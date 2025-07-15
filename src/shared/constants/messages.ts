@@ -1,0 +1,51 @@
+
+
+export const SUCCESS_MESSAGES = {
+  REGISTRATION_SUCCESSFUL: 'User registered successfully.',
+  LOGIN_SUCCESSFUL: 'User logged in successfully.',
+  DATA_RETRIEVED: 'Data retrieved successfully.',
+  USER_UPDATED: 'User updated successfully.',
+  USER_DELETED: 'User deleted successfully.',
+  OTP_SEND:"Otp send successfully",
+  OTP_VERIFIED:"Otp verification was successfull",
+  EMAIL_VERIFIED:"Email veified successfull",
+  EMAIL_SEND: "Email send successfully",
+  PASSWORD_UPDATED_SUCCESSFULLY: 'Password updated successfull',
+  TOKEN_REFRESHED: 'Token refresh successfull',
+  RESEND_OTP_SUCCESS: 'Resend otp send successfully',
+  LOGOUT_SUCCESS: 'Logout successfully',
+} as const;
+
+export const ERROR_MESSAGES = {
+  UNEXPECTED_SERVER_ERROR: 'An unexpected server error occurred.',
+  ACCOUNT_BLOCKED: "Your account has been blocked. Please contact support.",
+  INPUT_VALIDATION_FAILED: 'Input validation failed. Please check your data.',
+  EMAIL_ALREADY_EXISTS: 'A user with this email already exists.',
+  USER_NOT_FOUND: 'User not found.',
+  INVALID_CREDENTIALS: 'Invalid email or password.',
+  RESOURCE_NOT_FOUND: 'The requested resource was not found.',
+  UNAUTHORIZED_ACCESS: 'Unauthorized access.',
+  FORBIDDEN_ACCESS: 'Forbidden access.',
+  AUTH_NO_TOKEN_PROVIDED: "Access Denied: No authentication token provided.",
+  AUTH_INVALID_TOKEN: "Access Denied: Invalid or expired authentication token.",
+  AUTH_TOKEN_ERROR: "Authentication error: Could not process token.",
+  VALIDATION_ERROR: "Validation error: Please check your input data.",
+  EMAIL_NOT_FOUND: "Email not found",
+  OTP_NOT_FOUND: "Otp not found",
+  USER_NOT_EXIST_OR_ALREADY_VERIFIED: "User not exist or Already verified",
+  INVALID_OR_EXPIRED_VERIFICATION_LINK: "Invalid or expired verification link",
+  EMAIL_VERIFICATION_FAILED: 'Email verification failed',
+  EMAIL_NOT_PROVIDED: "Email is not provided",
+  VERIFICATION_TOKRN_MISSING: "Verification token is missing",
+  EMAIL_ALREADY_VERIFIED: "Email is already verified. Please login.",
+  USER_NOT_EXIST_OR_EMAIL_NOT_VERIFIED_OR_USER_BLOCKED: "User not exist or Email not verified or User blocked",
+  PASSWORD_DO_NOT_MATCH: 'Password do not match',
+  VERIFY_YOUR_EMAIL: 'Please verify your email',
+  EMAIL_OR_OTP_ARE_MISSING:'Email or Otp are missing',
+  INVALID_OTP: 'Invalid otp',
+  OTP_EXPIRED: 'Otp expired',
+  UNVALIDATED_EMAIL: 'Email not validated!!',
+  INVALID_REQUEST : "Please provide a valid OTP and email.",
+  MISSING_FIELDS : "OTP and email are required."  
+  
+} as const;
