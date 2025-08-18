@@ -1,5 +1,3 @@
-import { IUser } from "types/IUser";
-import { UserCreateDto } from "dtos/createUser.dtos";
 import { IAuthResponse } from "types/IAuthResponseType";
 import { IAuthResponseDTO } from "dtos/auth/auth.response.dtos";
 import { IRegisterUserDTO } from "dtos/auth/register.user.dtos";

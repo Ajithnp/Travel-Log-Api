@@ -7,7 +7,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 export const setAuthCookies = (res: Response, key: string, value: string , maxAge: number): void => {
     res.cookie(key, value, {
         httpOnly: true,
-        secure: isProduction, // Use secure cookies in production
+        secure: isProduction, //  secure cookies in production
         sameSite: isProduction ? "none":"lax",
         maxAge, 
     });

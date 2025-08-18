@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 const storage = multer.memoryStorage();
 
-const upload = multer({
+export const upload = multer({
   storage: storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 5 MB file size
@@ -13,9 +13,6 @@ const upload = multer({
     const allowedMimeTypes = [
       'image/jpeg',
       'image/png',
-      'image/gif',
-      'image/bmp',
-      'image/webp',
       'application/pdf' // PDF MIME type
     ];
     if (allowedMimeTypes.includes(file.mimetype)) {

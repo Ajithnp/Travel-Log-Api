@@ -1,12 +1,11 @@
 import { inject, injectable } from "tsyringe";
 import { IUserRepository } from "../interfaces/repository_interfaces/IUserRepository";
 import { IBcryptUtils } from "types/common/IBcryptUtils";
-import { UserCreateDto } from "../dtos/createUser.dtos";
 import { IAuthService } from "../interfaces/service_interfaces/IAuthService";
 import { IAuthResponse } from "types/IAuthResponseType";   
 import { ITokenService } from "interfaces/service_interfaces/ITokenService";
 import { IGoogleService } from "interfaces/service_interfaces/IGoogleService";
-import logger from "../shared/utils/logger";
+import logger from "../shared/utils/logger.helper";
 import { IRegisterUserDTO } from "dtos/auth/register.user.dtos";
 import { IAuthResponseDTO } from "dtos/auth/auth.response.dtos";
 import { IRefreshToekenPayload } from "../types/IRefreshTokenPayload";
@@ -43,8 +42,9 @@ export class AuthService implements IAuthService {
             throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND,HTTP_STATUS.BAD_REQUEST);
         };
 
-        if(!user.isActive){
-            throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED,HTTP_STATUS.FORBIDDEN);
+        if(user.isBlocked){
+            throw new AppError(`${ERROR_MESSAGES.ACCOUNT_BLOCKED} 
+                 Reason: ${user.blockedReason}`,HTTP_STATUS.FORBIDDEN);
         }
 
         const isPasswordMatch = await this._passwordBcrypt.comparePassword(password, user.password);
@@ -81,7 +81,7 @@ export class AuthService implements IAuthService {
     //=============================================================================
 
     async register(credentials: IRegisterUserDTO): Promise<IAuthResponseDTO> {
-        const { name, email, phone, password} = credentials;
+        const { name, email, phone, password, role} = credentials;
 
         const isUserExisting = await this._userRepository.findUserByEmail(email);
         if (isUserExisting) {
@@ -95,6 +95,7 @@ export class AuthService implements IAuthService {
         email,
         phone,
         password: hashedPassword,
+        role
        })
 
        logger.info('user saved success')
@@ -107,7 +108,7 @@ export class AuthService implements IAuthService {
            name:newUser.name,
            email:newUser.email,
            role:newUser.role
-       }
+       };
 
         return user;
     }
@@ -171,7 +172,7 @@ export class AuthService implements IAuthService {
 
         };
 
-        if(!user.isActive){
+        if(user.isBlocked){
             throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED,HTTP_STATUS.FORBIDDEN);
         };
 
@@ -199,19 +200,21 @@ export class AuthService implements IAuthService {
 
         const isUserEmailExist = await this._userRepository.findUserByEmail(email);
         if(!isUserEmailExist){
+            // just return 
             throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND,HTTP_STATUS.NOT_FOUND);
         };
         if(!isUserEmailExist.isEmailVerified){
             throw new AppError(ERROR_MESSAGES.UNVALIDATED_EMAIL,HTTP_STATUS.FORBIDDEN);
         };
-        if(!isUserEmailExist.isActive){
+        if(isUserEmailExist.isBlocked){
             throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED,HTTP_STATUS.FORBIDDEN);
         };
 
         await this._otpService.sendOtp(email);
 
         const user : Partial<IAuthResponseDTO> = {
-            email: isUserEmailExist.email
+            email: isUserEmailExist.email,
+            role: isUserEmailExist.role
         };
 
         return user;
@@ -229,7 +232,7 @@ export class AuthService implements IAuthService {
          throw new AppError(ERROR_MESSAGES.UNVALIDATED_EMAIL,HTTP_STATUS.BAD_REQUEST);
        }
 
-       if(!userDoc.isActive){
+       if(userDoc.isBlocked){
          throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED,HTTP_STATUS.CONFLICT);
        }
 

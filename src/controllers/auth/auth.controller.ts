@@ -4,7 +4,7 @@ import { inject, injectable } from "tsyringe";
 import { IAuthService } from "interfaces/service_interfaces/IAuthService";
 import { IApiResponse } from "types/common/IApiResponse";
 import { IAuthResponse } from "types/IAuthResponseType";
-import { clearAuthCookies,setAuthCookies } from "../../shared/utils/cookieHelper";
+import { clearAuthCookies,setAuthCookies } from "../../shared/utils/cookie.helper";
 import { ITokenService } from "interfaces/service_interfaces/ITokenService";
 import { registerSchema, loginSchema } from "../../validators/auth.schema";
 import { SUCCESS_STATUS, HTTP_STATUS } from "../../shared/constants/http_status_code";
@@ -15,6 +15,7 @@ import { AppError } from "../../errors/AppError";
 import { IAuthResponseDTO } from "../../dtos/auth/auth.response.dtos";
 import { JWT_TOKEN } from "../../shared/constants/jwt.token";
 import { IOtpService } from "interfaces/service_interfaces/IOtpService";
+import logger from "../../shared/utils/logger.helper";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -70,6 +71,7 @@ export class AuthController implements IAuthController {
 //===================================================================================    
 
     async register(req: Request, res: Response ,next: NextFunction): Promise<void> {
+       logger.debug(`req body: ${JSON.stringify(req.body)}`);
         const parsed = registerSchema.safeParse(req.body);
       
         if(!parsed.success) {
@@ -84,10 +86,8 @@ export class AuthController implements IAuthController {
             success: SUCCESS_STATUS.SUCCESS,
             message:SUCCESS_MESSAGES.REGISTRATION_SUCCESSFUL,
             data: {
-                name:user.name,
                 email:user.email,
-                role:user.role,
-                isEmailVerified:user.isEmailVerified
+                role: user.role,
             },
             
         };
@@ -141,6 +141,9 @@ export class AuthController implements IAuthController {
     async resendOtp (req:Request, res:Response, next:NextFunction):Promise<void> {
 
         const { email } = req.body;
+        logger.warn('email from resend otp',email)
+       
+        
         if(!email){
             throw new AppError(ERROR_MESSAGES.EMAIL_NOT_FOUND,HTTP_STATUS.BAD_REQUEST);
         };
@@ -215,6 +218,7 @@ export class AuthController implements IAuthController {
             message:SUCCESS_MESSAGES.EMAIL_VERIFIED,
             data: {
                 email:user.email,
+                role: user.role
             }
          };
          

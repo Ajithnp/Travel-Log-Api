@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import "../types/express_d";
+import redisClient from "../config/redis.config";
 import { HTTP_STATUS } from "../shared/constants/http_status_code";
 import { ERROR_MESSAGES } from "../shared/constants/messages";
 import { container } from "tsyringe";
@@ -10,6 +11,7 @@ import { SERVICE_TOKENS } from "../shared/constants/di.tokens";
 import { REPOSITORY_TOKENS } from "../shared/constants/di.tokens";
 import { SUCCESS_STATUS } from "../shared/constants/http_status_code";
 import { JWT_TOKEN } from "shared/constants/jwt.token";
+import { smallHasher } from "../shared/utils/small.hasher.helper";
 
 
 export const isAuthenticated = async(
@@ -37,6 +39,18 @@ export const isAuthenticated = async(
             return;
         }
 
+        // checking blacklist
+        const tokenHash = smallHasher(token);
+        const isBlackListed = await redisClient.get(`bl_token${tokenHash}`);
+
+        if(isBlackListed){
+            res.status(HTTP_STATUS.UNAUTHORIZED).json({
+                success: SUCCESS_STATUS.FAILURE,
+                message: ERROR_MESSAGES.SESSION_EXPIRED
+            });
+            return
+        }
+
         req.user = decode;
 
         const userRepository = container.resolve<IUserRepository>(REPOSITORY_TOKENS.USER_REPOSITORY);
@@ -48,7 +62,9 @@ export const isAuthenticated = async(
                 });
                 return;
         }
-        if(!user.isActive){
+
+
+        if(user.isBlocked){
             res.status(HTTP_STATUS.FORBIDDEN).json({
                 success: SUCCESS_STATUS.FAILURE,
                 message: ERROR_MESSAGES.ACCOUNT_BLOCKED

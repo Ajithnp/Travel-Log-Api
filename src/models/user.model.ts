@@ -33,14 +33,17 @@ const userSchema = new Schema<IUser>(
      type: Boolean,
      default: false,
     },
-    isActive: {
-     type: Boolean,
-     default: true,
-    },
     role: {
      type: String,
-     enum: ["admin", "user", "guest"],
+     enum: ["admin", "user", "vendor"],
      default: "user",
+    },
+     isBlocked: {
+     type: Boolean,
+     default: false,
+    },
+    blockedReason: {
+      type: String,
     },
 
 },{timestamps: true}

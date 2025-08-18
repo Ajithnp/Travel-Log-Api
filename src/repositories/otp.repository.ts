@@ -6,7 +6,7 @@ import { IOtpRepository } from "../interfaces/repository_interfaces/IOtpReposito
 import { injectable } from "tsyringe";
 
 @injectable()
-export class OtpRepository extends BaseRepository<IOtp> implements OtpRepository  {
+export class OtpRepository extends BaseRepository<IOtp> implements IOtpRepository  {
 
     constructor(){
         super(OtpModel)

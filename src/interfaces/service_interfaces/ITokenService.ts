@@ -4,8 +4,9 @@ import { JwtPayload } from "jsonwebtoken";
 export interface ITokenPayload extends JwtPayload {
     name?: string,
     email: string; 
-    role?: string; 
-    isVerified?: boolean;
+    role: string; 
+    exp?: number;
+    
 }
 
 // Interface for token-related operations 
@@ -28,20 +29,8 @@ export interface ITokenService {
     verifyAccessToken(token: string): ITokenPayload | null;
     verifyRefreshToken(token: string): ITokenPayload | null;
 
-    
-    /**
-     * Generates a token specifically for email verification purposes.
-     * @param payload - An object containing the user's email.
-     * @returns A string representing the signed email verification token.
-     */
-    generateEmailToken(payload: {email: string }): string;
-    generateResetPasswordToken(payload: {email: string}): string;
+    decodeToken(token: string): ITokenPayload | null;
 
-    /**
-     * Verifies and decodes the email verification token.
-     * @param token - The token to verify and decode.
-     * @returns An object containing the email if the token is valid, otherwise null.
-     */
-    verifyEmailToken(token: string): { email: string } | null;
-    verifyResetPasswordToken(token: string): { email: string} | null;
+    
+   
 }

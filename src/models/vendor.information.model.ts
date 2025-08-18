@@ -9,9 +9,11 @@ const vendorSchema = new Schema<IVendor>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+       unique: true,
     },
     isProfileVerified :{
-        type: Boolean
+        type: Boolean,
+        default: false,
     },
     businessName: {
       type: String,
@@ -20,9 +22,9 @@ const vendorSchema = new Schema<IVendor>(
     profileLogo: {
       type: String,
     },
-    role: {
-      type: String,
-    },
+    // role: {
+    //   type: String,
+    // },
     contactPersonName: {
       type: String,
     },

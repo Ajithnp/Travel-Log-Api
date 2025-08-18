@@ -14,6 +14,10 @@ export const SUCCESS_MESSAGES = {
   TOKEN_REFRESHED: 'Token refresh successfull',
   RESEND_OTP_SUCCESS: 'Resend otp send successfully',
   LOGOUT_SUCCESS: 'Logout successfully',
+  USER_BLOCKED_SUCCESS: 'User blocked successfully',
+  USER_UNBLOCKED_SUCCESS: 'User unblocked successfully',
+  OK:'success'
+
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -46,6 +50,13 @@ export const ERROR_MESSAGES = {
   OTP_EXPIRED: 'Otp expired',
   UNVALIDATED_EMAIL: 'Email not validated!!',
   INVALID_REQUEST : "Please provide a valid OTP and email.",
-  MISSING_FIELDS : "OTP and email are required."  
+  MISSING_FIELDS : "OTP and email are required."  ,
+  REDIS_ERROR:'Redis connection error!',
+  ACCESS_DENIED:'Access Denied',
+  INVALID_USER_ID:'Invalid user id',
+  INVALID_REQUEST_INPUT:'Provide valid input',
+  INVALID_JSON_PAYLOAD : 'Invalid JSON payload',
+  REASON_NOT_PROVIDED: 'Provide the reason',
+  SESSION_EXPIRED: 'Session expired',
   
 } as const;
