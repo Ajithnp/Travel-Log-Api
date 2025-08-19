@@ -7,7 +7,7 @@ import { IGoogleService } from "interfaces/service_interfaces/IGoogleService";
 import { GoogleService } from "../services/google.auth.service";
 import { IOtpService } from "interfaces/service_interfaces/IOtpService";
 import { OtpVerificationService } from "../services/otp.verification.service";
-import { IAdminUserService } from "interfaces/service_interfaces/IAdminUserService";
+import { IAdminUserService } from "../interfaces/service_interfaces/admin/IAdminUserService";
 import { AdminUserService } from "../services/admin/admin.user.service";
 
 export class ServiceRegistry {
@@ -26,6 +26,10 @@ export class ServiceRegistry {
 
         container.register<IOtpService>("IOtpService", {
             useClass:OtpVerificationService,
+        });
+
+        container.register<IAdminUserService>("IAdminUserService", {
+            useClass: AdminUserService,
         });
 
         container.register<IAdminUserService>("IAdminUserService", {

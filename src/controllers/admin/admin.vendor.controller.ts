@@ -6,7 +6,7 @@ import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/I
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
-import { VENDOR_STATUS } from 'shared/constants/common';
+import { VENDOR_STATUS } from '../../shared/constants/common';
 
 
 @injectable()
