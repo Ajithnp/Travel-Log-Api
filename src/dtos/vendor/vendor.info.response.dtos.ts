@@ -11,7 +11,6 @@ export interface IVendorInfoResponseDTO {
   GSTIN: string;
   status: "Pending" | "Approved" | "Rejected";
   reasonForReject?: string;
-  pancard: string;
   createdAt: Date;
   updatedAt: Date;
 
