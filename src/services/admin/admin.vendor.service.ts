@@ -11,14 +11,18 @@ import { VendorVerificationUpdateDTO } from '../../dtos/admin/vendor.verificatio
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
-
-
+import { USER_ROLES } from '../../shared/constants/roles';
+import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
+import { Types } from 'mongoose';
+import { blacklistToken } from '../../shared/utils/token.revocation.helper';
 
 @injectable()
 export class AdminVendorService implements IAdminVendorService {
   constructor(
     @inject('IVendorInfoRepository')
     private _vendorInfoRepositorry: IVendorInfoRepository,
+    @inject('IUserRepository')
+    private _userRepository: IUserRepository,
   ) {}
 
   async vendorVerificationRequestService(
@@ -87,4 +91,54 @@ export class AdminVendorService implements IAdminVendorService {
     }
 
   };
-}
+ //================================================================================
+   async fetchVendorService(page: number, limit: number): Promise<PaginatedData<Partial<IUser>>> {
+       
+        const skip = (page - 1) * limit;
+        const query = {role:USER_ROLES.VENDOR};
+        const options = {skip,limit};
+
+        const vendorsDoc = await this._userRepository.find(query,options);
+        const totalUsers = await this._userRepository.getDocsCount(query);
+
+        const vendorData : Partial<IUser>[] = vendorsDoc.map(user => ({
+            id: (user._id as Types.ObjectId).toString(),
+            name: user.name,
+            email:user.email,
+            isBlocked:user.isBlocked,
+            createdAt: user.createdAt,
+        
+            }));
+
+             return {
+            data: vendorData, 
+            currentPage:page,
+            totalPages: Math.ceil(totalUsers / limit),
+            totalUsers
+        };
+
+   }
+   //=========================================================================
+   async updateVendorAccessService(id: string, block: boolean, reason?: string, accessToken?: string): Promise<void> {
+       
+      const vendorDoc = await this._userRepository.findById(id);
+
+      if(!vendorDoc) {
+            throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND,HTTP_STATUS.NOT_FOUND);
+        }
+
+        const vendorUpdatedDoc = await this._userRepository.update(id,
+            {
+                isBlocked:block,
+                blockedReason: block === true ? reason : ""
+            });
+
+        if(!vendorUpdatedDoc){
+            throw new AppError(ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR,HTTP_STATUS.INTERNAL_SERVER_ERROR);
+        };  
+        
+        if(block && accessToken){
+            blacklistToken(accessToken);
+        };
+   };
+};
