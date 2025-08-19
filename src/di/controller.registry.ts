@@ -3,7 +3,7 @@ import { IAuthController } from 'interfaces/controller_interfaces/IAuthControlle
 import { AuthController } from '../controllers/auth/auth.controller';
 import { IAdminUserController } from 'interfaces/controller_interfaces/admin/IAdminUserController';
 import { AdminUserController } from '../controllers/admin/admin.user.controller';
-import { IAdminVendorController } from 'interfaces/controller_interfaces/admin/IAdminVendorController';
+import { IAdminVendorController } from '../interfaces/controller_interfaces/admin/IAdminVendorController';
 import { AdminVendorController } from '../controllers/admin/admin.vendor.controller';
 
 export class ControllerRegistry {

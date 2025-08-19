@@ -42,10 +42,11 @@ export class AdminRoutes extends BaseRoute {
             this._adminVendorController.updateVendorverification.bind(this._adminVendorController)
          )
 
-        //  this._router.get(
-        //     'get-vendors',
+         this._router.get(
+            'get-vendors',
+            this._adminVendorController.getVendors.bind(this._adminVendorController)
             
-        //  )
+         );
         
     };
 

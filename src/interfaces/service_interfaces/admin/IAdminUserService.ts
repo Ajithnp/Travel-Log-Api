@@ -8,5 +8,5 @@ export interface IAdminUserService {
     // fetchUsers():Promise<IUser []>
     fetchUsers(page: number, limit:number):Promise<PaginatedData <Partial<IUser>>>;
     
-    updateUserAccess(id:string, block:boolean,reson:string,token?:string): Promise<void>;
+    updateUserAccess(id:string, block:boolean,reason?:string,token?:string): Promise<void>;
 };
