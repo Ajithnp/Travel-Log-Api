@@ -106,9 +106,9 @@ export class AdminVendorController implements IAdminVendorController{
 
          try {
              if (blockUser && accessToken) {
-                await this._adminUserService.updateUserAccess(userId, blockUser, reason, accessToken);
+                await this._adminVendorService.updateVendorAccessService(userId, blockUser, reason, accessToken);
             } else {
-                await this._adminUserService.updateUserAccess(userId, blockUser, reason);
+                await this._adminVendorService.updateVendorAccessService(userId, blockUser, reason);
             }
 
             clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
