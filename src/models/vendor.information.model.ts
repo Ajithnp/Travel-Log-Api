@@ -19,7 +19,7 @@ const vendorSchema = new Schema<IVendor>(
       required: true,
     },
     profileLogo: {
-      type: String,
+      type: Object,
     },
     // role: {
     //   type: String,
@@ -34,12 +34,13 @@ const vendorSchema = new Schema<IVendor>(
       type: String,
     },
     businessLicence: {
-      type: String,
+      type: Object,
     },
+    businessPan: {
+      type: Object
+    },
+
     GSTIN: {
-      type: String,
-    },
-    pancard: {
       type: String,
     },
     status: {

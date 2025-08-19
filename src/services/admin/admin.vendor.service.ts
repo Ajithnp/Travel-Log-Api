@@ -30,40 +30,39 @@ export class AdminVendorService implements IAdminVendorService {
     limit: number,
   ): Promise<PaginatedData<Partial<IVendorInfoResponseDTO>>> {
     const skip = (page - 1) * limit;
-    const options = { skip, limit };
+    const options = { skip, limit, sort:{ createdAt: 1} };
     const query = { status: VENDOR_STATUS.Pending };
 
     const vendorsDoc = await this._vendorInfoRepositorry.find(query, options);
     const totalUsers = await this._vendorInfoRepositorry.getDocsCount(query);
 
     const vendorData: IVendorInfoResponseDTO[] = vendorsDoc.map((vendor) => {
-      const user = vendor.userId as IUser;
-      return {
-        id: vendor._id.toString(),
+    const user = vendor.userId as IUser;
+    return {
+        id: (vendor as IVendor & { _id: string | Types.ObjectId })._id.toString(),
         businessName: vendor.businessName,
-        profileLogo: vendor.profileLogo,
+        profileLogo: vendor.profileLogo.url,
         isProfileVerified: vendor.isProfileVerified,
         contactPersonName: vendor.contactPersonName,
         contactPersonPhone: vendor.contactPersonPhone,
         businessAddress: vendor.businessAddress,
-        businessLicence: vendor.businessLicence,
+        businessLicence: vendor.businessLicence.url,
         GSTIN: vendor.GSTIN,
         status: vendor.status,
         reasonForReject: vendor.reasonForReject,
-        pancard: vendor.pancard,
+        businesspan: vendor.businessPan.url,
         createdAt: vendor.createdAt,
         updatedAt: vendor.updatedAt,
-
-        user: {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          isBlocked: user.isBlocked,
-          createdAt: user.createdAt,
+        userId: {
+            id: (user as IUser & { _id: string | Types.ObjectId })._id.toString(),
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            isBlocked: user.isBlocked,
+            createdAt: user.createdAt,
         },
-      };
-    });
+    };
+});
 
     return {
         data: vendorData,

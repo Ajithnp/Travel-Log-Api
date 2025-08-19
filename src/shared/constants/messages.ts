@@ -18,7 +18,8 @@ export const SUCCESS_MESSAGES = {
   USER_UNBLOCKED_SUCCESS: 'User unblocked successfully',
   OK:'success',
   VENDOR_VERIFICATION_SUCCESS: 'Vendor verification success',
-  VENDOR_VERIFICATION_REJECTED: 'Vendor verification rejected successfull'
+  VENDOR_VERIFICATION_REJECTED: 'Vendor verification rejected successfull',
+  VERIFICATION_FORM_UPLOAD_SUCCESSFULLY: 'Verification form upload successfully'
 
 } as const;
 
@@ -62,5 +63,6 @@ export const ERROR_MESSAGES = {
   SESSION_EXPIRED: 'Session expired',
   REASON_REQUIRED: 'Reason for rejection is required',
   VENDOR_NOT_FOUND: 'Vendor not found!',
+  MISSING_REQUIRED_FIELDS_FOR_VERIFICATION: 'Missing required files for verification.',
   
 } as const;

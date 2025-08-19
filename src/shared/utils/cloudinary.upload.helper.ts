@@ -13,6 +13,7 @@ export const uploadToCloudinary = (
         resource_type: "auto", // handles pdf, images etc.
       },
       (error, result) => {
+         console.error("Cloudinary upload error:", error);
         if (error) return reject(error);
         resolve(result as UploadApiResponse);
       }
@@ -24,7 +25,7 @@ export const uploadToCloudinary = (
 
 // Multiple files upload
 export const uploadMultipleToCloudinary = async (
-  files: Record<string, Express.Multer.File>,
+  files: Record<string, Express.Multer.File | null>,
   vendorId: string,
   path: string
 ) => {
@@ -32,8 +33,8 @@ export const uploadMultipleToCloudinary = async (
 
   for (const [fieldName, file] of Object.entries(files)) {
     if (!file) continue;
-
-    const folder = `${path}/${vendorId}/${fieldName}`; // organized by vendor + field
+     try {
+        const folder = `${path}/${vendorId}/${fieldName}`; // organized by vendor + field
     const result = await uploadToCloudinary(file, folder);
 
     uploads[fieldName] = {
@@ -42,6 +43,11 @@ export const uploadMultipleToCloudinary = async (
       format: result.format,
       bytes: result.bytes,
     };
+     } catch (error) {
+        console.error(`Failed to upload file for field '${fieldName}':`, error);
+        throw new Error(`Failed to upload file for ${fieldName}`);
+     }
+    
   }
 
   return uploads;

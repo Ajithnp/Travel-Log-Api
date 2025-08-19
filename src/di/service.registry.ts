@@ -34,7 +34,7 @@ export class ServiceRegistry {
             useClass: AdminUserService,
         });
         container.register<IAdminVendorService>("IAdminVendorService", {
-            useClass: AdminVendorService,
+            useClass: AdminVendorService,n
         });
     }    // Register other services here
 }        
