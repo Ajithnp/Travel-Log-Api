@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { IEmailUtils } from "types/common/IEmailUtils";
 import { injectable } from "tsyringe";
 import { config } from "../../config/env";
-import { ACCOUNT_VERIFICATION } from "../../shared/templates/email_templates";
+import { ACCOUNT_VERIFICATION } from "../templates/email_templates";
 
 @injectable()
 export class EmailUtils implements IEmailUtils {

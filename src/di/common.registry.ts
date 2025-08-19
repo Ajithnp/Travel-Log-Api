@@ -1,8 +1,8 @@
 import { container } from "tsyringe";
 import { IBcryptUtils } from "types/common/IBcryptUtils";
-import { BcryptUtils } from "../shared/utils/passwordHasher";
+import { BcryptUtils } from "../shared/utils/password.hasher.helper";
 import { IEmailUtils } from "types/common/IEmailUtils";
-import { EmailUtils } from "../shared/utils/email_transporter";
+import { EmailUtils } from "../shared/utils/email.transporter.helper";
 
 export class CommonRegistry {
     static registerCommonDependencies() {

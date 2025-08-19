@@ -42,11 +42,6 @@ export class AuthRoutes extends BaseRoute {
             this._authController.googleAuthCallback.bind(this._authController)
         );
 
-        // this._router.post(
-        //     '/resent-email',
-        //     this._verificationController.resendEmail.bind(this._verificationController)
-        // );
-
         this._router.post(
             '/forgot-password',
              this._authController.forgotPasswordRequest.bind(this._authController));
@@ -62,7 +57,7 @@ export class AuthRoutes extends BaseRoute {
         )     
 
         this.router.get(
-            '/refresh',
+            '/refresh-token',
             this._authController.refreshAccessToken.bind(this._authController)
         );
 

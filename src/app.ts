@@ -5,8 +5,9 @@ import morgan from 'morgan';
 import { config } from './config/env';
 import { DependencyInjection } from "./di/index";
 import { AuthRoutes } from "./routes/auth/auth.routes";
+import { AdminRoutes } from "./routes/admin/admin.routes";
 import { container } from "tsyringe";
-import logger from "./shared/utils/logger";
+import logger from "./shared/utils/logger.helper";
 import { corsOption } from "./middlewares/cors.middleware";
 import { errorMiddleware } from "./middlewares/error.handler.middleware";
 
@@ -23,6 +24,7 @@ export default class App {
     private initialize(): void {
         
         DependencyInjection.registerDependencies(); // Register dependencies
+        //resolver
         this.configureMiddleware();
         this.configureRoutes();
         this._app.use(errorMiddleware)
@@ -49,6 +51,7 @@ export default class App {
             res.send("Welcome to the Travel Log API");
         });
         this._app.use("/api/v1/auth", container.resolve(AuthRoutes).router);
+        this._app.use('/api/v1/admin', container.resolve(AdminRoutes).router);
     }
 
     public start(): void {

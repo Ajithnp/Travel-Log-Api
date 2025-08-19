@@ -15,7 +15,7 @@ export const otpSchema = new Schema<IOtp>(
         expiresAt: {
             type: Date,
             required: true,
-            expires: 0, // Automatically remove the document after 0 seconds!
+            expires: 60, // Automatically remove the document after 0 seconds!
         }
     },
     { timestamps: true

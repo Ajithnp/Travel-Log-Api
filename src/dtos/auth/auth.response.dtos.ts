@@ -8,5 +8,5 @@ export interface IAuthResponseDTO {
     isEmailVerified?: boolean;
     isActive?: boolean;
     role: UserRole;
-    cookies?:string | string[] | undefined
+    // cookies?:string | string[] | undefined
 }

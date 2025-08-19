@@ -17,7 +17,12 @@ export const errorMiddleware = (
     if(err instanceof AppError) {
         statusCode = err.status_code;
         message = err.message;
-    }else{
+
+    }else if(err instanceof SyntaxError && 'body' in err) {
+        statusCode = HTTP_STATUS.BAD_REQUEST;
+        message = ERROR_MESSAGES.INVALID_JSON_PAYLOAD
+    }
+    else{
         statusCode = (err?.status_code) ?? HTTP_STATUS.INTERNAL_SERVER_ERROR;
         message = (err?.message) ?? ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR;
     }
@@ -30,3 +35,5 @@ export const errorMiddleware = (
     });
     
 }
+
+
