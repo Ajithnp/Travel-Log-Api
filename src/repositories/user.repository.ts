@@ -21,9 +21,10 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     // async findUsers(): Promise <IUser [] | null> {
     //     return await UserModel.find({role: USER_ROLES.USER}).exec();
     // };
-    async getDocsCount(role:string): Promise<number> {
-        return await UserModel.countDocuments({role}).exec();
-    };
+    
+    // async getDocsCount(role?:string): Promise<number> {
+    //     return await UserModel.countDocuments({role}).exec();
+    // };
 
     async updateIsVerified(email: string, status: boolean): Promise<IUser | null> {
         return await UserModel.findOneAndUpdate(

@@ -1,9 +1,9 @@
 //Examples: blockUser, unblockUser, viewAllUsers, deleteUser.
 import { inject, injectable } from 'tsyringe';
 import mongoose from 'mongoose';
-import { IAdminUserController } from '../../interfaces/controller_interfaces/IAdminUserController';
+import { IAdminUserController } from '../../interfaces/controller_interfaces/admin/IAdminUserController';
 import { Request, Response, NextFunction } from 'express';
-import { IAdminUserService } from '../../interfaces/service_interfaces/IAdminUserService';
+import { IAdminUserService } from '../../interfaces/service_interfaces/admin/IAdminUserService';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../shared/constants/messages';
@@ -19,23 +19,22 @@ export class AdminUserController implements IAdminUserController {
   ) {}
 
   async getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
-      
-     const page =  parseInt(req.query.page as string) || 1;
-     const limit = parseInt(req.query.limit as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
     try {
       const users = await this._adminUserService.fetchUsers(page, limit);
 
-      const successResponse :IApiResponse<typeof users> = {
+      const successResponse: IApiResponse<typeof users> = {
         success: SUCCESS_STATUS.SUCCESS,
         message: SUCCESS_MESSAGES.OK,
-        data:users
+        data: users,
       };
 
       res.status(HTTP_STATUS.OK).json(successResponse);
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   //==========================================================================================
   async blockOrUnclockUser(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -74,5 +73,5 @@ export class AdminUserController implements IAdminUserController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 }

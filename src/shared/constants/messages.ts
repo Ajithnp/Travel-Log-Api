@@ -16,7 +16,9 @@ export const SUCCESS_MESSAGES = {
   LOGOUT_SUCCESS: 'Logout successfully',
   USER_BLOCKED_SUCCESS: 'User blocked successfully',
   USER_UNBLOCKED_SUCCESS: 'User unblocked successfully',
-  OK:'success'
+  OK:'success',
+  VENDOR_VERIFICATION_SUCCESS: 'Vendor verification success',
+  VENDOR_VERIFICATION_REJECTED: 'Vendor verification rejected successfull'
 
 } as const;
 
@@ -58,5 +60,7 @@ export const ERROR_MESSAGES = {
   INVALID_JSON_PAYLOAD : 'Invalid JSON payload',
   REASON_NOT_PROVIDED: 'Provide the reason',
   SESSION_EXPIRED: 'Session expired',
+  REASON_REQUIRED: 'Reason for rejection is required',
+  VENDOR_NOT_FOUND: 'Vendor not found!',
   
 } as const;

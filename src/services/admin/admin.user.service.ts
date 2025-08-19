@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IAdminUserService } from "../../interfaces/service_interfaces/IAdminUserService";
+import { IAdminUserService } from "../../interfaces/service_interfaces/admin/IAdminUserService";
 import { IApiResponse } from "types/common/IApiResponse";
 import { IUser } from "../../types/IUser";
 import { IUserRepository } from "../../interfaces/repository_interfaces/IUserRepository";
@@ -30,7 +30,7 @@ export class AdminUserService implements IAdminUserService {
         const options = {skip,limit};
 
         const usersDoc = await this._userRepository.find(query,options);
-        const totalUsers = await this._userRepository.getDocsCount(USER_ROLES.USER);
+        const totalUsers = await this._userRepository.getDocsCount(query);
 
         const userData : Partial<IUser>[] = usersDoc.map(user => ({
             id: (user._id as Types.ObjectId).toString(),

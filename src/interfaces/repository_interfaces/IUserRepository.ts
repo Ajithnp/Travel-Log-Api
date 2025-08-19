@@ -5,7 +5,7 @@ export interface IUserRepository extends IBaseRepository<IUser> {
   
     findUserByEmail(email: string): Promise<IUser | null>;
 
-    getDocsCount(role:string):Promise<number>;
+    // getDocsCount(role:string):Promise<number>;
     
     updateIsVerified(email: string, status: boolean): Promise<IUser | null>;
     

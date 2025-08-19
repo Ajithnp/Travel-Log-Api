@@ -1,4 +1,5 @@
-import { Types } from "mongoose";
+import { Types, UpdateQuery } from "mongoose";
+import { FilterQuery } from "mongoose";
 
 export interface IBaseRepository<T> {
  
@@ -7,12 +8,14 @@ export interface IBaseRepository<T> {
   
     findById(id: string): Promise<T | null>;
 
+    getDocsCount(filter?: FilterQuery<T>): Promise<number>
 
     findOne(query: Partial<T>): Promise<T | null>;
 
+    findByIdAndUpdate(id:string,  update: Partial<T> | UpdateQuery<T>,options?: { new?: boolean; upsert?: boolean }):Promise<T | null>;
+
     findOneAndUpdate(query: Partial<T>, filter:Partial<T>, options?:{new:boolean, upsert:boolean}): Promise<T | null>
 
-   
     find(query?: Partial<T>,options?: {skip?: number; limit?: number; sort?: any}): Promise<T[]>;
 
   

@@ -1,6 +1,6 @@
-import { IApiResponse } from "../../types/common/IApiResponse";
-import { IUser } from "../../types/IUser";
-import { PaginatedData } from "../../interfaces/common_interfaces/output_types/pagination";
+import { IApiResponse } from "../../../types/common/IApiResponse";
+import { IUser } from "../../../types/IUser";
+import { PaginatedData } from "../../../interfaces/common_interfaces/output_types/pagination";
 
 
 export interface IAdminUserService {

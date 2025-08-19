@@ -1,7 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
 import { IVendor } from '../types/IVendor';
-import { boolean } from 'zod';
-import { ref } from 'process';
+
 
 const vendorSchema = new Schema<IVendor>(
   {
@@ -43,8 +42,16 @@ const vendorSchema = new Schema<IVendor>(
     pancard: {
       type: String,
     },
+    status: {
+      type: String,
+      enum:['Pending', 'approved', 'Rejected'],
+      default: 'Pending'
+    },
+    reasonForReject: {
+      type: String
+    },
   },
   { timestamps: true },
 );
 
-export const VendorModel = model<IVendor>('vendor', vendorSchema);
+export const VendorInformationModel = model<IVendor>('vendor', vendorSchema);
