@@ -64,5 +64,8 @@ export const ERROR_MESSAGES = {
   REASON_REQUIRED: 'Reason for rejection is required',
   VENDOR_NOT_FOUND: 'Vendor not found!',
   MISSING_REQUIRED_FIELDS_FOR_VERIFICATION: 'Missing required files for verification.',
+  TOO_MANY_REQUESTS: "Too many requests, try later.",
+  VENDOR_VERIFICARION_STATUS_APPROVED: 'Your profile is already approved',
+  VENDOR_VERIFICATION_STATUS_PENDING: 'Your profile is already under review',
   
 } as const;

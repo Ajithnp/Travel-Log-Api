@@ -17,6 +17,6 @@ export interface IAuthService {
 
     googleAuthentication(token: string, clientId: string): Promise<IAuthResponse<IAuthResponseDTO>>
 
-    refreshAccessToken(refreshToken: string | undefined): Promise<string>;
+    refreshAccessTokenService(refreshToken: string | undefined): Promise<string>;
 
 }

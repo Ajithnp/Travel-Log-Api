@@ -1,8 +1,8 @@
 import { Schema, model, Types } from 'mongoose';
-import { IVendor } from '../types/IVendor';
+import { IVendorInfo } from '../types/IVendor';
 
 
-const vendorSchema = new Schema<IVendor>(
+const vendorSchema = new Schema<IVendorInfo>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -14,20 +14,13 @@ const vendorSchema = new Schema<IVendor>(
         type: Boolean,
         default: false,
     },
-    businessName: {
-      type: String,
-      required: true,
-    },
     profileLogo: {
       type: Object,
     },
-    // role: {
-    //   type: String,
-    // },
-    contactPersonName: {
-      type: String,
+    ownerIdentity: {
+      type: Object,
     },
-    contactPersonPhone: {
+    contactPersonName: {
       type: String,
     },
     businessAddress: {
@@ -45,7 +38,7 @@ const vendorSchema = new Schema<IVendor>(
     },
     status: {
       type: String,
-      enum:['Pending', 'approved', 'Rejected'],
+      enum:['Pending', 'Approved', 'Rejected'],
       default: 'Pending'
     },
     reasonForReject: {
@@ -55,4 +48,4 @@ const vendorSchema = new Schema<IVendor>(
   { timestamps: true },
 );
 
-export const VendorInformationModel = model<IVendor>('vendor', vendorSchema);
+export const VendorInformationModel = model<IVendorInfo>('vendor', vendorSchema);

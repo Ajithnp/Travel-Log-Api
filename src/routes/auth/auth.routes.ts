@@ -1,7 +1,7 @@
 import { inject,injectable } from "tsyringe";
 import { IAuthController } from "interfaces/controller_interfaces/IAuthController";
 import { BaseRoute } from "../base.routes";
-
+import { isAuthenticated } from "../../middlewares/auth.middleware";
 
 @injectable()
 export class AuthRoutes extends BaseRoute {
@@ -56,7 +56,7 @@ export class AuthRoutes extends BaseRoute {
             this._authController.changePassword.bind(this._authController)
         )     
 
-        this.router.get(
+        this.router.post(
             '/refresh-token',
             this._authController.refreshAccessToken.bind(this._authController)
         );

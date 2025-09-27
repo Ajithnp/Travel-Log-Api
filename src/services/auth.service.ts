@@ -58,13 +58,13 @@ export class AuthService implements IAuthService {
 
         //Genarate Tokens
         const accessToken = this._tokenService.generateAccessToken({
-             id: user._id,
+             id: user._id.toString(),
              email: user.email,
              role: user.role
             })
 
         const refreshToken = this._tokenService.generateRefreshToken({
-            id: user._id,
+            id: user._id.toString(),
             email: user.email,
             role: user.role
         })  
@@ -136,12 +136,15 @@ export class AuthService implements IAuthService {
          }
 
          // generate Tokens
-         const accessToken = this._tokenService.generateAccessToken({
+        const accessToken = this._tokenService.generateAccessToken({
+            id: userDoc._id.toString(),
             email:email,
-            role:userDoc.role
+             role: userDoc.role,
+            
          });
 
-         const refreshToken = this._tokenService.generateRefreshToken({
+        const refreshToken = this._tokenService.generateRefreshToken({
+            id: userDoc._id.toString(),
             email:email,
             role:userDoc.role
          });
@@ -177,12 +180,14 @@ export class AuthService implements IAuthService {
         };
 
         // token generation
-          const accessToken = this._tokenService.generateAccessToken({
+        const accessToken = this._tokenService.generateAccessToken({
+            id: user._id.toString(),
             email: user.email,
              role: user.role
             });
 
-           const refreshToken = this._tokenService.generateRefreshToken({
+        const refreshToken = this._tokenService.generateRefreshToken({
+            id:user._id.toString(),
             email: user.email,
             role: user.role
            });
@@ -246,7 +251,7 @@ export class AuthService implements IAuthService {
    }    
 
 //=======================================================================================    
-    async refreshAccessToken(refreshToken: string): Promise<string> {
+    async refreshAccessTokenService(refreshToken: string): Promise<string> {
        
         const decoded = this._tokenService.verifyRefreshToken(refreshToken);
         if(!decoded){

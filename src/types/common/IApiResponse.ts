@@ -1,7 +1,7 @@
 export interface IApiResponse<T = undefined> {
     success: boolean;   
     message: string;
-    data?: T; // Optional data field for successful responses
+    data?: T; 
     error?: {
         code: string; // Error code for identifying the type of error
         message: string; // readable error message

@@ -10,6 +10,9 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../shared/constants/message
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { JWT_TOKEN } from '../../shared/constants/jwt.token';
 import { clearAuthCookies } from '../../shared/utils/cookie.helper';
+import { USER_ROLES } from '../../shared/constants/roles';
+import { getPaginationOptions } from '../../shared/utils/pagination.helper';
+
 
 @injectable()
 export class AdminUserController implements IAdminUserController {
@@ -19,10 +22,11 @@ export class AdminUserController implements IAdminUserController {
   ) {}
 
   async getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const { page, limit, search, selectedFilter } = getPaginationOptions(req);
+     
+    
     try {
-      const users = await this._adminUserService.fetchUsers(page, limit);
+      const users = await this._adminUserService.fetchUsers(page, limit, USER_ROLES.USER, search, selectedFilter);
 
       const successResponse: IApiResponse<typeof users> = {
         success: SUCCESS_STATUS.SUCCESS,
@@ -40,7 +44,7 @@ export class AdminUserController implements IAdminUserController {
   async blockOrUnclockUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { userId } = req.params;
     const { blockUser, reason } = req.body;
-
+    
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new AppError(ERROR_MESSAGES.INVALID_USER_ID, HTTP_STATUS.BAD_REQUEST);
     }
@@ -55,9 +59,18 @@ export class AdminUserController implements IAdminUserController {
 
     try {
       if (blockUser && accessToken) {
-        await this._adminUserService.updateUserAccess(userId, blockUser, reason, accessToken);
+        await this._adminUserService.updateUserAccess(
+          userId,
+          blockUser,
+          reason,
+          accessToken
+        );
       } else {
-        await this._adminUserService.updateUserAccess(userId, blockUser, reason);
+        await this._adminUserService.updateUserAccess(
+          userId,
+          blockUser,
+          reason
+        );
       }
 
       clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);

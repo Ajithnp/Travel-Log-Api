@@ -1,13 +1,14 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 
 export type UserRole = "admin" | "user" | "vendor";
 
 export interface IUser extends Document{
-    id?: string;
+    _id: Types.ObjectId
+    id?: string ; 
     name: string;
     email: string;
-    phone?: string;
+    phone: string;
     googleId: string;
     password: string;
     profile?: string;

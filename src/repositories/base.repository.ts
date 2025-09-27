@@ -1,5 +1,5 @@
 import { IBaseRepository } from 'interfaces/repository_interfaces/IBaseRepository';
-import { Model, Document, FilterQuery, Types, UpdateQuery } from 'mongoose';
+import { Model, Document, FilterQuery, Types, UpdateQuery, QueryOptions } from 'mongoose';
 
 export class BaseRepository<T extends Document> implements IBaseRepository<T> {
   protected model: Model<T>;
@@ -37,12 +37,12 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     update: Partial<T> | UpdateQuery<T>,
     options?: { new?: boolean; upsert?: boolean } 
   ): Promise<T | null> {
-    return await this.model.findByIdAndUpdate(id, update, {options}).exec();
+    return await this.model.findByIdAndUpdate(id, update, options).exec();
   }
 
   async find(
     query: FilterQuery<T>,
-    options: { skip?: number; limit?: number; sort?: any },
+    options: QueryOptions<T>,
   ): Promise<T[]> {
     return await this.model.find(query, null, options).exec();
   }

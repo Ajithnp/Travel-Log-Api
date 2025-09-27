@@ -6,7 +6,7 @@ import { PaginatedData } from "../../../interfaces/common_interfaces/output_type
 export interface IAdminUserService {
 
     // fetchUsers():Promise<IUser []>
-    fetchUsers(page: number, limit:number):Promise<PaginatedData <Partial<IUser>>>;
+    fetchUsers(page: number, limit:number, role:string, search?: string, selectedFilter?: string):Promise<PaginatedData <Partial<IUser>>>;
     
     updateUserAccess(id:string, block:boolean,reason?:string,token?:string): Promise<void>;
 };

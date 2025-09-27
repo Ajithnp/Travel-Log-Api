@@ -4,7 +4,7 @@ import { UserModel } from "../models/user.model";
 import { IUserRepository } from "../interfaces/repository_interfaces/IUserRepository";
 import { BaseRepository } from "./base.repository";
 import { USER_ROLES } from "../shared/constants/roles";
-import { IVendor } from "types/IVendor";
+import { IVendorInfo } from "types/IVendor";
 
 
 @injectable()

@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import "../types/express_d";
 import redisClient from "../config/redis.config";
 import { HTTP_STATUS } from "../shared/constants/http_status_code";
 import { ERROR_MESSAGES } from "../shared/constants/messages";
@@ -10,7 +9,7 @@ import { IUserRepository } from "../interfaces/repository_interfaces/IUserReposi
 import { SERVICE_TOKENS } from "../shared/constants/di.tokens";
 import { REPOSITORY_TOKENS } from "../shared/constants/di.tokens";
 import { SUCCESS_STATUS } from "../shared/constants/http_status_code";
-import { JWT_TOKEN } from "shared/constants/jwt.token";
+import { JWT_TOKEN } from "../shared/constants/jwt.token";
 import { smallHasher } from "../shared/utils/small.hasher.helper";
 
 

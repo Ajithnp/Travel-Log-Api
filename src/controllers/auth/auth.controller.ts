@@ -39,10 +39,9 @@ export class AuthController implements IAuthController {
         
       try {
           const { user, accessToken, refreshToken } = await this._authService.login(credentials);
-        //  const role = user.role
         setAuthCookies(res,
              JWT_TOKEN.ACCESS_TOKEN, accessToken,
-              10 * 60 * 1000);
+              20 * 60 * 1000);
         setAuthCookies(res,
              JWT_TOKEN.REFRESH_TOKEN, refreshToken,
               7 * 24 * 60 * 60 * 1000);
@@ -71,7 +70,6 @@ export class AuthController implements IAuthController {
 //===================================================================================    
 
     async register(req: Request, res: Response ,next: NextFunction): Promise<void> {
-       logger.debug(`req body: ${JSON.stringify(req.body)}`);
         const parsed = registerSchema.safeParse(req.body);
       
         if(!parsed.success) {
@@ -111,7 +109,7 @@ export class AuthController implements IAuthController {
 
            setAuthCookies(res,
             JWT_TOKEN.ACCESS_TOKEN, accessToken,
-             10 * 60 * 1000
+             20 * 60 * 1000
            )
 
            setAuthCookies(res,
@@ -179,7 +177,7 @@ export class AuthController implements IAuthController {
         setAuthCookies(
             res, 
             JWT_TOKEN.ACCESS_TOKEN, accessToken,
-             10* 60* 1000);
+             20* 60* 1000);
 
          setAuthCookies(res,
             JWT_TOKEN.REFRESH_TOKEN, refreshToken,
@@ -280,19 +278,20 @@ export class AuthController implements IAuthController {
 
     async refreshAccessToken(req: Request, res: Response, next:NextFunction): Promise<void> {
         const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
+        
           if (!refreshToken) {
              throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
            }
  
             try {
 
-            const accessToken = await this._authService.refreshAccessToken(refreshToken);
+            const accessToken = await this._authService.refreshAccessTokenService(refreshToken);
 
               clearAuthCookies(res,
                 JWT_TOKEN.ACCESS_TOKEN);
                setAuthCookies(res, 
                 JWT_TOKEN.ACCESS_TOKEN, accessToken, 
-                 5 * 60 * 1000);
+                 20 * 60 * 1000);
 
                const successResponse: IApiResponse = {
                  success: SUCCESS_STATUS.SUCCESS,

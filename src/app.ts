@@ -10,7 +10,8 @@ import { container } from "tsyringe";
 import logger from "./shared/utils/logger.helper";
 import { corsOption } from "./middlewares/cors.middleware";
 import { errorMiddleware } from "./middlewares/error.handler.middleware";
-
+import { VendorRoutes } from "./routes/vendor/vendor.routes";
+import { UserRoutes } from "./routes/user/user.route";
 export default class App {
     private _app: Application;
     private _port: number;
@@ -51,7 +52,9 @@ export default class App {
             res.send("Welcome to the Travel Log API");
         });
         this._app.use("/api/v1/auth", container.resolve(AuthRoutes).router);
+        this._app.use("/api/v1/vendor",container.resolve(VendorRoutes).router);
         this._app.use('/api/v1/admin', container.resolve(AdminRoutes).router);
+        this._app.use('/api/v1/user', container.resolve(UserRoutes).router);
     }
 
     public start(): void {
