@@ -1,5 +1,5 @@
 import { ICacheService } from 'interfaces/service_interfaces/ICacheService';
-import { inject, injectable } from 'tsyringe';
+import { injectable } from 'tsyringe';
 import redisClient from '../config/redis.config';
 
 @injectable()
@@ -15,8 +15,17 @@ export class CacheService implements ICacheService {
     await this._redisClient.setEx(key, ttlSeconds, JSON.stringify(value));
   }
 
+  async exists(key: string): Promise<number> {
+    return this._redisClient.exists(key)
+  }
+
   async del(key: string): Promise<void> {
     await this._redisClient.del(key);
+  }
+
+  async ttl(key: string): Promise<number> {
+    const time = await this._redisClient.ttl(key);
+    return time;
   }
 
   async clearPrefix(prefix: string): Promise<void> {

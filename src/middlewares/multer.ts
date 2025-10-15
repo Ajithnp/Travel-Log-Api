@@ -13,7 +13,7 @@ export const upload = multer({
     const allowedMimeTypes = [
       'image/jpeg',
       'image/png',
-      'application/pdf' // PDF MIME type
+      'application/pdf', // PDF MIME type
     ];
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);

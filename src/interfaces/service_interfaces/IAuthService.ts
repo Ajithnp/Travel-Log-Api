@@ -1,22 +1,38 @@
-import { IAuthResponse } from "types/IAuthResponseType";
-import { IAuthResponseDTO } from "dtos/auth/auth.response.dtos";
-import { IRegisterUserDTO } from "dtos/auth/register.user.dtos";
-import { ILoginUserDTO } from "dtos/auth/login.user.dtos";
+import { IAuthResponseDTO } from 'types/dtos/auth/auth.response.dtos';
+import { IRegisterUserDTO } from 'types/dtos/auth/register.user.dtos';
+import {
+  LoginRequestDTO,
+  SignupRequestDTO,
+  VerifyEmailRequestDTO,
+  GoogleAuthRequestDTO,
+  ForgotPasswordRequestDTO,
+  ChangePasswordRequestDTO,
+  RefreshTokenRequestDTO,
+} from 'types/dtos/auth/request.dtos';
+import {
+  AuthResultDTO,
+  LoginResponseDTO,
+  SignupResponseDTO,
+  VerifyEmailResponseDTO,
+  GoogleAuthResponseDTO,
+  ForgotPasswordResponseDTO,
+  RefreshTokenResponseDTO,
+} from 'types/dtos/auth/response.dtos';
 
 export interface IAuthService {
-  
-    register(userData: IRegisterUserDTO): Promise<IAuthResponseDTO>;
+  registerUser(payload: SignupRequestDTO): Promise<SignupResponseDTO>;
 
-    login(userData: ILoginUserDTO): Promise<IAuthResponse<IAuthResponseDTO>>;
+  loginUser(payload: LoginRequestDTO): Promise<AuthResultDTO<LoginResponseDTO>>;
 
-    emailVerify(email:string, otp:string): Promise<IAuthResponse<IAuthResponseDTO>>;
+  emailVerify(payload: VerifyEmailRequestDTO): Promise<AuthResultDTO<VerifyEmailResponseDTO>>;
 
-    forgotPassword(email:string):Promise<Partial<IAuthResponseDTO>>
+  forgotPassword(payload: ForgotPasswordRequestDTO): Promise<ForgotPasswordResponseDTO>;
 
-    updatePassword(email:string,password:string): Promise<void>
+  changePassword(payload: ChangePasswordRequestDTO): Promise<void>;
 
-    googleAuthentication(token: string, clientId: string): Promise<IAuthResponse<IAuthResponseDTO>>
+  googleAuthentication(
+    payload: GoogleAuthRequestDTO,
+  ): Promise<AuthResultDTO<GoogleAuthResponseDTO>>;
 
-    refreshAccessTokenService(refreshToken: string | undefined): Promise<string>;
-
+  refreshAccessToken(payload: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO>;
 }

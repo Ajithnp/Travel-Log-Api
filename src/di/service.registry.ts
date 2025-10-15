@@ -6,7 +6,7 @@ import { TokenService } from '../services/jwt.service';
 import { IGoogleService } from 'interfaces/service_interfaces/IGoogleService';
 import { GoogleService } from '../services/google.auth.service';
 import { IOtpService } from '../interfaces/service_interfaces/IOtpService';
-import { OtpVerificationService } from '../services/otp.verification.service';
+import { OtpService } from '../services/otp.service';
 import { IAdminUserService } from '../interfaces/service_interfaces/admin/IAdminUserService';
 import { AdminUserService } from '../services/admin/admin.user.service';
 import { IAdminVendorService } from '../interfaces/service_interfaces/admin/IAdminVendorService';
@@ -17,6 +17,8 @@ import { ICacheService } from '../interfaces/service_interfaces/ICacheService';
 import { CacheService } from '../services/cache.service';
 import { IUserService } from '../interfaces/service_interfaces/user/IUserService';
 import { UserService } from '../services/user/user.service';
+import { ITokenBlackListService } from '../interfaces/service_interfaces/ITokenBlacklistService';
+import { TokenBlackListService } from '../services/token.blacklist.service';
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -27,12 +29,16 @@ export class ServiceRegistry {
       useClass: TokenService,
     });
 
+    container.register<ITokenBlackListService>('ITokenBlackListService', {
+      useClass: TokenBlackListService
+    });
+
     container.register<IGoogleService>('IGoogleService', {
       useClass: GoogleService,
     });
 
     container.register<IOtpService>('IOtpService', {
-      useClass: OtpVerificationService,
+      useClass: OtpService,
     });
 
     container.register<ICacheService>('ICacheService', {

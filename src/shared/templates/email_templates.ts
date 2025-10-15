@@ -141,7 +141,6 @@ export const WELCOME = (name: string) => `
   </div>
 `;
 
-
 export const PASSWORD_RESET = (name: string, resetLink: string) => `
   <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
     <!-- Header -->

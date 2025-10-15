@@ -1,56 +1,59 @@
 import { inject, injectable } from 'tsyringe';
-import { PaginatedData } from 'interfaces/common_interfaces/output_types/pagination';
-import { IVendorInfo } from 'types/IVendor';
+import { PaginatedData } from 'types/common/IPaginationResponse';
 import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/IAdminVendorService';
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
-import { VENDOR_STATUS } from '../../shared/constants/common';
-import { VendorVerificationDTO } from 'validators/vendor.verification.schema';
-import { IUser } from '../../types/IUser';
-import { IVendorInfoResponseDTO } from '../../dtos/vendor/vendor.info.response.dtos';
-import { VendorVerificationUpdateDTO } from '../../dtos/admin/vendor.verification.update.dtos';
+import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
+import { IUser } from '../../types/entities/user.entity';
+import { IVendorInfo, IVendorInfoPopulated } from '../../types/entities/vendor.info.entity';
+import { IVendorInfoResponseDTO } from '../../types/dtos/vendor/vendor.info.response.dtos';
+import { VendorVerificationUpdateDTO } from '../../types/dtos/admin/request.dtos';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { FilterQuery, Types } from 'mongoose';
-import { blacklistToken } from '../../shared/utils/token.revocation.helper';
 import mongoose from 'mongoose';
+import { CustomQueryOptions } from '../../types/common/IQueryOptions';
+import { UserResponseDTO } from '../../types/dtos/admin/response.dtos';
 @injectable()
 export class AdminVendorService implements IAdminVendorService {
   constructor(
     @inject('IVendorInfoRepository')
-    private _vendorInfoRepositorry: IVendorInfoRepository,
+    private _vendorInfoRepository: IVendorInfoRepository,
     @inject('IUserRepository')
     private _userRepository: IUserRepository,
   ) {}
 
-  async vendorVerificationRequestService(
+  async vendorVerificationRequests(
     page: number,
     limit: number,
     search?: string,
     selectedFilter?: string,
   ): Promise<PaginatedData<Partial<IVendorInfoResponseDTO>>> {
     const skip = (page - 1) * limit;
-    const options = { skip, limit, sort: { createdAt: -1 } };
-    const query :FilterQuery<IUser> = { status: VENDOR_STATUS.Pending };
+    const options: CustomQueryOptions = {
+      skip,
+      limit,
+      sort:{createdAt: - 1 as const}
+    };
+    const query: FilterQuery<IUser> = { status: VENDOR_VERIFICATION_STATUS.PENDING };
 
     if (search && search.trim() !== '') {
       query.name = { $regex: search, $options: 'i' };
     }
 
-
-    const vendorsDoc = await this._vendorInfoRepositorry.findVendorsVerificationDetails(
+    const vendorsDocs = await this._vendorInfoRepository.findVendorsVerificationDetails(
       query,
       options,
     );
 
-    const totalDocs = await this._vendorInfoRepositorry.getDocsCount(query);
+    const totalDocs = await this._vendorInfoRepository.countDocuments(query);
 
-    const vendorData: IVendorInfoResponseDTO[] = vendorsDoc.map((vendor) => {
+    const vendorData: IVendorInfoResponseDTO[] = vendorsDocs.map((vendor) => {
       const user = vendor.userId as IUser;
       return {
-        id: (vendor as IVendorInfo & { _id: string | Types.ObjectId })._id.toString(),
+        id:(vendor as IVendorInfoPopulated & { _id: string | Types.ObjectId })._id.toString(),
         profileLogo: vendor.profileLogo.url,
         isProfileVerified: vendor.isProfileVerified,
         contactPersonName: vendor.contactPersonName,
@@ -77,20 +80,21 @@ export class AdminVendorService implements IAdminVendorService {
   }
 
   //=========================verification update=============================
-  async updateVendorVerificationService(
+  async updateVendorVerification(
     vendorId: string,
     payload: VendorVerificationUpdateDTO,
   ): Promise<void> {
-    if (payload.status === VENDOR_STATUS.Rejected && !payload.reasonForReject) {
+
+    if (payload.status === VENDOR_VERIFICATION_STATUS.REJECTED && !payload.reasonForReject) {
       throw new AppError(ERROR_MESSAGES.REASON_REQUIRED, HTTP_STATUS.BAD_REQUEST);
     }
 
-    const vendor = await this._vendorInfoRepositorry.findByIdAndUpdate(
+    const vendor = await this._vendorInfoRepository.findByIdAndUpdate(
       vendorId,
       {
         status: payload.status,
         isProfileVerified: true,
-        reasonForReject: payload.status === VENDOR_STATUS.Rejected ? payload.reasonForReject : null,
+        reasonForReject: payload.status === VENDOR_VERIFICATION_STATUS.REJECTED ? payload.reasonForReject : null,
       },
       { new: true },
     );
@@ -100,44 +104,48 @@ export class AdminVendorService implements IAdminVendorService {
     }
   }
   //================================================================================
-  async fetchVendorService(page: number, limit: number): Promise<PaginatedData<Partial<IUser>>> {
+  async getVendors(page: number, limit: number): Promise<PaginatedData<UserResponseDTO>> {
     const skip = (page - 1) * limit;
     const query = { role: USER_ROLES.VENDOR };
     const options = { skip, limit };
 
-    const vendorsDoc = await this._userRepository.find(query, options);
-    const totalDocs = await this._userRepository.getDocsCount(query);
+    const vendorsDocs = await this._userRepository.findAll(query, options);
+    const totalDocs = await this._userRepository.countDocuments(query);
 
-    const vendorData: Partial<IUser>[] = vendorsDoc.map((user) => ({
+    const vendorData: UserResponseDTO[] = vendorsDocs.map((user) => ({
       id: (user._id as Types.ObjectId).toString(),
       name: user.name,
       phone: user.phone,
       email: user.email,
       isBlocked: user.isBlocked,
-      createdAt: user.createdAt,
+      createdAt: user.createdAt.toDateString(),
     }));
 
-    return {
+    const response = {
       data: vendorData,
       currentPage: page,
       totalPages: Math.ceil(totalDocs / limit),
       totalDocs,
-    };
+
+    }
+
+    return response;
   }
   //=========================================================================
-  async updateVendorAccessService(
+  async updateVendorAccess(
     id: string,
     block: boolean,
     reason?: string,
     accessToken?: string,
   ): Promise<void> {
+    
     const vendorDoc = await this._userRepository.findById(id);
 
     if (!vendorDoc) {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    const vendorUpdatedDoc = await this._userRepository.update(id, {
+    const vendorUpdatedDoc = await this._userRepository.findByIdAndUpdate(id, {
       isBlocked: block,
       blockedReason: block === true ? reason : '',
     });

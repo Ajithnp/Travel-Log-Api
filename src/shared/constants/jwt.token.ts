@@ -1,4 +1,8 @@
 export const JWT_TOKEN = {
-    ACCESS_TOKEN: 'accessToken',
-    REFRESH_TOKEN:'refreshToken',
-} as const
+  ACCESS_TOKEN: 'accessToken',
+  REFRESH_TOKEN: 'refreshToken',
+  ACCESS_TOKEN_COOKIE_EXPIRY: 10 * 60 * 1000,
+  REFRESH_TOKEN_COOKIE_EXPIRY: 7 * 24 * 60 * 60 * 1000,
+  ACCESS_TOKEN_EXPIRY: '10m',
+  REFRESH_TOKEN_EXPIRY: '7d',
+} as const;

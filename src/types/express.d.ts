@@ -6,8 +6,7 @@ declare module 'express-serve-static-core' {
     user?: ITokenPayload;
     file?: Express.Multer.File; // single upload
     files?:
-    | Express.Multer.File[] // multiple
-    | { [fieldname: string]: Express.Multer.File[] }; // for upload.fields
-   
+      | Express.Multer.File[] // multiple
+      | { [fieldname: string]: Express.Multer.File[] }; // for upload.fields
   }
 }

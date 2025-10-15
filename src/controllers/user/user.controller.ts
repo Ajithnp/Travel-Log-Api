@@ -8,7 +8,7 @@ import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_
 import { AppError } from '../../errors/AppError';
 import { IApiResponse } from 'types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
-import { IUserProfileDTO } from '../../dtos/user/user.profile.response.dtos';
+import { UserProfileResponseDTO } from '../../types/dtos/user/response.dtos';
 @injectable()
 export class UserController implements IUserController {
   constructor(
@@ -18,14 +18,12 @@ export class UserController implements IUserController {
 
   async profile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log('---', req.user,  req.user?.role);
-      
       if (!req.user || req.user.role !== USER_ROLES.USER) {
         throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
       }
-      const doc = await this._userService.profileService(req.user.id);
+      const doc = await this._userService.profile(req.user.id);
 
-      const successResponse: IApiResponse<IUserProfileDTO> = {
+      const successResponse: IApiResponse<UserProfileResponseDTO> = {
         success: SUCCESS_STATUS.SUCCESS,
         message: SUCCESS_MESSAGES.OK,
         data: doc,
@@ -33,7 +31,7 @@ export class UserController implements IUserController {
 
       res.status(HTTP_STATUS.OK).json(successResponse);
     } catch (error) {
-        next(error)
+      next(error);
     }
   }
 }

@@ -1,5 +1,5 @@
-export enum HTTP_STATUS  {
-  OK =200,
+export enum HTTP_STATUS {
+  OK = 200,
   CREATED = 201,
   ACCEPTED = 202,
   BAD_REQUEST = 400,
@@ -10,8 +10,8 @@ export enum HTTP_STATUS  {
   CONFLICT = 409,
   INTERNAL_SERVER_ERROR = 500,
   GATEWAY_TIMEOUT = 504,
-  TOO_MANY_REQUESTS = 429
-};
+  TOO_MANY_REQUESTS = 429,
+}
 
 export const SUCCESS_STATUS = {
   SUCCESS: true,

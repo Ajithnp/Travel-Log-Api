@@ -1,10 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { IVendorController } from '../../interfaces/controller_interfaces/vendor/IVendorController';
-import {
-  VendorVerificationDTO,
-  VendorVerificationSchema,
-} from '../../validators/vendor.verification.schema';
+import { VendorVerificationDTO,VendorVerificationSchema } from '../../validators/vendor.verification.schema';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -12,11 +9,9 @@ import { getFile } from '../../shared/utils/multer.helper';
 import { IVendorService } from '../../interfaces/service_interfaces/vendor/IVendorService';
 import { IApiResponse } from 'types/common/IApiResponse';
 import { SUCCESS_STATUS } from '../../shared/constants/http_status_code';
-import { IVendorVerificationResponseDTO } from '../../dtos/vendor/vendorVerificationResponse.dtos';
-import logger from '../../shared/utils/logger.helper';
+import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { USER_ROLES } from '../../shared/constants/roles';
-import { IVendorProfileResponseDTO } from '../../dtos/vendor/vendorProfileResponse.dtos';
-
+import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
 @injectable()
 export class VendorController implements IVendorController {
   constructor(
@@ -29,8 +24,10 @@ export class VendorController implements IVendorController {
       if (!req.user || req.user.role !== USER_ROLES.VENDOR) {
         throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
       }
-      const doc = await this._vendorService.profileService(req.user.id);
-      const successResponse: IApiResponse<IVendorProfileResponseDTO> = {
+      
+      const doc = await this._vendorService.profile(req.user.id);
+      
+      const successResponse: IApiResponse<VendorProfileResponseDTO> = {
         success: SUCCESS_STATUS.SUCCESS,
         message: SUCCESS_MESSAGES.OK,
         data: doc,
@@ -67,7 +64,7 @@ export class VendorController implements IVendorController {
       );
     }
     try {
-      const result = await this._vendorService.vendorVerificationSubmitService(
+      const result = await this._vendorService.vendorVerificationSubmit(
         req.user.id,
         textData,
         files,

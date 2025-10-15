@@ -6,7 +6,7 @@ import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/I
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../shared/constants/messages';
-import { VENDOR_STATUS } from '../../shared/constants/common';
+import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import mongoose from 'mongoose';
 import { AppError } from '../../errors/AppError';
 import { JWT_TOKEN } from '../../shared/constants/jwt.token';
@@ -25,10 +25,14 @@ export class AdminVendorController implements IAdminVendorController {
 
   async vendorVerificationRequest(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
-    
 
     try {
-      const data = await this._adminVendorService.vendorVerificationRequestService(page, limit, search, selectedFilter);
+      const data = await this._adminVendorService.vendorVerificationRequests(
+        page,
+        limit,
+        search,
+        selectedFilter,
+      );
 
       const successResponse: IApiResponse<typeof data> = {
         success: SUCCESS_STATUS.SUCCESS,
@@ -48,7 +52,7 @@ export class AdminVendorController implements IAdminVendorController {
     const { status, reasonForReject } = req.body;
 
     try {
-      await this._adminVendorService.updateVendorVerificationService(vendorId, {
+      await this._adminVendorService.updateVendorVerification(vendorId, {
         status,
         reasonForReject,
       });
@@ -56,7 +60,7 @@ export class AdminVendorController implements IAdminVendorController {
       const successResponse: IApiResponse = {
         success: SUCCESS_STATUS.SUCCESS,
         message:
-          status === VENDOR_STATUS.Approved
+          status === VENDOR_VERIFICATION_STATUS.APPROVED
             ? SUCCESS_MESSAGES.VENDOR_VERIFICATION_SUCCESS
             : SUCCESS_MESSAGES.VENDOR_VERIFICATION_REJECTED,
       };
@@ -69,9 +73,15 @@ export class AdminVendorController implements IAdminVendorController {
   //===================================get vendors=======================================
   async getVendors(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
-    
+
     try {
-      const vendors = await this._adminUserService.fetchUsers(page, limit, USER_ROLES.VENDOR, search, selectedFilter);
+      const vendors = await this._adminUserService.fetchUsers(
+        page,
+        limit,
+        USER_ROLES.VENDOR,
+        search,
+        selectedFilter,
+      );
 
       const successResponse: IApiResponse<typeof vendors> = {
         success: SUCCESS_STATUS.SUCCESS,
@@ -106,18 +116,9 @@ export class AdminVendorController implements IAdminVendorController {
 
     try {
       if (blockUser && accessToken) {
-        await this._adminUserService.updateUserAccess(
-          vendorId,
-          blockUser,
-          reason,
-          accessToken,
-        );
+        await this._adminUserService.updateUserAccess(vendorId, blockUser, reason, accessToken);
       } else {
-        await this._adminUserService.updateUserAccess(
-          vendorId,
-          blockUser,
-          reason
-        );
+        await this._adminUserService.updateUserAccess(vendorId, blockUser, reason);
       }
 
       clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);

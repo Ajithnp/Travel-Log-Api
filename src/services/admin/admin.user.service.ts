@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 import { IAdminUserService } from '../../interfaces/service_interfaces/admin/IAdminUserService';
 import { IApiResponse } from 'types/common/IApiResponse';
-import { IUser } from '../../types/IUser';
+import { IUser } from '../../types/entities/user.entity';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
@@ -9,7 +9,7 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ITokenService } from '../../interfaces/service_interfaces/ITokenService';
 import { blacklistToken } from '../../shared/utils/token.revocation.helper';
 import { USER_ROLES } from '../../shared/constants/roles';
-import { PaginatedData } from '../../interfaces/common_interfaces/output_types/pagination';
+import { PaginatedData } from '../../types/common/IPaginationResponse';
 import { FilterQuery, Types } from 'mongoose';
 
 @injectable()
@@ -28,7 +28,7 @@ export class AdminUserService implements IAdminUserService {
     search?: string,
     selectedFilter?: string,
   ): Promise<PaginatedData<Partial<IUser>>> {
-      const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
     const query: FilterQuery<IUser> = { role };
 
     if (search && search.trim() !== '') {
@@ -39,8 +39,8 @@ export class AdminUserService implements IAdminUserService {
     if (selectedFilter === 'blocked') query.isBlocked = true;
 
     const [usersDoc, totalDocs] = await Promise.all([
-      this._userRepository.find(query, { skip, limit, sort:{createdAt: -1}}),
-      this._userRepository.getDocsCount(query),
+      this._userRepository.findAll(query, { skip, limit, sort: { createdAt: -1 } }),
+      this._userRepository.countDocuments(query),
     ]);
 
     const userData: Partial<IUser>[] = usersDoc.map((user) => ({
@@ -72,7 +72,7 @@ export class AdminUserService implements IAdminUserService {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    const userUpdatedDoc = await this._userRepository.update(id, {
+    const userUpdatedDoc = await this._userRepository.findByIdAndUpdate(id, {
       isBlocked: block,
       blockedReason: block === true ? reason : '',
     });

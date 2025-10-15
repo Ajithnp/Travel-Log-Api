@@ -1,13 +1,12 @@
 export class AppError extends Error {
+  public status_code: number;
+  public error_code?: string;
 
-    public status_code: number;
+  constructor(message: string, statusCode: number, errorCode?: string) {
+    super(message);
+    this.status_code = statusCode;
+    this.error_code = errorCode;
 
-    constructor(message: string, statusCode: number){
-        super(message);
-        this.status_code = statusCode;
-
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-
-    
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
 }

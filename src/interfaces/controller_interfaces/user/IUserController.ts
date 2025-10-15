@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express"
+import { Request, Response, NextFunction } from 'express';
 
 export interface IUserController {
-    profile(req:Request,res:Response, next:NextFunction):Promise<void>
+  profile(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

@@ -1,8 +1,9 @@
 import { injectable } from 'tsyringe';
-import { IGoogleUser } from 'types/IGoogleUserInfo';
+import { IGoogleUser } from 'types/IGoogleUser';
 import { IGoogleService } from 'interfaces/service_interfaces/IGoogleService';
 import { OAuth2Client } from 'google-auth-library';
-import { config } from '../config/env';
+import { AppError } from '../errors/AppError';
+import { HTTP_STATUS } from '../shared/constants/http_status_code';
 
 @injectable()
 export class GoogleService implements IGoogleService {
@@ -21,19 +22,19 @@ export class GoogleService implements IGoogleService {
 
       const payload = ticket.getPayload();
       if (!payload || !payload.sub || !payload.email) {
-        throw new Error('Invalid token: no payload found');
+        throw new AppError('Invalid token', HTTP_STATUS.BAD_REQUEST);
       }
 
-      return {
+      const response = {
         googleId: payload.sub,
-        email:payload.email,
+        email: payload.email,
         name: payload.name,
-        picture: payload.picture
+        picture: payload.picture,
       };
 
+      return response;
     } catch (error) {
-      console.error('error');
-       throw new Error("Failed to verify Google token.");
+      throw new AppError('Failed to verify Google token', HTTP_STATUS.UNAUTHORIZED);
     }
   }
 }

@@ -26,7 +26,7 @@ export class VendorRoutes extends BaseRoute {
     this._router.post(
       '/verification',
       isAuthenticated,
-       authorize([USER_ROLES.VENDOR]),
+      authorize([USER_ROLES.VENDOR]),
       upload.fields([
         { name: 'businessLicence', maxCount: 1 },
         { name: 'businessPan', maxCount: 1 },

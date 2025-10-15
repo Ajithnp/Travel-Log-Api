@@ -1,5 +1,5 @@
-import { RateLimiterRedis } from "rate-limiter-flexible";
-import redisClient from "./redis.config";
+import { RateLimiterRedis } from 'rate-limiter-flexible';
+import redisClient from './redis.config';
 
 const loginLimiter = new RateLimiterRedis({
   storeClient: redisClient,

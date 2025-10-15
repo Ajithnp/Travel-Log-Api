@@ -1,11 +1,22 @@
-import { VendorVerificationDTO } from 'validators/vendor.verification.schema';
-import { IVendorVerificationResponseDTO } from '../../../dtos/vendor/vendorVerificationResponse.dtos';
-import mongoose, { Types } from 'mongoose';
-import { IUserProfileDTO } from 'dtos/user/user.profile.response.dtos';
-
+import {
+  UserProfileResponseDTO,
+  IUpdateEmailResponseDTO
+} from "../../../types/dtos/user/response.dtos";
+import {
+  UpdateEmailRequestDTO,
+  VerifyEmailRequestDTO,
+  ResetPasswordRequestDTO,
+  UpdateProfileRequestDTO,
+} from "../../../types/dtos/user/request.dtos";
 export interface IUserService {
 
-    profileService(id: string): Promise<IUserProfileDTO>;
-    
-  
+  profile(userId: string): Promise<UserProfileResponseDTO>;
+
+  updateProfile(payload:UpdateProfileRequestDTO): Promise<void>
+
+  updateEmailRequest(payload: UpdateEmailRequestDTO): Promise<IUpdateEmailResponseDTO>;
+
+  updateEmail(payload: VerifyEmailRequestDTO): Promise<void>
+
+  resetPassword(payload: ResetPasswordRequestDTO): Promise<void>;
 }

@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { Request } from 'express';
 
 // get a single uploaded file when using multer.fields
 

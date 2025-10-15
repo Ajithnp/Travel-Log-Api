@@ -9,6 +9,9 @@ import { IVendorController } from '../interfaces/controller_interfaces/vendor/IV
 import { VendorController } from '../controllers/vendor/vendor.controller';
 import { IUserController } from '../interfaces/controller_interfaces/user/IUserController';
 import { UserController } from '../controllers/user/user.controller';
+import { IUserProfileController } from '../interfaces/controller_interfaces/user/IUserProfileController';
+import { UserProfileController } from '../controllers/user/user.profile.controller';
+
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -30,6 +33,10 @@ export class ControllerRegistry {
     //user controllers
     container.register<IUserController>('IUserController', {
       useClass: UserController,
+    });
+
+    container.register<IUserProfileController>('IUserProfileController', {
+      useClass: UserProfileController,
     });
 
     // Register other controllers here

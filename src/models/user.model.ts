@@ -1,52 +1,51 @@
-import { model, Schema } from "mongoose";
-import { IUser } from "../types/IUser";
+import { model, Schema } from 'mongoose';
+import { IUser } from '../types/entities/user.entity';
 
 const userSchema = new Schema<IUser>(
-{
-   name: {
-    type: String,
-    required: true,
-   },
+  {
+    name: {
+      type: String,
+      required: true,
+    },
     email: {
-     type: String,
-     required: true,
-     unique: true,
+      type: String,
+      required: true,
+      unique: true,
     },
     phone: {
-     type: String,
-     unique: true,
+      type: String,
+      unique: true,
     },
-     googleId: {
+    googleId: {
       type: String,
       unique: true,
       sparse: true,
     },
     password: {
-     type: String,
-   
+      type: String,
     },
     profile: {
-     type: String,
-     default: "",
+      type: String,
+      default: '',
     },
     isEmailVerified: {
-     type: Boolean,
-     default: false,
+      type: Boolean,
+      default: false,
     },
     role: {
-     type: String,
-     enum: ["admin", "user", "vendor"],
-     default: "user",
+      type: String,
+      enum: ['admin', 'user', 'vendor'],
+      default: 'user',
     },
-     isBlocked: {
-     type: Boolean,
-     default: false,
+    isBlocked: {
+      type: Boolean,
+      default: false,
     },
     blockedReason: {
       type: String,
     },
-
-},{timestamps: true}
+  },
+  { timestamps: true },
 );
 
-export const UserModel = model<IUser>("User", userSchema);
+export const UserModel = model<IUser>('User', userSchema);

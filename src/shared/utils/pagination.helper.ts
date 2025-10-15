@@ -1,11 +1,11 @@
-import { Request } from "express";
+import { Request } from 'express';
 
 export interface PaginationOptions {
-    page: number,
-    limit: number,
-    search: string,
-    selectedFilter: string
-};
+  page: number;
+  limit: number;
+  search: string;
+  selectedFilter: string;
+}
 
 export const getPaginationOptions = (req: Request): PaginationOptions => {
   const page = parseInt(req.query.page as string) || 1;
