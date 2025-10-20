@@ -43,6 +43,13 @@ export const config = {
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   },
 
+  aws: {
+    AWS_BUCKET_NAME: requireEnv('AWS_BUCKET_NAME'),
+    AWS_REGION: requireEnv('AWS_REGION'),
+    AWS_ACCESS_KEY_ID: requireEnv('AWS_ACCESS_KEY_ID'),
+    AWS_SECRET_ACCESS_KEY: requireEnv('AWS_SECRET_ACCESS_KEY')
+  },
+
   redis: {
     REDIS_URL: requireEnv('REDIS_URL'),
   },

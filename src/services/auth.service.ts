@@ -105,6 +105,8 @@ export class AuthService implements IAuthService {
       throw new AppError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS, HTTP_STATUS.BAD_REQUEST);
     }
 
+   
+
     const hashedPassword = await this._passwordBcrypt.hashPassword(password);
 
     const newUser = await this._userRepository.create({
