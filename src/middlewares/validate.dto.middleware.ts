@@ -3,7 +3,6 @@ import { AnyZodObject, ZodError } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../errors/AppError';
 import { HTTP_STATUS } from '../shared/constants/http_status_code';
-import { ERROR_MESSAGES } from '../shared/constants/messages';
 
 export const validateDTO =
   (schema: AnyZodObject) => (req: Request, res: Response, next: NextFunction) => {

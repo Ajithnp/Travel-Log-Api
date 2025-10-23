@@ -1,7 +1,10 @@
 import { inject, injectable } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { IVendorController } from '../../interfaces/controller_interfaces/vendor/IVendorController';
-import { VendorVerificationDTO,VendorVerificationSchema } from '../../validators/vendor.verification.schema';
+import {
+  VendorVerificationDTO,
+  VendorVerificationSchema,
+} from '../../validators/vendor.verification.schema';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -24,9 +27,9 @@ export class VendorController implements IVendorController {
       if (!req.user || req.user.role !== USER_ROLES.VENDOR) {
         throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
       }
-      
+
       const doc = await this._vendorService.profile(req.user.id);
-      
+
       const successResponse: IApiResponse<VendorProfileResponseDTO> = {
         success: SUCCESS_STATUS.SUCCESS,
         message: SUCCESS_MESSAGES.OK,

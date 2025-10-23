@@ -5,8 +5,9 @@ import { ERROR_MESSAGES } from '../shared/constants/messages';
 
 export function makeRateLimiter(limiter: RateLimiterRedis) {
   return async (req: Request, res: Response, next: NextFunction) => {
+    const key = req.ip || 'unknown';
     try {
-      await limiter.consume(req.ip || 'unknown');
+      await limiter.consume(key);
       next();
     } catch (rejRes) {
       const rateLimitRes = rejRes as RateLimiterRes;

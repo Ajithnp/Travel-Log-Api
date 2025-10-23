@@ -8,9 +8,9 @@ import { HTTP_STATUS } from '../shared/constants/http_status_code';
 import { hashOtp } from '../shared/utils/otp/otp.hash.helper';
 import { ICacheService } from '../interfaces/service_interfaces/ICacheService';
 import { OTP } from '../shared/constants/otp';
-import logger from '../config/logger';
 import { SendOtpResponseDTO } from '../types/dtos/auth/response.dtos';
 import { VerifyOtpRequestDTO } from '../types/dtos/auth/request.dtos';
+import { ACCOUNT_VERIFICATION } from '../shared/templates/email_templates';
 
 @injectable()
 export class OtpService implements IOtpService {
@@ -28,9 +28,12 @@ export class OtpService implements IOtpService {
 
     await this._cacheService.set(key, hashedOtp, OTP.OTP_TTL_SECONDS);
 
-    this._emailUtil.sendEmail(email, 'verify Your Email Adress', otp, 'Verify Your Account');
-    // const remainingTime = await this._cacheService.ttl(key);
-    
+    this._emailUtil.sendEmail({
+      to: email,
+      subject: 'verify Your Email Adress',
+      html: ACCOUNT_VERIFICATION(otp, 'Account Verification'),
+    });
+
     const response = {
       otpExpiresIn: expiresAt,
       serverTime: Math.floor(Date.now() / 1000),

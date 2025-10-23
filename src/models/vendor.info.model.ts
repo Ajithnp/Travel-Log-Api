@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { IVendorInfo } from '../types/entities/vendor.info.entity';
 
 const vendorSchema = new Schema<IVendorInfo>(

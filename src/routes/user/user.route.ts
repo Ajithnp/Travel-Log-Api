@@ -5,15 +5,15 @@ import { IUserProfileController } from '../../interfaces/controller_interfaces/u
 import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
+// import { otpLimiter } from '../../config/rate.limiter.config';
+// import { makeRateLimiter } from '../../middlewares/rate.limiter.middleware';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import {
   UpdateEmailSchema,
   UpdateEmailRequestSchema,
   ResetPasswordSchema,
-  UpdateProfileSchema
-
-  
- } from '../../types/dtos/user/request.dtos';
+  UpdateProfileSchema,
+} from '../../types/dtos/user/request.dtos';
 @injectable()
 export class UserRoutes extends BaseRoute {
   constructor(
@@ -21,7 +21,7 @@ export class UserRoutes extends BaseRoute {
     private _userController: IUserController,
 
     @inject('IUserProfileController')
-    private _userProfileController: IUserProfileController
+    private _userProfileController: IUserProfileController,
   ) {
     super();
     this.initializeRoutes();
@@ -40,15 +40,15 @@ export class UserRoutes extends BaseRoute {
       validateDTO(UpdateProfileSchema),
       isAuthenticated,
       authorize([USER_ROLES.USER]),
-      this._userProfileController.updateProfile.bind(this._userProfileController)
-    )
+      this._userProfileController.updateProfile.bind(this._userProfileController),
+    );
 
     this._router.post(
       '/me/change-email',
       validateDTO(UpdateEmailRequestSchema),
       isAuthenticated,
       authorize([USER_ROLES.USER]),
-      this._userProfileController.updateEmailRequest.bind(this._userProfileController)
+      this._userProfileController.updateEmailRequest.bind(this._userProfileController),
     );
 
     this._router.patch(
@@ -56,7 +56,7 @@ export class UserRoutes extends BaseRoute {
       validateDTO(UpdateEmailSchema),
       isAuthenticated,
       authorize([USER_ROLES.USER]),
-      this._userProfileController.updateEmail.bind(this._userProfileController)
+      this._userProfileController.updateEmail.bind(this._userProfileController),
     );
 
     this._router.patch(
@@ -64,10 +64,7 @@ export class UserRoutes extends BaseRoute {
       validateDTO(ResetPasswordSchema),
       isAuthenticated,
       authorize([USER_ROLES.USER]),
-      this._userProfileController.resetPassword.bind(this._userProfileController)
+      this._userProfileController.resetPassword.bind(this._userProfileController),
     );
-
   }
-
-  
 }

@@ -1,9 +1,7 @@
-import { IApiResponse } from '../../../types/common/IApiResponse';
 import { IUser } from '../../../types/entities/user.entity';
 import { PaginatedData } from '../../../types/common/IPaginationResponse';
 
 export interface IAdminUserService {
-  // fetchUsers():Promise<IUser []>
   fetchUsers(
     page: number,
     limit: number,

@@ -16,7 +16,7 @@ export class CacheService implements ICacheService {
   }
 
   async exists(key: string): Promise<number> {
-    return this._redisClient.exists(key)
+    return this._redisClient.exists(key);
   }
 
   async del(key: string): Promise<void> {

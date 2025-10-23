@@ -4,6 +4,7 @@ export const SERVICE_TOKENS = {
   VERIFICATION_SERVICE: 'IVerificationService',
   GOOGLE_SERVICE: 'IGoogleService',
   PASSWORD_SERVICE: 'IPasswordService',
+  TOKEN_BLACKLIST: 'ITokenBlackListService',
 } as const;
 
 export const CONTROLLER_TOKENS = {

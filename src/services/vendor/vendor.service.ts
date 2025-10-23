@@ -7,7 +7,7 @@ import {
   uploadMultipleToCloudinary,
 } from '../../shared/utils/cloudinary.helper';
 import { IVendorInfo } from '../../types/entities/vendor.info.entity'; // need to remove
-import mongoose, { Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -26,17 +26,18 @@ export class VendorService implements IVendorService {
   ) {}
 
   async profile(userId: string): Promise<VendorProfileResponseDTO> {
-
     const vendorDoc = await this._vendorInfoRepository.findVendorWithUser(userId);
 
-  
-    if (!vendorDoc  || vendorDoc.status === VENDOR_VERIFICATION_STATUS.PENDING || vendorDoc.status === VENDOR_VERIFICATION_STATUS.REJECTED) {
-      
+    if (
+      !vendorDoc ||
+      vendorDoc.status === VENDOR_VERIFICATION_STATUS.PENDING ||
+      vendorDoc.status === VENDOR_VERIFICATION_STATUS.REJECTED
+    ) {
       const userDoc = await this._userRepository.findById(userId);
 
-      if (!userDoc)  throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
-       
-            return {
+      if (!userDoc) throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+
+      return {
         id: userDoc._id.toString(),
         name: userDoc.name,
         email: userDoc.email,

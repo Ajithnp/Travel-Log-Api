@@ -30,7 +30,7 @@ export class ServiceRegistry {
     });
 
     container.register<ITokenBlackListService>('ITokenBlackListService', {
-      useClass: TokenBlackListService
+      useClass: TokenBlackListService,
     });
 
     container.register<IGoogleService>('IGoogleService', {

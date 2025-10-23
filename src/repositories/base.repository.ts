@@ -14,11 +14,11 @@ export class BaseRepository<T> implements IBaseRepository<T> {
 
   async findAll(query: FilterQuery<T>, options: QueryOptions<T>): Promise<T[]> {
     const result = await this.model.find(query, null, options).exec();
-    return result ?? []; 
+    return result ?? [];
   }
 
   async findOne(query: FilterQuery<T>): Promise<T | null> {
-    return await this.model.findOne(query).exec(); 
+    return await this.model.findOne(query).exec();
   }
 
   async findById(id: string): Promise<T | null> {
@@ -26,9 +26,9 @@ export class BaseRepository<T> implements IBaseRepository<T> {
   }
 
   async exists(filter: FilterQuery<T>): Promise<boolean> {
-    const result = await this.model.exists(filter)
+    const result = await this.model.exists(filter);
     return !!result;
-  };
+  }
 
   async countDocuments(filter: FilterQuery<T> = {}): Promise<number> {
     return this.model.countDocuments(filter).exec();
@@ -50,15 +50,13 @@ export class BaseRepository<T> implements IBaseRepository<T> {
     return await this.model.findByIdAndUpdate(id, update, options).exec();
   }
 
-    async updateAll(filter: any, data: Partial<T>): Promise<number> {
+  async updateAll(filter: Partial<T>, data: Partial<T>): Promise<number> {
     if (!filter || Object.keys(filter).length === 0) {
-      throw new Error(
-        'updateAll requires a filter to prevent accidental full updates'
-      );
+      throw new Error('updateAll requires a filter to prevent accidental full updates');
     }
 
     const result = await this.model.updateMany(filter, data).exec();
-    return result.modifiedCount; 
+    return result.modifiedCount;
   }
 
   async findByIdAndDelete(id: string | Types.ObjectId): Promise<T | null> {
@@ -68,4 +66,4 @@ export class BaseRepository<T> implements IBaseRepository<T> {
   async findOneAndDelete(query: FilterQuery<T>): Promise<T | null> {
     return await this.model.findOneAndDelete(query).exec();
   }
-};
+}

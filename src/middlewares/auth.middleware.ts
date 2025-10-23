@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import redisClient from '../config/redis.config';
 import { HTTP_STATUS } from '../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../shared/constants/messages';
 import { container } from 'tsyringe';
@@ -9,7 +8,7 @@ import { SERVICE_TOKENS } from '../shared/constants/di.tokens';
 import { REPOSITORY_TOKENS } from '../shared/constants/di.tokens';
 import { SUCCESS_STATUS } from '../shared/constants/http_status_code';
 import { JWT_TOKEN } from '../shared/constants/jwt.token';
-import { smallHasher } from '../shared/utils/small.hasher.helper';
+import { ITokenBlackListService } from 'interfaces/service_interfaces/ITokenBlacklistService';
 
 export const isAuthenticated = async (
   req: Request,
@@ -17,6 +16,7 @@ export const isAuthenticated = async (
   next: NextFunction,
 ): Promise<void> => {
   const token = req.cookies?.[JWT_TOKEN.ACCESS_TOKEN];
+
   if (!token) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: SUCCESS_STATUS.FAILURE,
@@ -37,8 +37,11 @@ export const isAuthenticated = async (
     }
 
     // checking blacklist
-    const tokenHash = smallHasher(token);
-    const isBlackListed = await redisClient.get(`bl_token${tokenHash}`);
+    const tokenBlackListService = container.resolve<ITokenBlackListService>(
+      SERVICE_TOKENS.TOKEN_BLACKLIST,
+    );
+
+    const isBlackListed = await tokenBlackListService.isBlackListed(token);
 
     if (isBlackListed) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({

@@ -2,7 +2,6 @@ import nodemailer from 'nodemailer';
 import { IEmailUtils } from 'interfaces/common_interfaces/IEmailUtils';
 import { injectable } from 'tsyringe';
 import { config } from '../../config/env';
-import { ACCOUNT_VERIFICATION } from '../templates/email_templates';
 
 @injectable()
 export class EmailUtils implements IEmailUtils {
@@ -21,12 +20,20 @@ export class EmailUtils implements IEmailUtils {
     });
   }
 
-  async sendEmail(to: string, subject: string, otp: string, matter: string): Promise<void> {
+  async sendEmail(options: {
+    to: string;
+    subject: string;
+    html?: string;
+    // otp: string,
+    text?: string;
+    // matter: string
+  }): Promise<void> {
     const mailOptions = {
-      from: `"MyApp" <${config.nodeMailer.EMAIL_HOST}>`,
-      to,
-      subject,
-      html: ACCOUNT_VERIFICATION(otp, matter),
+      from: `"TravelLog" <${config.nodeMailer.EMAIL_HOST}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
     };
 
     await this._transporter.sendMail(mailOptions);

@@ -1,3 +1,3 @@
 export interface IEmailUtils {
-  sendEmail(to: string, subject: string, link: string, matter: string): Promise<void>;
+  sendEmail(options: { to: string; subject: string; html?: string; text?: string }): Promise<void>;
 }

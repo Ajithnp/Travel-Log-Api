@@ -22,6 +22,6 @@ export interface IVendorInfo extends Document {
   updatedAt: Date;
 }
 
-export interface IVendorInfoPopulated extends Omit<IVendorInfo, "userId"> {
+export interface IVendorInfoPopulated extends Omit<IVendorInfo, 'userId'> {
   userId: IUser;
 }

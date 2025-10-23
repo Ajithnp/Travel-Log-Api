@@ -1,14 +1,11 @@
 import { inject, injectable } from 'tsyringe';
 import { IAdminUserService } from '../../interfaces/service_interfaces/admin/IAdminUserService';
-import { IApiResponse } from 'types/common/IApiResponse';
 import { IUser } from '../../types/entities/user.entity';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ITokenService } from '../../interfaces/service_interfaces/ITokenService';
-import { blacklistToken } from '../../shared/utils/token.revocation.helper';
-import { USER_ROLES } from '../../shared/constants/roles';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
 import { FilterQuery, Types } from 'mongoose';
 
@@ -65,7 +62,7 @@ export class AdminUserService implements IAdminUserService {
     id: string,
     block: boolean,
     reason?: string,
-    accessToken?: string,
+    // accessToken?: string,
   ): Promise<void> {
     const userDoc = await this._userRepository.findById(id);
     if (!userDoc) {

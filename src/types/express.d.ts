@@ -1,4 +1,4 @@
-import { Request } from 'express';
+// import { Request } from 'express';
 import { ITokenPayload } from '../interfaces/service_interfaces/ITokenService';
 
 declare module 'express-serve-static-core' {

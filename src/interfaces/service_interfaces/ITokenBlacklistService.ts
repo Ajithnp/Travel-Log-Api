@@ -1,6 +1,5 @@
 export interface ITokenBlackListService {
+  blackListToken(token: string, tokenExp: string): Promise<void>;
 
-    blackListToken(token: string, tokenExp: string): Promise<void>;
-
-    isBlackListed(token: string): Promise<boolean>
+  isBlackListed(token: string): Promise<boolean>;
 }

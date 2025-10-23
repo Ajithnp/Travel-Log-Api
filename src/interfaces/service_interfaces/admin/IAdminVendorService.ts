@@ -1,10 +1,8 @@
 import { PaginatedData } from '../../../types/common/IPaginationResponse';
 // import { IVendor } from "../../../types/IVendor";
 import { IVendorInfoResponseDTO } from '../../../types/dtos/vendor/vendor.info.response.dtos';
-import { IUser } from 'types/entities/user.entity';
 import { VendorVerificationUpdateDTO } from 'types/dtos/admin/request.dtos';
 import { UserResponseDTO } from '../../../types/dtos/admin/response.dtos';
-import mongoose from 'mongoose';
 
 export interface IAdminVendorService {
   vendorVerificationRequests(
@@ -14,21 +12,9 @@ export interface IAdminVendorService {
     selectedFilter?: string,
   ): Promise<PaginatedData<Partial<IVendorInfoResponseDTO>>>;
 
-  updateVendorVerification(
-    vendorId: string,
-    paload: VendorVerificationUpdateDTO,
-  ): Promise<void>;
+  updateVendorVerification(vendorId: string, paload: VendorVerificationUpdateDTO): Promise<void>;
 
-  getVendors(
-    page: number,
-    limit: number,
-    search: string,
-  ): Promise<PaginatedData<UserResponseDTO>>;
+  getVendors(page: number, limit: number, search: string): Promise<PaginatedData<UserResponseDTO>>;
 
-  updateVendorAccess(
-    id: string,
-    block: boolean,
-    reason?: string,
-    token?: string,
-  ): Promise<void>;
+  updateVendorAccess(id: string, block: boolean, reason?: string, token?: string): Promise<void>;
 }

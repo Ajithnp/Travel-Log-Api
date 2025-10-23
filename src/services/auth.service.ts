@@ -4,7 +4,6 @@ import { IBcryptUtils } from 'interfaces/common_interfaces/IBcryptUtils';
 import { IAuthService } from '../interfaces/service_interfaces/IAuthService';
 import { ITokenService } from 'interfaces/service_interfaces/ITokenService';
 import { IGoogleService } from 'interfaces/service_interfaces/IGoogleService';
-import logger from '../config/logger';
 import { AppError } from '../errors/AppError';
 import { ERROR_MESSAGES } from '../shared/constants/messages';
 import { HTTP_STATUS } from '../shared/constants/http_status_code';
@@ -65,7 +64,11 @@ export class AuthService implements IAuthService {
     }
 
     if (!user.isEmailVerified) {
-      throw new AppError(ERROR_MESSAGES.VERIFY_YOUR_EMAIL, HTTP_STATUS.BAD_REQUEST, "EMAIL_NOT_VERIFIED");
+      throw new AppError(
+        ERROR_MESSAGES.VERIFY_YOUR_EMAIL,
+        HTTP_STATUS.BAD_REQUEST,
+        'EMAIL_NOT_VERIFIED',
+      );
     }
 
     //Genarate Tokens
@@ -104,8 +107,6 @@ export class AuthService implements IAuthService {
     if (isUserExisting) {
       throw new AppError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS, HTTP_STATUS.BAD_REQUEST);
     }
-
-   
 
     const hashedPassword = await this._passwordBcrypt.hashPassword(password);
 
@@ -186,7 +187,7 @@ export class AuthService implements IAuthService {
     const userData = await this._googleService.getUserInfoFromAccessToken(token, clientId);
 
     // Check if the user already exists in the database
-    let user = await this._userRepository.findOne({ email:userData.email });
+    let user = await this._userRepository.findOne({ email: userData.email });
     if (!user) {
       user = await this._userRepository.create({
         name: userData.name,
@@ -275,7 +276,7 @@ export class AuthService implements IAuthService {
 
     const userDocUpdated = await this._userRepository.findOneAndUpdate(
       { email },
-      { password: newHashedPassword }
+      { password: newHashedPassword },
     );
 
     if (!userDocUpdated) {
@@ -286,22 +287,17 @@ export class AuthService implements IAuthService {
   //=======================================================================================
   async refreshAccessToken(payload: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO> {
     const { refreshToken } = payload;
-   
-    
+
     const decoded = this._tokenService.verifyRefreshToken(refreshToken);
     if (!decoded) {
       throw new AppError(ERROR_MESSAGES.AUTH_INVALID_TOKEN, HTTP_STATUS.UNAUTHORIZED);
     }
-   
-    
 
     const accessToken = this._tokenService.generateAccessToken({
       id: decoded.id,
       email: decoded.email,
       role: decoded.role,
     });
-
-    
 
     const response = {
       accessToken,

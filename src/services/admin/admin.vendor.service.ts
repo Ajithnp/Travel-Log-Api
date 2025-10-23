@@ -4,7 +4,7 @@ import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/I
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { IUser } from '../../types/entities/user.entity';
-import { IVendorInfo, IVendorInfoPopulated } from '../../types/entities/vendor.info.entity';
+import { IVendorInfoPopulated } from '../../types/entities/vendor.info.entity';
 import { IVendorInfoResponseDTO } from '../../types/dtos/vendor/vendor.info.response.dtos';
 import { VendorVerificationUpdateDTO } from '../../types/dtos/admin/request.dtos';
 import { AppError } from '../../errors/AppError';
@@ -13,7 +13,6 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { FilterQuery, Types } from 'mongoose';
-import mongoose from 'mongoose';
 import { CustomQueryOptions } from '../../types/common/IQueryOptions';
 import { UserResponseDTO } from '../../types/dtos/admin/response.dtos';
 @injectable()
@@ -29,13 +28,13 @@ export class AdminVendorService implements IAdminVendorService {
     page: number,
     limit: number,
     search?: string,
-    selectedFilter?: string,
+    // selectedFilter?: string,
   ): Promise<PaginatedData<Partial<IVendorInfoResponseDTO>>> {
     const skip = (page - 1) * limit;
     const options: CustomQueryOptions = {
       skip,
       limit,
-      sort:{createdAt: - 1 as const}
+      sort: { createdAt: -1 as const },
     };
     const query: FilterQuery<IUser> = { status: VENDOR_VERIFICATION_STATUS.PENDING };
 
@@ -53,7 +52,7 @@ export class AdminVendorService implements IAdminVendorService {
     const vendorData: IVendorInfoResponseDTO[] = vendorsDocs.map((vendor) => {
       const user = vendor.userId as IUser;
       return {
-        id:(vendor as IVendorInfoPopulated & { _id: string | Types.ObjectId })._id.toString(),
+        id: (vendor as IVendorInfoPopulated & { _id: string | Types.ObjectId })._id.toString(),
         profileLogo: vendor.profileLogo.url,
         isProfileVerified: vendor.isProfileVerified,
         contactPersonName: vendor.contactPersonName,
@@ -84,7 +83,6 @@ export class AdminVendorService implements IAdminVendorService {
     vendorId: string,
     payload: VendorVerificationUpdateDTO,
   ): Promise<void> {
-
     if (payload.status === VENDOR_VERIFICATION_STATUS.REJECTED && !payload.reasonForReject) {
       throw new AppError(ERROR_MESSAGES.REASON_REQUIRED, HTTP_STATUS.BAD_REQUEST);
     }
@@ -94,7 +92,8 @@ export class AdminVendorService implements IAdminVendorService {
       {
         status: payload.status,
         isProfileVerified: true,
-        reasonForReject: payload.status === VENDOR_VERIFICATION_STATUS.REJECTED ? payload.reasonForReject : null,
+        reasonForReject:
+          payload.status === VENDOR_VERIFICATION_STATUS.REJECTED ? payload.reasonForReject : null,
       },
       { new: true },
     );
@@ -126,8 +125,7 @@ export class AdminVendorService implements IAdminVendorService {
       currentPage: page,
       totalPages: Math.ceil(totalDocs / limit),
       totalDocs,
-
-    }
+    };
 
     return response;
   }
@@ -136,9 +134,8 @@ export class AdminVendorService implements IAdminVendorService {
     id: string,
     block: boolean,
     reason?: string,
-    accessToken?: string,
+    // accessToken?: string,
   ): Promise<void> {
-    
     const vendorDoc = await this._userRepository.findById(id);
 
     if (!vendorDoc) {

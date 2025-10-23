@@ -24,7 +24,7 @@ export const config = {
 
   nodeMailer: {
     EMAIL_HOST: requireEnv('EMAIL_USER'),
-    EMAIL_PASSWORD: requireEnv('EMAIL_PASSWORD')
+    EMAIL_PASSWORD: requireEnv('EMAIL_PASSWORD'),
   },
 
   jwt: {
@@ -47,7 +47,7 @@ export const config = {
     AWS_BUCKET_NAME: requireEnv('AWS_BUCKET_NAME'),
     AWS_REGION: requireEnv('AWS_REGION'),
     AWS_ACCESS_KEY_ID: requireEnv('AWS_ACCESS_KEY_ID'),
-    AWS_SECRET_ACCESS_KEY: requireEnv('AWS_SECRET_ACCESS_KEY')
+    AWS_SECRET_ACCESS_KEY: requireEnv('AWS_SECRET_ACCESS_KEY'),
   },
 
   redis: {
@@ -60,5 +60,5 @@ export const config = {
   password: {
     SALT_ROUNDS: requireEnv('BCRYPT_SALT_ROUNDS'),
     PASSWORD_HASH_SECRET: requireEnv('PASSWORD_HASH_SECRET'),
-  }
+  },
 };

@@ -4,7 +4,6 @@ import { config } from '../config/env';
 import { injectable } from 'tsyringe';
 import { JWT_TOKEN } from '../shared/constants/jwt.token';
 
-
 @injectable()
 export class TokenService implements ITokenService {
   private _accessSecret: string;
@@ -35,7 +34,7 @@ export class TokenService implements ITokenService {
     }
   }
 
-  verifyRefreshToken(token: string): ITokenPayload | null{
+  verifyRefreshToken(token: string): ITokenPayload | null {
     try {
       const decoded = jwt.verify(token, this._refreshSecret);
 
@@ -55,6 +54,6 @@ export class TokenService implements ITokenService {
       return decodedToken as ITokenPayload;
     } catch (error) {
       return null;
-    };
-  };
+    }
+  }
 }

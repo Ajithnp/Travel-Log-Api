@@ -3,7 +3,7 @@ export interface ICacheService {
 
   set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>;
 
-  exists(key: string):Promise<number>
+  exists(key: string): Promise<number>;
 
   del(key: string): Promise<void>;
 

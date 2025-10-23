@@ -19,6 +19,7 @@ export const SUCCESS_MESSAGES = {
   VENDOR_VERIFICATION_REJECTED: 'Vendor verification rejected successfull',
   VERIFICATION_FORM_UPLOAD_SUCCESSFULLY: 'Verification form upload successfully',
   EMAIL_UPDATED: 'Email updated Successfully',
+  PROFILE_UPDATED: 'Profile updated successfully',
 } as const;
 
 export const ERROR_MESSAGES = {

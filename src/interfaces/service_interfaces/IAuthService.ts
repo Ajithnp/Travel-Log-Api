@@ -1,5 +1,3 @@
-import { IAuthResponseDTO } from 'types/dtos/auth/auth.response.dtos';
-import { IRegisterUserDTO } from 'types/dtos/auth/register.user.dtos';
 import {
   LoginRequestDTO,
   SignupRequestDTO,

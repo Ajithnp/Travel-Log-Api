@@ -10,7 +10,6 @@ import { AppError } from '../../errors/AppError';
 import { IAuthResponseDTO } from '../../types/dtos/auth/auth.response.dtos';
 import { JWT_TOKEN } from '../../shared/constants/jwt.token';
 import { IOtpService } from 'interfaces/service_interfaces/IOtpService';
-import logger from '../../config/logger';
 import {
   LoginResponseDTO,
   SignupResponseDTO,
@@ -226,14 +225,14 @@ export class AuthController implements IAuthController {
 
   async refreshAccessToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
-    
+
     if (!refreshToken) {
       throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
     }
-   
+
     try {
-      const { accessToken } = await this._authService.refreshAccessToken({refreshToken});
-     
+      const { accessToken } = await this._authService.refreshAccessToken({ refreshToken });
+
       clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
       setAuthCookies(
         res,

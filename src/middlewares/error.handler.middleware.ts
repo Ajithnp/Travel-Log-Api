@@ -27,15 +27,17 @@ export const errorMiddleware = (
     errorCode = err?.error_code;
   }
 
-  const response:IApiResponse = {
+  const response: IApiResponse = {
     success: SUCCESS_STATUS.FAILURE,
     message,
-    error: errorCode ? {
-      code: errorCode
-    } : {
-      code: "UNKNOWN_ERROR"
-    }
-  }
+    error: errorCode
+      ? {
+          code: errorCode,
+        }
+      : {
+          code: 'UNKNOWN_ERROR',
+        },
+  };
 
   res.status(statusCode).json(response);
 };
