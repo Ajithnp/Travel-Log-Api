@@ -11,11 +11,17 @@ import { IUserController } from '../interfaces/controller_interfaces/user/IUserC
 import { UserController } from '../controllers/user/user.controller';
 import { IUserProfileController } from '../interfaces/controller_interfaces/user/IUserProfileController';
 import { UserProfileController } from '../controllers/user/user.profile.controller';
+import { IS3Controller } from '../interfaces/controller_interfaces/IS3Controller';
+import { S3Controller } from '../controllers/s3.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
       useClass: AuthController,
+    });
+
+    container.register<IS3Controller>('IS3Controller', {
+      useClass: S3Controller,
     });
     //vendor controllers
     container.register<IVendorController>('IVendorController', {

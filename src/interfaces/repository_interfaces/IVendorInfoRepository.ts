@@ -1,13 +1,30 @@
-import { IVendorInfo, IVendorInfoPopulated } from '../../types/entities/vendor.info.entity';
+import {
+  IVendorInfo,
+  IVendorInfoWithUser,
+  IVendorInfoPopulated,
+} from '../../types/entities/vendor.info.entity';
 import { IBaseRepository } from './IBaseRepository';
 import { FilterQuery } from 'mongoose';
 import { CustomQueryOptions } from '../../types/common/IQueryOptions';
-
+import { IUser } from '../../types/entities/user.entity';
 export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
-  findVendorWithUser(userId: string): Promise<IVendorInfoPopulated | null>;
+  findVendorWithUserId(userId: string): Promise<IVendorInfoPopulated | null>;
+
+  findVendors(
+    vendorSearchQuery: FilterQuery<IUser>,
+    vendorFilter: FilterQuery<IUser>,
+    options?: CustomQueryOptions,
+  ): Promise<IVendorInfoWithUser[]>;
+
+  countVendorDocuments(
+    vendorSearchQuery?: FilterQuery<IUser>,
+    vendorFilter?: FilterQuery<IVendorInfo>,
+    matchQuery?: FilterQuery<IVendorInfo>,
+  ): Promise<number>;
 
   findVendorsVerificationDetails(
-    filter?: FilterQuery<IVendorInfo>,
+    vendorSearchQuery?: FilterQuery<IUser>,
+    vendorFilter?: FilterQuery<IVendorInfo>,
     options?: CustomQueryOptions,
-  ): Promise<IVendorInfoPopulated[]>;
+  ): Promise<IVendorInfoWithUser[]>;
 }

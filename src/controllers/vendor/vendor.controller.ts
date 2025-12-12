@@ -8,13 +8,13 @@ import {
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
-import { getFile } from '../../shared/utils/multer.helper';
 import { IVendorService } from '../../interfaces/service_interfaces/vendor/IVendorService';
 import { IApiResponse } from 'types/common/IApiResponse';
 import { SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
+import { hasFile, UploadedFile } from '../../shared/utils/file.validate.helper';
 @injectable()
 export class VendorController implements IVendorController {
   constructor(
@@ -41,36 +41,61 @@ export class VendorController implements IVendorController {
       next(error);
     }
   }
-  //=====================================================================================
-  async vendorVerificationSubmit(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const parsed = VendorVerificationSchema.safeParse(req.body);
-    if (!parsed.success) {
-      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST);
+  //====================================================================================
+  async updateProfileLogo(req: Request, res: Response, next: NextFunction) {
+    
+    if (!req.user || !req.user.id) {
+      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED)
+    };
+
+    const updateProfileLogoPayload = req.body;
+    const { files }: { files: UploadedFile[] } = updateProfileLogoPayload;
+
+    if (!hasFile(files, 'profileLogo')) {
+          throw new AppError(
+        ERROR_MESSAGES.MISSING_REQUIRED_FIELDS_FOR_VERIFICATION,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
+    
+    try {
+      await this._vendorService.updateProfileLogo(req.user.id,updateProfileLogoPayload);
+
+      const successResponse: IApiResponse<VendorProfileResponseDTO> = {
+        success: SUCCESS_STATUS.SUCCESS,
+        message: SUCCESS_MESSAGES.OK,
+      };
+      res.status(HTTP_STATUS.OK).json(successResponse);
+    } catch (error) {
+      next(error)
     }
 
-    const files = {
-      businessLicence: getFile(req, 'businessLicence'),
-      businessPan: getFile(req, 'businessPan'),
-      companyLogo: getFile(req, 'companyLogo'),
-      ownerIdentity: getFile(req, 'ownerIdentityProof'),
-    };
+  }
+  //=====================================================================================
+  async vendorVerificationSubmit(req: Request, res: Response, next: NextFunction): Promise<void> {
 
     if (!req.user || !req.user.id) {
       throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
     }
 
-    const textData: VendorVerificationDTO = parsed.data;
-    if (!files.businessLicence || !files.businessPan || !files.companyLogo) {
+    const vendorVerificationPayload = req.body;
+    const { files }: { files: UploadedFile[] } = vendorVerificationPayload;
+
+    if (
+      !hasFile(files, 'businessLicence') ||
+      !hasFile(files, 'businessPan') ||
+      !hasFile(files, 'companyLogo')
+    ) {
       throw new AppError(
         ERROR_MESSAGES.MISSING_REQUIRED_FIELDS_FOR_VERIFICATION,
         HTTP_STATUS.BAD_REQUEST,
       );
     }
     try {
+
       const result = await this._vendorService.vendorVerificationSubmit(
         req.user.id,
-        textData,
-        files,
+        vendorVerificationPayload,
       );
 
       const successResponse: IApiResponse<IVendorVerificationResponseDTO> = {

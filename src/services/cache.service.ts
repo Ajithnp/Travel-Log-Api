@@ -3,7 +3,7 @@ import { injectable } from 'tsyringe';
 import redisClient from '../config/redis.config';
 
 @injectable()
-export class CacheService implements ICacheService {
+export class RedisService implements ICacheService {
   private readonly _redisClient = redisClient;
 
   async get<T>(key: string): Promise<T | null> {

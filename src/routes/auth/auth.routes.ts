@@ -1,6 +1,6 @@
 import { inject, injectable } from 'tsyringe';
 import { IAuthController } from 'interfaces/controller_interfaces/IAuthController';
-import { BaseRoute } from '../base.routes';
+import BaseRoute from '../base.route';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import {
   SignupSchema,
@@ -72,7 +72,7 @@ export class AuthRoutes extends BaseRoute {
       this._authController.changePassword.bind(this._authController),
     );
 
-    this.router.post(
+    this._router.post(
       '/refresh-token',
       this._authController.refreshAccessToken.bind(this._authController),
     );

@@ -1,9 +1,11 @@
 export interface VendorProfileResponseDTO {
   id: string;
+  userId?: string;
   profileLogo: string | null;
   name: string;
   email: string;
   phone: string;
+  role: string;
   businessAddress: string | null;
   contactPersonName: string | null;
   status: 'Pending' | 'Approved' | 'Rejected' | 'NotSubmitted';

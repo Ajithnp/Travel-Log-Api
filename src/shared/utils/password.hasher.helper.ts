@@ -15,15 +15,11 @@ export class BcryptUtils implements IBcryptUtils {
 
   async hashPassword(password: string): Promise<string> {
     const passwordWithKey = password + this.secretKey;
-    console.log('password key, hash ', passwordWithKey);
     return await bcrypt.hash(passwordWithKey, this.saltRounds);
   }
 
   async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
-    console.log('🔑 Secret key:', JSON.stringify(this.secretKey));
-
     const passwordWithKey = password + this.secretKey;
-    console.log('password key, compare', passwordWithKey);
 
     return await bcrypt.compare(passwordWithKey, hashedPassword);
   }

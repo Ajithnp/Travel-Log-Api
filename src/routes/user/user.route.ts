@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe';
-import { BaseRoute } from '../../routes/base.routes';
+import BaseRoute from '../base.route';
 import { IUserController } from '../../interfaces/controller_interfaces/user/IUserController';
 import { IUserProfileController } from '../../interfaces/controller_interfaces/user/IUserProfileController';
 import { isAuthenticated } from '../../middlewares/auth.middleware';
@@ -39,7 +39,7 @@ export class UserRoutes extends BaseRoute {
       '/me/edit',
       validateDTO(UpdateProfileSchema),
       isAuthenticated,
-      authorize([USER_ROLES.USER]),
+      authorize([USER_ROLES.USER, USER_ROLES.VENDOR]),
       this._userProfileController.updateProfile.bind(this._userProfileController),
     );
 
@@ -47,7 +47,7 @@ export class UserRoutes extends BaseRoute {
       '/me/change-email',
       validateDTO(UpdateEmailRequestSchema),
       isAuthenticated,
-      authorize([USER_ROLES.USER]),
+      authorize([USER_ROLES.USER, USER_ROLES.VENDOR]),
       this._userProfileController.updateEmailRequest.bind(this._userProfileController),
     );
 
@@ -55,7 +55,7 @@ export class UserRoutes extends BaseRoute {
       '/me/email',
       validateDTO(UpdateEmailSchema),
       isAuthenticated,
-      authorize([USER_ROLES.USER]),
+      authorize([USER_ROLES.USER, USER_ROLES.VENDOR]),
       this._userProfileController.updateEmail.bind(this._userProfileController),
     );
 
@@ -63,7 +63,7 @@ export class UserRoutes extends BaseRoute {
       '/me/password',
       validateDTO(ResetPasswordSchema),
       isAuthenticated,
-      authorize([USER_ROLES.USER]),
+      authorize([USER_ROLES.USER, USER_ROLES.VENDOR]),
       this._userProfileController.resetPassword.bind(this._userProfileController),
     );
   }

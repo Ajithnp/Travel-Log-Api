@@ -14,11 +14,15 @@ import { AdminVendorService } from '../services/admin/admin.vendor.service';
 import { IVendorService } from '../interfaces/service_interfaces/vendor/IVendorService';
 import { VendorService } from '../services/vendor/vendor.service';
 import { ICacheService } from '../interfaces/service_interfaces/ICacheService';
-import { CacheService } from '../services/cache.service';
+import { RedisService } from '../services/cache.service';
 import { IUserService } from '../interfaces/service_interfaces/user/IUserService';
 import { UserService } from '../services/user/user.service';
 import { ITokenBlackListService } from '../interfaces/service_interfaces/ITokenBlacklistService';
 import { TokenBlackListService } from '../services/token.blacklist.service';
+import { IFileStorageService } from '../interfaces/service_interfaces/IStorageService';
+import { S3Service } from '../services/s3.service';
+import { IFileStorageHandlerService } from '../interfaces/service_interfaces/IFileStorageBusinessService';
+import { FileStorageHandlerService } from '../services/file.storage.handler.service';
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -42,8 +46,17 @@ export class ServiceRegistry {
     });
 
     container.register<ICacheService>('ICacheService', {
-      useClass: CacheService,
+      useClass: RedisService,
     });
+
+    container.register<IFileStorageService>('IFileStorageService', {
+      useClass: S3Service,
+    });
+
+    container.register<IFileStorageHandlerService>('IFileStorageHandlerService', {
+      useClass: FileStorageHandlerService,
+    });
+
     //vendor-services
     container.register<IVendorService>('IVendorService', {
       useClass: VendorService,

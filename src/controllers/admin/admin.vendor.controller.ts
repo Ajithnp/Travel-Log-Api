@@ -75,10 +75,9 @@ export class AdminVendorController implements IAdminVendorController {
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
 
     try {
-      const vendors = await this._adminUserService.fetchUsers(
+      const vendors = await this._adminVendorService.getVendors(
         page,
         limit,
-        USER_ROLES.VENDOR,
         search,
         selectedFilter,
       );

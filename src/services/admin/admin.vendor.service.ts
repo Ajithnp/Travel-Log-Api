@@ -4,13 +4,12 @@ import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/I
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { IUser } from '../../types/entities/user.entity';
-import { IVendorInfoPopulated } from '../../types/entities/vendor.info.entity';
+import { IVendorInfo, IVendorInfoWithUser } from '../../types/entities/vendor.info.entity';
 import { IVendorInfoResponseDTO } from '../../types/dtos/vendor/vendor.info.response.dtos';
 import { VendorVerificationUpdateDTO } from '../../types/dtos/admin/request.dtos';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
-import { USER_ROLES } from '../../shared/constants/roles';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { FilterQuery, Types } from 'mongoose';
 import { CustomQueryOptions } from '../../types/common/IQueryOptions';
@@ -28,45 +27,49 @@ export class AdminVendorService implements IAdminVendorService {
     page: number,
     limit: number,
     search?: string,
-    // selectedFilter?: string,
+    selectedFilter?: string,
   ): Promise<PaginatedData<Partial<IVendorInfoResponseDTO>>> {
     const skip = (page - 1) * limit;
     const options: CustomQueryOptions = {
       skip,
       limit,
-      sort: { createdAt: -1 as const },
+      sort: { createdAt: -1 },
     };
-    const query: FilterQuery<IUser> = { status: VENDOR_VERIFICATION_STATUS.PENDING };
 
-    if (search && search.trim() !== '') {
-      query.name = { $regex: search, $options: 'i' };
-    }
+    const userSearchQuery: FilterQuery<IUser> = search
+      ? { 'user.name': { $regex: search, $options: 'i' } }
+      : {};
 
-    const vendorsDocs = await this._vendorInfoRepository.findVendorsVerificationDetails(
-      query,
-      options,
-    );
+    const vendorFilter: FilterQuery<IVendorInfo> = selectedFilter ? { status: selectedFilter } : {};
 
-    const totalDocs = await this._vendorInfoRepository.countDocuments(query);
+    const [vendorsDocs, totalDocs] = await Promise.all([
+      this._vendorInfoRepository.findVendorsVerificationDetails(
+        userSearchQuery,
+        vendorFilter,
+        options,
+      ),
+      this._vendorInfoRepository.countVendorDocuments(userSearchQuery, vendorFilter),
+    ]);
 
     const vendorData: IVendorInfoResponseDTO[] = vendorsDocs.map((vendor) => {
-      const user = vendor.userId as IUser;
+      const user = vendor.user as IUser;
       return {
-        id: (vendor as IVendorInfoPopulated & { _id: string | Types.ObjectId })._id.toString(),
-        profileLogo: vendor.profileLogo.url,
+        id: (vendor._id as Types.ObjectId).toString(),
+        profileLogo: vendor.profileLogo?.key ?? '',
         isProfileVerified: vendor.isProfileVerified,
         contactPersonName: vendor.contactPersonName,
         businessAddress: vendor.businessAddress,
-        businessLicence: vendor.businessLicence.url,
-        ownerIdentity: vendor.ownerIdentity.url,
+        businessLicence: vendor.businessLicence?.key ?? '',
+        ownerIdentity: vendor.ownerIdentity?.key ?? '',
         GSTIN: vendor.GSTIN,
         status: vendor.status,
-        businessPan: vendor.businessPan.url,
-        userId: (user as IUser & { _id: string | Types.ObjectId })._id.toString(),
+        businessPan: vendor.businessPan?.key ?? '',
+        userId: (user._id as Types.ObjectId).toString(),
         name: user.name,
         email: user.email,
         phone: user.phone,
-        createdAt: user.createdAt.toLocaleDateString(),
+        reasonForReject: vendor.reasonForReject ? vendor.reasonForReject : '',
+        createdAt: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
       };
     });
 
@@ -103,21 +106,41 @@ export class AdminVendorService implements IAdminVendorService {
     }
   }
   //================================================================================
-  async getVendors(page: number, limit: number): Promise<PaginatedData<UserResponseDTO>> {
+  async getVendors(
+    page: number,
+    limit: number,
+    search?: string,
+    selectedFilter?: string,
+  ): Promise<PaginatedData<UserResponseDTO>> {
     const skip = (page - 1) * limit;
-    const query = { role: USER_ROLES.VENDOR };
-    const options = { skip, limit };
+    const options: CustomQueryOptions = {
+      skip,
+      limit,
+      sort: { createdAt: -1 },
+    };
 
-    const vendorsDocs = await this._userRepository.findAll(query, options);
-    const totalDocs = await this._userRepository.countDocuments(query);
+    const vendorSearchQuery: FilterQuery<IUser> = search
+      ? { 'user.name': { $regex: search, $options: 'i' } }
+      : {};
 
-    const vendorData: UserResponseDTO[] = vendorsDocs.map((user) => ({
-      id: (user._id as Types.ObjectId).toString(),
-      name: user.name,
-      phone: user.phone,
-      email: user.email,
-      isBlocked: user.isBlocked,
-      createdAt: user.createdAt.toDateString(),
+    const vendorFilter: FilterQuery<IUser> = {};
+    if (selectedFilter === 'active') vendorFilter['user.isBlocked'] = false;
+    if (selectedFilter === 'blocked') vendorFilter['user.isBlocked'] = true;
+
+    const matchQuery: FilterQuery<IVendorInfo> = { isProfileVerified: true };
+
+    const [vendorsDocs, totalDocs] = await Promise.all([
+      this._vendorInfoRepository.findVendors(vendorSearchQuery, vendorFilter, options),
+      this._vendorInfoRepository.countVendorDocuments(vendorSearchQuery, vendorFilter, matchQuery),
+    ]);
+
+    const vendorData: UserResponseDTO[] = vendorsDocs.map((vendor) => ({
+      id: (vendor.user._id as Types.ObjectId).toString(),
+      name: vendor.user.name,
+      phone: vendor.user.phone,
+      email: vendor.user.email,
+      isBlocked: vendor.user.isBlocked,
+      createdAt: vendor.user.createdAt.toDateString(),
     }));
 
     const response = {

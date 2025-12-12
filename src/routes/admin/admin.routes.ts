@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe';
-import { BaseRoute } from '../../routes/base.routes';
+import BaseRoute from '../base.route';
 import { IAdminUserController } from '../../interfaces/controller_interfaces/admin/IAdminUserController';
 import { IAdminVendorController } from '../../interfaces/controller_interfaces/admin/IAdminVendorController';
 import { isAuthenticated } from '../../middlewares/auth.middleware';
@@ -26,7 +26,7 @@ export class AdminRoutes extends BaseRoute {
       this._adminUserContoller.getAllUsers.bind(this._adminUserContoller),
     );
 
-    this.router.patch(
+    this._router.patch(
       '/users/:userId/status',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
@@ -36,14 +36,14 @@ export class AdminRoutes extends BaseRoute {
 
     //========== vendor management ==================
 
-    this.router.get(
+    this._router.get(
       '/vendor/verification-requests',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       this._adminVendorController.vendorVerificationRequest.bind(this._adminVendorController),
     );
 
-    this.router.patch(
+    this._router.patch(
       '/update-vendor-verification/:vendorId',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
@@ -57,7 +57,7 @@ export class AdminRoutes extends BaseRoute {
       this._adminVendorController.getVendors.bind(this._adminVendorController),
     );
 
-    this.router.patch(
+    this._router.patch(
       '/vendors/:vendorId/status',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),

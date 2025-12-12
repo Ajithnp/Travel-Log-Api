@@ -2,8 +2,8 @@ import { Document, Types } from 'mongoose';
 import { IUser } from './user.entity';
 
 export interface IFiles {
-  url: string;
-  publicId: string;
+  key: string;
+  fieldName: string;
 }
 
 export interface IVendorInfo extends Document {
@@ -24,4 +24,8 @@ export interface IVendorInfo extends Document {
 
 export interface IVendorInfoPopulated extends Omit<IVendorInfo, 'userId'> {
   userId: IUser;
+}
+
+export interface IVendorInfoWithUser extends IVendorInfo {
+  user: IUser;
 }
