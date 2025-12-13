@@ -184,11 +184,16 @@ export class AuthService implements IAuthService {
     payload: GoogleAuthRequestDTO,
   ): Promise<AuthResultDTO<GoogleAuthResponseDTO>> {
     const { token, clientId } = payload;
+    
+    let isNewUser = false;
+
     const userData = await this._googleService.getUserInfoFromAccessToken(token, clientId);
 
     // Check if the user already exists in the database
     let user = await this._userRepository.findOne({ email: userData.email });
     if (!user) {
+      isNewUser = true;
+      
       user = await this._userRepository.create({
         name: userData.name,
         email: userData.email,
@@ -217,6 +222,7 @@ export class AuthService implements IAuthService {
     const response = {
       accessToken,
       refreshToken,
+      isNewUser,
       user: {
         name: user.name,
         email: user.email,

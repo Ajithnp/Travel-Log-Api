@@ -42,6 +42,7 @@ export interface ForgotPasswordResponseDTO extends SendOtpResponseDTO {
 
 export interface AuthResultDTO<T> extends TokenResponseDTO {
   user: T;
+  isNewUser?: boolean;
 }
 
 export interface RefreshTokenResponseDTO {

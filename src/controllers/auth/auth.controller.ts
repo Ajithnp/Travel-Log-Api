@@ -1,3 +1,4 @@
+import asyncHandler from "express-async-handler";
 import { NextFunction, Request, Response } from 'express';
 import { IAuthController } from 'interfaces/controller_interfaces/IAuthController';
 import { inject, injectable } from 'tsyringe';
@@ -28,23 +29,25 @@ export class AuthController implements IAuthController {
     private _otpService: IOtpService,
   ) {}
 
-  async loginUser(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const loginPayload = req.body;
+    loginUser = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const loginPayload = req.body;
 
-    try {
-      const { user, accessToken, refreshToken } = await this._authService.loginUser(loginPayload);
+      const { user, accessToken, refreshToken } =
+        await this._authService.loginUser(loginPayload);
 
       setAuthCookies(
         res,
         JWT_TOKEN.ACCESS_TOKEN,
         accessToken,
-        JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY,
+        JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY
       );
+
       setAuthCookies(
         res,
         JWT_TOKEN.REFRESH_TOKEN,
         refreshToken,
-        JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY,
+        JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY
       );
 
       const successResponse: IApiResponse<LoginResponseDTO> = {
@@ -52,18 +55,17 @@ export class AuthController implements IAuthController {
         message: SUCCESS_MESSAGES.LOGIN_SUCCESSFUL,
         data: user,
       };
+
       res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
     }
-  }
+  );
 
   //===================================================================================
 
-  async registerUser(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const registerPayload = req.body;
+  registerUser = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const registerPayload = req.body;
 
-    try {
       const user = await this._authService.registerUser(registerPayload);
 
       const successResponse: IApiResponse<SignupResponseDTO> = {
@@ -71,192 +73,185 @@ export class AuthController implements IAuthController {
         message: SUCCESS_MESSAGES.REGISTRATION_SUCCESSFUL,
         data: user,
       };
+
       res.status(HTTP_STATUS.CREATED).json(successResponse);
-    } catch (error) {
-      next(error);
     }
-  }
+  );
+
   //===============================================================================
 
-  async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+verifyEmail = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const verificationPayload = req.body;
 
-    try {
-      const { user, accessToken, refreshToken } =
-        await this._authService.emailVerify(verificationPayload);
+    const { user, accessToken, refreshToken } =
+      await this._authService.emailVerify(verificationPayload);
 
-      setAuthCookies(
-        res,
-        JWT_TOKEN.ACCESS_TOKEN,
-        accessToken,
-        JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY,
-      );
+    setAuthCookies(
+      res,
+      JWT_TOKEN.ACCESS_TOKEN,
+      accessToken,
+      JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY
+    );
 
-      setAuthCookies(
-        res,
-        JWT_TOKEN.REFRESH_TOKEN,
-        refreshToken,
-        JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY,
-      );
+    setAuthCookies(
+      res,
+      JWT_TOKEN.REFRESH_TOKEN,
+      refreshToken,
+      JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY
+    );
 
-      const successResponse: IApiResponse<VerifyEmailResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.EMAIL_VERIFIED,
-        data: user,
-      };
+    const successResponse: IApiResponse<VerifyEmailResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.EMAIL_VERIFIED,
+      data: user,
+    };
 
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
+    res.status(HTTP_STATUS.OK).json(successResponse);
   }
+);
   //==========================================================================================
 
-  async resendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
+resendOtp = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const { email } = req.body;
-    try {
-      const otpData = await this._otpService.sendOtp(email);
 
-      const successResponse: IApiResponse<SendOtpResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.RESEND_OTP_SUCCESS,
-        data: otpData,
-      };
+    const otpData = await this._otpService.sendOtp(email);
 
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
+    const successResponse: IApiResponse<SendOtpResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.RESEND_OTP_SUCCESS,
+      data: otpData,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
   }
+);
 
   //===============================================================================================
 
-  async googleAuthCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const GoogleAuthPayload = req.body;
+googleAuthCallback = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const googleAuthPayload = req.body;
 
-    try {
-      const { user, accessToken, refreshToken } =
-        await this._authService.googleAuthentication(GoogleAuthPayload);
+    const { user, accessToken, refreshToken, isNewUser } =
+      await this._authService.googleAuthentication(googleAuthPayload);
 
-      // setting cookies
-      setAuthCookies(
-        res,
-        JWT_TOKEN.ACCESS_TOKEN,
-        accessToken,
-        JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY,
-      );
+    // setting cookies
+    setAuthCookies(
+      res,
+      JWT_TOKEN.ACCESS_TOKEN,
+      accessToken,
+      JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY
+    );
 
-      setAuthCookies(
-        res,
-        JWT_TOKEN.REFRESH_TOKEN,
-        refreshToken,
-        JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY,
-      );
+    setAuthCookies(
+      res,
+      JWT_TOKEN.REFRESH_TOKEN,
+      refreshToken,
+      JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY
+    );
 
-      const successResponse: IApiResponse<GoogleAuthResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.LOGIN_SUCCESSFUL,
-        data: user,
-      };
+    const successResponse: IApiResponse<GoogleAuthResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.LOGIN_SUCCESSFUL,
+      data: user,
+    };
 
-      res.status(HTTP_STATUS.CREATED).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
+    res.status(isNewUser ? HTTP_STATUS.CREATED : HTTP_STATUS.OK).json(successResponse);
   }
+);
 
   //=====================================================================================
-  async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+forgotPassword = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const forgotPasswordPayload = req.body;
-    try {
-      const user = await this._authService.forgotPassword(forgotPasswordPayload);
 
-      const successResponse: IApiResponse<ForgotPasswordResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.EMAIL_VERIFIED,
-        data: user,
-      };
+    const user =
+      await this._authService.forgotPassword(forgotPasswordPayload);
 
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
+    const successResponse: IApiResponse<ForgotPasswordResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OTP_SEND,
+      data: user,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
   }
+);
 
   //========================================================================================
 
-  async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
+verifyOtp = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const verifyOtpPayload = req.body;
 
-    try {
-      await this._otpService.verifyOtp(verifyOtpPayload);
+    await this._otpService.verifyOtp(verifyOtpPayload);
 
-      const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.OTP_VERIFIED,
-      };
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OTP_VERIFIED,
+    };
 
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
+    res.status(HTTP_STATUS.OK).json(successResponse);
   }
+)
 
   //========================================================================================
 
-  async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+changePassword = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const passwordChangePayload = req.body;
 
-    try {
-      await this._authService.changePassword(passwordChangePayload);
+    await this._authService.changePassword(passwordChangePayload);
 
-      const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.PASSWORD_UPDATED_SUCCESSFULLY,
-      };
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.PASSWORD_UPDATED_SUCCESSFULLY,
+    };
 
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
+    res.status(HTTP_STATUS.OK).json(successResponse);
   }
+);
 
   //======================================================================================
 
-  async refreshAccessToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+refreshAccessToken = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
 
     if (!refreshToken) {
-      throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
-    }
-
-    try {
-      const { accessToken } = await this._authService.refreshAccessToken({ refreshToken });
-
-      clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
-      setAuthCookies(
-        res,
-        JWT_TOKEN.ACCESS_TOKEN,
-        accessToken,
-        JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY,
+      throw new AppError(
+        ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED,
+        HTTP_STATUS.UNAUTHORIZED
       );
-
-      // const cookies = res.getHeader("Set-Cookie") as string | string[] | undefined;
-      const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.TOKEN_REFRESHED,
-      };
-
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
     }
+
+    const { accessToken } = await this._authService.refreshAccessToken({ refreshToken });
+
+    // Replace old access token cookie
+    clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
+    setAuthCookies(
+      res,
+      JWT_TOKEN.ACCESS_TOKEN,
+      accessToken,
+      JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY
+    );
+
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.TOKEN_REFRESHED,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
   }
+);
   //=====================================================================================
-  async logout(req: Request, res: Response) {
+logout = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
     clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
-    //   const cookies = res.getHeader("Set-Cookie") as string | string[] | undefined;
+
     const successResponse: IApiResponse<Partial<IAuthResponseDTO>> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.LOGOUT_SUCCESS,
@@ -264,4 +259,5 @@ export class AuthController implements IAuthController {
 
     res.status(HTTP_STATUS.OK).json(successResponse);
   }
+)
 }
