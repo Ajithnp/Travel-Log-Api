@@ -1,3 +1,4 @@
+import asyncHandler from "express-async-handler";
 import { inject, injectable } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { IUserController } from '../../interfaces/controller_interfaces/user/IUserController';
@@ -16,22 +17,25 @@ export class UserController implements IUserController {
     private _userService: IUserService,
   ) {}
 
-  async profile(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      if (!req.user || req.user.role !== USER_ROLES.USER) {
-        throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
-      }
-      const doc = await this._userService.profile(req.user.id);
-
-      const successResponse: IApiResponse<UserProfileResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.OK,
-        data: doc,
-      };
-
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
+profile = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) {
+      throw new AppError(
+        ERROR_MESSAGES.UNAUTHORIZED_ACCESS,
+        HTTP_STATUS.UNAUTHORIZED
+      );
     }
+
+    const doc = await this._userService.profile(req.user.id);
+
+    const successResponse: IApiResponse<UserProfileResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: doc,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
   }
+  );
+  
 }
