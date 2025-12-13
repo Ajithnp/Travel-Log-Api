@@ -8,7 +8,7 @@ export default abstract class BaseRoute {
   }
 
   // Abstract method to initialize routes
-  protected  abstract initializeRoutes(): void;
+  protected abstract initializeRoutes(): void;
 
   // Method to get the router instance
   public get router(): Router {

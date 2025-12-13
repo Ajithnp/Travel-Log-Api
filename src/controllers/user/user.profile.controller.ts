@@ -1,4 +1,4 @@
-import asyncHandler from "express-async-handler";
+import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
 import { Request, Response } from 'express';
 import { IUserService } from '../../interfaces/service_interfaces/user/IUserService';
@@ -22,13 +22,9 @@ export class UserProfileController implements IUserProfileController {
     private _userService: IUserService,
   ) {}
 
-profile = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  profile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     if (!req.user) {
-      throw new AppError(
-        ERROR_MESSAGES.UNAUTHORIZED_ACCESS,
-        HTTP_STATUS.UNAUTHORIZED
-      );
+      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
     }
 
     const doc = await this._userService.profile(req.user.id);
@@ -40,11 +36,9 @@ profile = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
 
-updateProfile = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  updateProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const updateProfileRequestPayload = req.body;
 
     await this._userService.updateProfile({
@@ -52,20 +46,17 @@ updateProfile = asyncHandler(
       email: req.user!.email,
     });
 
-      const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.PROFILE_UPDATED,
-      };
-      res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.PROFILE_UPDATED,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 
- updateEmailRequest = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  updateEmailRequest = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const updateEmailRequestPayload = req.body;
 
-    const updateEmailData =
-      await this._userService.updateEmailRequest(updateEmailRequestPayload);
+    const updateEmailData = await this._userService.updateEmailRequest(updateEmailRequestPayload);
 
     const successResponse: IApiResponse<IUpdateEmailResponseDTO> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -74,18 +65,13 @@ updateProfile = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
 
-updateEmail = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  updateEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
 
     if (!refreshToken) {
-      throw new AppError(
-        ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED,
-        HTTP_STATUS.UNAUTHORIZED
-      );
+      throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
     }
 
     await this._userService.updateEmail({
@@ -99,23 +85,18 @@ updateEmail = asyncHandler(
     clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
     clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
 
-       const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.EMAIL_UPDATED,
-      };
-      res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.EMAIL_UPDATED,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 
-resetPassword = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  resetPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
 
     if (!refreshToken) {
-      throw new AppError(
-        ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED,
-        HTTP_STATUS.UNAUTHORIZED
-      );
+      throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
     }
 
     await this._userService.resetPassword({
@@ -129,10 +110,9 @@ resetPassword = asyncHandler(
     clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
 
     const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.PASSWORD_UPDATED_SUCCESSFULLY,
-      };
-      res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.PASSWORD_UPDATED_SUCCESSFULLY,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 }

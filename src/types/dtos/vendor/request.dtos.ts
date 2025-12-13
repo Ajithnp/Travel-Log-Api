@@ -18,8 +18,6 @@ export const VendorVerificationSchema = z.object({
 });
 export type VendorVerificationRequestDTO = z.infer<typeof VendorVerificationSchema>;
 
-
-
 export const updateProfileLogoSchema = z.object({
   vendorInfoId: z.string().min(1, 'vendor data is required'),
   files: z
@@ -30,6 +28,5 @@ export const updateProfileLogoSchema = z.object({
       }),
     )
     .min(1, 'At least one file must be uploaded'),
-
 });
 export type UpdateProfileLogoRequestDTO = z.infer<typeof updateProfileLogoSchema>;

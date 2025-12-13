@@ -1,6 +1,5 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
 export interface IS3Controller {
-
-  generateUploadURL:RequestHandler;
-  generateDownloadURL:RequestHandler;
+  generateUploadURL: RequestHandler;
+  generateDownloadURL: RequestHandler;
 }

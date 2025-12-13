@@ -1,4 +1,4 @@
-import asyncHandler from "express-async-handler";
+import asyncHandler from 'express-async-handler';
 import { NextFunction, Request, Response } from 'express';
 import { IAuthController } from 'interfaces/controller_interfaces/IAuthController';
 import { inject, injectable } from 'tsyringe';
@@ -29,76 +29,60 @@ export class AuthController implements IAuthController {
     private _otpService: IOtpService,
   ) {}
 
-    loginUser = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
-      const loginPayload = req.body;
+  loginUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const loginPayload = req.body;
 
-      const { user, accessToken, refreshToken } =
-        await this._authService.loginUser(loginPayload);
+    const { user, accessToken, refreshToken } = await this._authService.loginUser(loginPayload);
 
-      setAuthCookies(
-        res,
-        JWT_TOKEN.ACCESS_TOKEN,
-        accessToken,
-        JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY
-      );
-
-      setAuthCookies(
-        res,
-        JWT_TOKEN.REFRESH_TOKEN,
-        refreshToken,
-        JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY
-      );
-
-      const successResponse: IApiResponse<LoginResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.LOGIN_SUCCESSFUL,
-        data: user,
-      };
-
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    }
-  );
-
-  //===================================================================================
-
-  registerUser = asyncHandler(
-    async (req: Request, res: Response): Promise<void> => {
-      const registerPayload = req.body;
-
-      const user = await this._authService.registerUser(registerPayload);
-
-      const successResponse: IApiResponse<SignupResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.REGISTRATION_SUCCESSFUL,
-        data: user,
-      };
-
-      res.status(HTTP_STATUS.CREATED).json(successResponse);
-    }
-  );
-
-  //===============================================================================
-
-verifyEmail = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const verificationPayload = req.body;
-
-    const { user, accessToken, refreshToken } =
-      await this._authService.emailVerify(verificationPayload);
-
-    setAuthCookies(
-      res,
-      JWT_TOKEN.ACCESS_TOKEN,
-      accessToken,
-      JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY
-    );
+    setAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN, accessToken, JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY);
 
     setAuthCookies(
       res,
       JWT_TOKEN.REFRESH_TOKEN,
       refreshToken,
-      JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY
+      JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY,
+    );
+
+    const successResponse: IApiResponse<LoginResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.LOGIN_SUCCESSFUL,
+      data: user,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  //===================================================================================
+
+  registerUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const registerPayload = req.body;
+
+    const user = await this._authService.registerUser(registerPayload);
+
+    const successResponse: IApiResponse<SignupResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.REGISTRATION_SUCCESSFUL,
+      data: user,
+    };
+
+    res.status(HTTP_STATUS.CREATED).json(successResponse);
+  });
+
+  //===============================================================================
+
+  verifyEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const verificationPayload = req.body;
+
+    const { user, accessToken, refreshToken } =
+      await this._authService.emailVerify(verificationPayload);
+
+    setAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN, accessToken, JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY);
+
+    setAuthCookies(
+      res,
+      JWT_TOKEN.REFRESH_TOKEN,
+      refreshToken,
+      JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY,
     );
 
     const successResponse: IApiResponse<VerifyEmailResponseDTO> = {
@@ -108,12 +92,10 @@ verifyEmail = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
   //==========================================================================================
 
-resendOtp = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  resendOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email } = req.body;
 
     const otpData = await this._otpService.sendOtp(email);
@@ -125,31 +107,24 @@ resendOtp = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
 
   //===============================================================================================
 
-googleAuthCallback = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  googleAuthCallback = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const googleAuthPayload = req.body;
 
     const { user, accessToken, refreshToken, isNewUser } =
       await this._authService.googleAuthentication(googleAuthPayload);
 
     // setting cookies
-    setAuthCookies(
-      res,
-      JWT_TOKEN.ACCESS_TOKEN,
-      accessToken,
-      JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY
-    );
+    setAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN, accessToken, JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY);
 
     setAuthCookies(
       res,
       JWT_TOKEN.REFRESH_TOKEN,
       refreshToken,
-      JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY
+      JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY,
     );
 
     const successResponse: IApiResponse<GoogleAuthResponseDTO> = {
@@ -159,16 +134,13 @@ googleAuthCallback = asyncHandler(
     };
 
     res.status(isNewUser ? HTTP_STATUS.CREATED : HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
 
   //=====================================================================================
-forgotPassword = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  forgotPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const forgotPasswordPayload = req.body;
 
-    const user =
-      await this._authService.forgotPassword(forgotPasswordPayload);
+    const user = await this._authService.forgotPassword(forgotPasswordPayload);
 
     const successResponse: IApiResponse<ForgotPasswordResponseDTO> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -177,13 +149,11 @@ forgotPassword = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
 
   //========================================================================================
 
-verifyOtp = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  verifyOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const verifyOtpPayload = req.body;
 
     await this._otpService.verifyOtp(verifyOtpPayload);
@@ -194,13 +164,11 @@ verifyOtp = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-)
+  });
 
   //========================================================================================
 
-changePassword = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const passwordChangePayload = req.body;
 
     await this._authService.changePassword(passwordChangePayload);
@@ -211,32 +179,22 @@ changePassword = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
 
   //======================================================================================
 
-refreshAccessToken = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  refreshAccessToken = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
 
     if (!refreshToken) {
-      throw new AppError(
-        ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED,
-        HTTP_STATUS.UNAUTHORIZED
-      );
+      throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
     }
 
     const { accessToken } = await this._authService.refreshAccessToken({ refreshToken });
 
     // Replace old access token cookie
     clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
-    setAuthCookies(
-      res,
-      JWT_TOKEN.ACCESS_TOKEN,
-      accessToken,
-      JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY
-    );
+    setAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN, accessToken, JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY);
 
     const successResponse: IApiResponse = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -244,11 +202,9 @@ refreshAccessToken = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
   //=====================================================================================
-logout = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
     clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
 
@@ -258,6 +214,5 @@ logout = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-)
+  });
 }

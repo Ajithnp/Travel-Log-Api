@@ -1,4 +1,4 @@
-import asyncHandler from "express-async-handler";
+import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { IUserController } from '../../interfaces/controller_interfaces/user/IUserController';
@@ -17,13 +17,9 @@ export class UserController implements IUserController {
     private _userService: IUserService,
   ) {}
 
-profile = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  profile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     if (!req.user) {
-      throw new AppError(
-        ERROR_MESSAGES.UNAUTHORIZED_ACCESS,
-        HTTP_STATUS.UNAUTHORIZED
-      );
+      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
     }
 
     const doc = await this._userService.profile(req.user.id);
@@ -35,7 +31,5 @@ profile = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-  );
-  
+  });
 }

@@ -1,4 +1,4 @@
-import asyncHandler from "express-async-handler";
+import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
 import { IS3Controller } from '../interfaces/controller_interfaces/IS3Controller';
 import { Request, Response, NextFunction } from 'express';
@@ -9,7 +9,6 @@ import { IApiResponse } from '../types/common/IApiResponse';
 import { IGetUploadUrlResponse } from '../types/dtos/common/response.dtos';
 import { IFileStorageHandlerService } from '../interfaces/service_interfaces/IFileStorageBusinessService';
 
-
 @injectable()
 export class S3Controller implements IS3Controller {
   constructor(
@@ -17,15 +16,11 @@ export class S3Controller implements IS3Controller {
     private _s3Service: IFileStorageHandlerService,
   ) {}
 
-generateUploadURL = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  generateUploadURL = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { files } = req.body;
 
     if (!files || !Array.isArray(files) || files.length === 0) {
-      throw new AppError(
-        "Use valid file types",
-        HTTP_STATUS.BAD_REQUEST
-      );
+      throw new AppError('Use valid file types', HTTP_STATUS.BAD_REQUEST);
     }
 
     const uploadUrls = await this._s3Service.getUploadUrls(files);
@@ -37,28 +32,18 @@ generateUploadURL = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
 
-generateDownloadURL = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  generateDownloadURL = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { userId, keys } = req.query;
 
     if (!userId || !keys) {
-      throw new AppError(
-        "Missing required parameters: userId or keys",
-        HTTP_STATUS.BAD_REQUEST
-      );
+      throw new AppError('Missing required parameters: userId or keys', HTTP_STATUS.BAD_REQUEST);
     }
 
-    const keysArray = Array.isArray(keys)
-      ? keys
-      : [keys];
+    const keysArray = Array.isArray(keys) ? keys : [keys];
 
-    const signedUrls = await this._s3Service.getViewUrls(
-      String(userId),
-      keysArray.map(String)
-    );
+    const signedUrls = await this._s3Service.getViewUrls(String(userId), keysArray.map(String));
 
     const successResponse: IApiResponse<string[]> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -67,6 +52,5 @@ generateDownloadURL = asyncHandler(
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
-  }
-);
+  });
 }

@@ -17,7 +17,6 @@ export class FileStorageHandlerService implements IFileStorageHandlerService {
     private _cacheService: ICacheService,
   ) {}
 
-
   async getViewUrls(userId: string, keys: string[]): Promise<string[]> {
     const hash = smallHasher(JSON.stringify(keys));
     const cacheKey = `s3:view:${userId}:${hash}`;

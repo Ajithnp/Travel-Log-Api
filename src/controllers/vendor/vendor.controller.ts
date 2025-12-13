@@ -43,23 +43,22 @@ export class VendorController implements IVendorController {
   }
   //====================================================================================
   async updateProfileLogo(req: Request, res: Response, next: NextFunction) {
-    
     if (!req.user || !req.user.id) {
-      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED)
-    };
+      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
+    }
 
     const updateProfileLogoPayload = req.body;
     const { files }: { files: UploadedFile[] } = updateProfileLogoPayload;
 
     if (!hasFile(files, 'profileLogo')) {
-          throw new AppError(
+      throw new AppError(
         ERROR_MESSAGES.MISSING_REQUIRED_FIELDS_FOR_VERIFICATION,
         HTTP_STATUS.BAD_REQUEST,
       );
     }
-    
+
     try {
-      await this._vendorService.updateProfileLogo(req.user.id,updateProfileLogoPayload);
+      await this._vendorService.updateProfileLogo(req.user.id, updateProfileLogoPayload);
 
       const successResponse: IApiResponse<VendorProfileResponseDTO> = {
         success: SUCCESS_STATUS.SUCCESS,
@@ -67,13 +66,11 @@ export class VendorController implements IVendorController {
       };
       res.status(HTTP_STATUS.OK).json(successResponse);
     } catch (error) {
-      next(error)
+      next(error);
     }
-
   }
   //=====================================================================================
   async vendorVerificationSubmit(req: Request, res: Response, next: NextFunction): Promise<void> {
-
     if (!req.user || !req.user.id) {
       throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
     }
@@ -92,7 +89,6 @@ export class VendorController implements IVendorController {
       );
     }
     try {
-
       const result = await this._vendorService.vendorVerificationSubmit(
         req.user.id,
         vendorVerificationPayload,

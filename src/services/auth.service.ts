@@ -184,7 +184,7 @@ export class AuthService implements IAuthService {
     payload: GoogleAuthRequestDTO,
   ): Promise<AuthResultDTO<GoogleAuthResponseDTO>> {
     const { token, clientId } = payload;
-    
+
     let isNewUser = false;
 
     const userData = await this._googleService.getUserInfoFromAccessToken(token, clientId);
@@ -193,7 +193,7 @@ export class AuthService implements IAuthService {
     let user = await this._userRepository.findOne({ email: userData.email });
     if (!user) {
       isNewUser = true;
-      
+
       user = await this._userRepository.create({
         name: userData.name,
         email: userData.email,

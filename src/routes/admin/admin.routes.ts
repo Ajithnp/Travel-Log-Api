@@ -5,6 +5,8 @@ import { IAdminVendorController } from '../../interfaces/controller_interfaces/a
 import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
+import { validateDTO } from '../../middlewares/validate.dto.middleware';
+import { BlockOrUnblockUserSchema } from '../../types/dtos/admin/user/request.dtos';
 @injectable()
 export class AdminRoutes extends BaseRoute {
   constructor(
@@ -28,10 +30,11 @@ export class AdminRoutes extends BaseRoute {
 
     this._router.patch(
       '/users/:userId/status',
+      validateDTO(BlockOrUnblockUserSchema),
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
 
-      this._adminUserContoller.blockOrUnclockUser.bind(this._adminUserContoller),
+      this._adminUserContoller.blockOrUnblockUser.bind(this._adminUserContoller),
     );
 
     //========== vendor management ==================

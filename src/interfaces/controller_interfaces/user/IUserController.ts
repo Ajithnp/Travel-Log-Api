@@ -1,5 +1,5 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
 
 export interface IUserController {
-  profile:RequestHandler
+  profile: RequestHandler;
 }

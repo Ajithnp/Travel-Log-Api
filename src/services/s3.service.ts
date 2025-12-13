@@ -45,7 +45,7 @@ export class S3Service implements IFileStorageService {
 
   async generateUploadURL(file: IGetUploadUrlPayload): Promise<IGetUploadUrlResponse> {
     const [result] = await this.generateUploadURLs([file]);
-    
+
     return result;
   }
 

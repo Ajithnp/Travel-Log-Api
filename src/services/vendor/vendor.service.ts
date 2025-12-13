@@ -13,7 +13,10 @@ import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRep
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
-import { UpdateProfileLogoRequestDTO, VendorVerificationRequestDTO } from '../../types/dtos/vendor/request.dtos';
+import {
+  UpdateProfileLogoRequestDTO,
+  VendorVerificationRequestDTO,
+} from '../../types/dtos/vendor/request.dtos';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 @injectable()
 export class VendorService implements IVendorService {
@@ -53,19 +56,18 @@ export class VendorService implements IVendorService {
         createdAt: userDoc.createdAt,
       };
     }
-    
 
     return {
       id: (vendorDoc._id as Types.ObjectId).toString(),
       name: vendorDoc.userId.name,
       email: vendorDoc.userId.email,
       phone: vendorDoc.userId.phone,
-      role:vendorDoc.userId.role,
+      role: vendorDoc.userId.role,
       profileLogo: vendorDoc.profileLogo?.key,
       businessAddress: vendorDoc.businessAddress,
       contactPersonName: vendorDoc.contactPersonName,
       isProfileVerified: vendorDoc.isProfileVerified,
-      userId:(vendorDoc.userId?._id as Types.ObjectId).toString(),
+      userId: (vendorDoc.userId?._id as Types.ObjectId).toString(),
       status: vendorDoc.status,
       reasonForReject: vendorDoc?.reasonForReject ? vendorDoc.reasonForReject : '',
       createdAt: vendorDoc?.createdAt,
@@ -73,22 +75,20 @@ export class VendorService implements IVendorService {
   }
 
   async updateProfileLogo(vendorId: string, payload: UpdateProfileLogoRequestDTO): Promise<void> {
-    
     const vendorDoc = await this._vendorInfoRepository.findVendorWithUserId(vendorId);
     if (!vendorDoc) {
-      throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
+      throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-      // 2. Delete old file from S3 (if exists)
-  if (vendorDoc.profileLogo?.key) {
-    await this._fileStorage.deleteFile(vendorDoc.profileLogo.key);
-  }
-  
+    // 2. Delete old file from S3 (if exists)
+    if (vendorDoc.profileLogo?.key) {
+      await this._fileStorage.deleteFile(vendorDoc.profileLogo.key);
+    }
+
     const file = payload.files[0];
     await this._vendorInfoRepository.findByIdAndUpdate(payload.vendorInfoId, {
-      profileLogo:{key:file.key}
+      profileLogo: { key: file.key },
     });
-
   }
 
   async vendorVerificationSubmit(

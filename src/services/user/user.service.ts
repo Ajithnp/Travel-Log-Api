@@ -49,7 +49,7 @@ export class UserService implements IUserService {
     }
     const response = {
       id: userDoc._id.toString(),
-      role:userDoc.role,
+      role: userDoc.role,
       name: userDoc.name,
       email: userDoc.email,
       phone: userDoc.phone,

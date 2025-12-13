@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
 export interface IAuthController {
   registerUser: RequestHandler;
   loginUser: RequestHandler;
@@ -11,4 +11,3 @@ export interface IAuthController {
   refreshAccessToken: RequestHandler;
   logout: RequestHandler;
 }
-

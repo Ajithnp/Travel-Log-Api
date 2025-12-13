@@ -6,7 +6,10 @@ import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
-import { VendorVerificationSchema, updateProfileLogoSchema } from '../../types/dtos/vendor/request.dtos';
+import {
+  VendorVerificationSchema,
+  updateProfileLogoSchema,
+} from '../../types/dtos/vendor/request.dtos';
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
@@ -31,7 +34,7 @@ export class VendorRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._vendorController.updateProfileLogo.bind(this._vendorController),
-    )
+    );
 
     this._router.post(
       '/verification',
