@@ -1,13 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { RequestHandler } from "express";
 
 export interface IUserProfileController {
-  profile(req: Request, res: Response, next: NextFunction): Promise<void>;
-
-  updateProfile(req: Request, res: Response, next: NextFunction): Promise<void>;
-
-  resetPassword(req: Request, res: Response, next: NextFunction): Promise<void>;
-
-  updateEmailRequest(req: Request, res: Response, next: NextFunction): Promise<void>;
-
-  updateEmail(req: Request, res: Response, next: NextFunction): Promise<void>;
+  profile: RequestHandler
+  updateProfile: RequestHandler
+  resetPassword: RequestHandler
+  updateEmailRequest: RequestHandler
+  updateEmail: RequestHandler
 }
