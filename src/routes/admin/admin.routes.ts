@@ -7,6 +7,7 @@ import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import { BlockOrUnblockUserSchema } from '../../types/dtos/admin/user/request.dtos';
+import { UpdateVendorVerificationSchema } from '../../types/dtos/admin/vendor/request.dtos';
 @injectable()
 export class AdminRoutes extends BaseRoute {
   constructor(
@@ -48,9 +49,10 @@ export class AdminRoutes extends BaseRoute {
 
     this._router.patch(
       '/update-vendor-verification/:vendorId',
+      validateDTO(UpdateVendorVerificationSchema),
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
-      this._adminVendorController.updateVendorverification.bind(this._adminVendorController),
+      this._adminVendorController.updateVendorVerification.bind(this._adminVendorController),
     );
 
     this._router.get(
@@ -58,13 +60,6 @@ export class AdminRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       this._adminVendorController.getVendors.bind(this._adminVendorController),
-    );
-
-    this._router.patch(
-      '/vendors/:vendorId/status',
-      isAuthenticated,
-      authorize([USER_ROLES.ADMIN]),
-      this._adminVendorController.blockOrUnclockVendor.bind(this._adminVendorController),
     );
   }
 }
