@@ -16,7 +16,7 @@ export class S3Controller implements IS3Controller {
     private _s3Service: IFileStorageHandlerService,
   ) {}
 
-  generateUploadURL = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  generateUploadURL = asyncHandler(async (req, res) => {
     const { files } = req.body;
 
     if (!files || !Array.isArray(files) || files.length === 0) {
@@ -34,7 +34,7 @@ export class S3Controller implements IS3Controller {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  generateDownloadURL = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  generateDownloadURL = asyncHandler(async (req, res) => {
     const { userId, keys } = req.query;
 
     if (!userId || !keys) {

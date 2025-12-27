@@ -18,7 +18,7 @@ export class AdminVendorController implements IAdminVendorController {
     private _adminUserService: IAdminUserService,
   ) {}
 
-  vendorVerificationRequest = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  vendorVerificationRequest = asyncHandler(async (req, res) => {
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
 
     const data = await this._adminVendorService.vendorVerificationRequests(
@@ -38,7 +38,7 @@ export class AdminVendorController implements IAdminVendorController {
   });
 
   //=======================================================================
-  updateVendorVerification = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  updateVendorVerification = asyncHandler(async (req, res) => {
     const { vendorId } = req.params;
     const { status, reasonForReject } = req.body;
 
@@ -58,7 +58,7 @@ export class AdminVendorController implements IAdminVendorController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
   //===================================get vendors=======================================
-  getVendors = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  getVendors = asyncHandler(async (req, res) => {
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
 
     const vendors = await this._adminVendorService.getVendors(page, limit, search, selectedFilter);

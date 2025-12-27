@@ -17,7 +17,7 @@ export class AdminUserController implements IAdminUserController {
     private _adminUserService: IAdminUserService,
   ) {}
 
-  getAllUsers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  getAllUsers = asyncHandler(async (req, res) => {
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
 
     const users = await this._adminUserService.fetchUsers(
@@ -38,7 +38,7 @@ export class AdminUserController implements IAdminUserController {
   });
 
   //==========================================================================================
-  blockOrUnblockUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  blockOrUnblockUser = asyncHandler(async (req, res) => {
     const { userId } = req.params;
     const { blockUser, reason } = req.body;
 

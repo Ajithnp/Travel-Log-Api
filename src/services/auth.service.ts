@@ -142,6 +142,7 @@ export class AuthService implements IAuthService {
     if (userDoc.isEmailVerified) {
       throw new AppError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED, HTTP_STATUS.CONFLICT);
     }
+    console.log("service layer", payload)
 
     await this._otpService.verifyOtp(payload);
 

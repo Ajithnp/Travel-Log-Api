@@ -3,9 +3,9 @@ import { IAuthController } from 'interfaces/controller_interfaces/IAuthControlle
 import BaseRoute from '../base.route';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import {
-  SignupSchema,
-  LoginSchema,
-  VerifyEmailSchema,
+  SignupRequestSchema,
+  LoginRequestSchema,
+  VerifyEmailRequestSchema,
   ResendOtpSchema,
   GoogleAuthSchema,
   ForgotPasswordSchema,
@@ -26,19 +26,19 @@ export class AuthRoutes extends BaseRoute {
   initializeRoutes(): void {
     this._router.post(
       '/login',
-      validateDTO(LoginSchema),
+      validateDTO(LoginRequestSchema),
       this._authController.loginUser.bind(this._authController),
     );
 
     this._router.post(
       '/signup',
-      validateDTO(SignupSchema),
+      validateDTO(SignupRequestSchema),
       this._authController.registerUser.bind(this._authController),
     );
 
     this._router.post(
       '/verify-email',
-      validateDTO(VerifyEmailSchema),
+      validateDTO(VerifyEmailRequestSchema),
       this._authController.verifyEmail.bind(this._authController),
     );
 

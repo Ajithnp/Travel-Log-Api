@@ -17,19 +17,4 @@ export class UserController implements IUserController {
     private _userService: IUserService,
   ) {}
 
-  profile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    if (!req.user) {
-      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
-    }
-
-    const doc = await this._userService.profile(req.user.id);
-
-    const successResponse: IApiResponse<UserProfileResponseDTO> = {
-      success: SUCCESS_STATUS.SUCCESS,
-      message: SUCCESS_MESSAGES.OK,
-      data: doc,
-    };
-
-    res.status(HTTP_STATUS.OK).json(successResponse);
-  });
 }

@@ -8,6 +8,7 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ITokenService } from '../../interfaces/service_interfaces/ITokenService';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
 import { FilterQuery, Types } from 'mongoose';
+import { UserProfileResponseDTO } from 'types/dtos/user/response.dtos';
 
 @injectable()
 export class AdminUserService implements IAdminUserService {
@@ -24,7 +25,7 @@ export class AdminUserService implements IAdminUserService {
     role: IUser['role'],
     search?: string,
     selectedFilter?: string,
-  ): Promise<PaginatedData<Partial<IUser>>> {
+  ): Promise<PaginatedData<Partial<UserProfileResponseDTO>>> {
     const skip = (page - 1) * limit;
     const query: FilterQuery<IUser> = { role };
 
@@ -40,13 +41,13 @@ export class AdminUserService implements IAdminUserService {
       this._userRepository.countDocuments(query),
     ]);
 
-    const userData: Partial<IUser>[] = usersDoc.map((user) => ({
+    const userData: UserProfileResponseDTO[] = usersDoc.map((user) => ({
       id: (user._id as Types.ObjectId).toString(),
       name: user.name,
       email: user.email,
       phone: user.phone,
       isBlocked: user.isBlocked,
-      createdAt: user.createdAt,
+      createdAt: user.createdAt.toDateString(),
     }));
 
     return {

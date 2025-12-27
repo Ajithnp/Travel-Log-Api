@@ -7,6 +7,7 @@ import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import {
+  UpdateProfileLogoRequestSchema,
   VendorVerificationSchema,
   updateProfileLogoSchema,
 } from '../../types/dtos/vendor/request.dtos';
@@ -30,7 +31,7 @@ export class VendorRoutes extends BaseRoute {
 
     this._router.patch(
       '/me/profileLogo',
-      validateDTO(updateProfileLogoSchema),
+      validateDTO(UpdateProfileLogoRequestSchema),
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._vendorController.updateProfileLogo.bind(this._vendorController),

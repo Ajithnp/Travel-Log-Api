@@ -46,11 +46,11 @@ export class FileStorageHandlerService implements IFileStorageHandlerService {
     return await this._fileStorageService.generateUploadURLs(files);
   }
 
-  async deleteFile(key: string): Promise<void> {
+  async deleteFile(key: string) {
     await this._fileStorageService.deleteFile(key);
   }
 
-  async deleteFiles(keys: string[]): Promise<void> {
+  async deleteFiles(keys: string[]) {
     await this._fileStorageService.deleteFiles(keys);
   }
 

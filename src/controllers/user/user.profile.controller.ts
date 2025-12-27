@@ -7,7 +7,6 @@ import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_
 import { AppError } from '../../errors/AppError';
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
-
 import {
   UserProfileResponseDTO,
   IUpdateEmailResponseDTO,
@@ -22,12 +21,9 @@ export class UserProfileController implements IUserProfileController {
     private _userService: IUserService,
   ) {}
 
-  profile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    if (!req.user) {
-      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
-    }
-
-    const doc = await this._userService.profile(req.user.id);
+  profile = asyncHandler(async (req, res) => {
+   const user = req.user!;
+    const doc = await this._userService.profile(user.id);
 
     const successResponse: IApiResponse<UserProfileResponseDTO> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -38,7 +34,7 @@ export class UserProfileController implements IUserProfileController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  updateProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  updateProfile = asyncHandler(async (req, res) => {
     const updateProfileRequestPayload = req.body;
 
     await this._userService.updateProfile({
@@ -53,7 +49,7 @@ export class UserProfileController implements IUserProfileController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  updateEmailRequest = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  updateEmailRequest = asyncHandler(async (req, res) => {
     const updateEmailRequestPayload = req.body;
 
     const updateEmailData = await this._userService.updateEmailRequest(updateEmailRequestPayload);
@@ -67,7 +63,7 @@ export class UserProfileController implements IUserProfileController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  updateEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  updateEmail = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
 
     if (!refreshToken) {
@@ -92,7 +88,7 @@ export class UserProfileController implements IUserProfileController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  resetPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  resetPassword = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
 
     if (!refreshToken) {

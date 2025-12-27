@@ -29,7 +29,7 @@ export class AuthController implements IAuthController {
     private _otpService: IOtpService,
   ) {}
 
-  loginUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  loginUser = asyncHandler(async (req, res) => {
     const loginPayload = req.body;
 
     const { user, accessToken, refreshToken } = await this._authService.loginUser(loginPayload);
@@ -54,7 +54,7 @@ export class AuthController implements IAuthController {
 
   //===================================================================================
 
-  registerUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  registerUser = asyncHandler(async (req, res) => {
     const registerPayload = req.body;
 
     const user = await this._authService.registerUser(registerPayload);
@@ -70,8 +70,9 @@ export class AuthController implements IAuthController {
 
   //===============================================================================
 
-  verifyEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  verifyEmail = asyncHandler(async (req, res) => {
     const verificationPayload = req.body;
+    console.log("input", verificationPayload)
 
     const { user, accessToken, refreshToken } =
       await this._authService.emailVerify(verificationPayload);
@@ -95,7 +96,7 @@ export class AuthController implements IAuthController {
   });
   //==========================================================================================
 
-  resendOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  resendOtp = asyncHandler(async (req, res) => {
     const { email } = req.body;
 
     const otpData = await this._otpService.sendOtp(email);
@@ -111,7 +112,7 @@ export class AuthController implements IAuthController {
 
   //===============================================================================================
 
-  googleAuthCallback = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  googleAuthCallback = asyncHandler(async (req, res) => {
     const googleAuthPayload = req.body;
 
     const { user, accessToken, refreshToken, isNewUser } =
@@ -137,7 +138,7 @@ export class AuthController implements IAuthController {
   });
 
   //=====================================================================================
-  forgotPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  forgotPassword = asyncHandler(async (req, res) => {
     const forgotPasswordPayload = req.body;
 
     const user = await this._authService.forgotPassword(forgotPasswordPayload);
@@ -153,7 +154,7 @@ export class AuthController implements IAuthController {
 
   //========================================================================================
 
-  verifyOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  verifyOtp = asyncHandler(async (req, res) => {
     const verifyOtpPayload = req.body;
 
     await this._otpService.verifyOtp(verifyOtpPayload);
@@ -168,7 +169,7 @@ export class AuthController implements IAuthController {
 
   //========================================================================================
 
-  changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  changePassword = asyncHandler(async (req, res) => {
     const passwordChangePayload = req.body;
 
     await this._authService.changePassword(passwordChangePayload);
@@ -183,7 +184,7 @@ export class AuthController implements IAuthController {
 
   //======================================================================================
 
-  refreshAccessToken = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  refreshAccessToken = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
 
     if (!refreshToken) {
@@ -204,7 +205,7 @@ export class AuthController implements IAuthController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
   //=====================================================================================
-  logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  logout = asyncHandler(async (req, res) => {
     clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
     clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
 
