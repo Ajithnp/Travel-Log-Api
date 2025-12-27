@@ -4,15 +4,22 @@ export const UpdateEmailRequestSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email format'),
 });
 
+export const ChangeEmailRequestSchema = z.object({
+  body: UpdateEmailRequestSchema
+});
+
 export type UpdateEmailRequestDTO = z.infer<typeof UpdateEmailRequestSchema>;
 
 export const UpdateEmailSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email format'),
-  otp: z
+  body: z.object({
+    email: z.string().min(1, 'Email is required').email('Invalid email format'),
+    otp: z
     .string()
     .min(6, 'OTP must be 6 digits')
     .max(6, 'OTP must be 6 digits')
     .nonempty('OTP is required'),
+  })
+
 });
 
 export type VerifyEmailRequestDTO = {
@@ -24,8 +31,11 @@ export type VerifyEmailRequestDTO = {
 };
 
 export const ResetPasswordSchema = z.object({
-  oldPassword: z.string().min(6, 'Password must be at least 6 characters long'),
-  newPassword: z.string().min(6, 'Password must be at least 6 characters long'),
+  body: z.object({
+    oldPassword: z.string().min(6, 'Password must be at least 6 characters long'),
+    newPassword: z.string().min(6, 'Password must be at least 6 characters long'),
+  })
+
 });
 
 export type ResetPasswordRequestDTO = {

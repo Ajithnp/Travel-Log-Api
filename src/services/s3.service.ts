@@ -45,11 +45,11 @@ export class S3Service implements IFileStorageService {
 
   async generateUploadURL(file: IGetUploadUrlPayload): Promise<IGetUploadUrlResponse> {
     const [result] = await this.generateUploadURLs([file]);
-    
+
     return result;
   }
 
-  async deleteFile(key: string): Promise<void> {
+  async deleteFile(key: string) {
     await this._s3Client.send(
       new DeleteObjectCommand({
         Bucket: this._bucketName,
@@ -58,7 +58,7 @@ export class S3Service implements IFileStorageService {
     );
   }
 
-  async deleteFiles(keys: string[]): Promise<void> {
+  async deleteFiles(keys: string[]) {
     await Promise.all(keys.map((key) => this.deleteFile(key)));
   }
 }

@@ -8,7 +8,12 @@ export const SignupSchema = z.object({
   role: z.enum(['admin', 'user', 'vendor']),
 });
 
+export const SignupRequestSchema = z.object({
+  body: SignupSchema,
+});
+
 export type SignupRequestDTO = z.infer<typeof SignupSchema>;
+//=========
 
 export const LoginSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -16,7 +21,11 @@ export const LoginSchema = z.object({
   // role: z.enum(["admin", "user", "vendor"])
 });
 
+export const LoginRequestSchema = z.object({
+  body: LoginSchema,
+});
 export type LoginRequestDTO = z.infer<typeof LoginSchema>;
+//==========
 
 export const VerifyEmailSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email format'),
@@ -27,11 +36,19 @@ export const VerifyEmailSchema = z.object({
     .nonempty('OTP is required'),
 });
 
-export type VerifyEmailRequestDTO = z.infer<typeof VerifyEmailSchema>;
-
-export const ResendOtpSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email format'),
+export const VerifyEmailRequestSchema = z.object({
+  body: VerifyEmailSchema,
 });
+export type VerifyEmailRequestDTO = z.infer<typeof VerifyEmailSchema>;
+//=========
+export const ResendOtpSchema = z.object({
+  body: z.object({
+      email: z.string().min(1, 'Email is required').email('Invalid email format'),
+  })
+ 
+});
+
+//======
 
 export const GoogleAuthSchema = z.object({
   token: z.string().nonempty('Token is required'),

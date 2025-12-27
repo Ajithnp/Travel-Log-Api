@@ -26,7 +26,11 @@ export class OtpService implements IOtpService {
     const hashedOtp = hashOtp(otp, email);
     const key = `otp:${email}`;
 
+
     await this._cacheService.set(key, hashedOtp, OTP.OTP_TTL_SECONDS);
+
+    const storedOtp = await this._cacheService.get(key);
+  
 
     this._emailUtil.sendEmail({
       to: email,
@@ -42,11 +46,13 @@ export class OtpService implements IOtpService {
     return response;
   }
 
-  async verifyOtp(data: VerifyOtpRequestDTO): Promise<void> {
+  async verifyOtp(data: VerifyOtpRequestDTO) {
     const { email, otp } = data;
     const key = `otp:${email}`;
     const hashedOtp = hashOtp(otp, email);
     const storedOtp = await this._cacheService.get(key);
+    console.log("hased otp", hashedOtp)
+    console.log("stored otp", storedOtp)
 
     if (!storedOtp) {
       throw new AppError(ERROR_MESSAGES.OTP_EXPIRED, HTTP_STATUS.NOT_FOUND);

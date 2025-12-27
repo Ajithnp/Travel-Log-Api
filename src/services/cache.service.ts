@@ -11,7 +11,7 @@ export class RedisService implements ICacheService {
     return data ? JSON.parse(data) : null;
   }
 
-  async set<T>(key: string, value: T, ttlSeconds: number = 60): Promise<void> {
+  async set<T>(key: string, value: T, ttlSeconds: number = 60) {
     await this._redisClient.setEx(key, ttlSeconds, JSON.stringify(value));
   }
 
@@ -19,7 +19,7 @@ export class RedisService implements ICacheService {
     return this._redisClient.exists(key);
   }
 
-  async del(key: string): Promise<void> {
+  async del(key: string) {
     await this._redisClient.del(key);
   }
 
@@ -28,7 +28,7 @@ export class RedisService implements ICacheService {
     return time;
   }
 
-  async clearPrefix(prefix: string): Promise<void> {
+  async clearPrefix(prefix: string) {
     const keys = await this._redisClient.keys(`${prefix}*`);
     if (keys.length) {
       await this._redisClient.del(keys);

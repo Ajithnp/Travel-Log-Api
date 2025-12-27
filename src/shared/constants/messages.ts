@@ -69,3 +69,5 @@ export const ERROR_MESSAGES = {
   VENDOR_VERIFICARION_STATUS_APPROVED: 'Your profile is already approved',
   VENDOR_VERIFICATION_STATUS_PENDING: 'Your profile is already under review',
 } as const;
+
+

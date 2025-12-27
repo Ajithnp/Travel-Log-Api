@@ -1,7 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-
+import { RequestHandler } from 'express';
 export interface IS3Controller {
-  generateUploadURL(req: Request, res: Response, next: NextFunction): Promise<void>;
-
-  generateDownloadURL(req: Request, res: Response, next: NextFunction): Promise<void>;
+  generateUploadURL: RequestHandler;
+  generateDownloadURL: RequestHandler;
 }

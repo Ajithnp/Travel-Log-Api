@@ -10,7 +10,7 @@ import { USER_ROLES } from '../../shared/constants/roles';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import {
   UpdateEmailSchema,
-  UpdateEmailRequestSchema,
+  ChangeEmailRequestSchema,
   ResetPasswordSchema,
   UpdateProfileSchema,
 } from '../../types/dtos/user/request.dtos';
@@ -32,11 +32,11 @@ export class UserRoutes extends BaseRoute {
       '/me',
       isAuthenticated,
       authorize([USER_ROLES.USER]),
-      this._userController.profile.bind(this._userController),
+      this._userProfileController.profile.bind(this._userController),
     );
 
     this._router.put(
-      '/me/edit',
+      '/me',
       validateDTO(UpdateProfileSchema),
       isAuthenticated,
       authorize([USER_ROLES.USER, USER_ROLES.VENDOR]),
@@ -45,7 +45,7 @@ export class UserRoutes extends BaseRoute {
 
     this._router.post(
       '/me/change-email',
-      validateDTO(UpdateEmailRequestSchema),
+      validateDTO(ChangeEmailRequestSchema),
       isAuthenticated,
       authorize([USER_ROLES.USER, USER_ROLES.VENDOR]),
       this._userProfileController.updateEmailRequest.bind(this._userProfileController),

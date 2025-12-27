@@ -17,7 +17,6 @@ export class FileStorageHandlerService implements IFileStorageHandlerService {
     private _cacheService: ICacheService,
   ) {}
 
-
   async getViewUrls(userId: string, keys: string[]): Promise<string[]> {
     const hash = smallHasher(JSON.stringify(keys));
     const cacheKey = `s3:view:${userId}:${hash}`;
@@ -47,11 +46,11 @@ export class FileStorageHandlerService implements IFileStorageHandlerService {
     return await this._fileStorageService.generateUploadURLs(files);
   }
 
-  async deleteFile(key: string): Promise<void> {
+  async deleteFile(key: string) {
     await this._fileStorageService.deleteFile(key);
   }
 
-  async deleteFiles(keys: string[]): Promise<void> {
+  async deleteFiles(keys: string[]) {
     await this._fileStorageService.deleteFiles(keys);
   }
 

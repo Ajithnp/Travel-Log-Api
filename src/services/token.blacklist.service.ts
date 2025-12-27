@@ -9,7 +9,7 @@ export class TokenBlackListService implements ITokenBlackListService {
     private _cacheService: ICacheService,
   ) {}
 
-  async blackListToken(token: string, tokenExp: string): Promise<void> {
+  async blackListToken(token: string, tokenExp: string) {
     const ttl = Number(tokenExp) - Math.floor(Date.now() / 1000);
     if (ttl <= 0) return; // prevent storing expired token;
 

@@ -1,13 +1,12 @@
+import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { IUserService } from '../../interfaces/service_interfaces/user/IUserService';
-import { USER_ROLES } from '../../shared/constants/roles';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { AppError } from '../../errors/AppError';
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
-
 import {
   UserProfileResponseDTO,
   IUpdateEmailResponseDTO,
@@ -22,122 +21,94 @@ export class UserProfileController implements IUserProfileController {
     private _userService: IUserService,
   ) {}
 
-  async profile(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      if (!req.user || req.user.role !== USER_ROLES.USER) {
-        throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
-      }
-      const doc = await this._userService.profile(req.user.id);
+  profile = asyncHandler(async (req, res) => {
+   const user = req.user!;
+    const doc = await this._userService.profile(user.id);
 
-      const successResponse: IApiResponse<UserProfileResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.OK,
-        data: doc,
-      };
+    const successResponse: IApiResponse<UserProfileResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: doc,
+    };
 
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
-  }
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 
-  async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (!req.user || req.user.role === USER_ROLES.ADMIN) {
-      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
-    }
+  updateProfile = asyncHandler(async (req, res) => {
     const updateProfileRequestPayload = req.body;
 
-    try {
-      await this._userService.updateProfile({
-        ...updateProfileRequestPayload,
-        email: req.user.email,
-      });
+    await this._userService.updateProfile({
+      ...updateProfileRequestPayload,
+      email: req.user!.email,
+    });
 
-      const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.PROFILE_UPDATED,
-      };
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
-  }
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.PROFILE_UPDATED,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 
-  async updateEmailRequest(req: Request, res: Response, next: NextFunction): Promise<void> {
+  updateEmailRequest = asyncHandler(async (req, res) => {
     const updateEmailRequestPayload = req.body;
-    try {
-      const updateEmaildata = await this._userService.updateEmailRequest(updateEmailRequestPayload);
 
-      const successResponse: IApiResponse<IUpdateEmailResponseDTO> = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.OTP_SEND,
-        data: updateEmaildata,
-      };
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
-  }
+    const updateEmailData = await this._userService.updateEmailRequest(updateEmailRequestPayload);
 
-  async updateEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (!req.user || !req.user.email || !req.user.id) {
-      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
-    }
+    const successResponse: IApiResponse<IUpdateEmailResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OTP_SEND,
+      data: updateEmailData,
+    };
 
-    const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
-    if (!refreshToken) {
-      throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
-    }
-    const updateEmailpayload = req.body;
-    try {
-      await this._userService.updateEmail({
-        ...updateEmailpayload,
-        oldEmail: req.user.email,
-        userId: req.user.id,
-        refreshToken,
-      });
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 
-      clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
-      clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
-
-      const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.EMAIL_UPDATED,
-      };
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (!req.user || req.user.role === USER_ROLES.ADMIN) {
-      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
-    }
-
+  updateEmail = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
 
     if (!refreshToken) {
       throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
     }
-    const resetPasswordPayload = req.body;
-    try {
-      await this._userService.resetPassword({
-        ...resetPasswordPayload,
-        email: req.user.email,
-        token: refreshToken,
-      });
 
-      clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
-      clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
+    await this._userService.updateEmail({
+      ...req.body,
+      oldEmail: req.user!.email,
+      userId: req.user!.id,
+      refreshToken,
+    });
 
-      const successResponse: IApiResponse = {
-        success: SUCCESS_STATUS.SUCCESS,
-        message: SUCCESS_MESSAGES.PASSWORD_UPDATED_SUCCESSFULLY,
-      };
-      res.status(HTTP_STATUS.OK).json(successResponse);
-    } catch (error) {
-      next(error);
+    // force re-authentication
+    clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
+    clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
+
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.EMAIL_UPDATED,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  resetPassword = asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies?.[JWT_TOKEN.REFRESH_TOKEN];
+
+    if (!refreshToken) {
+      throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
     }
-  }
+
+    await this._userService.resetPassword({
+      ...req.body,
+      email: req.user!.email,
+      token: refreshToken,
+    });
+
+    // Force logout after password reset
+    clearAuthCookies(res, JWT_TOKEN.REFRESH_TOKEN);
+    clearAuthCookies(res, JWT_TOKEN.ACCESS_TOKEN);
+
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.PASSWORD_UPDATED_SUCCESSFULLY,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 }
