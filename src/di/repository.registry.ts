@@ -3,7 +3,8 @@ import { IUserRepository } from '../interfaces/repository_interfaces/IUserReposi
 import { UserRepository } from '../repositories/user.repository';
 import { IVendorInfoRepository } from '../interfaces/repository_interfaces/IVendorInfoRepository';
 import { VendorInfoRepository } from '../repositories/vendor.info.repository';
-
+import { IBasePackageRepository } from '../interfaces/repository_interfaces/IBasePackageRepository';
+import { BasePackageRepository } from '../repositories/base-package-repository';
 export class RepositoryRegistry {
   static registerRepositories(): void {
     container.register<IUserRepository>('IUserRepository', {
@@ -15,6 +16,9 @@ export class RepositoryRegistry {
     });
     container.register<IVendorInfoRepository>('IVendorInfoRepository', {
       useClass: VendorInfoRepository,
+    });
+    container.register<IBasePackageRepository>('IBasePackageRepository', {
+      useClass: BasePackageRepository,
     });
 
     // Register other repositories here
