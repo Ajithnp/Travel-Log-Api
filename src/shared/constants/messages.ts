@@ -20,6 +20,7 @@ export const SUCCESS_MESSAGES = {
   VERIFICATION_FORM_UPLOAD_SUCCESSFULLY: 'Verification form upload successfully',
   EMAIL_UPDATED: 'Email updated Successfully',
   PROFILE_UPDATED: 'Profile updated successfully',
+  PACKAGE_CREATION_SUCCESS:"Package creation successfull"
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -68,6 +69,9 @@ export const ERROR_MESSAGES = {
   TOO_MANY_REQUESTS: 'Too many requests, try later.',
   VENDOR_VERIFICARION_STATUS_APPROVED: 'Your profile is already approved',
   VENDOR_VERIFICATION_STATUS_PENDING: 'Your profile is already under review',
+  VENDOR_NOT_VERIFIED: 'Vendor not verified',
+
+  PACKAGE_ALREADY_EXISTS:"Package already exists"
 } as const;
 
 

@@ -71,6 +71,4 @@ export interface IBasePackage extends Document{
   difficultyLevel: DifficultyLevel
   isActive: boolean;
 
-  // createdAt: Date;
-  // updatedAt: Date;
 }

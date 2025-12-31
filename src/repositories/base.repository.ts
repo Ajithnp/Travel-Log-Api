@@ -12,7 +12,7 @@ export class BaseRepository<T> implements IBaseRepository<T> {
     return await this.model.create(data);
   }
 
-  async findAll(query: FilterQuery<T>, options: QueryOptions<T>): Promise<T[]> {
+  async findAll(query: FilterQuery<T> = {}, options: QueryOptions<T> = {}): Promise<T[]> {
     const result = await this.model.find(query, null, options).exec();
     return result ?? [];
   }

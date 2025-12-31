@@ -2,6 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import upload from '../../middlewares/multer';
 import BaseRoute from '../base.route';
 import { IVendorController } from '../../interfaces/controller_interfaces/vendor/IVendorController';
+import { IVendorPackageController } from '../../interfaces/controller_interfaces/vendor/IVendorPackageController';
 import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
@@ -11,11 +12,15 @@ import {
   VendorVerificationSchema,
   updateProfileLogoSchema,
 } from '../../types/dtos/vendor/request.dtos';
+import { CreateBasePackageSchema } from '../../types/dtos/vendor/base-Package/request.dtos';
+
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
     @inject('IVendorController')
     private _vendorController: IVendorController,
+    @inject('IVendorPackageController')
+    private _vendorPackageController: IVendorPackageController,
   ) {
     super();
     this.initializeRoutes();
@@ -45,5 +50,15 @@ export class VendorRoutes extends BaseRoute {
 
       this._vendorController.vendorVerificationSubmit.bind(this._vendorController),
     );
+    /*---------------Package management--------------------- */
+    this._router.post(
+      '/packages',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(CreateBasePackageSchema),
+      this._vendorPackageController.createPackage.bind(this._vendorPackageController),
+    )
   }
 }
+
+//Rule: 👉 Auth first → authorization → validation → business logic

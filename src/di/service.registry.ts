@@ -23,6 +23,8 @@ import { IFileStorageService } from '../interfaces/service_interfaces/IStorageSe
 import { S3Service } from '../services/s3.service';
 import { IFileStorageHandlerService } from '../interfaces/service_interfaces/IFileStorageBusinessService';
 import { FileStorageHandlerService } from '../services/file.storage.handler.service';
+import { IPackageService } from '../interfaces/service_interfaces/vendor/IPackageService';
+import { PackageService } from '../services/vendor/package.service';
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -61,6 +63,10 @@ export class ServiceRegistry {
     container.register<IVendorService>('IVendorService', {
       useClass: VendorService,
     });
+    container.register<IPackageService>('IPackageService', {
+      useClass: PackageService,
+    });
+
 
     //admin-services
     container.register<IAdminUserService>('IAdminUserService', {

@@ -13,7 +13,8 @@ import { IUserProfileController } from '../interfaces/controller_interfaces/user
 import { UserProfileController } from '../controllers/user/user.profile.controller';
 import { IS3Controller } from '../interfaces/controller_interfaces/IS3Controller';
 import { S3Controller } from '../controllers/s3.controller';
-
+import { IVendorPackageController } from '../interfaces/controller_interfaces/vendor/IVendorPackageController';
+import { VendorPackageController } from '../controllers/vendor/vendor-package.controller';
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -26,6 +27,9 @@ export class ControllerRegistry {
     //vendor controllers
     container.register<IVendorController>('IVendorController', {
       useClass: VendorController,
+    });
+    container.register<IVendorPackageController>('IVendorPackageController', {
+      useClass: VendorPackageController,
     });
 
     //admin controllers
