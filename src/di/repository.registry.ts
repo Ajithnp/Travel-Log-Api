@@ -5,6 +5,8 @@ import { IVendorInfoRepository } from '../interfaces/repository_interfaces/IVend
 import { VendorInfoRepository } from '../repositories/vendor.info.repository';
 import { IBasePackageRepository } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BasePackageRepository } from '../repositories/base-package-repository';
+import { ICategoryRepository } from '../interfaces/repository_interfaces/ICategoryRepository';
+import { CategoryRepository } from '../repositories/category.repository';
 export class RepositoryRegistry {
   static registerRepositories(): void {
     container.register<IUserRepository>('IUserRepository', {
@@ -19,6 +21,9 @@ export class RepositoryRegistry {
     });
     container.register<IBasePackageRepository>('IBasePackageRepository', {
       useClass: BasePackageRepository,
+    });
+    container.register<ICategoryRepository>('ICategoryRepository', {
+      useClass: CategoryRepository,
     });
 
     // Register other repositories here
