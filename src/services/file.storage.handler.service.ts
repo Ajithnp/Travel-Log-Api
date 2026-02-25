@@ -5,7 +5,7 @@ import { IFileStorageHandlerService } from '../interfaces/service_interfaces/IFi
 import { IGetUploadUrlPayload } from 'types/dtos/common/request.dtos';
 import { IGetUploadUrlResponse } from 'types/dtos/common/response.dtos';
 import { smallHasher } from '../shared/utils/small.hasher.helper';
-
+import { SignedUrlViewResponse } from 'types/dtos/common/response.dtos';
 @injectable()
 ///Orchestrstion,
 export class FileStorageHandlerService implements IFileStorageHandlerService {
@@ -17,25 +17,22 @@ export class FileStorageHandlerService implements IFileStorageHandlerService {
     private _cacheService: ICacheService,
   ) {}
 
-  async getViewUrls(userId: string, keys: string[]): Promise<string[]> {
+  async getViewUrls(userId: string, keys: string[]): Promise<SignedUrlViewResponse[]> {
     const hash = smallHasher(JSON.stringify(keys));
     const cacheKey = `s3:view:${userId}:${hash}`;
 
-    const cached = await this._cacheService.get<string[]>(cacheKey);
+    const cached = await this._cacheService.get<SignedUrlViewResponse[]>(cacheKey);
     if (cached) {
       return cached;
     }
 
-    let urls: string[];
+    let responses: SignedUrlViewResponse[];
 
-    if (keys.length === 1) {
-      const singleUrl = await this._fileStorageService.getObjectURL(keys[0]);
-      urls = [singleUrl];
-    } else {
-      urls = await this._fileStorageService.getObjectURLs(keys);
-    }
-    await this._cacheService.set(cacheKey, urls, 300);
-    return urls;
+    responses = await this._fileStorageService.getObjectURLs(keys);
+
+    await this._cacheService.set(cacheKey, responses, 300);
+
+    return responses;
   }
 
   async getUploadUrls(files: IGetUploadUrlPayload[]): Promise<IGetUploadUrlResponse[]> {

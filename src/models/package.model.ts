@@ -1,125 +1,102 @@
-import mongoose ,{ Schema } from 'mongoose';
-import { IBasePackage } from '../types/entities/base-package.entity';
+import mongoose, { Schema, model } from 'mongoose';
+import { IBasePackageEntity } from '../types/entities/base-package.entity';
+import { PACKAGE_STATUS } from '../shared/constants/constants';
 
 /* ---------- Sub Schemas ---------- */
 
 const FileSchema = new Schema(
   {
-    key: { type: String, required: true },
-    fieldName: { type: String, required: true },
+    key: { type: String },
   },
   { _id: false }
 );
 
-const ActivitySchema = new Schema(
+const activitySchema = new Schema(
   {
-    startTime: { type: String, required: true },
-    endTime: { type: String, required: true },
-    title: { type: String, required: true },
+    startTime: { type: String },
+    endTime: { type: String },
+    title: { type: String },
     description: { type: String },
-    location: { type: String, required: true },
+    location: { type: String },
     type: {
       type: String,
-      enum: ["travel", "meal", "stay", "sightseeing", "activity", "free"],
-      required: true,
+      enum: ['tour', 'transport', 'accommodation', 'activity', 'meal'],
     },
-    included: { type: Boolean, required: true },
+    included: { type: Boolean },
   },
-  { _id: false }
+  { _id: false },
 );
 
-const DayItinerarySchema = new Schema(
+const itineraryDaySchema = new Schema(
   {
-    dayNumber: { type: Number, required: true, min: 1 },
-    title: { type: String, required: true },
-    activities: { type: [ActivitySchema], default: [] },
+    title: { type: String },
+    dayNumber: { type: Number },
+    activities: { type: [activitySchema], default: [] },
   },
-  { _id: false }
+  { _id: false },
 );
 
 /* ---------- Base Package Schema ---------- */
 
-const BasePackageSchema = new Schema<IBasePackage>(
+const packageSchema = new Schema<IBasePackageEntity>(
   {
     vendorId: {
       type: Schema.Types.ObjectId,
-      ref: "Vendor",
       required: true,
       index: true,
     },
 
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    title: { type: String, trim: true },
+    
+    location: { type: String, trim: true },
 
-    location: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    pickupLocation: { type: String, trim: true },
+
+    usp: { type: String, trim: true },
 
     category: {
       type: String,
-      enum: ["weekend", "adventure", "family", "honeymoon"],
-      required: true,
-    },
-
-    images: {
-      type: [FileSchema],
-      default: [],
-    },
-
-    duration: {
-      days: { type: Number, required: true, min: 1 },
-      nights: { type: Number, required: true, min: 0 },
-    },
-
-    basePrice: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-
-    description: {
-      type: String,
-      required: true,
-    },
-
-    itinerary: {
-      type: [DayItinerarySchema],
-      default: [],
-    },
-
-    inclusions: {
-      type: [String],
-      default: [],
-    },
-
-    exclusions: {
-      type: [String],
-      default: [],
+      enum: ['adventure', 'cultural', 'relaxation', 'luxury'],
     },
 
     difficultyLevel: {
       type: String,
-      enum: ["easy", "moderate", "hard"],
-      required: true,
+      enum: ['easy', 'moderate', 'challenging', 'extreme'],
+    },
+
+    description: { type: String },
+
+    days: { type: String },
+    nights: { type: String },
+
+    basePrice: { type: String },
+
+    images: { type: [FileSchema], default: [] },
+
+    itinerary: { type: [itineraryDaySchema], default: [] },
+
+    inclusions: { type: [String], default: [] },
+    exclusions: { type: [String], default: [] },
+    packingList: { type: [String], default: [] },
+
+    cancellationPolicy: {
+      type: String,
+      enum: ['Flexible', 'Moderate', 'Strict', 'Non-Refundable'],
+    },
+
+    status: {
+      type: String,
+      enum: Object.values(PACKAGE_STATUS),
+      default: PACKAGE_STATUS.DRAFT,
+      index: true,
     },
 
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
-  {
-    timestamps: true, 
-  }
+  { timestamps: true },
 );
 
-export const BasePackageModel = mongoose.model<IBasePackage>(
-  "BasePackage",
-  BasePackageSchema
-);
-
+export const PackageModel = model<IBasePackageEntity>('Package', packageSchema);

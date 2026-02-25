@@ -6,6 +6,7 @@ import s3Client from '../config/s3.config';
 import { IGetUploadUrlPayload } from '../types/dtos/common/request.dtos';
 import { IGetUploadUrlResponse } from '../types/dtos/common/response.dtos';
 import { IFileStorageService } from 'interfaces/service_interfaces/IStorageService';
+import { SignedUrlViewResponse } from '../types/dtos/common/response.dtos';
 @injectable()
 export class S3Service implements IFileStorageService {
   private readonly _s3Client = s3Client;
@@ -20,8 +21,19 @@ export class S3Service implements IFileStorageService {
     return url;
   }
 
-  async getObjectURLs(keys: string[]): Promise<string[]> {
-    return Promise.all(keys.map((key) => this.getObjectURL(key)));
+  async getObjectURLs(keys: string[]): Promise<SignedUrlViewResponse[]> {
+    const results = await Promise.all(
+      keys.map(async (key) => {
+        const url = await this.getObjectURL(key);
+
+        return {
+          key,
+          url,
+        };
+      }),
+    );
+
+    return results;
   }
 
   async generateUploadURLs(files: IGetUploadUrlPayload[]): Promise<IGetUploadUrlResponse[]> {

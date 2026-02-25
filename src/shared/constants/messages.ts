@@ -20,7 +20,8 @@ export const SUCCESS_MESSAGES = {
   VERIFICATION_FORM_UPLOAD_SUCCESSFULLY: 'Verification form upload successfully',
   EMAIL_UPDATED: 'Email updated Successfully',
   PROFILE_UPDATED: 'Profile updated successfully',
-  PACKAGE_CREATION_SUCCESS:"Package creation successfull"
+  PACKAGE_CREATION_SUCCESS: 'Package creation successfull',
+  PACKAGE_UPDATION_SUCCESS: 'Package updation success'
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -71,7 +72,8 @@ export const ERROR_MESSAGES = {
   VENDOR_VERIFICATION_STATUS_PENDING: 'Your profile is already under review',
   VENDOR_NOT_VERIFIED: 'Vendor not verified',
 
-  PACKAGE_ALREADY_EXISTS:"Package already exists"
+  PACKAGE_ALREADY_EXISTS: 'Package already exists',
+  PACKAGE_NOT_FOUND: 'Package not found',
+  PACKAGE_ACTIVE: 'This package is not active and cannot be edited.',
+  PACKAGE_CANNOT_EDIT: 'This package cannot be edited.',
 } as const;
-
-

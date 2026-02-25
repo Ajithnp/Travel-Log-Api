@@ -12,8 +12,7 @@ import {
   VendorVerificationSchema,
   updateProfileLogoSchema,
 } from '../../types/dtos/vendor/request.dtos';
-import { CreateBasePackageSchema } from '../../types/dtos/vendor/base-Package/request.dtos';
-
+import { PackageCreateUnionSchema } from '../../validators/vendor/package/base-package.schema';
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
@@ -55,10 +54,32 @@ export class VendorRoutes extends BaseRoute {
       '/packages',
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
-      validateDTO(CreateBasePackageSchema),
+      validateDTO(PackageCreateUnionSchema),
       this._vendorPackageController.createPackage.bind(this._vendorPackageController),
-    )
+    );
+
+    this._router.put('/packages/:packageId',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(PackageCreateUnionSchema),
+      this._vendorPackageController.updatePackage.bind(this._vendorPackageController),
+
+    );
+
+    this._router.get(
+      '/packages',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorPackageController.fetchPackages.bind(this._vendorPackageController),
+    );
+
+    this._router.get(
+      '/packages/:id',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorPackageController.fetPackagesWithId.bind(this._vendorPackageController),
+    );
   }
 }
 
-//Rule: 👉 Auth first → authorization → validation → business logic
+

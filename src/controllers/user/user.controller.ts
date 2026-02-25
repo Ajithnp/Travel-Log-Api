@@ -16,5 +16,4 @@ export class UserController implements IUserController {
     @inject('IUserService')
     private _userService: IUserService,
   ) {}
-
 }

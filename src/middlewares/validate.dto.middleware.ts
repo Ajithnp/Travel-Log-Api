@@ -27,5 +27,3 @@ export const validateDTO =
       next(error);
     }
   };
-
-//   router.post("/signup", validateDTO(SignupSchema), signup);

@@ -45,7 +45,7 @@ export class S3Controller implements IS3Controller {
 
     const signedUrls = await this._s3Service.getViewUrls(String(userId), keysArray.map(String));
 
-    const successResponse: IApiResponse<string[]> = {
+    const successResponse: IApiResponse<typeof signedUrls> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
       data: signedUrls,

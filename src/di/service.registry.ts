@@ -67,7 +67,6 @@ export class ServiceRegistry {
       useClass: PackageService,
     });
 
-
     //admin-services
     container.register<IAdminUserService>('IAdminUserService', {
       useClass: AdminUserService,

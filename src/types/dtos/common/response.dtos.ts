@@ -4,3 +4,8 @@ export interface IGetUploadUrlResponse {
   fieldName: string;
   name: string;
 }
+
+export interface SignedUrlViewResponse {
+  key: string;
+  url: string;
+}

@@ -1,74 +1,60 @@
 import { Document, Types } from 'mongoose';
 
-/* ---------- File ---------- */
+export type PackageStatus = 'DRAFT' | 'PUBLISHED' | 'SOFT_DELETED';
 export interface IFile {
   key: string;
-  fieldName: string;
 }
 
-
-/* ---------- Activity ---------- */
-export type ActivityType =
-  | "travel"
-  | "meal"
-  | "stay"
-  | "sightseeing"
-  | "activity"
-  | "free";
+export type ActivityType = 'travel' | 'meal' | 'stay' | 'sightseeing' | 'activity' | 'free';
 
 export interface Activity {
-  startTime: string;        // "09:00"
-  endTime: string;          // "12:00"
-  title: string;            // "Edakkal Caves Visit"
+  startTime?: string;
+  endTime?: string;
+  title?: string;
   description?: string;
-  location: string;
-  type: ActivityType
-  included: boolean;
+  location?: string;
+  type?: ActivityType;
+  included?: boolean;
 }
-
-/* ---------- Day Itinerary ---------- */
 export interface DayItinerary {
-  dayNumber: number;        // 1, 2, 3
-  title: string;            // "Arrival & Exploration"
-  activities: Activity[];
+  dayNumber?: number;
+  title?: string;
+  activities?: Activity[];
 }
 
-/* ---------- Enums ---------- */
-export type PackageCategory =
-  | "weekend"
-  | "adventure"
-  | "family"
-  | "honeymoon";
+export type PackageCategory = 'weekend' | 'adventure' | 'family' | 'honeymoon';
 
-export type DifficultyLevel =
-  | "easy"
-  | "moderate"
-  | "hard";
+export type DifficultyLevel = 'easy' | 'moderate' | 'hard';
 
-/* ---------- Base Package ---------- */  
-export interface IBasePackage extends Document{
+export interface IBasePackageEntity extends Document {
   vendorId: Types.ObjectId;
 
-  title: string;
-  location: string;           // "Wayanad, Kerala"
-  category: PackageCategory
+  title?: string;
+  location?: string;
+  pickupLocation?: string;
+  usp?: string;
+  category?: PackageCategory;
 
-  images: IFile[];
+  images?: IFile[];
 
-  duration: {
-    days: number;
-    nights: number;
-  };
+  days?: string;
+  nights?: string;
 
-  basePrice: number;          // reference price
-  description: string;
+  basePrice?: string;
+  description?: string;
 
-  itinerary: DayItinerary[];  // DEFAULT itinerary
+  itinerary?: DayItinerary[];
 
-  inclusions: string[];
-  exclusions: string[];
+  inclusions?: string[];
+  exclusions?: string[];
+  packingList?: string[];
+  cancellationPolicy?: 'Flexible' | 'Moderate' | 'Strict' | 'Non-Refundable' ;
 
-  difficultyLevel: DifficultyLevel
+  difficultyLevel?: DifficultyLevel;
+
+  status: PackageStatus;
   isActive: boolean;
 
+  createdAt: Date;
+  updatedAt: Date;
 }
