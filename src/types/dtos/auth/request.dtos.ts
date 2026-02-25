@@ -43,9 +43,8 @@ export type VerifyEmailRequestDTO = z.infer<typeof VerifyEmailSchema>;
 //=========
 export const ResendOtpSchema = z.object({
   body: z.object({
-      email: z.string().min(1, 'Email is required').email('Invalid email format'),
-  })
- 
+    email: z.string().min(1, 'Email is required').email('Invalid email format'),
+  }),
 });
 
 //======

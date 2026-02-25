@@ -10,11 +10,7 @@ import { SUCCESS_STATUS } from '../shared/constants/http_status_code';
 import { JWT_TOKEN } from '../shared/constants/jwt.token';
 import { ITokenBlackListService } from 'interfaces/service_interfaces/ITokenBlacklistService';
 
-export const isAuthenticated = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies?.[JWT_TOKEN.ACCESS_TOKEN];
 
   if (!token) {
@@ -28,7 +24,7 @@ export const isAuthenticated = async (
   try {
     const tokenService = container.resolve<ITokenService>(SERVICE_TOKENS.TOKEN_SERVICE);
     const decode = tokenService.verifyAccessToken(token as string);
-    
+
     if (!decode) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: SUCCESS_STATUS.FAILURE,

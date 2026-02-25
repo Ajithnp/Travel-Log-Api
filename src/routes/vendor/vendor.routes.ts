@@ -2,6 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import upload from '../../middlewares/multer';
 import BaseRoute from '../base.route';
 import { IVendorController } from '../../interfaces/controller_interfaces/vendor/IVendorController';
+import { IVendorPackageController } from '../../interfaces/controller_interfaces/vendor/IVendorPackageController';
 import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
@@ -11,11 +12,14 @@ import {
   VendorVerificationSchema,
   updateProfileLogoSchema,
 } from '../../types/dtos/vendor/request.dtos';
+import { PackageCreateUnionSchema } from '../../validators/vendor/package/base-package.schema';
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
     @inject('IVendorController')
     private _vendorController: IVendorController,
+    @inject('IVendorPackageController')
+    private _vendorPackageController: IVendorPackageController,
   ) {
     super();
     this.initializeRoutes();
@@ -45,5 +49,37 @@ export class VendorRoutes extends BaseRoute {
 
       this._vendorController.vendorVerificationSubmit.bind(this._vendorController),
     );
+    /*---------------Package management--------------------- */
+    this._router.post(
+      '/packages',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(PackageCreateUnionSchema),
+      this._vendorPackageController.createPackage.bind(this._vendorPackageController),
+    );
+
+    this._router.put('/packages/:packageId',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(PackageCreateUnionSchema),
+      this._vendorPackageController.updatePackage.bind(this._vendorPackageController),
+
+    );
+
+    this._router.get(
+      '/packages',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorPackageController.fetchPackages.bind(this._vendorPackageController),
+    );
+
+    this._router.get(
+      '/packages/:id',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorPackageController.fetPackagesWithId.bind(this._vendorPackageController),
+    );
   }
 }
+
+

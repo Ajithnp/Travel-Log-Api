@@ -22,7 +22,7 @@ export class UserProfileController implements IUserProfileController {
   ) {}
 
   profile = asyncHandler(async (req, res) => {
-   const user = req.user!;
+    const user = req.user!;
     const doc = await this._userService.profile(user.id);
 
     const successResponse: IApiResponse<UserProfileResponseDTO> = {

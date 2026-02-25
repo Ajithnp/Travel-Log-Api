@@ -13,6 +13,7 @@ import { errorMiddleware } from './middlewares/error.handler.middleware';
 import { VendorRoutes } from './routes/vendor/vendor.routes';
 import { UserRoutes } from './routes/user/user.route';
 import { S3Routes } from './routes/shared/s3.routes';
+
 export default class App {
   private _app: Application;
   private _port: number;

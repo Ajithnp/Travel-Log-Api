@@ -4,26 +4,16 @@ import { z } from 'zod';
  * Single uploaded file schema
  */
 const uploadedFileSchema = z.object({
-  fieldName: z
-    .string()
-    .trim()
-    .min(1, "File field name is required"),
+  fieldName: z.string().trim().min(1, 'File field name is required'),
 
-  key: z
-    .string()
-    .trim()
-    .min(1, "File key is required"),
+  key: z.string().trim().min(1, 'File key is required'),
 });
 
 /**
  * Required verification file fields
  */
 
-const REQUIRED_VERIFICATION_FILES = [
-  "businessLicence",
-  "businessPan",
-  "companyLogo",
-] as const;
+const REQUIRED_VERIFICATION_FILES = ['businessLicence', 'businessPan', 'companyLogo'] as const;
 
 /**
  * Vendor verification request schema (request-level)
@@ -32,39 +22,26 @@ const REQUIRED_VERIFICATION_FILES = [
 export const VendorVerificationSchema = z
   .object({
     body: z.object({
-      ownerName: z
-        .string()
-        .trim()
-        .min(1, "Owner name is required"),
+      ownerName: z.string().trim().min(1, 'Owner name is required'),
 
-      businessAddress: z
-        .string()
-        .trim()
-        .min(1, "Business address is required"),
+      businessAddress: z.string().trim().min(1, 'Business address is required'),
 
-      gstin: z
-        .string()
-        .trim()
-        .length(15, "GST number must be exactly 15 characters"),
+      gstin: z.string().trim().length(15, 'GST number must be exactly 15 characters'),
 
-      files: z
-        .array(uploadedFileSchema)
-        .min(1, "At least one file must be uploaded"),
+      files: z.array(uploadedFileSchema).min(1, 'At least one file must be uploaded'),
     }),
   })
   .superRefine((data, ctx) => {
-    const uploadedFields = new Set(
-      data.body.files.map((file) => file.fieldName)
-    );
+    const uploadedFields = new Set(data.body.files.map((file) => file.fieldName));
 
     const missingFiles = REQUIRED_VERIFICATION_FILES.filter(
-      (required) => !uploadedFields.has(required)
+      (required) => !uploadedFields.has(required),
     );
 
     if (missingFiles.length > 0) {
       ctx.addIssue({
-        path: ["body", "files"],
-        message: `Missing required files: ${missingFiles.join(", ")}`,
+        path: ['body', 'files'],
+        message: `Missing required files: ${missingFiles.join(', ')}`,
         code: z.ZodIssueCode.custom,
       });
     }
@@ -99,28 +76,21 @@ export interface VendorVerificationRequestDTO {
   gstin: string;
 }
 
-
-
-
 /**
  * Update profile logo schema
  */
 export const updateProfileLogoSchema = z
   .object({
-   vendorInfoId: z.string().min(1, 'vendor data is required'),
-    files: z
-      .array(uploadedFileSchema)
-      .min(1, "At least one file must be uploaded"),
+    vendorInfoId: z.string().min(1, 'vendor data is required'),
+    files: z.array(uploadedFileSchema).min(1, 'At least one file must be uploaded'),
   })
   .superRefine((data, ctx) => {
-    const hasProfileLogo = data.files.some(
-      (file) => file.fieldName === "profileLogo"
-    );
+    const hasProfileLogo = data.files.some((file) => file.fieldName === 'profileLogo');
 
     if (!hasProfileLogo) {
       ctx.addIssue({
-        path: ["files"],
-        message: "Profile logo file is required",
+        path: ['files'],
+        message: 'Profile logo file is required',
         code: z.ZodIssueCode.custom,
       });
     }
