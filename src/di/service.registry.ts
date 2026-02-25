@@ -25,6 +25,8 @@ import { IFileStorageHandlerService } from '../interfaces/service_interfaces/IFi
 import { FileStorageHandlerService } from '../services/file.storage.handler.service';
 import { IPackageService } from '../interfaces/service_interfaces/vendor/IPackageService';
 import { PackageService } from '../services/vendor/package.service';
+import { IAdminCategoryService } from '../interfaces/service_interfaces/admin/ICategoryService';
+import { CategoryService } from '../services/admin/category.service';
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -73,6 +75,9 @@ export class ServiceRegistry {
     });
     container.register<IAdminVendorService>('IAdminVendorService', {
       useClass: AdminVendorService,
+    });
+    container.register<IAdminCategoryService>('IAdminCategoryService', {
+      useClass: CategoryService,
     });
 
     //user services
