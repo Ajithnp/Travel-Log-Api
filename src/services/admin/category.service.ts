@@ -31,9 +31,9 @@ export class CategoryService implements IAdminCategoryService {
 
     await this._categoryRepository.create({
       ...data,
-        slug,
-        isActive: true,
-      status:CATEGORY_STATUS.ACTIVE,
+      slug,
+      isActive: true,
+      status: CATEGORY_STATUS.ACTIVE,
       createdBy: adminObjectId,
     });
   }
@@ -54,5 +54,25 @@ export class CategoryService implements IAdminCategoryService {
     const updated = await this._categoryRepository.findByIdAndUpdate(id, data);
     if (!updated)
       throw new AppError(ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+  }
+
+  async toggleCategoryStatus(id: string): Promise<boolean> {
+    const category = await this._categoryRepository.findById(id);
+    if (!category) {
+      throw new AppError(ERROR_MESSAGES.CATEGORY_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    if (
+      category.status === CATEGORY_STATUS.PENDING ||
+      category.status === CATEGORY_STATUS.REJECTED
+    ) {
+      throw new AppError(ERROR_MESSAGES.CANNOT_TOGGLE, HTTP_STATUS.BAD_REQUEST);
+    }
+    const newIsActive = !category.isActive;
+    const newStatus = newIsActive ? CATEGORY_STATUS.ACTIVE : CATEGORY_STATUS.INACTIVE;
+
+    await this._categoryRepository.toggleStatus(id, newIsActive, newStatus);
+
+    return newIsActive;
   }
 }

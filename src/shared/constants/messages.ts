@@ -26,6 +26,8 @@ export const SUCCESS_MESSAGES = {
   // category
   CATEGORY_CREATED: 'Category created successfully',
   CATEGORY_UPDATED: 'Category updated successfully',
+  CATEGORY_ACTIVATED: 'Category activated successfully',
+  CATEGORY_DEACTIVATED: 'Category deactivated successfully',
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -84,4 +86,5 @@ export const ERROR_MESSAGES = {
   // category
   CATEGORY_NOT_FOUND: 'Category not found',
   CATEGORY_CANNOT_EDIT: 'This Category cannot be edited',
+  CANNOT_TOGGLE: 'Cannot toggle status of a vendor category request.',
 } as const;

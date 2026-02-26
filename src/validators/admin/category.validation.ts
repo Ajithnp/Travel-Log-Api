@@ -12,12 +12,15 @@ const categoryDescription = z
   .optional();
 
 const categoryIcon = z
-  .object({
-    key: z.string({ required_error: "Icon key required" }).trim(),
-  },{
-    invalid_type_error: "Input type error",
-    required_error: "Icon is required",
-  })
+  .object(
+    {
+      key: z.string({ required_error: 'Icon key required' }).trim(),
+    },
+    {
+      invalid_type_error: 'Input type error',
+      required_error: 'Icon is required',
+    },
+  )
   .optional();
 
 // create
@@ -33,16 +36,16 @@ export const createCategorySchema = z.object({
 });
 
 // update
-export const updateCategoryBodySchema = z.object({
-  description:categoryDescription,
-  icon:categoryIcon,
-}).refine(
-  data => Object.values(data).some(v => v !== undefined),
-  { message: 'At least one field must be provided for update' }
-)
-
+export const updateCategoryBodySchema = z
+  .object({
+    description: categoryDescription,
+    icon: categoryIcon,
+  })
+  .refine((data) => Object.values(data).some((v) => v !== undefined), {
+    message: 'At least one field must be provided for update',
+  });
 
 export const updateCategorySchema = z.object({
-    params: z.object({id: z.string(),}),
-    body: updateCategoryBodySchema,
+  params: z.object({ id: z.string() }),
+  body: updateCategoryBodySchema,
 });
