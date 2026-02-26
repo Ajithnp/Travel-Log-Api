@@ -18,7 +18,6 @@ export class VendorPackageController implements IVendorPackageController {
   ) {}
 
   createPackage = asyncHandler(async (req, res) => {
-
     const vendorId = req.user?.id!;
     const payload = req.body;
 

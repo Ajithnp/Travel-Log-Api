@@ -21,7 +21,10 @@ export const SUCCESS_MESSAGES = {
   EMAIL_UPDATED: 'Email updated Successfully',
   PROFILE_UPDATED: 'Profile updated successfully',
   PACKAGE_CREATION_SUCCESS: 'Package creation successfull',
-  PACKAGE_UPDATION_SUCCESS: 'Package updation success'
+  PACKAGE_UPDATION_SUCCESS: 'Package updation success',
+
+  // category
+  CATEGORY_CREATED: 'Category created successfully',
 } as const;
 
 export const ERROR_MESSAGES = {

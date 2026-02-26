@@ -8,7 +8,7 @@ const FileSchema = new Schema(
   {
     key: { type: String },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const activitySchema = new Schema(
@@ -47,7 +47,7 @@ const packageSchema = new Schema<IBasePackageEntity>(
     },
 
     title: { type: String, trim: true },
-    
+
     location: { type: String, trim: true },
 
     pickupLocation: { type: String, trim: true },

@@ -31,7 +31,7 @@ const basePackageBackendSchema = z.object({
 
 export const packageImageSchema = z.object({
   key: z.string(), // Present for existing images (S3 Key)
-  file: z.instanceof(File).optional(), 
+  file: z.instanceof(File).optional(),
   status: z.enum(['PENDING_UPLOAD', 'UPLOADED', 'REMOVED']),
 });
 
@@ -72,7 +72,7 @@ const draftPackageBackendSchema = basePackageBackendSchema.extend({
   exclusions: z.array(z.string()).optional(),
   packingList: z.array(z.string()).optional(),
 
- cancellationPolicy: z.enum(["Flexible", "Moderate", "Strict", "Non-Refundable",]).optional(),
+  cancellationPolicy: z.enum(['Flexible', 'Moderate', 'Strict', 'Non-Refundable']).optional(),
 
   isActive: z.boolean().optional(),
 
@@ -127,17 +127,17 @@ export const publishPackageBackendSchema = basePackageBackendSchema
     location: z
       .string()
       .min(2, 'Location must be at least 2 characters')
-      .max(100, 'Location must be at most 100 characters'), 
-    
+      .max(100, 'Location must be at most 100 characters'),
+
     pickupLocation: z
       .string()
       .min(2, 'Pickup location must be at least 2 characters')
       .max(100, 'Pickup location must be at most 100 characters'),
-    
-      usp: z
-        .string()
-        .min(2, 'USP must be at least 2 characters')
-        .max(100, 'USP must be at most 100 characters'),
+
+    usp: z
+      .string()
+      .min(2, 'USP must be at least 2 characters')
+      .max(100, 'USP must be at most 100 characters'),
 
     category: z.enum(CATEGORY_ENUM, {
       errorMap: () => ({ message: 'Please select a valid category' }),
@@ -174,7 +174,7 @@ export const publishPackageBackendSchema = basePackageBackendSchema
     exclusions: z.array(z.string().min(1)),
     packingList: z.array(z.string()),
 
-    cancellationPolicy: z.enum(["Flexible", "Moderate", "Strict", "Non-Refundable"], {
+    cancellationPolicy: z.enum(['Flexible', 'Moderate', 'Strict', 'Non-Refundable'], {
       errorMap: () => ({ message: 'Please select a valid cancellation policy' }),
     }),
 
