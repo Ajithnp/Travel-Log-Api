@@ -6,6 +6,7 @@ import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 
+
 @injectable()
 export class AdminCategoryController implements IAdminCategoryController {
   constructor(
@@ -21,6 +22,21 @@ export class AdminCategoryController implements IAdminCategoryController {
     const successResponse: IApiResponse = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.CATEGORY_CREATED,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  updateCategory = asyncHandler(async (req, res) => {
+    const adminId = "12345"
+    const { id } = req.params;
+    const payload = req.body;
+console.log('all data', req.body)
+    await this._adminCategoryService.updateCategory(adminId, id, payload);
+
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.CATEGORY_UPDATED,
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);

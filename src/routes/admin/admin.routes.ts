@@ -9,7 +9,7 @@ import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import { BlockOrUnblockUserSchema } from '../../types/dtos/admin/user/request.dtos';
 import { UpdateVendorVerificationSchema } from '../../types/dtos/admin/vendor/request.dtos';
 import { IAdminCategoryController } from '../../interfaces/controller_interfaces/admin/IAdminCategoryController';
-import { createCategorySchema } from '../../validators/admin/category.validation';
+import { createCategorySchema , updateCategorySchema} from '../../validators/admin/category.validation';
 @injectable()
 export class AdminRoutes extends BaseRoute {
   constructor(
@@ -68,10 +68,18 @@ export class AdminRoutes extends BaseRoute {
     // =================Category management===================
     this._router.post(
       '/category',
-      isAuthenticated,
-      authorize([USER_ROLES.ADMIN]),
+      // isAuthenticated,
+      // authorize([USER_ROLES.ADMIN]),
       validateDTO(createCategorySchema),
       this._adminCategoryController.createCategory.bind(this._adminCategoryController),
+    );
+
+      this._router.put(
+      '/category/:id',
+      // isAuthenticated,
+      // authorize([USER_ROLES.ADMIN]),
+      validateDTO(updateCategorySchema),
+      this._adminCategoryController.updateCategory.bind(this._adminCategoryController),
     );
   }
 }

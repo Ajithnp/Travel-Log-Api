@@ -13,7 +13,10 @@ const categoryDescription = z
 
 const categoryIcon = z
   .object({
-    key: z.string().trim(),
+    key: z.string({ required_error: "Icon key required" }).trim(),
+  },{
+    invalid_type_error: "Input type error",
+    required_error: "Icon is required",
   })
   .optional();
 
@@ -29,4 +32,17 @@ export const createCategorySchema = z.object({
   body: createCategoryBodySchema,
 });
 
+// update
+export const updateCategoryBodySchema = z.object({
+  description:categoryDescription,
+  icon:categoryIcon,
+}).refine(
+  data => Object.values(data).some(v => v !== undefined),
+  { message: 'At least one field must be provided for update' }
+)
 
+
+export const updateCategorySchema = z.object({
+    params: z.object({id: z.string(),}),
+    body: updateCategoryBodySchema,
+});

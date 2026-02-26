@@ -25,9 +25,9 @@ const CategorySchema = new Schema<ICategory>(
     },
 
     icon: {
-       key: {
-         type: String,
-         trim: true,
+      key: {
+        type: String,
+        trim: true,
       },
     },
 
@@ -66,7 +66,6 @@ const CategorySchema = new Schema<ICategory>(
     versionKey: false,
   },
 );
-
 
 CategorySchema.index({ name: 1 }, { unique: true });
 CategorySchema.index({ status: 1, isActive: 1 });

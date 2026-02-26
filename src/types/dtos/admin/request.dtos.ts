@@ -12,3 +12,5 @@ export interface ICreateCategoryInputDTO {
   description: string;
   icon?: IFile;
 }
+
+export type IUpdateCategoryInputDTO = Partial<Omit<ICreateCategoryInputDTO, 'name'>>;
