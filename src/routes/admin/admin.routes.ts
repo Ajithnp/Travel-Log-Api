@@ -91,5 +91,12 @@ export class AdminRoutes extends BaseRoute {
       authorize([USER_ROLES.ADMIN]),
       this._adminCategoryController.toggleCategoryStatus.bind(this._adminCategoryController),
     );
+
+    this._router.get(
+      '/category',
+      // isAuthenticated,
+      // authorize([USER_ROLES.ADMIN]),
+      this._adminCategoryController.getAllCategories.bind(this._adminCategoryController),
+    );
   }
 }

@@ -10,7 +10,11 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { generateSlug } from '../../shared/utils/slug.generator.helper';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
-import { CATEGORY_STATUS } from '../../shared/constants/constants';
+import { CATEGORY_STATUS, CategoryStatus } from '../../shared/constants/constants';
+import { PaginatedCategoryResponse, PaginatedData } from '../../types/common/IPaginationResponse';
+import { CategoryFilters } from '../../types/db';
+import { CategoryResponseDTO } from '../../types/dtos/admin/response.dtos';
+import { ICategory } from 'types/entities/category.entity';
 
 @injectable()
 export class CategoryService implements IAdminCategoryService {
@@ -18,6 +22,23 @@ export class CategoryService implements IAdminCategoryService {
     @inject('ICategoryRepository')
     private _categoryRepository: ICategoryRepository,
   ) {}
+
+  private toResponse(cat: ICategory): CategoryResponseDTO {
+    return {
+      id: cat._id.toString(),
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description ?? null,
+      icon: cat.icon ?? null,
+      isActive: cat.isActive,
+      status: cat.status,
+      createdBy: cat.createdBy?.toString() ?? null,
+      requestedBy: cat.requestedBy?.toString() ?? null,
+      rejectionReason: cat.rejectionReason ?? null,
+      createdAt: cat.createdAt,
+      updatedAt: cat.updatedAt,
+    };
+  }
 
   async createCategory(adminId: string, data: ICreateCategoryInputDTO): Promise<void> {
     const adminObjectId = toObjectId(adminId);
@@ -74,5 +95,27 @@ export class CategoryService implements IAdminCategoryService {
     await this._categoryRepository.toggleStatus(id, newIsActive, newStatus);
 
     return newIsActive;
+  }
+
+    async getAllCategories(filters: CategoryFilters): Promise<PaginatedCategoryResponse> {
+      
+    const invalidStatuses = new Set<CategoryStatus>([
+      CATEGORY_STATUS.ACTIVE,
+      CATEGORY_STATUS.INACTIVE,
+    ]);
+    if (filters.status && !invalidStatuses.has(filters.status)) {
+      throw new AppError(`Filter by '${filters.status}' is not permitted`, HTTP_STATUS.BAD_REQUEST);
+    }
+    const data = await this._categoryRepository.findAllCategory({
+      ...filters,
+    });
+
+    return {
+      data: data.categories.map(this.toResponse.bind(this)),
+      totalDocs: data.total,
+      currentPage: filters.page,
+      totalPages: Math.ceil(data.total / filters.limit),
+      stats: data.stats,
+    };
   }
 }

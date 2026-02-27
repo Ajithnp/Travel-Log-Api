@@ -5,9 +5,11 @@ import asyncHandler from 'express-async-handler';
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
-import { RequestHandler } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
-import { ParsedQs } from 'qs';
+
+import { getPaginationOptions } from '../../shared/utils/pagination.helper';
+import { CategoryFilters } from '../../types/db';
+
+import { CategoryStatus } from '../../shared/constants/constants';
 
 @injectable()
 export class AdminCategoryController implements IAdminCategoryController {
@@ -45,15 +47,36 @@ export class AdminCategoryController implements IAdminCategoryController {
 
   toggleCategoryStatus = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    console.log('id')
     const isActivated = await this._adminCategoryService.toggleCategoryStatus(id);
-   console.log('actate', isActivated)
+
     const successResponse: IApiResponse = {
       success: SUCCESS_STATUS.SUCCESS,
       message: isActivated
         ? SUCCESS_MESSAGES.CATEGORY_ACTIVATED
         : SUCCESS_MESSAGES.CATEGORY_DEACTIVATED,
     };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getAllCategories = asyncHandler(async (req, res) => {
+    const { page, limit, search, selectedFilter } = getPaginationOptions(req);
+    const filters: CategoryFilters = {
+      status: selectedFilter as CategoryStatus,
+      search: search,
+      page: page || 1,
+      limit: limit || 10,
+    };
+
+    console.log('finter option', filters);
+
+    const result = await this._adminCategoryService.getAllCategories(filters);
+
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 }

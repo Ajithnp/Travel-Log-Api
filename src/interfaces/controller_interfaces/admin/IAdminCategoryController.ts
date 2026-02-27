@@ -4,4 +4,5 @@ export interface IAdminCategoryController {
   createCategory: RequestHandler;
   updateCategory: RequestHandler;
   toggleCategoryStatus: RequestHandler;
+  getAllCategories: RequestHandler;
 }
