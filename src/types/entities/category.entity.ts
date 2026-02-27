@@ -13,6 +13,12 @@ export interface ICategory extends Document {
   createdBy?: Types.ObjectId;
   requestedBy?: Types.ObjectId;
   rejectionReason?: string;
+  vendorNote?: string;
+  adminNote?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ICategoryRequestPopulated extends Omit<ICategory, 'requestedBy'> {
+  requestedBy: { _id: string; name: string; email: string };
 }

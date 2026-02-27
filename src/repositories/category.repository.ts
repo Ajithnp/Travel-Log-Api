@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
 import { BaseRepository } from './base.repository';
-import { ICategory } from '../types/entities/category.entity';
+import { ICategory, ICategoryRequestPopulated } from '../types/entities/category.entity';
 import { CategoryModel } from '../models/category.model';
 import { ICategoryRepository } from '../interfaces/repository_interfaces/ICategoryRepository';
 import mongoose from 'mongoose';
@@ -148,5 +148,28 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
       total: result.total,
       stats: result.stats,
     };
+  }
+
+  async findPendingRequests(
+    page: number,
+    limit: number,
+  ): Promise<{ requests: ICategoryRequestPopulated[]; total: number }> {
+    const query = { status: CATEGORY_STATUS.PENDING };
+    const skip = (page - 1) * limit;
+
+    const [requests, total] = await Promise.all([
+      CategoryModel.find(query)
+        .populate<{ requestedBy: { _id: string; name: string; email: string } }>(
+          'requestedBy',
+          'name email',
+        ) // vendor info
+        .sort({ createdAt: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean<ICategoryRequestPopulated[]>(),
+      CategoryModel.countDocuments(query),
+    ]);
+
+    return { requests, total };
   }
 }

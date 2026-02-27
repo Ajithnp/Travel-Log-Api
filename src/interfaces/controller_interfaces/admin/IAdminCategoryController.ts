@@ -5,4 +5,5 @@ export interface IAdminCategoryController {
   updateCategory: RequestHandler;
   toggleCategoryStatus: RequestHandler;
   getAllCategories: RequestHandler;
+  getPendingRequest: RequestHandler;
 }

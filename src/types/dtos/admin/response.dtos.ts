@@ -37,3 +37,14 @@ export interface CategoryResponseDTO {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface CategoryRequestResponseDTO {
+  name: string;
+  requested: {
+    name: string;
+    email: string;
+  } | null;
+  vendorNote: string | null;
+  date: string;
+  status: CategoryStatus;
+}

@@ -1,5 +1,5 @@
 import { IBaseRepository } from './IBaseRepository';
-import { ICategory } from '../../types/entities/category.entity';
+import { ICategory, ICategoryRequestPopulated } from '../../types/entities/category.entity';
 import { CategoryStatus } from '../../shared/constants/constants';
 import { CategoryFilters, CategoryFindAllResult } from '../../types/db';
 
@@ -8,4 +8,8 @@ export interface ICategoryRepository extends IBaseRepository<ICategory> {
   findBySlug(slug: string, excludeId?: string): Promise<ICategory | null>;
   toggleStatus(id: string, isActive: boolean, status: CategoryStatus): Promise<ICategory | null>;
   findAllCategory(filters: CategoryFilters): Promise<CategoryFindAllResult>;
+  findPendingRequests(
+    page: number,
+    limit: number,
+  ): Promise<{ requests: ICategoryRequestPopulated[]; total: number }>;
 }

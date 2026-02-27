@@ -13,8 +13,11 @@ import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { CATEGORY_STATUS, CategoryStatus } from '../../shared/constants/constants';
 import { PaginatedCategoryResponse, PaginatedData } from '../../types/common/IPaginationResponse';
 import { CategoryFilters } from '../../types/db';
-import { CategoryResponseDTO } from '../../types/dtos/admin/response.dtos';
-import { ICategory } from 'types/entities/category.entity';
+import {
+  CategoryRequestResponseDTO,
+  CategoryResponseDTO,
+} from '../../types/dtos/admin/response.dtos';
+import { ICategory, ICategoryRequestPopulated } from '../../types/entities/category.entity';
 
 @injectable()
 export class CategoryService implements IAdminCategoryService {
@@ -37,6 +40,25 @@ export class CategoryService implements IAdminCategoryService {
       rejectionReason: cat.rejectionReason ?? null,
       createdAt: cat.createdAt,
       updatedAt: cat.updatedAt,
+    };
+  }
+
+  private toRequestResponse(cat: ICategoryRequestPopulated): CategoryRequestResponseDTO {
+    return {
+      name: cat.name,
+      requested: cat.requestedBy
+        ? {
+            name: cat.requestedBy.name,
+            email: cat.requestedBy.email,
+          }
+        : null,
+      vendorNote: cat.vendorNote ?? null,
+      date: new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+      }).format(cat.createdAt),
+      status: cat.status,
     };
   }
 
@@ -97,12 +119,12 @@ export class CategoryService implements IAdminCategoryService {
     return newIsActive;
   }
 
-    async getAllCategories(filters: CategoryFilters): Promise<PaginatedCategoryResponse> {
-      
+  async getAllCategories(filters: CategoryFilters): Promise<PaginatedCategoryResponse> {
     const invalidStatuses = new Set<CategoryStatus>([
       CATEGORY_STATUS.ACTIVE,
       CATEGORY_STATUS.INACTIVE,
     ]);
+
     if (filters.status && !invalidStatuses.has(filters.status)) {
       throw new AppError(`Filter by '${filters.status}' is not permitted`, HTTP_STATUS.BAD_REQUEST);
     }
@@ -116,6 +138,19 @@ export class CategoryService implements IAdminCategoryService {
       currentPage: filters.page,
       totalPages: Math.ceil(data.total / filters.limit),
       stats: data.stats,
+    };
+  }
+
+  async getPendingRequests(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedData<CategoryRequestResponseDTO>> {
+    const { requests, total } = await this._categoryRepository.findPendingRequests(page, limit);
+    return {
+      data: requests.map(this.toRequestResponse.bind(this)),
+      totalDocs: total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
     };
   }
 }

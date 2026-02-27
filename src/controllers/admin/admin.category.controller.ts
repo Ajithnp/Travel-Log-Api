@@ -62,12 +62,10 @@ export class AdminCategoryController implements IAdminCategoryController {
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
     const filters: CategoryFilters = {
       status: selectedFilter as CategoryStatus,
-      search: search,
-      page: page || 1,
-      limit: limit || 10,
+      search,
+      page,
+      limit,
     };
-
-    console.log('finter option', filters);
 
     const result = await this._adminCategoryService.getAllCategories(filters);
 
@@ -77,6 +75,19 @@ export class AdminCategoryController implements IAdminCategoryController {
       data: result,
     };
 
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getPendingRequest = asyncHandler(async (req, res) => {
+    const { page, limit } = getPaginationOptions(req);
+
+    const result = await this._adminCategoryService.getPendingRequests(page, limit);
+
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 }

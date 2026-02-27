@@ -60,6 +60,16 @@ const CategorySchema = new Schema<ICategory>(
       trim: true,
       default: null,
     },
+    vendorNote: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    adminNote: {
+      type: String,
+      trim: true,
+      default: null,
+    },
   },
   {
     timestamps: true,

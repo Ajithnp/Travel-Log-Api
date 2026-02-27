@@ -93,10 +93,10 @@ export class AdminRoutes extends BaseRoute {
     );
 
     this._router.get(
-      '/category',
-      // isAuthenticated,
-      // authorize([USER_ROLES.ADMIN]),
-      this._adminCategoryController.getAllCategories.bind(this._adminCategoryController),
+      '/category/requests',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminCategoryController.getPendingRequest.bind(this._adminCategoryController),
     );
   }
 }
