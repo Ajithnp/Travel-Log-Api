@@ -21,4 +21,10 @@ export interface IAdminCategoryService {
     page: number,
     limit: number,
   ): Promise<PaginatedData<CategoryRequestResponseDTO>>;
+  reviewCategoryRequest(adminId: string, id: string, data: ReviewInput): Promise<void>;
+}
+
+export interface ReviewInput {
+  action: 'approve' | 'reject';
+  rejectionReason?: string;
 }

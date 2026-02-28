@@ -12,3 +12,11 @@ export const CATEGORY_STATUS = {
 } as const;
 
 export type CategoryStatus = (typeof CATEGORY_STATUS)[keyof typeof CATEGORY_STATUS];
+
+export const APPROVE_REJECT_ACTIONS = {
+  APPROVE: 'approve',
+  REJECT: 'rejected',
+} as const;
+
+export type ApproveRejectActions =
+  (typeof APPROVE_REJECT_ACTIONS)[keyof typeof APPROVE_REJECT_ACTIONS];

@@ -14,3 +14,11 @@ export interface ICreateCategoryInputDTO {
 }
 
 export type IUpdateCategoryInputDTO = Partial<Omit<ICreateCategoryInputDTO, 'name'>>;
+
+export interface ReviewRequestDTO {
+  status: 'active' | 'rejected';
+  isActive: boolean;
+  adminId: string;
+  slug?: string;
+  rejectionReason?: string;
+}

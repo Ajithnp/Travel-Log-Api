@@ -4,8 +4,13 @@ import { ICategory, ICategoryRequestPopulated } from '../types/entities/category
 import { CategoryModel } from '../models/category.model';
 import { ICategoryRepository } from '../interfaces/repository_interfaces/ICategoryRepository';
 import mongoose from 'mongoose';
-import { CATEGORY_STATUS, CategoryStatus } from '../shared/constants/constants';
+import {
+  APPROVE_REJECT_ACTIONS,
+  CATEGORY_STATUS,
+  CategoryStatus,
+} from '../shared/constants/constants';
 import { CategoryFilters, CategoryFindAllResult } from '../types/db';
+import { ReviewRequestDTO } from 'types/dtos/admin/request.dtos';
 
 @injectable()
 export class CategoryRepository extends BaseRepository<ICategory> implements ICategoryRepository {
@@ -171,5 +176,25 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     ]);
 
     return { requests, total };
+  }
+
+  async reviewRequest(id: string, data: ReviewRequestDTO): Promise<ICategory | null> {
+    const updateData: Partial<ICategory> = {
+      status: data.status as CategoryStatus,
+      isActive: data.isActive,
+      createdBy: new mongoose.Types.ObjectId(data.adminId), // admin who reviewed
+    };
+
+    if (data.status === APPROVE_REJECT_ACTIONS.REJECT && data.rejectionReason) {
+      updateData.rejectionReason = data.rejectionReason;
+    } else {
+      updateData.slug = data.slug;
+    }
+
+    return this.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true },
+    ) as Promise<ICategory | null>;
   }
 }

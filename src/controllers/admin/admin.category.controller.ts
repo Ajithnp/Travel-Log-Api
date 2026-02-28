@@ -5,12 +5,10 @@ import asyncHandler from 'express-async-handler';
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
-
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
 import { CategoryFilters } from '../../types/db';
-
 import { CategoryStatus } from '../../shared/constants/constants';
-
+import { APPROVE_REJECT_ACTIONS } from '../../shared/constants/constants';
 @injectable()
 export class AdminCategoryController implements IAdminCategoryController {
   constructor(
@@ -87,6 +85,26 @@ export class AdminCategoryController implements IAdminCategoryController {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
       data: result,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  reviewCategoryRequest = asyncHandler(async (req, res) => {
+    const adminId = '68ea7bc7e534a813e0efdbe0';
+    const { id } = req.params;
+    const { action, rejectionReason } = req.body;
+
+    await this._adminCategoryService.reviewCategoryRequest(adminId, id, {
+      action,
+      rejectionReason,
+    });
+
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message:
+        action === APPROVE_REJECT_ACTIONS.APPROVE
+          ? SUCCESS_MESSAGES.CATEGORY_REQUEST_APPROVED
+          : SUCCESS_MESSAGES.CATEGORY_REQUEST_REJECTED,
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });

@@ -49,3 +49,29 @@ export const updateCategorySchema = z.object({
   params: z.object({ id: z.string() }),
   body: updateCategoryBodySchema,
 });
+
+//=============================
+export const reviewCategoryBodySchema = z
+  .object({
+    action: z.enum(['approve', 'rejected'], {
+      required_error: 'action is required',
+      invalid_type_error: 'action must be "approve" or "reject"',
+    }),
+    rejectionReason: z
+      .string()
+      .trim()
+      .min(10, 'Rejection reason must be at least 10 characters')
+      .max(500, 'Rejection reason cannot exceed 500 characters')
+      .optional(),
+  })
+  .refine((data) => !(data.action === 'rejected' && !data.rejectionReason?.trim()), {
+    message: 'rejectionReason is required when action is "reject"',
+    path: ['rejectionReason'],
+  });
+
+export const reviewCategorySchema = z.object({
+  params: z.object({ id: z.string() }),
+  body: reviewCategoryBodySchema,
+});
+
+//=============================

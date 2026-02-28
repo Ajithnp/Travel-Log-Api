@@ -11,6 +11,7 @@ import { UpdateVendorVerificationSchema } from '../../types/dtos/admin/vendor/re
 import { IAdminCategoryController } from '../../interfaces/controller_interfaces/admin/IAdminCategoryController';
 import {
   createCategorySchema,
+  reviewCategorySchema,
   updateCategorySchema,
 } from '../../validators/admin/category.validation';
 @injectable()
@@ -92,11 +93,12 @@ export class AdminRoutes extends BaseRoute {
       this._adminCategoryController.toggleCategoryStatus.bind(this._adminCategoryController),
     );
 
-    this._router.get(
-      '/category/requests',
+    this._router.patch(
+      '/category/requests/:id/review',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
-      this._adminCategoryController.getPendingRequest.bind(this._adminCategoryController),
+      validateDTO(reviewCategorySchema),
+      this._adminCategoryController.reviewCategoryRequest.bind(this._adminCategoryController),
     );
   }
 }

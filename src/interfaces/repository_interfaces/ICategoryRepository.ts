@@ -2,6 +2,7 @@ import { IBaseRepository } from './IBaseRepository';
 import { ICategory, ICategoryRequestPopulated } from '../../types/entities/category.entity';
 import { CategoryStatus } from '../../shared/constants/constants';
 import { CategoryFilters, CategoryFindAllResult } from '../../types/db';
+import { ReviewRequestDTO } from '../../types/dtos/admin/request.dtos';
 
 export interface ICategoryRepository extends IBaseRepository<ICategory> {
   findByName(name: string): Promise<ICategory | null>;
@@ -12,4 +13,5 @@ export interface ICategoryRepository extends IBaseRepository<ICategory> {
     page: number,
     limit: number,
   ): Promise<{ requests: ICategoryRequestPopulated[]; total: number }>;
+  reviewRequest(id: string, data: ReviewRequestDTO): Promise<ICategory | null>;
 }

@@ -1,5 +1,8 @@
 import { inject, injectable } from 'tsyringe';
-import { IAdminCategoryService } from '../../interfaces/service_interfaces/admin/ICategoryService';
+import {
+  IAdminCategoryService,
+  ReviewInput,
+} from '../../interfaces/service_interfaces/admin/ICategoryService';
 import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICategoryRepository';
 import {
   ICreateCategoryInputDTO,
@@ -10,7 +13,11 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { generateSlug } from '../../shared/utils/slug.generator.helper';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
-import { CATEGORY_STATUS, CategoryStatus } from '../../shared/constants/constants';
+import {
+  APPROVE_REJECT_ACTIONS,
+  CATEGORY_STATUS,
+  CategoryStatus,
+} from '../../shared/constants/constants';
 import { PaginatedCategoryResponse, PaginatedData } from '../../types/common/IPaginationResponse';
 import { CategoryFilters } from '../../types/db';
 import {
@@ -152,5 +159,48 @@ export class CategoryService implements IAdminCategoryService {
       currentPage: page,
       totalPages: Math.ceil(total / limit),
     };
+  }
+
+  async reviewCategoryRequest(adminId: string, id: string, data: ReviewInput): Promise<void> {
+    const category = await this._categoryRepository.findById(id);
+
+    if (!category) {
+      throw new AppError(ERROR_MESSAGES.CATEGORY_REQUEST_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    if (category.status !== CATEGORY_STATUS.PENDING) {
+      throw new AppError(
+        `This request has already been ${category.status}. Cannot review again.`,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
+
+    if (data.action === APPROVE_REJECT_ACTIONS.APPROVE) {
+      const duplicate = await this._categoryRepository.findByName(category.name);
+      if (duplicate && duplicate._id.toString() !== id) {
+        throw new AppError(
+          `An active category named "${category.name}" already exists. ` +
+            `Reject this request and inform the vendor.`,
+          HTTP_STATUS.CONFLICT,
+        );
+      }
+
+      const slug = generateSlug(category.name);
+
+      const approved = await this._categoryRepository.reviewRequest(id, {
+        status: CATEGORY_STATUS.ACTIVE,
+        slug,
+        isActive: true,
+        adminId,
+      });
+      return;
+    }
+
+    const rejected = await this._categoryRepository.reviewRequest(id, {
+      status: CATEGORY_STATUS.REJECTED,
+      isActive: false,
+      adminId,
+      rejectionReason: data.rejectionReason!.trim(),
+    });
   }
 }
