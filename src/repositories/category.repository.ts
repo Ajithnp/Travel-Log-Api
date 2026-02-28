@@ -19,13 +19,13 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
   }
 
   async findByName(name: string): Promise<ICategory | null> {
-    return CategoryModel.findOne({
+    return this.findOne({
       name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
-    }).lean() as Promise<ICategory | null>;
+    })as Promise<ICategory | null>;
   }
 
   async findBySlug(slug: string): Promise<ICategory | null> {
-    return CategoryModel.findOne({ slug: slug.toLowerCase() }).lean() as Promise<ICategory | null>;
+    return this.findOne({ slug: slug.toLowerCase() }) as Promise<ICategory | null>;
   }
 
   async toggleStatus(
@@ -33,11 +33,11 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     isActive: boolean,
     status: CategoryStatus,
   ): Promise<ICategory | null> {
-    return CategoryModel.findByIdAndUpdate(
+    return this.findByIdAndUpdate(
       id,
       { $set: { isActive, status } },
       { new: true },
-    ).lean() as Promise<ICategory | null>;
+    ) as Promise<ICategory | null>;
   }
 
   async findAllCategory(filters: CategoryFilters): Promise<CategoryFindAllResult> {
@@ -56,7 +56,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
 
     const skip = (filters.page - 1) * filters.limit;
 
-    const [result] = await CategoryModel.aggregate([
+    const [result] = await this.model.aggregate([
       { $match: searchMatch },
 
       {
@@ -163,7 +163,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     const skip = (page - 1) * limit;
 
     const [requests, total] = await Promise.all([
-      CategoryModel.find(query)
+      this.model.find(query)
         .populate<{ requestedBy: { _id: string; name: string; email: string } }>(
           'requestedBy',
           'name email',
