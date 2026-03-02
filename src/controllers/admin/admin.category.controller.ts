@@ -44,7 +44,6 @@ export class AdminCategoryController implements IAdminCategoryController {
   });
 
   toggleCategoryStatus = asyncHandler(async (req, res) => {
-    console.log('category paload', req.body);
     const { id } = req.params;
     const isActivated = await this._adminCategoryService.toggleCategoryStatus(id);
 
