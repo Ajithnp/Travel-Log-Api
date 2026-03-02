@@ -44,6 +44,7 @@ export class AdminCategoryController implements IAdminCategoryController {
   });
 
   toggleCategoryStatus = asyncHandler(async (req, res) => {
+    console.log('category paload', req.body);
     const { id } = req.params;
     const isActivated = await this._adminCategoryService.toggleCategoryStatus(id);
 
@@ -77,9 +78,9 @@ export class AdminCategoryController implements IAdminCategoryController {
   });
 
   getPendingRequest = asyncHandler(async (req, res) => {
-    const { page, limit } = getPaginationOptions(req);
+    const { page, limit, search } = getPaginationOptions(req);
 
-    const result = await this._adminCategoryService.getPendingRequests(page, limit);
+    const result = await this._adminCategoryService.getPendingRequests(page, limit, search);
 
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -90,7 +91,7 @@ export class AdminCategoryController implements IAdminCategoryController {
   });
 
   reviewCategoryRequest = asyncHandler(async (req, res) => {
-    const adminId = '68ea7bc7e534a813e0efdbe0';
+    const adminId = req.user?.id!;
     const { id } = req.params;
     const { action, rejectionReason } = req.body;
 
@@ -105,6 +106,24 @@ export class AdminCategoryController implements IAdminCategoryController {
         action === APPROVE_REJECT_ACTIONS.APPROVE
           ? SUCCESS_MESSAGES.CATEGORY_REQUEST_APPROVED
           : SUCCESS_MESSAGES.CATEGORY_REQUEST_REJECTED,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getReviwedRequest = asyncHandler(async (req, res) => {
+    const { page, limit, search, selectedFilter } = getPaginationOptions(req);
+
+    const result = await this._adminCategoryService.getReviewedRequests(
+      page,
+      limit,
+      search,
+      selectedFilter,
+    );
+
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });

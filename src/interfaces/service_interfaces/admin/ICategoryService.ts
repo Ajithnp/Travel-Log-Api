@@ -9,6 +9,7 @@ import {
 import { CategoryFilters } from '../../../types/db';
 import {
   CategoryRequestResponseDTO,
+  CategoryRequestReviewedResponseDTO,
   CategoryResponseDTO,
 } from '../../../types/dtos/admin/response.dtos';
 
@@ -20,8 +21,15 @@ export interface IAdminCategoryService {
   getPendingRequests(
     page: number,
     limit: number,
+    search?: string,
   ): Promise<PaginatedData<CategoryRequestResponseDTO>>;
   reviewCategoryRequest(adminId: string, id: string, data: ReviewInput): Promise<void>;
+  getReviewedRequests(
+    page: number,
+    limit: number,
+    search?: string,
+    selectedFilter?: string,
+  ): Promise<PaginatedData<CategoryRequestReviewedResponseDTO>>;
 }
 
 export interface ReviewInput {

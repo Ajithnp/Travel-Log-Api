@@ -23,6 +23,7 @@ import { CategoryFilters } from '../../types/db';
 import {
   CategoryRequestResponseDTO,
   CategoryResponseDTO,
+  CategoryRequestReviewedResponseDTO,
 } from '../../types/dtos/admin/response.dtos';
 import { ICategory, ICategoryRequestPopulated } from '../../types/entities/category.entity';
 
@@ -52,6 +53,7 @@ export class CategoryService implements IAdminCategoryService {
 
   private toRequestResponse(cat: ICategoryRequestPopulated): CategoryRequestResponseDTO {
     return {
+      id: cat._id.toString(),
       name: cat.name,
       requested: cat.requestedBy
         ? {
@@ -65,6 +67,28 @@ export class CategoryService implements IAdminCategoryService {
         day: '2-digit',
         year: 'numeric',
       }).format(cat.createdAt),
+      status: cat.status,
+    };
+  }
+
+  private toRequestReviwedResponse(
+    cat: ICategoryRequestPopulated,
+  ): CategoryRequestReviewedResponseDTO {
+    return {
+      id: cat._id.toString(),
+      name: cat.name,
+      requested: cat.requestedBy
+        ? {
+            name: cat.requestedBy.name,
+            email: cat.requestedBy.email,
+          }
+        : null,
+      adminNote: cat.adminNote ?? null,
+      updatedDate: new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+      }).format(cat.updatedAt),
       status: cat.status,
     };
   }
@@ -151,8 +175,13 @@ export class CategoryService implements IAdminCategoryService {
   async getPendingRequests(
     page: number,
     limit: number,
+    search?: string,
   ): Promise<PaginatedData<CategoryRequestResponseDTO>> {
-    const { requests, total } = await this._categoryRepository.findPendingRequests(page, limit);
+    const { requests, total } = await this._categoryRepository.findPendingRequests(
+      page,
+      limit,
+      search,
+    );
     return {
       data: requests.map(this.toRequestResponse.bind(this)),
       totalDocs: total,
@@ -202,5 +231,25 @@ export class CategoryService implements IAdminCategoryService {
       adminId,
       rejectionReason: data.rejectionReason!.trim(),
     });
+  }
+
+  async getReviewedRequests(
+    page: number,
+    limit: number,
+    search?: string,
+    selectedFilter?: string,
+  ): Promise<PaginatedData<CategoryRequestReviewedResponseDTO>> {
+    const { requests, total } = await this._categoryRepository.findReviewedRequest(
+      page,
+      limit,
+      search,
+      selectedFilter,
+    );
+    return {
+      data: requests.map(this.toRequestReviwedResponse.bind(this)),
+      totalDocs: total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 }

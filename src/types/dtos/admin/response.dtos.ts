@@ -39,6 +39,7 @@ export interface CategoryResponseDTO {
 }
 
 export interface CategoryRequestResponseDTO {
+  id: string;
   name: string;
   requested: {
     name: string;
@@ -46,5 +47,17 @@ export interface CategoryRequestResponseDTO {
   } | null;
   vendorNote: string | null;
   date: string;
+  status: CategoryStatus;
+}
+
+export interface CategoryRequestReviewedResponseDTO {
+  id: string;
+  name: string;
+  requested: {
+    name: string;
+    email: string;
+  } | null;
+  adminNote: string | null;
+  updatedDate: string;
   status: CategoryStatus;
 }

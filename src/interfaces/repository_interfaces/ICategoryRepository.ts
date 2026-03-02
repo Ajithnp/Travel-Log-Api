@@ -12,6 +12,13 @@ export interface ICategoryRepository extends IBaseRepository<ICategory> {
   findPendingRequests(
     page: number,
     limit: number,
+    search?: string,
   ): Promise<{ requests: ICategoryRequestPopulated[]; total: number }>;
   reviewRequest(id: string, data: ReviewRequestDTO): Promise<ICategory | null>;
+  findReviewedRequest(
+    page: number,
+    limit: number,
+    search?: string,
+    selectedFilter?: string,
+  ): Promise<{ requests: ICategoryRequestPopulated[]; total: number }>;
 }

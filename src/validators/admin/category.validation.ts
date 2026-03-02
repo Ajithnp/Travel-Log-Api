@@ -75,3 +75,20 @@ export const reviewCategorySchema = z.object({
 });
 
 //=============================
+export const reviewedCategoryBodySchema = z
+  .object({
+    selectedFilter: z
+      .enum(['active', 'rejected'], {
+        message: 'Filter must be "active" or "rejected"',
+      })
+      .optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+    search: z.string().optional(),
+  })
+  .strict();
+
+export const reviewedCategorySchema = z.object({
+  query: reviewedCategoryBodySchema,
+});
+//=================================================

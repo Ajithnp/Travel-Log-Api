@@ -21,7 +21,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
   async findByName(name: string): Promise<ICategory | null> {
     return this.findOne({
       name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
-    })as Promise<ICategory | null>;
+    }) as Promise<ICategory | null>;
   }
 
   async findBySlug(slug: string): Promise<ICategory | null> {
@@ -158,12 +158,20 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
   async findPendingRequests(
     page: number,
     limit: number,
+    search?: string,
   ): Promise<{ requests: ICategoryRequestPopulated[]; total: number }> {
-    const query = { status: CATEGORY_STATUS.PENDING };
+    const query: mongoose.FilterQuery<ICategory> = {
+      status: CATEGORY_STATUS.PENDING,
+    };
+
+    if (search?.trim()) {
+      query.name = { $regex: new RegExp(search.trim(), 'i') };
+    }
     const skip = (page - 1) * limit;
 
     const [requests, total] = await Promise.all([
-      this.model.find(query)
+      this.model
+        .find(query)
         .populate<{ requestedBy: { _id: string; name: string; email: string } }>(
           'requestedBy',
           'name email',
@@ -196,5 +204,40 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
       { $set: updateData },
       { new: true },
     ) as Promise<ICategory | null>;
+  }
+
+  async findReviewedRequest(
+    page: number,
+    limit: number,
+    search?: string,
+    selectedFilter?: string,
+  ): Promise<{ requests: ICategoryRequestPopulated[]; total: number }> {
+    const query: mongoose.FilterQuery<ICategory> = {
+      status: selectedFilter
+        ? selectedFilter
+        : { $in: [CATEGORY_STATUS.REJECTED, CATEGORY_STATUS.ACTIVE] },
+      requestedBy: { $ne: null },
+    };
+
+    if (search?.trim()) {
+      query.name = { $regex: new RegExp(search.trim(), 'i') };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [requests, total] = await Promise.all([
+      this.model
+        .find(query)
+        .populate<{
+          requestedBy: { _id: string; name: string; email: string };
+        }>('requestedBy', 'name email')
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean<ICategoryRequestPopulated[]>(),
+      this.model.countDocuments(query),
+    ]);
+
+    return { requests, total };
   }
 }

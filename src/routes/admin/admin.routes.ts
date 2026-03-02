@@ -12,6 +12,7 @@ import { IAdminCategoryController } from '../../interfaces/controller_interfaces
 import {
   createCategorySchema,
   reviewCategorySchema,
+  reviewedCategorySchema,
   updateCategorySchema,
 } from '../../validators/admin/category.validation';
 @injectable()
@@ -93,12 +94,34 @@ export class AdminRoutes extends BaseRoute {
       this._adminCategoryController.toggleCategoryStatus.bind(this._adminCategoryController),
     );
 
+    this._router.get(
+      '/category',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminCategoryController.getAllCategories.bind(this._adminCategoryController),
+    );
+
+    this._router.get(
+      '/category/requests',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminCategoryController.getPendingRequest.bind(this._adminCategoryController),
+    );
+
     this._router.patch(
       '/category/requests/:id/review',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       validateDTO(reviewCategorySchema),
       this._adminCategoryController.reviewCategoryRequest.bind(this._adminCategoryController),
+    );
+
+    this._router.get(
+      '/category/requests/reviewed',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(reviewedCategorySchema),
+      this._adminCategoryController.getReviwedRequest.bind(this._adminCategoryController),
     );
   }
 }
