@@ -9,6 +9,13 @@ export interface CategoryFilters {
   limit: number;
 }
 
+export interface FilterType {
+  selectedFilter?: string;
+  search?: string;
+  page: number;
+  limit:number
+}
+
 export interface CategoryFindAllResult {
   categories: ICategory[];
   stats: CategoryStats;

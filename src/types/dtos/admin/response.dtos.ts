@@ -61,3 +61,5 @@ export interface CategoryRequestReviewedResponseDTO {
   updatedDate: string;
   status: CategoryStatus;
 }
+
+

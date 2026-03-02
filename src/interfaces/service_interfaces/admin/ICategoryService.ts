@@ -10,7 +10,6 @@ import { CategoryFilters } from '../../../types/db';
 import {
   CategoryRequestResponseDTO,
   CategoryRequestReviewedResponseDTO,
-  CategoryResponseDTO,
 } from '../../../types/dtos/admin/response.dtos';
 
 export interface IAdminCategoryService {
@@ -30,6 +29,8 @@ export interface IAdminCategoryService {
     search?: string,
     selectedFilter?: string,
   ): Promise<PaginatedData<CategoryRequestReviewedResponseDTO>>;
+
+
 }
 
 export interface ReviewInput {

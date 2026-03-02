@@ -6,9 +6,10 @@ import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
-import { CategoryFilters } from '../../types/db';
+import { CategoryFilters} from '../../types/db';
 import { CategoryStatus } from '../../shared/constants/constants';
 import { APPROVE_REJECT_ACTIONS } from '../../shared/constants/constants';
+
 @injectable()
 export class AdminCategoryController implements IAdminCategoryController {
   constructor(
@@ -126,4 +127,5 @@ export class AdminCategoryController implements IAdminCategoryController {
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
+
 }

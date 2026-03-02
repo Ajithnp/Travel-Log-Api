@@ -1,3 +1,5 @@
+import { CategoryStatus } from "shared/constants/constants";
+
 export interface VendorProfileResponseDTO {
   id: string;
   userId?: string;
@@ -12,4 +14,13 @@ export interface VendorProfileResponseDTO {
   isProfileVerified: boolean;
   reasonForReject: string;
   createdAt: Date;
+}
+
+export interface VendorRequestedCategoryResponseDTO {
+  id: string;
+  name: string;
+  adminNote: string | null;
+  note: string | null;
+  createdAt: string;
+  status: CategoryStatus;
 }

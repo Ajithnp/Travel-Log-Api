@@ -71,6 +71,7 @@ export class CategoryService implements IAdminCategoryService {
     };
   }
 
+
   private toRequestReviwedResponse(
     cat: ICategoryRequestPopulated,
   ): CategoryRequestReviewedResponseDTO {
@@ -252,4 +253,6 @@ export class CategoryService implements IAdminCategoryService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
+
 }

@@ -17,6 +17,8 @@ import { IVendorPackageController } from '../interfaces/controller_interfaces/ve
 import { VendorPackageController } from '../controllers/vendor/vendor-package.controller';
 import { AdminCategoryController } from '../controllers/admin/admin.category.controller';
 import { IAdminCategoryController } from '../interfaces/controller_interfaces/admin/IAdminCategoryController';
+import { IVendorCategoryController } from '../interfaces/controller_interfaces/vendor/IVendorCategoryController';
+import { VendorCategoryController } from '../controllers/vendor/vendor-category.controller';
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -32,6 +34,10 @@ export class ControllerRegistry {
     });
     container.register<IVendorPackageController>('IVendorPackageController', {
       useClass: VendorPackageController,
+    });
+
+    container.register<IVendorCategoryController>('IVendorCategoryController', {
+      useClass: VendorCategoryController,
     });
 
     //admin controllers

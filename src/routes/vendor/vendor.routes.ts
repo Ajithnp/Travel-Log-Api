@@ -13,6 +13,8 @@ import {
   updateProfileLogoSchema,
 } from '../../types/dtos/vendor/request.dtos';
 import { PackageCreateUnionSchema } from '../../validators/vendor/package/base-package.schema';
+import { IVendorCategoryController } from '../../interfaces/controller_interfaces/vendor/IVendorCategoryController';
+import { getRequestedCategorySchema } from 'validators/vendor/category.validation';
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
@@ -20,6 +22,8 @@ export class VendorRoutes extends BaseRoute {
     private _vendorController: IVendorController,
     @inject('IVendorPackageController')
     private _vendorPackageController: IVendorPackageController,
+    @inject('IVendorCategoryController')
+    private _vendorCategoryController: IVendorCategoryController,
   ) {
     super();
     this.initializeRoutes();
@@ -78,6 +82,16 @@ export class VendorRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._vendorPackageController.fetPackagesWithId.bind(this._vendorPackageController),
+    );
+
+    //======================category mgnt===================
+    
+    this._router.get(
+      '/category/request',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(getRequestedCategorySchema),
+      this._vendorCategoryController.getVendorsRequestCategories.bind(this._vendorPackageController),
     );
   }
 }

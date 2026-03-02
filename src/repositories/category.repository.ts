@@ -2,14 +2,14 @@ import { injectable } from 'tsyringe';
 import { BaseRepository } from './base.repository';
 import { ICategory, ICategoryRequestPopulated } from '../types/entities/category.entity';
 import { CategoryModel } from '../models/category.model';
-import { ICategoryRepository } from '../interfaces/repository_interfaces/ICategoryRepository';
+import { ICategoryRepository, PaginatedVendorCategoryResult } from '../interfaces/repository_interfaces/ICategoryRepository';
 import mongoose from 'mongoose';
 import {
   APPROVE_REJECT_ACTIONS,
   CATEGORY_STATUS,
   CategoryStatus,
 } from '../shared/constants/constants';
-import { CategoryFilters, CategoryFindAllResult } from '../types/db';
+import { CategoryFilters, CategoryFindAllResult, FilterType } from '../types/db';
 import { ReviewRequestDTO } from 'types/dtos/admin/request.dtos';
 
 @injectable()
@@ -239,5 +239,36 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     ]);
 
     return { requests, total };
+  }
+
+  async findVendorCategory(vendorId: string, filter: FilterType): Promise<PaginatedVendorCategoryResult> {
+    const query: mongoose.FilterQuery<ICategory> = {
+      requestedBy: new mongoose.Types.ObjectId(vendorId),
+      status: CATEGORY_STATUS.PENDING
+    };
+
+    if (filter.search?.trim()) {
+      query.name = { $regex: new RegExp(filter.search.trim(), 'i') };
+    }
+
+    if (filter.selectedFilter) {
+      query.status = filter.selectedFilter
+    }
+    
+    const skip = (filter.page - 1) * filter.limit;
+
+      const [data, total] = await Promise.all([
+      this.model
+        .find(query)
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(filter.limit)
+        .lean<ICategory[]>(),
+        
+      this.model.countDocuments(query),
+    ]);
+
+   return {data ,total };
+
   }
 }

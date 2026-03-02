@@ -27,6 +27,8 @@ import { IPackageService } from '../interfaces/service_interfaces/vendor/IPackag
 import { PackageService } from '../services/vendor/package.service';
 import { IAdminCategoryService } from '../interfaces/service_interfaces/admin/ICategoryService';
 import { CategoryService } from '../services/admin/category.service';
+import { IVendorCategoryService } from '../interfaces/service_interfaces/vendor/ICategoryService';
+import { VendorCategoryService } from '../services/vendor/category.service';
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -67,6 +69,10 @@ export class ServiceRegistry {
     });
     container.register<IPackageService>('IPackageService', {
       useClass: PackageService,
+    });
+
+    container.register<IVendorCategoryService>('IVendorCategoryService', {
+      useClass: VendorCategoryService,
     });
 
     //admin-services
