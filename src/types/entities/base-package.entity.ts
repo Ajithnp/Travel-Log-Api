@@ -48,7 +48,7 @@ export interface IBasePackageEntity extends Document {
   inclusions?: string[];
   exclusions?: string[];
   packingList?: string[];
-  cancellationPolicy?: 'Flexible' | 'Moderate' | 'Strict' | 'Non-Refundable' ;
+  cancellationPolicy?: 'Flexible' | 'Moderate' | 'Strict' | 'Non-Refundable';
 
   difficultyLevel?: DifficultyLevel;
 

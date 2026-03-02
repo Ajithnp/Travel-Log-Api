@@ -21,7 +21,15 @@ export const SUCCESS_MESSAGES = {
   EMAIL_UPDATED: 'Email updated Successfully',
   PROFILE_UPDATED: 'Profile updated successfully',
   PACKAGE_CREATION_SUCCESS: 'Package creation successfull',
-  PACKAGE_UPDATION_SUCCESS: 'Package updation success'
+  PACKAGE_UPDATION_SUCCESS: 'Package updation success',
+
+  // category
+  CATEGORY_CREATED: 'Category created successfully',
+  CATEGORY_UPDATED: 'Category updated successfully',
+  CATEGORY_ACTIVATED: 'Category activated successfully',
+  CATEGORY_DEACTIVATED: 'Category deactivated successfully',
+  CATEGORY_REQUEST_APPROVED: 'Category request approved and is now live',
+  CATEGORY_REQUEST_REJECTED: 'Category request rejected',
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -76,4 +84,10 @@ export const ERROR_MESSAGES = {
   PACKAGE_NOT_FOUND: 'Package not found',
   PACKAGE_ACTIVE: 'This package is not active and cannot be edited.',
   PACKAGE_CANNOT_EDIT: 'This package cannot be edited.',
+
+  // category
+  CATEGORY_NOT_FOUND: 'Category not found',
+  CATEGORY_CANNOT_EDIT: 'This Category cannot be edited',
+  CATEGORY_REQUEST_NOT_FOUND: 'Category request not found',
+  CANNOT_TOGGLE: 'Cannot toggle status of a vendor category request.',
 } as const;

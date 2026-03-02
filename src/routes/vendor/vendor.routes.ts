@@ -58,12 +58,12 @@ export class VendorRoutes extends BaseRoute {
       this._vendorPackageController.createPackage.bind(this._vendorPackageController),
     );
 
-    this._router.put('/packages/:packageId',
+    this._router.put(
+      '/packages/:packageId',
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       validateDTO(PackageCreateUnionSchema),
       this._vendorPackageController.updatePackage.bind(this._vendorPackageController),
-
     );
 
     this._router.get(
@@ -81,5 +81,3 @@ export class VendorRoutes extends BaseRoute {
     );
   }
 }
-
-

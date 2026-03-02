@@ -28,8 +28,6 @@ export const CANCELLATION_POLICIES = {
 
   nonRefundable: {
     label: 'Non-Refundable',
-    rules: [
-      { daysBeforeTrip: 0, refundPercent: 0 },
-    ],
+    rules: [{ daysBeforeTrip: 0, refundPercent: 0 }],
   },
 };

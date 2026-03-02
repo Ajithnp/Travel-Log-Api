@@ -29,19 +29,19 @@ export class PackageService implements IPackageService {
     @inject('IVendorInfoRepository')
     private _vendorInfoRepository: IVendorInfoRepository,
     @inject('IFileStorageHandlerService')
-    private _fileStorageHandlerService: IFileStorageHandlerService
+    private _fileStorageHandlerService: IFileStorageHandlerService,
   ) {}
 
-  private async processPackageImages(images: { key: string; status: string }[]):Promise<IFile[]> {
+  private async processPackageImages(images: { key: string; status: string }[]): Promise<IFile[]> {
     const uploaded = images.filter((img) => img.status === 'UPLOADED');
     const removed = images.filter((img) => img.status === 'REMOVED');
 
     if (removed.length > 0) {
       await Promise.all(removed.map((img) => this._fileStorageHandlerService.deleteFile(img.key)));
     }
-    return uploaded.map(img => ({ key: img.key }));
+    return uploaded.map((img) => ({ key: img.key }));
   }
-//=======================================
+  //=======================================
   async fetchPackages(
     vendorId: string,
     page: number,
@@ -116,18 +116,20 @@ export class PackageService implements IPackageService {
   }
 
   //==================================================================
-    async createPackage(vendorId: string, payload: CreateBasePackageDTO): Promise<{ packageId: string }> {
-      
-      const vendorObjectId = toObjectId(vendorId);
+  async createPackage(
+    vendorId: string,
+    payload: CreateBasePackageDTO,
+  ): Promise<{ packageId: string }> {
+    const vendorObjectId = toObjectId(vendorId);
 
-      // Step 1 — Only approved vendors can create packages
-      const vendor = await this._vendorInfoRepository.findVendorWithUserId(vendorId);
-  
+    // Step 1 — Only approved vendors can create packages
+    const vendor = await this._vendorInfoRepository.findVendorWithUserId(vendorId);
+
     if (!vendor || vendor.status !== VENDOR_VERIFICATION_STATUS.APPROVED) {
       throw new AppError(ERROR_MESSAGES.VENDOR_NOT_VERIFIED, HTTP_STATUS.FORBIDDEN);
-      }
-      
-      // Step 2 — Prevent duplicate published packages with same title
+    }
+
+    // Step 2 — Prevent duplicate published packages with same title
     if (payload.title) {
       const existingPublished = await this._basePackageRepository.findOne({
         vendorId: vendorObjectId,
@@ -139,20 +141,20 @@ export class PackageService implements IPackageService {
         throw new AppError(ERROR_MESSAGES.PACKAGE_ALREADY_EXISTS, HTTP_STATUS.CONFLICT);
       }
     }
-      
-      // Step 3 — Process images if any were sent
+
+    // Step 3 — Process images if any were sent
     let imageKeys: IFile[] | undefined;
     if (payload.images && payload.images.length > 0) {
       imageKeys = await this.processPackageImages(payload.images);
     }
-       
-     const newPackage = await this._basePackageRepository.create({
-        ...payload,
-        vendorId: vendorObjectId,
-        ...(imageKeys && { images: imageKeys }),
-     });
-      
-      return {packageId: newPackage._id.toString()};
+
+    const newPackage = await this._basePackageRepository.create({
+      ...payload,
+      vendorId: vendorObjectId,
+      ...(imageKeys && { images: imageKeys }),
+    });
+
+    return { packageId: newPackage._id.toString() };
   }
   //==========================================================
   async updatePackage(vendorId: string, packageId: string, payload: CreateBasePackageDTO) {
@@ -168,21 +170,24 @@ export class PackageService implements IPackageService {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    if (existingPackage.status === PACKAGE_STATUS.SOFT_DELETED || existingPackage.status === PACKAGE_STATUS.PUBLISHED) {
+    if (
+      existingPackage.status === PACKAGE_STATUS.SOFT_DELETED ||
+      existingPackage.status === PACKAGE_STATUS.PUBLISHED
+    ) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_CANNOT_EDIT, HTTP_STATUS.BAD_REQUEST);
     }
-    
+
     let imageKeys: IFile[] | undefined;
-      
+
     if (payload.images) {
-         imageKeys = await this.processPackageImages(payload.images);
-      }
-      
+      imageKeys = await this.processPackageImages(payload.images);
+    }
+
     await this._basePackageRepository.findOneAndUpdate(
       { _id: packageObjectId },
       {
-          ...payload,
-          ...(imageKeys && { images: imageKeys }),
+        ...payload,
+        ...(imageKeys && { images: imageKeys }),
       },
     );
   }

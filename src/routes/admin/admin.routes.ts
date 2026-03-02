@@ -8,6 +8,13 @@ import { USER_ROLES } from '../../shared/constants/roles';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import { BlockOrUnblockUserSchema } from '../../types/dtos/admin/user/request.dtos';
 import { UpdateVendorVerificationSchema } from '../../types/dtos/admin/vendor/request.dtos';
+import { IAdminCategoryController } from '../../interfaces/controller_interfaces/admin/IAdminCategoryController';
+import {
+  createCategorySchema,
+  reviewCategorySchema,
+  reviewedCategorySchema,
+  updateCategorySchema,
+} from '../../validators/admin/category.validation';
 @injectable()
 export class AdminRoutes extends BaseRoute {
   constructor(
@@ -15,6 +22,8 @@ export class AdminRoutes extends BaseRoute {
     private _adminUserContoller: IAdminUserController,
     @inject('IAdminVendorController')
     private _adminVendorController: IAdminVendorController,
+    @inject('IAdminCategoryController')
+    private _adminCategoryController: IAdminCategoryController,
   ) {
     super();
     this.initializeRoutes();
@@ -31,10 +40,9 @@ export class AdminRoutes extends BaseRoute {
 
     this._router.patch(
       '/users/:userId/status',
-      validateDTO(BlockOrUnblockUserSchema),
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
-
+      validateDTO(BlockOrUnblockUserSchema),
       this._adminUserContoller.blockOrUnblockUser.bind(this._adminUserContoller),
     );
 
@@ -49,9 +57,9 @@ export class AdminRoutes extends BaseRoute {
 
     this._router.patch(
       '/update-vendor-verification/:vendorId',
-      validateDTO(UpdateVendorVerificationSchema),
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
+      validateDTO(UpdateVendorVerificationSchema),
       this._adminVendorController.updateVendorVerification.bind(this._adminVendorController),
     );
 
@@ -60,6 +68,60 @@ export class AdminRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       this._adminVendorController.getVendors.bind(this._adminVendorController),
+    );
+
+    // =================Category management===================
+    this._router.post(
+      '/category',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(createCategorySchema),
+      this._adminCategoryController.createCategory.bind(this._adminCategoryController),
+    );
+
+    this._router.put(
+      '/category/:id',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(updateCategorySchema),
+      this._adminCategoryController.updateCategory.bind(this._adminCategoryController),
+    );
+
+    this._router.patch(
+      '/category/:id/toggle',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminCategoryController.toggleCategoryStatus.bind(this._adminCategoryController),
+    );
+
+    this._router.get(
+      '/category',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminCategoryController.getAllCategories.bind(this._adminCategoryController),
+    );
+
+    this._router.get(
+      '/category/requests',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminCategoryController.getPendingRequest.bind(this._adminCategoryController),
+    );
+
+    this._router.patch(
+      '/category/requests/:id/review',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(reviewCategorySchema),
+      this._adminCategoryController.reviewCategoryRequest.bind(this._adminCategoryController),
+    );
+
+    this._router.get(
+      '/category/requests/reviewed',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(reviewedCategorySchema),
+      this._adminCategoryController.getReviwedRequest.bind(this._adminCategoryController),
     );
   }
 }

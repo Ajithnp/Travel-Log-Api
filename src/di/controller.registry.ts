@@ -15,6 +15,8 @@ import { IS3Controller } from '../interfaces/controller_interfaces/IS3Controller
 import { S3Controller } from '../controllers/s3.controller';
 import { IVendorPackageController } from '../interfaces/controller_interfaces/vendor/IVendorPackageController';
 import { VendorPackageController } from '../controllers/vendor/vendor-package.controller';
+import { AdminCategoryController } from '../controllers/admin/admin.category.controller';
+import { IAdminCategoryController } from '../interfaces/controller_interfaces/admin/IAdminCategoryController';
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -38,6 +40,9 @@ export class ControllerRegistry {
     });
     container.register<IAdminVendorController>('IAdminVendorController', {
       useClass: AdminVendorController,
+    });
+    container.register<IAdminCategoryController>('IAdminCategoryController', {
+      useClass: AdminCategoryController,
     });
 
     //user controllers
