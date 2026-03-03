@@ -14,7 +14,7 @@ import {
   reviewCategorySchema,
   reviewedCategorySchema,
   updateCategorySchema,
-} from '../../validators/admin/category.validation';
+} from '../../validators/category.validation';
 @injectable()
 export class AdminRoutes extends BaseRoute {
   constructor(

@@ -101,3 +101,10 @@ export const UpdateProfileLogoRequestSchema = z.object({
 });
 
 export type UpdateProfileLogoRequestDTO = z.infer<typeof updateProfileLogoSchema>;
+
+//==== category=====
+
+export interface VendorCategoryRequestInputDTO {
+  name: string;
+  vendorNote: string;
+}

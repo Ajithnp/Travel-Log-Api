@@ -26,72 +26,13 @@ import {
   CategoryRequestReviewedResponseDTO,
 } from '../../types/dtos/admin/response.dtos';
 import { ICategory, ICategoryRequestPopulated } from '../../types/entities/category.entity';
-
+import { CategoryMapper } from '../../shared/mappers/category.mapper';
 @injectable()
 export class CategoryService implements IAdminCategoryService {
   constructor(
     @inject('ICategoryRepository')
     private _categoryRepository: ICategoryRepository,
   ) {}
-
-  private toResponse(cat: ICategory): CategoryResponseDTO {
-    return {
-      id: cat._id.toString(),
-      name: cat.name,
-      slug: cat.slug,
-      description: cat.description ?? null,
-      icon: cat.icon ?? null,
-      isActive: cat.isActive,
-      status: cat.status,
-      createdBy: cat.createdBy?.toString() ?? null,
-      requestedBy: cat.requestedBy?.toString() ?? null,
-      rejectionReason: cat.rejectionReason ?? null,
-      createdAt: cat.createdAt,
-      updatedAt: cat.updatedAt,
-    };
-  }
-
-  private toRequestResponse(cat: ICategoryRequestPopulated): CategoryRequestResponseDTO {
-    return {
-      id: cat._id.toString(),
-      name: cat.name,
-      requested: cat.requestedBy
-        ? {
-            name: cat.requestedBy.name,
-            email: cat.requestedBy.email,
-          }
-        : null,
-      vendorNote: cat.vendorNote ?? null,
-      date: new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric',
-      }).format(cat.createdAt),
-      status: cat.status,
-    };
-  }
-
-  private toRequestReviwedResponse(
-    cat: ICategoryRequestPopulated,
-  ): CategoryRequestReviewedResponseDTO {
-    return {
-      id: cat._id.toString(),
-      name: cat.name,
-      requested: cat.requestedBy
-        ? {
-            name: cat.requestedBy.name,
-            email: cat.requestedBy.email,
-          }
-        : null,
-      adminNote: cat.adminNote ?? null,
-      updatedDate: new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric',
-      }).format(cat.updatedAt),
-      status: cat.status,
-    };
-  }
 
   async createCategory(adminId: string, data: ICreateCategoryInputDTO): Promise<void> {
     const adminObjectId = toObjectId(adminId);
@@ -164,7 +105,7 @@ export class CategoryService implements IAdminCategoryService {
     });
 
     return {
-      data: data.categories.map(this.toResponse.bind(this)),
+      data: data.categories.map(CategoryMapper.toResponse),
       totalDocs: data.total,
       currentPage: filters.page,
       totalPages: Math.ceil(data.total / filters.limit),
@@ -183,7 +124,7 @@ export class CategoryService implements IAdminCategoryService {
       search,
     );
     return {
-      data: requests.map(this.toRequestResponse.bind(this)),
+      data: requests.map(CategoryMapper.toRequestResponse),
       totalDocs: total,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
@@ -246,7 +187,7 @@ export class CategoryService implements IAdminCategoryService {
       selectedFilter,
     );
     return {
-      data: requests.map(this.toRequestReviwedResponse.bind(this)),
+      data: requests.map(CategoryMapper.toReviewedResponse),
       totalDocs: total,
       currentPage: page,
       totalPages: Math.ceil(total / limit),

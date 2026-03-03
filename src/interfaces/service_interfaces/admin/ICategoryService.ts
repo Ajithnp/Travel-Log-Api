@@ -10,7 +10,6 @@ import { CategoryFilters } from '../../../types/db';
 import {
   CategoryRequestResponseDTO,
   CategoryRequestReviewedResponseDTO,
-  CategoryResponseDTO,
 } from '../../../types/dtos/admin/response.dtos';
 
 export interface IAdminCategoryService {
