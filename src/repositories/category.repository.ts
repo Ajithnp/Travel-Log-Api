@@ -2,7 +2,10 @@ import { injectable } from 'tsyringe';
 import { BaseRepository } from './base.repository';
 import { ICategory, ICategoryRequestPopulated } from '../types/entities/category.entity';
 import { CategoryModel } from '../models/category.model';
-import { ICategoryRepository, PaginatedVendorCategoryResult } from '../interfaces/repository_interfaces/ICategoryRepository';
+import {
+  ICategoryRepository,
+  PaginatedVendorCategoryResult,
+} from '../interfaces/repository_interfaces/ICategoryRepository';
 import mongoose from 'mongoose';
 import {
   APPROVE_REJECT_ACTIONS,
@@ -241,10 +244,13 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     return { requests, total };
   }
 
-  async findVendorCategory(vendorId: string, filter: FilterType): Promise<PaginatedVendorCategoryResult> {
+  async findVendorCategory(
+    vendorId: string,
+    filter: FilterType,
+  ): Promise<PaginatedVendorCategoryResult> {
     const query: mongoose.FilterQuery<ICategory> = {
       requestedBy: new mongoose.Types.ObjectId(vendorId),
-      status: CATEGORY_STATUS.PENDING
+      status: CATEGORY_STATUS.PENDING,
     };
 
     if (filter.search?.trim()) {
@@ -252,23 +258,40 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     }
 
     if (filter.selectedFilter) {
-      query.status = filter.selectedFilter
+      query.status = filter.selectedFilter;
     }
-    
+
     const skip = (filter.page - 1) * filter.limit;
 
-      const [data, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       this.model
         .find(query)
         .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(filter.limit)
         .lean<ICategory[]>(),
-        
+
       this.model.countDocuments(query),
     ]);
 
-   return {data ,total };
+    return { data, total };
+  }
 
+  async findDuplicateRequest(vendorId: string, name: string): Promise<ICategory | null> {
+    return this.findOne({
+      requestedBy: new mongoose.Types.ObjectId(vendorId),
+      name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
+    });
+  }
+
+  async countPendingByVendor(vendorId: string): Promise<number> {
+    return this.countDocuments({
+      requestedBy: new mongoose.Types.ObjectId(vendorId),
+      status: CATEGORY_STATUS.PENDING,
+    });
+  }
+
+  async findActiveCategories(): Promise<ICategory[]> {
+    return this.findAll({ status: CATEGORY_STATUS.ACTIVE, isActive: true });
   }
 }

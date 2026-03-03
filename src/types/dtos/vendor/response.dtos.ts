@@ -1,4 +1,4 @@
-import { CategoryStatus } from "shared/constants/constants";
+import { CategoryStatus } from 'shared/constants/constants';
 
 export interface VendorProfileResponseDTO {
   id: string;

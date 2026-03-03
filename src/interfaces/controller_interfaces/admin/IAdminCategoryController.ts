@@ -8,5 +8,4 @@ export interface IAdminCategoryController {
   getPendingRequest: RequestHandler;
   reviewCategoryRequest: RequestHandler;
   getReviwedRequest: RequestHandler;
-
 }

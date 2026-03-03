@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 
 export interface IVendorCategoryController {
-
-getVendorsRequestCategories: RequestHandler;
-
+  getVendorsRequestCategories: RequestHandler;
+  getActiveCategories: RequestHandler;
+  requestCategory: RequestHandler;
 }

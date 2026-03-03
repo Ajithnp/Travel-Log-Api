@@ -23,7 +23,10 @@ export interface ICategoryRepository extends IBaseRepository<ICategory> {
   ): Promise<{ requests: ICategoryRequestPopulated[]; total: number }>;
 
   //===== vendor=======
-  findVendorCategory(vendorId: string,filter: FilterType):Promise<PaginatedVendorCategoryResult >
+  findVendorCategory(vendorId: string, filter: FilterType): Promise<PaginatedVendorCategoryResult>;
+  findActiveCategories(): Promise<ICategory[]>;
+  findDuplicateRequest(vendorId: string, name: string): Promise<ICategory | null>;
+  countPendingByVendor(vendorId: string): Promise<number>;
 }
 
 export interface PaginatedVendorCategoryResult {

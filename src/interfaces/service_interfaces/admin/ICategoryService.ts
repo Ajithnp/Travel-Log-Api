@@ -29,8 +29,6 @@ export interface IAdminCategoryService {
     search?: string,
     selectedFilter?: string,
   ): Promise<PaginatedData<CategoryRequestReviewedResponseDTO>>;
-
-
 }
 
 export interface ReviewInput {

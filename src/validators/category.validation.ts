@@ -11,6 +11,12 @@ const categoryDescription = z
   .max(300, 'Description cannot exceed 300 characters')
   .optional();
 
+const vendorNote = z
+  .string()
+  .trim()
+  .min(5, 'Category name must be at least 5 characters')
+  .max(100, 'Description cannot exceed 300 characters');
+
 const categoryIcon = z
   .object(
     {
@@ -92,3 +98,11 @@ export const reviewedCategorySchema = z.object({
   query: reviewedCategoryBodySchema,
 });
 //=================================================
+export const requestCategorySchemaBody = z.object({
+  name: categoryName,
+  vendorNote: vendorNote,
+});
+
+export const requestCategorySchema = z.object({
+  body: requestCategorySchemaBody,
+});

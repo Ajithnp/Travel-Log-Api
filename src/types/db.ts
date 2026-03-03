@@ -13,7 +13,7 @@ export interface FilterType {
   selectedFilter?: string;
   search?: string;
   page: number;
-  limit:number
+  limit: number;
 }
 
 export interface CategoryFindAllResult {

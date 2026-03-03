@@ -1,5 +1,4 @@
 import { inject, injectable } from 'tsyringe';
-import upload from '../../middlewares/multer';
 import BaseRoute from '../base.route';
 import { IVendorController } from '../../interfaces/controller_interfaces/vendor/IVendorController';
 import { IVendorPackageController } from '../../interfaces/controller_interfaces/vendor/IVendorPackageController';
@@ -14,7 +13,8 @@ import {
 } from '../../types/dtos/vendor/request.dtos';
 import { PackageCreateUnionSchema } from '../../validators/vendor/package/base-package.schema';
 import { IVendorCategoryController } from '../../interfaces/controller_interfaces/vendor/IVendorCategoryController';
-import { getRequestedCategorySchema } from 'validators/vendor/category.validation';
+import { getRequestedCategorySchema } from '../../validators/vendor/category.validation';
+import { requestCategorySchema } from '../../validators/category.validation';
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
@@ -85,13 +85,30 @@ export class VendorRoutes extends BaseRoute {
     );
 
     //======================category mgnt===================
-    
+
     this._router.get(
-      '/category/request',
+      '/categories/request',
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       validateDTO(getRequestedCategorySchema),
-      this._vendorCategoryController.getVendorsRequestCategories.bind(this._vendorPackageController),
+      this._vendorCategoryController.getVendorsRequestCategories.bind(
+        this._vendorPackageController,
+      ),
+    );
+
+    this._router.get(
+      '/categories',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorCategoryController.getActiveCategories.bind(this._vendorPackageController),
+    );
+
+    this._router.post(
+      '/categories',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(requestCategorySchema),
+      this._vendorCategoryController.requestCategory.bind(this._vendorPackageController),
     );
   }
 }

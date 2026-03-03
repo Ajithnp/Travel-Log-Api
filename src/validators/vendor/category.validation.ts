@@ -1,9 +1,9 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const getRequestedCategoryBodySchema = z
   .object({
     selectedFilter: z
-      .enum(['active','rejected','pending'], {
+      .enum(['active', 'rejected', 'pending'], {
         message: 'Filter must be "active" or "rejected"',
       })
       .optional(),
