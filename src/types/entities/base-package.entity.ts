@@ -1,19 +1,15 @@
 import { Document, Types } from 'mongoose';
-
-export type PackageStatus = 'DRAFT' | 'PUBLISHED' | 'SOFT_DELETED';
+import { PackageStatus } from 'shared/constants/constants';
 export interface IFile {
   key: string;
 }
-
-export type ActivityType = 'travel' | 'meal' | 'stay' | 'sightseeing' | 'activity' | 'free';
-
 export interface Activity {
   startTime?: string;
   endTime?: string;
   title?: string;
   description?: string;
   location?: string;
-  type?: ActivityType;
+  specials?: string[];
   included?: boolean;
 }
 export interface DayItinerary {
@@ -22,18 +18,16 @@ export interface DayItinerary {
   activities?: Activity[];
 }
 
-export type PackageCategory = 'weekend' | 'adventure' | 'family' | 'honeymoon';
 
-export type DifficultyLevel = 'easy' | 'moderate' | 'hard';
+export type DifficultyLevel = 'easy'| 'moderate'| 'challenging'| 'extreme';
 
 export interface IBasePackageEntity extends Document {
   vendorId: Types.ObjectId;
 
   title?: string;
   location?: string;
-  pickupLocation?: string;
   usp?: string;
-  category?: PackageCategory;
+  categoryId?: Types.ObjectId;
 
   images?: IFile[];
 

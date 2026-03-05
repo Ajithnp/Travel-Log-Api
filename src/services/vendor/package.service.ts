@@ -2,7 +2,6 @@ import { inject, injectable } from 'tsyringe';
 import { IPackageService } from '../../interfaces/service_interfaces/vendor/IPackageService';
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
-
 import {
   CreateBasePackageDTO,
   BasePackageResponseDTO,
@@ -20,7 +19,7 @@ import { FilterQuery } from 'mongoose';
 import { IBasePackageEntity, IFile } from '../../types/entities/base-package.entity';
 import { PACKAGE_STATUS } from '../../shared/constants/constants';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
-
+import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICategoryRepository';
 @injectable()
 export class PackageService implements IPackageService {
   constructor(
@@ -30,6 +29,9 @@ export class PackageService implements IPackageService {
     private _vendorInfoRepository: IVendorInfoRepository,
     @inject('IFileStorageHandlerService')
     private _fileStorageHandlerService: IFileStorageHandlerService,
+    @inject('ICategoryRepository')
+    private _categoryRepository: ICategoryRepository,
+
   ) {}
 
   private async processPackageImages(images: { key: string; status: string }[]): Promise<IFile[]> {
@@ -121,7 +123,8 @@ export class PackageService implements IPackageService {
     payload: CreateBasePackageDTO,
   ): Promise<{ packageId: string }> {
     const vendorObjectId = toObjectId(vendorId);
-
+    
+    console.log('creation data', payload)
     // Step 1 — Only approved vendors can create packages
     const vendor = await this._vendorInfoRepository.findVendorWithUserId(vendorId);
 
@@ -141,8 +144,19 @@ export class PackageService implements IPackageService {
         throw new AppError(ERROR_MESSAGES.PACKAGE_ALREADY_EXISTS, HTTP_STATUS.CONFLICT);
       }
     }
+    
+    let categoryObjectId: Types.ObjectId | undefined;
+    if (payload.categoryId) {
+      categoryObjectId = toObjectId(payload.categoryId);
+        const category = await this._categoryRepository.findById(payload.categoryId);
 
-    // Step 3 — Process images if any were sent
+      if (!category) {
+       throw new AppError(ERROR_MESSAGES.CATEGORY_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+      }
+      if (!category.isActive) {
+        throw new AppError(ERROR_MESSAGES.CATEGORY_NOT_ACTIVE, HTTP_STATUS.BAD_REQUEST);
+      }
+    }
     let imageKeys: IFile[] | undefined;
     if (payload.images && payload.images.length > 0) {
       imageKeys = await this.processPackageImages(payload.images);
@@ -151,6 +165,7 @@ export class PackageService implements IPackageService {
     const newPackage = await this._basePackageRepository.create({
       ...payload,
       vendorId: vendorObjectId,
+      ...(categoryObjectId && { categoryId: categoryObjectId }),
       ...(imageKeys && { images: imageKeys }),
     });
 

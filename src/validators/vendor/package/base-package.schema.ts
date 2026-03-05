@@ -1,29 +1,8 @@
 import { PACKAGE_STATUS } from '../../../shared/constants/constants';
 import z from 'zod';
 
-export const CATEGORY_ENUM = [
-  'weekend',
-  'adventure',
-  'family',
-  'honeymoon',
-  'cultural',
-  'relaxation',
-  'luxury',
-] as const;
 
 export const DIFFICULTY_ENUM = ['easy', 'moderate', 'hard', 'challenging', 'extreme'] as const;
-
-export const ACTIVITY_TYPE_ENUM = [
-  'travel',
-  'meal',
-  'stay',
-  'sightseeing',
-  'activity',
-  'free',
-  'tour',
-  'transport',
-  'accommodation',
-] as const;
 
 const basePackageBackendSchema = z.object({
   status: z.nativeEnum(PACKAGE_STATUS),
@@ -41,7 +20,7 @@ const draftActivitySchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   location: z.string().optional(),
-  type: z.enum(ACTIVITY_TYPE_ENUM).optional(),
+  specials: z.array(z.string()).transform(arr => arr.filter(s => s.trim() !== "")),
   included: z.boolean().optional(),
 });
 
@@ -55,13 +34,12 @@ const draftPackageBackendSchema = basePackageBackendSchema.extend({
   title: z.string().min(3).optional(),
   location: z.string().optional(),
   usp: z.string().optional(),
-  pickupLocation: z.string().optional(),
   description: z.string().optional(),
 
   images: z.array(packageImageSchema).optional(),
   itinerary: z.array(draftItineraryDaySchema).optional(),
 
-  category: z.enum(CATEGORY_ENUM).optional(),
+  categoryId: z.string().optional(),
   difficultyLevel: z.enum(DIFFICULTY_ENUM).optional(),
 
   days: z.string().optional(),
@@ -104,9 +82,7 @@ const createActivitySchema = z.object({
 
   location: z.string().min(2, 'Activity location is required'),
 
-  type: z.enum(ACTIVITY_TYPE_ENUM, {
-    errorMap: () => ({ message: 'Please select a valid activity type' }),
-  }),
+  specials: z.array(z.string().min(1, "Special cannot be empty")),
 
   included: z.boolean(),
 });
@@ -139,9 +115,7 @@ export const publishPackageBackendSchema = basePackageBackendSchema
       .min(2, 'USP must be at least 2 characters')
       .max(100, 'USP must be at most 100 characters'),
 
-    category: z.enum(CATEGORY_ENUM, {
-      errorMap: () => ({ message: 'Please select a valid category' }),
-    }),
+    categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid category"),
 
     difficultyLevel: z.enum(DIFFICULTY_ENUM, {
       errorMap: () => ({ message: 'Please select a valid difficulty level' }),

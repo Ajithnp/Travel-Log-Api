@@ -9,6 +9,7 @@ import { IApiResponse } from 'types/common/IApiResponse';
 import { RequestHandler } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
+import { CreateBasePackageDTO } from 'validators/vendor/package/base-package.schema';
 
 @injectable()
 export class VendorPackageController implements IVendorPackageController {
@@ -19,7 +20,7 @@ export class VendorPackageController implements IVendorPackageController {
 
   createPackage = asyncHandler(async (req, res) => {
     const vendorId = req.user?.id!;
-    const payload = req.body;
+    const payload:CreateBasePackageDTO = req.body;
 
     const { packageId } = await this._packageService.createPackage(vendorId, payload);
 
