@@ -24,3 +24,8 @@ export interface VendorRequestedCategoryResponseDTO {
   createdAt: string;
   status: CategoryStatus;
 }
+
+export interface ActiveCategoriesResponseDTO {
+  id: string;
+  name: string;
+}

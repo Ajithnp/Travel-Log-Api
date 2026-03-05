@@ -48,7 +48,6 @@ const packageSchema = new Schema<IBasePackageEntity>(
 
     location: { type: String, trim: true },
 
-
     usp: { type: String, trim: true },
 
     categoryId: {

@@ -8,7 +8,7 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
 import { FilterType } from '../../types/db';
 import { VendorCategoryRequestInputDTO } from '../../types/dtos/vendor/request.dtos';
-import { VendorRequestedCategoryResponseDTO } from '../../types/dtos/vendor/response.dtos';
+import { ActiveCategoriesResponseDTO, VendorRequestedCategoryResponseDTO } from '../../types/dtos/vendor/response.dtos';
 import { generateSlug } from '../../shared/utils/slug.generator.helper';
 import { CategoryMapper } from '../../shared/mappers/category.mapper';
 @injectable()
@@ -87,8 +87,8 @@ export class VendorCategoryService implements IVendorCategoryService {
     });
   }
 
-  async getActiveCategories(): Promise<string[]> {
+  async getActiveCategories(): Promise<ActiveCategoriesResponseDTO[]> {
     const categories = await this._categoryRepository.findActiveCategories();
-    return categories.map((cat) => cat.name);
+    return categories.map(CategoryMapper.toActiveCategoriesResponse);
   }
 }
