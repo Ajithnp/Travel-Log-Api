@@ -90,5 +90,5 @@ export const ERROR_MESSAGES = {
   CATEGORY_CANNOT_EDIT: 'This Category cannot be edited',
   CATEGORY_REQUEST_NOT_FOUND: 'Category request not found',
   CANNOT_TOGGLE: 'Cannot toggle status of a vendor category request.',
-  CATEGORY_NOT_ACTIVE:'Selected category is no longer active'
+  CATEGORY_NOT_ACTIVE: 'Selected category is no longer active',
 } as const;

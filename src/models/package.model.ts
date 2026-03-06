@@ -19,7 +19,7 @@ const activitySchema = new Schema(
     title: { type: String },
     description: { type: String },
     location: { type: String },
-    specials: { type: [String], default: []},
+    specials: { type: [String], default: [] },
     included: { type: Boolean },
   },
   { _id: false },
@@ -48,16 +48,18 @@ const packageSchema = new Schema<IBasePackageEntity>(
 
     location: { type: String, trim: true },
 
+    state: { type: String, trim: true },
+
     usp: { type: String, trim: true },
 
     categoryId: {
       type: Schema.Types.ObjectId,
-      ref: 'Category'
+      ref: 'Category',
     },
 
     difficultyLevel: {
       type: String,
-      enum: ['easy', 'moderate', 'challenging', 'extreme'],
+      enum: ['Easy', 'Moderate', 'Challenging', 'Extreme'],
     },
 
     description: { type: String },

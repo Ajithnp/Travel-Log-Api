@@ -13,13 +13,13 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { Types } from 'mongoose';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
-import { BasePackageSingleResponseDTO } from '../../types/dtos/admin/response.dtos';
-import { CustomQueryOptions } from '../../types/common/IQueryOptions';
-import { FilterQuery } from 'mongoose';
-import { IBasePackageEntity, IFile } from '../../types/entities/base-package.entity';
+import { BasePackageSingleResponseDTO, PackageDetailDTO } from '../../types/dtos/admin/response.dtos';
 import { PACKAGE_STATUS } from '../../shared/constants/constants';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICategoryRepository';
+import { FilterType } from 'types/db';
+import { PackageMapper } from '../../shared/mappers/package.mapper';
+import { IBasePackagePopulated, IFile } from 'types/entities/base-package.entity';
 @injectable()
 export class PackageService implements IPackageService {
   constructor(
@@ -31,7 +31,6 @@ export class PackageService implements IPackageService {
     private _fileStorageHandlerService: IFileStorageHandlerService,
     @inject('ICategoryRepository')
     private _categoryRepository: ICategoryRepository,
-
   ) {}
 
   private async processPackageImages(images: { key: string; status: string }[]): Promise<IFile[]> {
@@ -46,75 +45,33 @@ export class PackageService implements IPackageService {
   //=======================================
   async fetchPackages(
     vendorId: string,
-    page: number,
-    limit: number,
-    search?: string,
-    selectedFilter?: string,
+    filters: FilterType,
   ): Promise<PaginatedData<BasePackageSingleResponseDTO>> {
-    const skip = (page - 1) * limit;
-
-    const query: FilterQuery<IBasePackageEntity> = {
-      vendorId,
-    };
-    if (search) {
-      query.title = { $regex: search, $options: 'i' };
-    }
-    if (selectedFilter && selectedFilter !== 'all') {
-      query.status = selectedFilter;
-    }
-
-    const options = {
-      skip,
-      limit,
-      sort: { createdAt: -1 },
-    };
-
-    const [packages, totalDocs] = await Promise.all([
-      this._basePackageRepository.findAll(query, options),
-      this._basePackageRepository.countDocuments(query),
-    ]);
-
-    const packageData: BasePackageSingleResponseDTO[] = packages.map((pkg) => ({
-      id: pkg._id.toString(),
-      title: pkg.title ?? '',
-      location: pkg.location ?? '',
-      durationDays: pkg.days ?? 0,
-      durationNights: pkg.nights ?? 0,
-      imageUrl: pkg.images?.map((image: IFile) => ({ key: image.key })) ?? [],
-      status: pkg.status,
-      category: pkg.category ?? '',
-      difficultyLevel: pkg.difficultyLevel ?? '',
-      basePrice: pkg.basePrice ?? 0,
-    }));
-
+ 
+    const { requests, total } = await this._basePackageRepository.findPackages(vendorId, filters);
     const response = {
-      data: packageData,
-      currentPage: page,
-      totalPages: Math.ceil(totalDocs / limit),
-      totalDocs,
+      data: requests.map(PackageMapper.toResponse),
+      currentPage: filters.page,
+      totalPages: Math.ceil(total / filters.limit),
+      totalDocs: total,
     };
     return response;
   }
   //====================================================================
 
-  async fetchPackagesWithId(vendorId: string, packageId: string): Promise<BasePackageResponseDTO> {
+  async fetchPackagesWithId(vendorId: string, packageId: string): Promise<PackageDetailDTO> {
     const vendorObjectId = toObjectId(vendorId);
     const packageObjectId = toObjectId(packageId);
 
-    const packageExist = await this._basePackageRepository.findOne({
-      _id: packageObjectId,
-      vendorId: vendorObjectId,
-    });
+    const packageExist = await this._basePackageRepository.findOnePopulated<IBasePackagePopulated>({
+      _id: packageObjectId,vendorId: vendorObjectId,},
+      { path: 'categoryId', select: 'name' }
+    );
 
     if (!packageExist) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
-
-    return {
-      ...packageExist.toObject(),
-      packageId: packageExist._id.toString(),
-      vendorId: vendorObjectId.toString(),
-    };
+    return PackageMapper.toDetailResponse(packageExist);
   }
 
   //==================================================================
@@ -123,8 +80,6 @@ export class PackageService implements IPackageService {
     payload: CreateBasePackageDTO,
   ): Promise<{ packageId: string }> {
     const vendorObjectId = toObjectId(vendorId);
-    
-    console.log('creation data', payload)
     // Step 1 — Only approved vendors can create packages
     const vendor = await this._vendorInfoRepository.findVendorWithUserId(vendorId);
 
@@ -144,14 +99,14 @@ export class PackageService implements IPackageService {
         throw new AppError(ERROR_MESSAGES.PACKAGE_ALREADY_EXISTS, HTTP_STATUS.CONFLICT);
       }
     }
-    
+
     let categoryObjectId: Types.ObjectId | undefined;
     if (payload.categoryId) {
       categoryObjectId = toObjectId(payload.categoryId);
-        const category = await this._categoryRepository.findById(payload.categoryId);
+      const category = await this._categoryRepository.findById(payload.categoryId);
 
       if (!category) {
-       throw new AppError(ERROR_MESSAGES.CATEGORY_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+        throw new AppError(ERROR_MESSAGES.CATEGORY_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
       }
       if (!category.isActive) {
         throw new AppError(ERROR_MESSAGES.CATEGORY_NOT_ACTIVE, HTTP_STATUS.BAD_REQUEST);
@@ -161,9 +116,10 @@ export class PackageService implements IPackageService {
     if (payload.images && payload.images.length > 0) {
       imageKeys = await this.processPackageImages(payload.images);
     }
+    const { categoryId, images, ...restPayload } = payload;
 
     const newPackage = await this._basePackageRepository.create({
-      ...payload,
+      ...restPayload,
       vendorId: vendorObjectId,
       ...(categoryObjectId && { categoryId: categoryObjectId }),
       ...(imageKeys && { images: imageKeys }),
@@ -192,6 +148,20 @@ export class PackageService implements IPackageService {
       throw new AppError(ERROR_MESSAGES.PACKAGE_CANNOT_EDIT, HTTP_STATUS.BAD_REQUEST);
     }
 
+    const { categoryId, ...restPayload } = payload;
+    let categoryObjectId: Types.ObjectId | undefined;
+
+    if (categoryId) {
+      const category = await this._categoryRepository.findById(categoryId);
+      if (!category) {
+        throw new AppError(ERROR_MESSAGES.CATEGORY_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+      }
+      if (!category.isActive) {
+        throw new AppError(ERROR_MESSAGES.CATEGORY_NOT_ACTIVE, HTTP_STATUS.BAD_REQUEST);
+      }
+      categoryObjectId = toObjectId(categoryId);
+    }
+
     let imageKeys: IFile[] | undefined;
 
     if (payload.images) {
@@ -201,7 +171,8 @@ export class PackageService implements IPackageService {
     await this._basePackageRepository.findOneAndUpdate(
       { _id: packageObjectId },
       {
-        ...payload,
+        ...restPayload,
+        ...(categoryObjectId && { categoryId: categoryObjectId }),
         ...(imageKeys && { images: imageKeys }),
       },
     );

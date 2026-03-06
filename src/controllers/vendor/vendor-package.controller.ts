@@ -10,6 +10,7 @@ import { RequestHandler } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
 import { CreateBasePackageDTO } from 'validators/vendor/package/base-package.schema';
+import { FilterType } from 'types/db';
 
 @injectable()
 export class VendorPackageController implements IVendorPackageController {
@@ -20,7 +21,7 @@ export class VendorPackageController implements IVendorPackageController {
 
   createPackage = asyncHandler(async (req, res) => {
     const vendorId = req.user?.id!;
-    const payload:CreateBasePackageDTO = req.body;
+    const payload: CreateBasePackageDTO = req.body;
 
     const { packageId } = await this._packageService.createPackage(vendorId, payload);
 
@@ -49,15 +50,13 @@ export class VendorPackageController implements IVendorPackageController {
   fetchPackages = asyncHandler(async (req, res) => {
     const vendorId = req.user?.id!;
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
-
-    const packages = await this._packageService.fetchPackages(
-      vendorId,
+    const filters: FilterType = {
       page,
       limit,
       search,
       selectedFilter,
-    );
-
+    };
+    const packages = await this._packageService.fetchPackages(vendorId, filters);
     const successResponse: IApiResponse<typeof packages> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,

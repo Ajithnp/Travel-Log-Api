@@ -1,8 +1,7 @@
 import { PACKAGE_STATUS } from '../../../shared/constants/constants';
 import z from 'zod';
 
-
-export const DIFFICULTY_ENUM = ['easy', 'moderate', 'hard', 'challenging', 'extreme'] as const;
+export const DIFFICULTY_ENUM = ['Easy', 'Moderate', 'Challenging', 'Extreme'] as const;
 
 const basePackageBackendSchema = z.object({
   status: z.nativeEnum(PACKAGE_STATUS),
@@ -20,7 +19,7 @@ const draftActivitySchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   location: z.string().optional(),
-  specials: z.array(z.string()).transform(arr => arr.filter(s => s.trim() !== "")),
+  specials: z.array(z.string()).transform((arr) => arr.filter((s) => s.trim() !== '')),
   included: z.boolean().optional(),
 });
 
@@ -33,6 +32,7 @@ const draftItineraryDaySchema = z.object({
 const draftPackageBackendSchema = basePackageBackendSchema.extend({
   title: z.string().min(3).optional(),
   location: z.string().optional(),
+  state: z.string().optional(),
   usp: z.string().optional(),
   description: z.string().optional(),
 
@@ -80,9 +80,9 @@ const createActivitySchema = z.object({
     .min(10, 'Description must be at least 10 characters')
     .max(1000, 'Description must be at most 1000 characters'),
 
-  location: z.string().min(2, 'Activity location is required'),
+  location: z.string().min(3, 'Activity location is required'),
 
-  specials: z.array(z.string().min(1, "Special cannot be empty")),
+  specials: z.array(z.string().min(1, 'Special cannot be empty')),
 
   included: z.boolean(),
 });
@@ -102,20 +102,20 @@ export const publishPackageBackendSchema = basePackageBackendSchema
 
     location: z
       .string()
-      .min(2, 'Location must be at least 2 characters')
+      .min(3, 'Location must be at least 2 characters')
       .max(100, 'Location must be at most 100 characters'),
-
-    pickupLocation: z
+    
+    state: z
       .string()
-      .min(2, 'Pickup location must be at least 2 characters')
-      .max(100, 'Pickup location must be at most 100 characters'),
+      .min(3, 'State must be at least 2 characters')
+      .max(100, 'State must be at most 100 characters'),
 
     usp: z
       .string()
       .min(2, 'USP must be at least 2 characters')
       .max(100, 'USP must be at most 100 characters'),
 
-    categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid category"),
+    categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid category'),
 
     difficultyLevel: z.enum(DIFFICULTY_ENUM, {
       errorMap: () => ({ message: 'Please select a valid difficulty level' }),

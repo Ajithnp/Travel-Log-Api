@@ -20,6 +20,7 @@ export const validateDTO =
       next();
     } catch (error) {
       if (error instanceof ZodError) {
+          // console.log("ZOD ERRORS:", JSON.stringify(error.errors, null, 2));
         next(new AppError(error.errors[0].message, HTTP_STATUS.BAD_REQUEST));
         return;
       }
