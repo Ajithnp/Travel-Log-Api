@@ -4,6 +4,8 @@ export const PACKAGE_STATUS = {
   SOFT_DELETED: 'SOFT_DELETED',
 } as const;
 
+export type PackageStatus = (typeof PACKAGE_STATUS)[keyof typeof PACKAGE_STATUS];
+
 export const CATEGORY_STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',

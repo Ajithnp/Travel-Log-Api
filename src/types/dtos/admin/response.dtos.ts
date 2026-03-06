@@ -1,4 +1,4 @@
-import { IFile } from 'types/entities/base-package.entity';
+import { DifficultyLevel, IFile } from 'types/entities/base-package.entity';
 import { PackageStatus } from '../../../types/type';
 import { CategoryStatus } from '../../../shared/constants/constants';
 export interface UserResponseDTO {
@@ -10,10 +10,13 @@ export interface UserResponseDTO {
   createdAt: string;
 }
 
+
+// =========== package ==========
 export interface BasePackageSingleResponseDTO {
   id: string;
   title: string;
   location: string;
+  state: string;
   durationDays: number;
   durationNights: number;
   imageUrl?: IFile[];
@@ -23,6 +26,51 @@ export interface BasePackageSingleResponseDTO {
   basePrice: number;
 }
 
+
+
+export interface ActivityDTO {
+  startTime: string;
+  endTime: string;
+  title: string;
+  description: string;
+  location: string;
+  specials: string[];
+  included: boolean;
+}
+
+export interface ItineraryDayDTO {
+  dayNumber: number;
+  title: string;
+  activities: ActivityDTO[];
+}
+
+export interface PackageDetailDTO {
+  packageId: string;        
+  vendorId: string;         
+  title: string;
+  location: string;
+  state: string;
+  usp: string;
+  category: string | null; 
+  difficultyLevel: DifficultyLevel | undefined;
+  description: string;
+  days: string;
+  nights: string;
+  basePrice: string;
+  images: { key: string }[];
+  itinerary: ItineraryDayDTO[];
+  inclusions: string[];
+  exclusions: string[];
+  packingList: string[];
+  cancellationPolicy: string | null;
+  status: PackageStatus;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+
+//======= category =========
 export interface CategoryResponseDTO {
   id: string;
   name: string;

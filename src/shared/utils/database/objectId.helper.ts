@@ -1,5 +1,3 @@
-// shared/database/objectId.helper.ts
-
 import { Types } from 'mongoose';
 import { AppError } from '../../../errors/AppError';
 import { HTTP_STATUS } from '../../../shared/constants/http_status_code';

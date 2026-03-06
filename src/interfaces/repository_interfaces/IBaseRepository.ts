@@ -10,6 +10,11 @@ export interface IBaseRepository<T> {
 
   findOne(query: Partial<T>): Promise<T | null>;
 
+  findOnePopulated<P = T>(
+    query: FilterQuery<T>,
+    populate: { path: string; select?: string },
+  ): Promise<P | null>; 
+
   countDocuments(filter?: FilterQuery<T>): Promise<number>;
 
   findByIdAndUpdate(

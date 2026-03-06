@@ -1,19 +1,15 @@
-import { Document, Types } from 'mongoose';
-
-export type PackageStatus = 'DRAFT' | 'PUBLISHED' | 'SOFT_DELETED';
+import mongoose, { Document, Types } from 'mongoose';
+import { PackageStatus } from 'shared/constants/constants';
 export interface IFile {
   key: string;
 }
-
-export type ActivityType = 'travel' | 'meal' | 'stay' | 'sightseeing' | 'activity' | 'free';
-
 export interface Activity {
   startTime?: string;
   endTime?: string;
   title?: string;
   description?: string;
   location?: string;
-  type?: ActivityType;
+  specials?: string[];
   included?: boolean;
 }
 export interface DayItinerary {
@@ -22,39 +18,33 @@ export interface DayItinerary {
   activities?: Activity[];
 }
 
-export type PackageCategory = 'weekend' | 'adventure' | 'family' | 'honeymoon';
-
-export type DifficultyLevel = 'easy' | 'moderate' | 'hard';
+export type DifficultyLevel = 'Easy' | 'Moderate' | 'Challenging' | 'Extreme';
 
 export interface IBasePackageEntity extends Document {
+  _id: mongoose.Types.ObjectId;
   vendorId: Types.ObjectId;
-
   title?: string;
   location?: string;
-  pickupLocation?: string;
+  state?: string;
   usp?: string;
-  category?: PackageCategory;
-
+  categoryId?: Types.ObjectId;
   images?: IFile[];
-
   days?: string;
   nights?: string;
-
   basePrice?: string;
   description?: string;
-
   itinerary?: DayItinerary[];
-
   inclusions?: string[];
   exclusions?: string[];
   packingList?: string[];
   cancellationPolicy?: 'Flexible' | 'Moderate' | 'Strict' | 'Non-Refundable';
-
   difficultyLevel?: DifficultyLevel;
-
   status: PackageStatus;
   isActive: boolean;
-
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IBasePackagePopulated extends Omit<IBasePackageEntity, 'categoryId'> {
+  categoryId: { name: string };
 }

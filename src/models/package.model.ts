@@ -1,6 +1,7 @@
 import mongoose, { Schema, model } from 'mongoose';
 import { IBasePackageEntity } from '../types/entities/base-package.entity';
 import { PACKAGE_STATUS } from '../shared/constants/constants';
+import { DifficultyLevel } from '../types/entities/base-package.entity';
 
 /* ---------- Sub Schemas ---------- */
 
@@ -18,10 +19,7 @@ const activitySchema = new Schema(
     title: { type: String },
     description: { type: String },
     location: { type: String },
-    type: {
-      type: String,
-      enum: ['tour', 'transport', 'accommodation', 'activity', 'meal'],
-    },
+    specials: { type: [String], default: [] },
     included: { type: Boolean },
   },
   { _id: false },
@@ -50,18 +48,18 @@ const packageSchema = new Schema<IBasePackageEntity>(
 
     location: { type: String, trim: true },
 
-    pickupLocation: { type: String, trim: true },
+    state: { type: String, trim: true },
 
     usp: { type: String, trim: true },
 
-    category: {
-      type: String,
-      enum: ['adventure', 'cultural', 'relaxation', 'luxury'],
+    categoryId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
     },
 
     difficultyLevel: {
       type: String,
-      enum: ['easy', 'moderate', 'challenging', 'extreme'],
+      enum: ['Easy', 'Moderate', 'Challenging', 'Extreme'],
     },
 
     description: { type: String },
