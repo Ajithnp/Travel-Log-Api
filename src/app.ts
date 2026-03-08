@@ -47,7 +47,7 @@ export default class App {
   }
 
   private configureRoutes(): void {
-    // Define routes here
+    // routes 
     this._app.use('/api/v1/auth', container.resolve(AuthRoutes).router);
     this._app.use('/api/v1/vendor', container.resolve(VendorRoutes).router);
     this._app.use('/api/v1/admin', container.resolve(AdminRoutes).router);
@@ -55,9 +55,11 @@ export default class App {
     this._app.use('/api/v1/s3', container.resolve(S3Routes).router);
   }
 
-  public start(): void {
-    this._app.listen(this._port, () => {
-      logger.info(`Server is running on http://localhost:${this._port}`);
-    });
+  public get expressApp(): Application {
+    return this._app;
+  }
+
+  public get port(): number {
+    return this._port;
   }
 }
