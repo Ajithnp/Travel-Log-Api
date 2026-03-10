@@ -30,6 +30,9 @@ export const SUCCESS_MESSAGES = {
   CATEGORY_DEACTIVATED: 'Category deactivated successfully',
   CATEGORY_REQUEST_APPROVED: 'Category request approved and is now live',
   CATEGORY_REQUEST_REJECTED: 'Category request rejected',
+
+  // schedule
+  SCHEDULE_CREATED_SUCCESSFULLY: 'Schedule created successfully',
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -84,6 +87,7 @@ export const ERROR_MESSAGES = {
   PACKAGE_NOT_FOUND: 'Package not found',
   PACKAGE_ACTIVE: 'This package is not active and cannot be edited.',
   PACKAGE_CANNOT_EDIT: 'This package cannot be edited.',
+  PACKAGE_NOT_PUBLISHED: 'Package must be published before creating a schedule. Publish it first.',
 
   // category
   CATEGORY_NOT_FOUND: 'Category not found',
@@ -91,4 +95,11 @@ export const ERROR_MESSAGES = {
   CATEGORY_REQUEST_NOT_FOUND: 'Category request not found',
   CANNOT_TOGGLE: 'Cannot toggle status of a vendor category request.',
   CATEGORY_NOT_ACTIVE: 'Selected category is no longer active',
+
+  // schedule-package
+  SCHEDULE_TRIP_ATLEAST_SEVEN_DAYS_BEFORE:
+    'Trips must be scheduled at least 7 days before the start date',
+  END_DATE_MUST_AFTER_START_DATE: 'End date must be after start date',
+  CANNOT_SCHEDULE_TRIPS_FOUR_MONTH_IN_ADVANCE:
+    'Trips cannot be scheduled more than 4 months in advance',
 } as const;

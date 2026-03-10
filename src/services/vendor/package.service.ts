@@ -13,7 +13,11 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { Types } from 'mongoose';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
-import { BasePackageSingleResponseDTO, PackageDetailDTO } from '../../types/dtos/admin/response.dtos';
+import {
+  BasePackageSingleResponseDTO,
+  PackageDetailDTO,
+  PackageScheduleContextResponseDTO,
+} from '../../types/dtos/admin/response.dtos';
 import { PACKAGE_STATUS } from '../../shared/constants/constants';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICategoryRepository';
@@ -47,7 +51,6 @@ export class PackageService implements IPackageService {
     vendorId: string,
     filters: FilterType,
   ): Promise<PaginatedData<BasePackageSingleResponseDTO>> {
- 
     const { requests, total } = await this._basePackageRepository.findPackages(vendorId, filters);
     const response = {
       data: requests.map(PackageMapper.toResponse),
@@ -63,9 +66,12 @@ export class PackageService implements IPackageService {
     const vendorObjectId = toObjectId(vendorId);
     const packageObjectId = toObjectId(packageId);
 
-    const packageExist = await this._basePackageRepository.findOnePopulated<IBasePackagePopulated>({
-      _id: packageObjectId,vendorId: vendorObjectId,},
-      { path: 'categoryId', select: 'name' }
+    const packageExist = await this._basePackageRepository.findOnePopulated<IBasePackagePopulated>(
+      {
+        _id: packageObjectId,
+        vendorId: vendorObjectId,
+      },
+      { path: 'categoryId', select: 'name' },
     );
 
     if (!packageExist) {
@@ -176,5 +182,31 @@ export class PackageService implements IPackageService {
         ...(imageKeys && { images: imageKeys }),
       },
     );
+  }
+  //========================================================================
+  async fetchPackageScheduleContext(
+    vendorId: string,
+    packageId: string,
+  ): Promise<PackageScheduleContextResponseDTO> {
+    const vendorObjectId = toObjectId(vendorId);
+    const packageObjectId = toObjectId(packageId);
+
+    const pkg = await this._basePackageRepository.findOnePopulated<IBasePackagePopulated>(
+      {
+        _id: packageObjectId,
+        vendorId: vendorObjectId,
+      },
+      { path: 'categoryId', select: 'name' },
+    );
+
+    if (!pkg) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    if (pkg.status !== PACKAGE_STATUS.PUBLISHED) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_PUBLISHED, HTTP_STATUS.BAD_REQUEST);
+    }
+
+    return PackageMapper.toScheduleContext(pkg);
   }
 }

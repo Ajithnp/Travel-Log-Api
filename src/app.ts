@@ -47,7 +47,7 @@ export default class App {
   }
 
   private configureRoutes(): void {
-    // routes 
+    // routes
     this._app.use('/api/v1/auth', container.resolve(AuthRoutes).router);
     this._app.use('/api/v1/vendor', container.resolve(VendorRoutes).router);
     this._app.use('/api/v1/admin', container.resolve(AdminRoutes).router);

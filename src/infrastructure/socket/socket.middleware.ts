@@ -12,8 +12,6 @@ import logger from '../../config/logger';
 import { parseCookies } from '../../shared/utils/cookie.parse.helper';
 type AppSocket = Socket<SocketData>;
 
-
-
 export const socketAuthMiddleware = async (
   socket: AppSocket,
   next: (err?: Error) => void,
@@ -32,7 +30,6 @@ export const socketAuthMiddleware = async (
       return next(new Error('AUTH_ERROR: Access token missing'));
     }
 
-   
     const tokenService = container.resolve<ITokenService>(SERVICE_TOKENS.TOKEN_SERVICE);
     const decoded = tokenService.verifyAccessToken(token);
 
@@ -40,7 +37,6 @@ export const socketAuthMiddleware = async (
       return next(new Error('AUTH_ERROR: Invalid token'));
     }
 
-    
     const tokenBlackListService = container.resolve<ITokenBlackListService>(
       SERVICE_TOKENS.TOKEN_BLACKLIST,
     );
@@ -50,10 +46,7 @@ export const socketAuthMiddleware = async (
       return next(new Error('AUTH_ERROR: Session expired'));
     }
 
-   
-    const userRepository = container.resolve<IUserRepository>(
-      REPOSITORY_TOKENS.USER_REPOSITORY,
-    );
+    const userRepository = container.resolve<IUserRepository>(REPOSITORY_TOKENS.USER_REPOSITORY);
     const user = await userRepository.findOne({ email: decoded.email });
 
     if (!user) {
@@ -64,14 +57,14 @@ export const socketAuthMiddleware = async (
       return next(new Error('AUTH_ERROR: Account is blocked'));
     }
 
-   
-    socket.data.userId = decoded.userId;  
+    socket.data.userId = decoded.userId;
     socket.data.role = decoded.role;
 
-    logger.info(`[Socket Auth] Authenticated: userId=${socket.data.userId} role=${socket.data.role}`);
+    logger.info(
+      `[Socket Auth] Authenticated: userId=${socket.data.userId} role=${socket.data.role}`,
+    );
 
     next(); // allow connection
-
   } catch (error) {
     logger.error('[Socket Auth] Middleware error', error);
     next(new Error('AUTH_ERROR: Unexpected error during authentication'));

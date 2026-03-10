@@ -13,7 +13,7 @@ export interface IBaseRepository<T> {
   findOnePopulated<P = T>(
     query: FilterQuery<T>,
     populate: { path: string; select?: string },
-  ): Promise<P | null>; 
+  ): Promise<P | null>;
 
   countDocuments(filter?: FilterQuery<T>): Promise<number>;
 

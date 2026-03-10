@@ -15,8 +15,8 @@ const dbConnection = new ConnectDB();
 
     //ONE shared HTTP server
     const httpServer = createServer(application.expressApp);
-    
-     // Attach Socket.IO to the same HTTP server
+
+    // Attach Socket.IO to the same HTTP server
     // This must happen before httpServer.listen()
     SocketServer.getInstance(httpServer);
 

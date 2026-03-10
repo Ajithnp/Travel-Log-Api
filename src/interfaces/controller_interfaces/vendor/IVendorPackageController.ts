@@ -5,4 +5,5 @@ export interface IVendorPackageController {
   updatePackage: RequestHandler;
   fetchPackages: RequestHandler;
   fetPackagesWithId: RequestHandler;
+  getPackageScheduleContext: RequestHandler;
 }

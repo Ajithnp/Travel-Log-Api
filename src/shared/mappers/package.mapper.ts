@@ -1,4 +1,8 @@
-import { BasePackageSingleResponseDTO, PackageDetailDTO } from 'types/dtos/admin/response.dtos';
+import {
+  BasePackageSingleResponseDTO,
+  PackageDetailDTO,
+  PackageScheduleContextResponseDTO,
+} from 'types/dtos/admin/response.dtos';
 import { IBasePackagePopulated, IFile } from 'types/entities/base-package.entity';
 
 export class PackageMapper {
@@ -7,7 +11,7 @@ export class PackageMapper {
       id: pkg._id.toString(),
       title: pkg.title ?? '',
       location: pkg.location ?? '',
-      state:pkg.state ?? '',
+      state: pkg.state ?? '',
       durationDays: Number(pkg.days) ?? 0,
       durationNights: Number(pkg.nights) ?? 0,
       imageUrl: pkg.images?.map((image: IFile) => ({ key: image.key })) ?? [],
@@ -16,10 +20,10 @@ export class PackageMapper {
       difficultyLevel: pkg.difficultyLevel ?? '',
       basePrice: Number(pkg.basePrice) ?? 0,
     };
-    }
-    
-   static toDetailResponse(pkg: IBasePackagePopulated): PackageDetailDTO {
-     return {
+  }
+
+  static toDetailResponse(pkg: IBasePackagePopulated): PackageDetailDTO {
+    return {
       packageId: pkg._id.toString(),
       vendorId: pkg.vendorId.toString(),
       title: pkg.title ?? '',
@@ -33,19 +37,21 @@ export class PackageMapper {
       nights: pkg.nights ?? '',
       basePrice: pkg.basePrice ?? '',
       images: pkg.images?.map((image: IFile) => ({ key: image.key })) ?? [],
-      itinerary: pkg.itinerary?.map((day) => ({
-        dayNumber: day.dayNumber ?? 0,
-        title: day.title ?? '',
-        activities: day.activities?.map((activity) => ({
-          startTime: activity.startTime ?? '',
-          endTime: activity.endTime ?? '',
-          title: activity.title ?? '',
-          description: activity.description ?? '',
-          location: activity.location ?? '',
-          specials: activity.specials ?? [],
-          included: activity.included ?? false,
+      itinerary:
+        pkg.itinerary?.map((day) => ({
+          dayNumber: day.dayNumber ?? 0,
+          title: day.title ?? '',
+          activities:
+            day.activities?.map((activity) => ({
+              startTime: activity.startTime ?? '',
+              endTime: activity.endTime ?? '',
+              title: activity.title ?? '',
+              description: activity.description ?? '',
+              location: activity.location ?? '',
+              specials: activity.specials ?? [],
+              included: activity.included ?? false,
+            })) ?? [],
         })) ?? [],
-      })) ?? [],
       inclusions: pkg.inclusions ?? [],
       exclusions: pkg.exclusions ?? [],
       packingList: pkg.packingList ?? [],
@@ -56,6 +62,18 @@ export class PackageMapper {
       updatedAt: pkg.updatedAt,
     };
   }
+
+  static toScheduleContext(pkg: IBasePackagePopulated): PackageScheduleContextResponseDTO {
+    return {
+      PackageId: pkg._id.toString(),
+      title: pkg.title ?? '',
+      location: pkg.location ?? '',
+      state: pkg.state ?? '',
+      category: pkg.categoryId?.name ?? null,
+      difficultyLevel: pkg.difficultyLevel ?? '',
+      status: pkg.status,
+      days: Number(pkg.days ?? 0),
+      nights: Number(pkg.nights ?? 0),
+    };
+  }
 }
-
-

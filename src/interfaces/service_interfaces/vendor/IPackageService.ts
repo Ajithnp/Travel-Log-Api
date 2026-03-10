@@ -3,7 +3,11 @@ import {
   BasePackageResponseDTO,
   CreateBasePackageDTO,
 } from 'validators/vendor/package/base-package.schema';
-import { BasePackageSingleResponseDTO, PackageDetailDTO } from '../../../types/dtos/admin/response.dtos';
+import {
+  BasePackageSingleResponseDTO,
+  PackageDetailDTO,
+  PackageScheduleContextResponseDTO,
+} from '../../../types/dtos/admin/response.dtos';
 import { FilterType } from 'types/db';
 
 export interface IPackageService {
@@ -14,4 +18,8 @@ export interface IPackageService {
   createPackage(vendorId: string, payload: CreateBasePackageDTO): Promise<{ packageId: string }>;
   updatePackage(vendorId: string, packageId: string, payload: CreateBasePackageDTO): Promise<void>;
   fetchPackagesWithId(vendorId: string, packageId: string): Promise<PackageDetailDTO>;
+  fetchPackageScheduleContext(
+    vendorId: string,
+    packageId: string,
+  ): Promise<PackageScheduleContextResponseDTO>;
 }
