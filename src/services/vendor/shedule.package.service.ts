@@ -12,6 +12,8 @@ import { IPricingTier } from '../../types/entities/schedule.entity';
 import { FilterType } from 'types/db';
 import { ScheduleMapper } from '../../shared/mappers/schedule.mapper';
 import { ScheduleListResponseDTO } from '../../types/common/IPaginationResponse';
+import mongoose from 'mongoose';
+import { ScheduleResponse } from '../../types/dtos/vendor/response.dtos';
 @injectable()
 export class SchedulePackageService implements ISchedulePackageService {
   constructor(
@@ -161,5 +163,18 @@ export class SchedulePackageService implements ISchedulePackageService {
     filters.limit,  
     statusCounts,
    );
+  }
+
+  //=====================================================
+  async getSchedule(scheduleId: string, vendorId: string): Promise<ScheduleResponse> {
+      
+    const schedule = await this._schedulePackageRepository.findOne({
+        _id: new mongoose.Types.ObjectId(scheduleId),
+        vendorId: new mongoose.Types.ObjectId(vendorId)
+    })
+    if (!schedule) {
+      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
+    }
+    return ScheduleMapper.toResponse(schedule)
   }
 }

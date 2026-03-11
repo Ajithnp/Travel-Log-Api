@@ -30,3 +30,5 @@ export const SCHEDULE_STATUS = {
   CANCELLED: 'cancelled',
   SOLD_OUT: 'sold_out',
 } as const;
+
+export type ScheduleStatus = (typeof SCHEDULE_STATUS)[keyof typeof SCHEDULE_STATUS];

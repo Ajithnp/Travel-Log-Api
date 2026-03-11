@@ -92,4 +92,5 @@ export class SchedulePackageRepository
       {} as Record<string, number>,
     );
   }
+
 }

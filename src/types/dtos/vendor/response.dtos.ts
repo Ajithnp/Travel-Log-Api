@@ -1,5 +1,5 @@
 import { CategoryStatus } from 'shared/constants/constants';
-
+import { ScheduleStatus } from 'shared/constants/constants';
 export interface VendorProfileResponseDTO {
   id: string;
   userId?: string;
@@ -64,3 +64,23 @@ export interface ScheduleStatusCounts {
   cancelled: number;
   soldOut: number;
 }
+
+export interface ScheduleResponse {
+  startDate:         Date
+  endDate:           Date
+  reportingTime:     string
+  reportingLocation: string
+  pricing:         PricingTierDTO[];
+  totalSeats:        number
+  seatsBooked:       number
+  seatsRemaining:    number
+  notes:             string | null
+  status:            ScheduleStatus
+  cancellationReason: string | null
+  cancelledAt:        Date | null
+  cancelledBookings:  number | null
+  totalRefunded:      number | null
+  createdAt:         Date
+  updatedAt:         Date
+}
+

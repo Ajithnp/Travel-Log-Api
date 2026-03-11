@@ -1,7 +1,8 @@
-import { ISchedulePopulated, IPricingTier } from 'types/entities/schedule.entity';
+import { ISchedulePopulated, IPricingTier, ISchedule } from 'types/entities/schedule.entity';
 import {
   ScheduleListItemDTO,
   PricingTierDTO,
+  ScheduleResponse,
 } from 'types/dtos/vendor/response.dtos';
 import { SCHEDULE_STATUS } from '../../shared/constants/constants';
 import { ScheduleListResponseDTO } from '../../types/common/IPaginationResponse';
@@ -57,5 +58,27 @@ static toListResponse(
         soldOut: statusCounts[SCHEDULE_STATUS.SOLD_OUT] ?? 0,
       },
     };
+  }
+
+  static toResponse(schedule: ISchedule): ScheduleResponse {
+
+    return {
+      startDate: schedule.startDate,
+      endDate: schedule.endDate,
+      reportingTime: schedule.reportingTime,
+      reportingLocation: schedule.reportingLocation,
+      pricing: schedule.pricing.map(ScheduleMapper.mapPricing),
+      totalSeats: schedule.totalSeats,
+      seatsBooked: schedule.seatsBooked,
+      seatsRemaining: schedule.totalSeats - schedule.seatsBooked,
+      notes: schedule.notes ?? null,
+      status: schedule.status,
+      cancellationReason: schedule.cancellationReason ?? null,
+      cancelledAt: schedule.cancelledAt ?? null,
+      cancelledBookings: schedule.cancelledBookings ?? null,
+      totalRefunded: schedule.totalRefunded ?? null,
+      createdAt: schedule.createdAt,
+      updatedAt: schedule.updatedAt,
+    }
   }
 }
