@@ -29,3 +29,38 @@ export interface ActiveCategoriesResponseDTO {
   id: string;
   name: string;
 }
+
+//======= schedule package ======================
+
+export interface PricingTierDTO {
+  type: 'SOLO' | 'DUO' | 'GROUP';
+  peopleCount: number;
+  price: number;
+}
+
+export interface ScheduleListItemDTO {
+  scheduleId: string;
+  packageId: string;
+  packageTitle: string;
+  packageDays: string;
+  difficultyLevel: string;
+  startDate: string;
+  endDate: string;
+  reportingTime: string;
+  reportingLocation: string;
+  pricing: PricingTierDTO[];
+  soloPricing: number | null;
+  totalSeats: number;
+  seatsBooked: number;
+  seatsRemaining: number;
+  status: string;
+  notes: string | null;
+}
+
+export interface ScheduleStatusCounts {
+  upcoming: number;
+  ongoing: number;
+  completed: number;
+  cancelled: number;
+  soldOut: number;
+}

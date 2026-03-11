@@ -9,6 +9,9 @@ import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { PACKAGE_STATUS } from '../../shared/constants/constants';
 import { IPricingTier } from '../../types/entities/schedule.entity';
+import { FilterType } from 'types/db';
+import { ScheduleMapper } from '../../shared/mappers/schedule.mapper';
+import { ScheduleListResponseDTO } from '../../types/common/IPaginationResponse';
 @injectable()
 export class SchedulePackageService implements ISchedulePackageService {
   constructor(
@@ -138,5 +141,25 @@ export class SchedulePackageService implements ISchedulePackageService {
       startDate,
       endDate,
     });
+  }
+
+  //==========================================================
+  async fetchVendorSchedules(
+    vendorId: string,
+    filters: FilterType,
+  ): Promise<ScheduleListResponseDTO> {
+      
+    const [{ schedules, total }, statusCounts] = await Promise.all([
+      this._schedulePackageRepository.findSchedulesWithPackage(filters, vendorId),
+      this._schedulePackageRepository.getStatusCounts(vendorId),
+    ]);
+      
+    return ScheduleMapper.toListResponse(
+    schedules,
+    total,
+    filters.page,  
+    filters.limit,  
+    statusCounts,
+   );
   }
 }

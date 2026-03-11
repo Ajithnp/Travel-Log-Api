@@ -14,6 +14,8 @@ export interface FilterType {
   search?: string;
   page: number;
   limit: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface CategoryFindAllResult {

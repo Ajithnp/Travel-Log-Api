@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 
 export interface ISchedulePackageController {
-  createSchedule: RequestHandler;
+    createSchedule: RequestHandler;
+    fetchSchedules: RequestHandler;
 }

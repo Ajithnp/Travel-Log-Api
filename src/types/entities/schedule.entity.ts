@@ -1,4 +1,4 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { SCHEDULE_STATUS } from '../../shared/constants/constants';
 
 export type ScheduleStatus = (typeof SCHEDULE_STATUS)[keyof typeof SCHEDULE_STATUS];
@@ -35,4 +35,13 @@ export interface ISchedule extends Document {
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ISchedulePopulated extends Omit<ISchedule, 'packageId'> {
+  packageId: {
+    _id: Types.ObjectId;
+    title: string;
+    days: string;
+    difficultyLevel?: string;
+  };
 }

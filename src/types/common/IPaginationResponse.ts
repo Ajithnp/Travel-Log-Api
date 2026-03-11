@@ -1,3 +1,4 @@
+import { ScheduleListItemDTO, ScheduleStatusCounts } from 'types/dtos/vendor/response.dtos';
 import { CategoryResponseDTO } from '../../types/dtos/admin/response.dtos';
 import { CategoryStats } from '../../types/type';
 
@@ -10,4 +11,8 @@ export interface PaginatedData<T> {
 
 export interface PaginatedCategoryResponse extends PaginatedData<CategoryResponseDTO> {
   stats: CategoryStats;
+}
+
+export interface ScheduleListResponseDTO extends PaginatedData<ScheduleListItemDTO> {
+  statusCounts: ScheduleStatusCounts;
 }

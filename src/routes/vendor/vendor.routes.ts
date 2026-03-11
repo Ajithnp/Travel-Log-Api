@@ -123,12 +123,21 @@ export class VendorRoutes extends BaseRoute {
     );
 
     // schedule package
+
     this._router.post(
       '/schedules/packages/:packageId',
-      // isAuthenticated,
-      // authorize([USER_ROLES.VENDOR]),
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
       validateDTO(createScheduleSchema),
       this._schedulePackageController.createSchedule.bind(this._schedulePackageController),
     );
+
+    this._router.get(
+      '/schedules',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._schedulePackageController.fetchSchedules.bind(this._schedulePackageController),
+    );
   }
 }
+
