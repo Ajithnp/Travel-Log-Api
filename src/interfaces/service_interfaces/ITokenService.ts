@@ -4,7 +4,7 @@ export interface ITokenPayload extends JwtPayload {
   id: string;
   name?: string;
   email: string;
-  role: 'user'|'admin'|'vendor';
+  role: 'user' | 'admin' | 'vendor';
   exp?: number;
 }
 export interface ITokenService {

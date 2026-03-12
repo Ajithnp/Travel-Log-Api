@@ -1,18 +1,15 @@
 import { Server } from 'socket.io';
 import { Server as HttpServer } from 'http';
 
-import {
-  SocketData,
-} from './types/socket.types';
+import { SocketData } from './types/socket.types';
 import { config } from '../../config/env';
 import logger from '../../config/logger';
 import { Namespace } from 'socket.io';
 
 export class SocketServer {
-
   private static instance: SocketServer;
   private _io: Server;
-  
+
   private constructor(httpServer: HttpServer) {
     this._io = new Server(httpServer, {
       cors: {
@@ -20,16 +17,14 @@ export class SocketServer {
         methods: ['GET', 'POST', 'PATCH', 'DELETE'],
         credentials: true,
       },
-        transports: ['websocket', 'polling'],
-        // pingTimeout: 60000,
-        // pingInterval: 25000,
+      transports: ['websocket', 'polling'],
+      // pingTimeout: 60000,
+      // pingInterval: 25000,
     });
 
     // Initialize namespaces
 
-
     // Store namespace reference for use in NotificationService
-   
 
     logger.info('SocketServer initialized with namespaces: /notifications, /chat');
   }
@@ -43,7 +38,6 @@ export class SocketServer {
     }
     return SocketServer.instance;
   }
-
 
   public get io(): Server {
     return this._io;

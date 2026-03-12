@@ -21,15 +21,15 @@ export class BaseRepository<T> implements IBaseRepository<T> {
     return await this.model.findOne(query).exec();
   }
 
-async findOnePopulated<P = T>(
-  query: FilterQuery<T>,
-  populate: { path: string; select?: string },
- ): Promise<P | null> {
-  return await this.model
-    .findOne(query)
-    .populate(populate.path, populate.select)
-    .lean() as P | null;
-}
+  async findOnePopulated<P = T>(
+    query: FilterQuery<T>,
+    populate: { path: string; select?: string },
+  ): Promise<P | null> {
+    return (await this.model
+      .findOne(query)
+      .populate(populate.path, populate.select)
+      .lean()) as P | null;
+  }
 
   async findById(id: string): Promise<T | null> {
     return await this.model.findById(id).exec();

@@ -22,3 +22,13 @@ export const APPROVE_REJECT_ACTIONS = {
 
 export type ApproveRejectActions =
   (typeof APPROVE_REJECT_ACTIONS)[keyof typeof APPROVE_REJECT_ACTIONS];
+
+export const SCHEDULE_STATUS = {
+  UPCOMING: 'upcoming',
+  ONGOING: 'ongoing',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+  SOLD_OUT: 'sold_out',
+} as const;
+
+export type ScheduleStatus = (typeof SCHEDULE_STATUS)[keyof typeof SCHEDULE_STATUS];

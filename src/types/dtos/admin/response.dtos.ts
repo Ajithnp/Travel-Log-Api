@@ -10,7 +10,6 @@ export interface UserResponseDTO {
   createdAt: string;
 }
 
-
 // =========== package ==========
 export interface BasePackageSingleResponseDTO {
   id: string;
@@ -26,7 +25,17 @@ export interface BasePackageSingleResponseDTO {
   basePrice: number;
 }
 
-
+export interface PackageScheduleContextResponseDTO {
+  PackageId: string;
+  title: string;
+  location: string;
+  state: string;
+  days: number;
+  nights: number;
+  status: PackageStatus;
+  category: string;
+  difficultyLevel: string;
+}
 
 export interface ActivityDTO {
   startTime: string;
@@ -45,13 +54,13 @@ export interface ItineraryDayDTO {
 }
 
 export interface PackageDetailDTO {
-  packageId: string;        
-  vendorId: string;         
+  packageId: string;
+  vendorId: string;
   title: string;
   location: string;
   state: string;
   usp: string;
-  category: string | null; 
+  category: string | null;
   difficultyLevel: DifficultyLevel | undefined;
   description: string;
   days: string;
@@ -68,7 +77,6 @@ export interface PackageDetailDTO {
   createdAt: Date;
   updatedAt: Date;
 }
-
 
 //======= category =========
 export interface CategoryResponseDTO {

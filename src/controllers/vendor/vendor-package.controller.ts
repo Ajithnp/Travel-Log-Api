@@ -6,11 +6,9 @@ import { SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { IPackageService } from '../../interfaces/service_interfaces/vendor/IPackageService';
 import { IApiResponse } from 'types/common/IApiResponse';
-import { RequestHandler } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
-import { CreateBasePackageDTO } from 'validators/vendor/package/base-package.schema';
-import { FilterType } from 'types/db';
+import { CreateBasePackageDTO } from '../../validators/vendor/package/base-package.schema';
+import { FilterType } from '../../types/db';
 
 @injectable()
 export class VendorPackageController implements IVendorPackageController {
@@ -76,6 +74,21 @@ export class VendorPackageController implements IVendorPackageController {
       message: SUCCESS_MESSAGES.OK,
       data: packages,
     };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getPackageScheduleContext = asyncHandler(async (req, res) => {
+    const vendorId = req.user?.id!;
+    const { id } = req.params;
+
+    const pkg = await this._packageService.fetchPackageScheduleContext(vendorId, id);
+
+    const successResponse: IApiResponse<typeof pkg> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: pkg,
+    };
+
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 }

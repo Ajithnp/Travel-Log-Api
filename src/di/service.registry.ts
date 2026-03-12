@@ -29,6 +29,8 @@ import { IAdminCategoryService } from '../interfaces/service_interfaces/admin/IC
 import { CategoryService } from '../services/admin/category.service';
 import { IVendorCategoryService } from '../interfaces/service_interfaces/vendor/ICategoryService';
 import { VendorCategoryService } from '../services/vendor/category.service';
+import { ISchedulePackageService } from '../interfaces/service_interfaces/vendor/ISchedulePackage';
+import { SchedulePackageService } from '../services/vendor/shedule.package.service';
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -73,6 +75,10 @@ export class ServiceRegistry {
 
     container.register<IVendorCategoryService>('IVendorCategoryService', {
       useClass: VendorCategoryService,
+    });
+
+    container.register<ISchedulePackageService>('ISchedulePackageService', {
+      useClass: SchedulePackageService,
     });
 
     //admin-services

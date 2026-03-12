@@ -7,6 +7,8 @@ import { IBasePackageRepository } from '../interfaces/repository_interfaces/IBas
 import { BasePackageRepository } from '../repositories/base-package-repository';
 import { ICategoryRepository } from '../interfaces/repository_interfaces/ICategoryRepository';
 import { CategoryRepository } from '../repositories/category.repository';
+import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
+import { SchedulePackageRepository } from '../repositories/schedule.package.repository';
 export class RepositoryRegistry {
   static registerRepositories(): void {
     container.register<IUserRepository>('IUserRepository', {
@@ -21,6 +23,10 @@ export class RepositoryRegistry {
     });
     container.register<IBasePackageRepository>('IBasePackageRepository', {
       useClass: BasePackageRepository,
+    });
+
+    container.register<ISchedulePackageRepository>('ISchedulePackageRepository', {
+      useClass: SchedulePackageRepository,
     });
     container.register<ICategoryRepository>('ICategoryRepository', {
       useClass: CategoryRepository,

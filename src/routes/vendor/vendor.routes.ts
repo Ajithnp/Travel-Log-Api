@@ -15,6 +15,8 @@ import { PackageCreateUnionSchema } from '../../validators/vendor/package/base-p
 import { IVendorCategoryController } from '../../interfaces/controller_interfaces/vendor/IVendorCategoryController';
 import { getRequestedCategorySchema } from '../../validators/vendor/category.validation';
 import { requestCategorySchema } from '../../validators/category.validation';
+import { ISchedulePackageController } from '../../interfaces/controller_interfaces/vendor/IShedulePackageController';
+import { createScheduleSchema } from '../../validators/vendor/schedule-package.validation';
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
@@ -24,6 +26,8 @@ export class VendorRoutes extends BaseRoute {
     private _vendorPackageController: IVendorPackageController,
     @inject('IVendorCategoryController')
     private _vendorCategoryController: IVendorCategoryController,
+    @inject('ISchedulePackageController')
+    private _schedulePackageController: ISchedulePackageController,
   ) {
     super();
     this.initializeRoutes();
@@ -84,6 +88,13 @@ export class VendorRoutes extends BaseRoute {
       this._vendorPackageController.fetPackagesWithId.bind(this._vendorPackageController),
     );
 
+    this._router.get(
+      '/packages/:id/schedule-context',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorPackageController.getPackageScheduleContext.bind(this._vendorPackageController),
+    );
+
     //======================category mgnt===================
 
     this._router.get(
@@ -109,6 +120,30 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       validateDTO(requestCategorySchema),
       this._vendorCategoryController.requestCategory.bind(this._vendorPackageController),
+    );
+
+    // schedule package
+
+    this._router.post(
+      '/schedules/packages/:packageId',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(createScheduleSchema),
+      this._schedulePackageController.createSchedule.bind(this._schedulePackageController),
+    );
+
+    this._router.get(
+      '/schedules',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._schedulePackageController.fetchSchedules.bind(this._schedulePackageController),
+    );
+
+    this._router.get(
+      '/schedules/:scheduleId',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._schedulePackageController.getSchedule.bind(this._schedulePackageController),
     );
   }
 }

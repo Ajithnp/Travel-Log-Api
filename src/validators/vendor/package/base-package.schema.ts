@@ -104,7 +104,7 @@ export const publishPackageBackendSchema = basePackageBackendSchema
       .string()
       .min(3, 'Location must be at least 2 characters')
       .max(100, 'Location must be at most 100 characters'),
-    
+
     state: z
       .string()
       .min(3, 'State must be at least 2 characters')
