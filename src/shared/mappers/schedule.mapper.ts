@@ -38,7 +38,7 @@ export class ScheduleMapper {
     };
   }
 
-static toListResponse(
+  static toListResponse(
     schedules: ISchedulePopulated[],
     total: number,
     page: number,
@@ -61,7 +61,6 @@ static toListResponse(
   }
 
   static toResponse(schedule: ISchedule): ScheduleResponse {
-
     return {
       startDate: schedule.startDate,
       endDate: schedule.endDate,
@@ -79,6 +78,6 @@ static toListResponse(
       totalRefunded: schedule.totalRefunded ?? null,
       createdAt: schedule.createdAt,
       updatedAt: schedule.updatedAt,
-    }
+    };
   }
 }

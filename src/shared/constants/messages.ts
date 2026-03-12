@@ -102,5 +102,5 @@ export const ERROR_MESSAGES = {
   END_DATE_MUST_AFTER_START_DATE: 'End date must be after start date',
   CANNOT_SCHEDULE_TRIPS_FOUR_MONTH_IN_ADVANCE:
     'Trips cannot be scheduled more than 4 months in advance',
-  SCHEDULE_NOT_FOUND: 'Schedule not found'
+  SCHEDULE_NOT_FOUND: 'Schedule not found',
 } as const;

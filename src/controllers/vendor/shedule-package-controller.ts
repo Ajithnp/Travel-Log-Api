@@ -37,17 +37,17 @@ export class ShedulePackageController implements ISchedulePackageController {
   fetchSchedules = expressAsyncHandler(async (req, res) => {
     const vendorId = req.user?.id!;
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
-    
+
     const startDate = req.query.startDate as string | undefined;
     const endDate = req.query.endDate as string | undefined;
-      
+
     const filters: FilterType = {
       selectedFilter,
       search,
       page,
       limit,
       startDate,
-      endDate
+      endDate,
     };
 
     const result = await this._shedulePackageService.fetchVendorSchedules(vendorId, filters);
@@ -62,16 +62,15 @@ export class ShedulePackageController implements ISchedulePackageController {
   });
 
   getSchedule = expressAsyncHandler(async (req, res) => {
-      const vendorId   = req.user!.id
-      const scheduleId = req.params.scheduleId
-    const schedule = await this._shedulePackageService.getSchedule(scheduleId, vendorId)
-    
+    const vendorId = req.user!.id;
+    const scheduleId = req.params.scheduleId;
+    const schedule = await this._shedulePackageService.getSchedule(scheduleId, vendorId);
+
     const successResponse: IApiResponse<typeof schedule> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
       data: schedule,
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
-    })
-   
+  });
 }

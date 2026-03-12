@@ -47,17 +47,16 @@ export class SchedulePackageRepository
       vendorId: toObjectId(vendorId),
     };
 
-
     if (filters.selectedFilter?.trim()) {
       query.status = filters.selectedFilter;
     }
 
-  if (filters.startDate || filters.endDate) {
-    query.startDate = {
-      ...(filters.startDate ? { $gte: new Date(filters.startDate) } : {}),
-      ...(filters.endDate   ? { $lte: new Date(filters.endDate)   } : {}),
-    };
-  }
+    if (filters.startDate || filters.endDate) {
+      query.startDate = {
+        ...(filters.startDate ? { $gte: new Date(filters.startDate) } : {}),
+        ...(filters.endDate ? { $lte: new Date(filters.endDate) } : {}),
+      };
+    }
 
     const skip = (filters.page - 1) * filters.limit;
 
@@ -92,5 +91,4 @@ export class SchedulePackageRepository
       {} as Record<string, number>,
     );
   }
-
 }

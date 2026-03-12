@@ -150,31 +150,29 @@ export class SchedulePackageService implements ISchedulePackageService {
     vendorId: string,
     filters: FilterType,
   ): Promise<ScheduleListResponseDTO> {
-      
     const [{ schedules, total }, statusCounts] = await Promise.all([
       this._schedulePackageRepository.findSchedulesWithPackage(filters, vendorId),
       this._schedulePackageRepository.getStatusCounts(vendorId),
     ]);
-      
+
     return ScheduleMapper.toListResponse(
-    schedules,
-    total,
-    filters.page,  
-    filters.limit,  
-    statusCounts,
-   );
+      schedules,
+      total,
+      filters.page,
+      filters.limit,
+      statusCounts,
+    );
   }
 
   //=====================================================
   async getSchedule(scheduleId: string, vendorId: string): Promise<ScheduleResponse> {
-      
     const schedule = await this._schedulePackageRepository.findOne({
-        _id: new mongoose.Types.ObjectId(scheduleId),
-        vendorId: new mongoose.Types.ObjectId(vendorId)
-    })
+      _id: new mongoose.Types.ObjectId(scheduleId),
+      vendorId: new mongoose.Types.ObjectId(vendorId),
+    });
     if (!schedule) {
-      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
+      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
-    return ScheduleMapper.toResponse(schedule)
+    return ScheduleMapper.toResponse(schedule);
   }
 }

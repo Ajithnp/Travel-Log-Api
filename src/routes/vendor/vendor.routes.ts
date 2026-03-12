@@ -147,4 +147,3 @@ export class VendorRoutes extends BaseRoute {
     );
   }
 }
-
