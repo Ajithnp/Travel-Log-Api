@@ -1,9 +1,7 @@
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { inject, injectable } from 'tsyringe';
 import { IVendorService } from '../../interfaces/service_interfaces/vendor/IVendorService';
-import { VendorVerificationDTO } from '../../validators/vendor.verification.schema';
-
-import { IFiles, IVendorInfo } from '../../types/entities/vendor.info.entity';
+import { IDocuments, IFiles, IVendorInfo } from '../../types/entities/vendor.info.entity';
 import { Types } from 'mongoose';
 import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { AppError } from '../../errors/AppError';
@@ -14,10 +12,10 @@ import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-
 import { USER_ROLES } from '../../shared/constants/roles';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
 import {
-  UpdateProfileLogoRequestDTO,
   VendorVerificationRequestDTO,
 } from '../../types/dtos/vendor/request.dtos';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
+import { UpdateProfileLogoRequestDTO } from '../../validators/vendor/profile.validation';
 @injectable()
 export class VendorService implements IVendorService {
   constructor(
@@ -51,7 +49,7 @@ export class VendorService implements IVendorService {
         businessAddress: null,
         contactPersonName: null,
         isProfileVerified: false,
-        status: vendorDoc?.status ? vendorDoc.status : VENDOR_VERIFICATION_STATUS.NOT_SUBMITTED,
+        status: vendorDoc?.status ? vendorDoc.status : VENDOR_VERIFICATION_STATUS.PENDING,
         reasonForReject: vendorDoc?.reasonForReject ? vendorDoc.reasonForReject : '',
         createdAt: userDoc.createdAt,
       };
@@ -63,9 +61,9 @@ export class VendorService implements IVendorService {
       email: vendorDoc.userId.email,
       phone: vendorDoc.userId.phone,
       role: vendorDoc.userId.role,
-      profileLogo: vendorDoc.profileLogo?.key,
-      businessAddress: vendorDoc.businessAddress,
-      contactPersonName: vendorDoc.contactPersonName,
+      profileLogo: vendorDoc.documents?.profileLogo?.key,
+      businessAddress: vendorDoc.businessInfo?.businessAddress,
+      contactPersonName: vendorDoc.businessInfo?.contactPersonName,
       isProfileVerified: vendorDoc.isProfileVerified,
       userId: (vendorDoc.userId?._id as Types.ObjectId).toString(),
       status: vendorDoc.status,
@@ -80,9 +78,8 @@ export class VendorService implements IVendorService {
       throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    // 2. Delete old file from S3 (if exists)
-    if (vendorDoc.profileLogo?.key) {
-      await this._fileStorage.deleteFile(vendorDoc.profileLogo.key);
+    if (vendorDoc.documents?.profileLogo?.key) {
+      await this._fileStorage.deleteFile(vendorDoc.documents?.profileLogo.key);
     }
 
     const file = payload.files[0];
@@ -99,7 +96,6 @@ export class VendorService implements IVendorService {
       userId: new Types.ObjectId(vendorId),
     });
 
-    // Case 1: Vendor already approved — block further changes
     if (vendorDoc?.status === VENDOR_VERIFICATION_STATUS.APPROVED) {
       throw new AppError(
         ERROR_MESSAGES.VENDOR_VERIFICARION_STATUS_APPROVED,
@@ -107,7 +103,6 @@ export class VendorService implements IVendorService {
       );
     }
 
-    // Case 2: Vendor verification already pending
     if (vendorDoc?.status === VENDOR_VERIFICATION_STATUS.PENDING) {
       throw new AppError(
         ERROR_MESSAGES.VENDOR_VERIFICATION_STATUS_PENDING,
@@ -115,50 +110,68 @@ export class VendorService implements IVendorService {
       );
     }
 
-    // Case 3: Vendor rejected — reset old data and re-submit
+
 
     if (vendorDoc && vendorDoc.status === VENDOR_VERIFICATION_STATUS.REJECTED) {
       // remove existing files from s3;
       const oldFiles = [
-        vendorDoc.businessLicence?.key,
-        vendorDoc.businessPan?.key,
-        vendorDoc.profileLogo?.key,
-        vendorDoc.ownerIdentity?.key,
+        vendorDoc.documents?.businessLicence?.key,
+        vendorDoc.documents?.businessPan?.key,
+        vendorDoc.documents?.profileLogo?.key,
+        vendorDoc.documents?.ownerIdentity?.key,
       ].filter(Boolean) as string[];
 
+    if (oldFiles.length > 0) {
       await this._fileStorage.deleteFiles(oldFiles);
+      }
     }
-    // Prepare new verification data (common for new + rejected cases).
-    const vendorData: Partial<IVendorInfo> = {
-      userId: new Types.ObjectId(vendorId),
-      GSTIN: verificationData.gstin,
-      businessAddress: verificationData.businessAddress,
-      contactPersonName: verificationData.ownerName,
-      status: VENDOR_VERIFICATION_STATUS.PENDING,
-      reasonForReject: '',
-    };
-
-    const fileFieldMap: Record<string, keyof Partial<IVendorInfo>> = {
+   
+    const fileFieldMap: Record<string, keyof IDocuments> = {
       businessLicence: 'businessLicence',
       businessPan: 'businessPan',
       companyLogo: 'profileLogo',
       ownerIdentityProof: 'ownerIdentity',
     };
 
-    verificationData.files.forEach((file) => {
-      const field = fileFieldMap[file.fieldName];
+      const updatedDocuments: Partial<IDocuments> = {};
 
-      if (field) {
-        vendorData[field] = { key: file.key };
-      }
-    });
+  verificationData.files.forEach((file) => {
+    const field = fileFieldMap[file.fieldName];
+    if (field) {
+      updatedDocuments[field] = {
+        key:       file.key,
+        fieldName: file.fieldName,  
+      };
+    }
+  })
 
-    // Case 4: Create or update vendor record.
+    const vendorData: Partial<IVendorInfo> = {
+      userId: new Types.ObjectId(vendorId),
+      businessInfo: {                               
+      GSTIN:             verificationData.gstin,
+      businessAddress:   verificationData.businessAddress,
+      contactPersonName: verificationData.ownerName,
+      },
+      bankDetails: {
+        accountHolderName: verificationData.accountHolderName,
+        accountNumber: verificationData.accountNumber,
+        bankName: verificationData.bankName,
+        branch: verificationData.branch,
+        ifsc: verificationData.ifsc
+      },
+          documents: {                                  
+      ...vendorDoc?.documents,                    
+      ...updatedDocuments,                        
+      } as IDocuments,
+          
+    status:          VENDOR_VERIFICATION_STATUS.UNDER_REVIEW,
+    reasonForReject: '',
+    };
+
+
+
     if (!vendorDoc) {
-      vendorDoc = await this._vendorInfoRepository.create({
-        userId: new Types.ObjectId(vendorId),
-        ...vendorData,
-      });
+      vendorDoc = await this._vendorInfoRepository.create(vendorData);
     } else {
       vendorDoc.set(vendorData);
       await vendorDoc.save();

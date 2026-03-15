@@ -6,20 +6,47 @@ export interface IFiles {
   fieldName: string;
 }
 
-export interface IVendorInfo extends Document {
-  userId: Types.ObjectId | string;
-  isProfileVerified: boolean;
+export type VendorStatus =
+  | 'Pending'
+  | 'UnderReview'
+  | 'Approved'
+  | 'Rejected'
+  | 'Suspended';
+
+
+
+export interface IBusinessInfo {
   contactPersonName: string;
-  businessAddress: string;
+  businessAddress:   string;
+  GSTIN:             string;
+}
+
+export interface IDocuments {
   businessLicence: IFiles;
-  profileLogo: IFiles;
-  businessPan: IFiles;
-  ownerIdentity: IFiles;
-  GSTIN: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  profileLogo:     IFiles;
+  businessPan:     IFiles;
+  ownerIdentity:   IFiles;
+}
+
+export interface IBankDetails {
+  accountNumber:     string;
+  ifsc:              string;
+  accountHolderName: string;
+  bankName:          string;
+  branch:            string;
+}
+
+
+export interface IVendorInfo extends Document {
+  userId:         Types.ObjectId;
+  businessInfo:   IBusinessInfo;
+  documents:      IDocuments;
+  bankDetails:    IBankDetails;
+  status: VendorStatus;
   reasonForReject?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  isProfileVerified: boolean; 
+  createdAt:      Date;
+  updatedAt:      Date;
 }
 
 export interface IVendorInfoPopulated extends Omit<IVendorInfo, 'userId'> {

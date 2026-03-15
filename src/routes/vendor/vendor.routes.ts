@@ -6,17 +6,14 @@ import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
-import {
-  UpdateProfileLogoRequestSchema,
-  VendorVerificationSchema,
-  updateProfileLogoSchema,
-} from '../../types/dtos/vendor/request.dtos';
 import { PackageCreateUnionSchema } from '../../validators/vendor/package/base-package.schema';
 import { IVendorCategoryController } from '../../interfaces/controller_interfaces/vendor/IVendorCategoryController';
 import { getRequestedCategorySchema } from '../../validators/vendor/category.validation';
 import { requestCategorySchema } from '../../validators/category.validation';
 import { ISchedulePackageController } from '../../interfaces/controller_interfaces/vendor/IShedulePackageController';
 import { createScheduleSchema } from '../../validators/vendor/schedule-package.validation';
+import { UpdateProfileLogoRequestSchema } from '../../validators/vendor/profile.validation';
+import { VendorVerificationSchema } from '../../validators/vendor/vendor-verification';
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
@@ -51,10 +48,9 @@ export class VendorRoutes extends BaseRoute {
 
     this._router.post(
       '/verification',
-      validateDTO(VendorVerificationSchema),
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
-
+      validateDTO(VendorVerificationSchema),
       this._vendorController.vendorVerificationSubmit.bind(this._vendorController),
     );
     /*---------------Package management--------------------- */
