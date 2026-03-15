@@ -10,6 +10,7 @@ import { IApiResponse } from 'types/common/IApiResponse';
 import { SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
+import { VendorVerificationRequestDTO } from 'types/dtos/vendor/request.dtos';
 @injectable()
 export class VendorController implements IVendorController {
   constructor(
@@ -42,7 +43,7 @@ export class VendorController implements IVendorController {
   });
   //=====================================================================================
   vendorVerificationSubmit = asyncHandler(async (req, res) => {
-    const payload = req.body;
+    const payload:VendorVerificationRequestDTO = req.body;
 
     const result = await this._vendorService.vendorVerificationSubmit(req.user!.id, payload);
 

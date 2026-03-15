@@ -1,5 +1,6 @@
 import { CategoryStatus } from 'shared/constants/constants';
 import { ScheduleStatus } from 'shared/constants/constants';
+import { VendorStatus } from 'types/entities/vendor.info.entity';
 export interface VendorProfileResponseDTO {
   id: string;
   userId?: string;
@@ -10,7 +11,7 @@ export interface VendorProfileResponseDTO {
   role: string;
   businessAddress: string | null;
   contactPersonName: string | null;
-  status: 'Pending' | 'Approved' | 'Rejected' | 'NotSubmitted';
+  status: VendorStatus;
   isProfileVerified: boolean;
   reasonForReject: string;
   createdAt: Date;
