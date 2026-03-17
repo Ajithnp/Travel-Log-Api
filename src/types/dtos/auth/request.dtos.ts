@@ -56,13 +56,16 @@ export const GoogleAuthSchema = z.object({
 
 export type GoogleAuthRequestDTO = z.infer<typeof GoogleAuthSchema>;
 
-export const ForgotPasswordSchema = z.object({
+export const ForgotPasswordSchemaBody = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email format'),
 });
+export const ForgotPasswordSchema = z.object({
+  body:ForgotPasswordSchemaBody
+});
 
-export type ForgotPasswordRequestDTO = z.infer<typeof ForgotPasswordSchema>;
+export type ForgotPasswordRequestDTO = z.infer<typeof ForgotPasswordSchemaBody>;
 
-export const VerifyOtpSchema = z.object({
+export const VerifyOtpSchemaBody = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email format'),
   otp: z
     .string()
@@ -71,7 +74,11 @@ export const VerifyOtpSchema = z.object({
     .nonempty('OTP is required'),
 });
 
-export type VerifyOtpRequestDTO = z.infer<typeof VerifyOtpSchema>;
+export const VerifyOtpSchema = z.object({
+  body: VerifyOtpSchemaBody
+})
+
+export type VerifyOtpRequestDTO = z.infer<typeof VerifyOtpSchemaBody>;
 
 export const changePasswordSchema = z.object({
   email: z.string().nonempty('Email is required').email('Invalid email format'),
