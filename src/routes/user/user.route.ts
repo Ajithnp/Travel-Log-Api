@@ -14,6 +14,7 @@ import {
   ResetPasswordSchema,
   UpdateProfileSchema,
 } from '../../types/dtos/user/request.dtos';
+import { publicPackageQuerySchema } from '../../validators/public-package.validation';
 @injectable()
 export class UserRoutes extends BaseRoute {
   constructor(
@@ -28,6 +29,18 @@ export class UserRoutes extends BaseRoute {
   }
 
   protected initializeRoutes(): void {
+    // public //
+    this._router.get(
+      '/packages/public',
+      validateDTO(publicPackageQuerySchema),
+      this._userController.getPublicPackages.bind(this._userController),
+    );
+
+    this._router.get(
+      '/packages/categories',
+      this._userController.getCategories.bind(this._userController),
+    );
+
     this._router.get(
       '/me',
       isAuthenticated,

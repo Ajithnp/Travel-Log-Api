@@ -60,7 +60,7 @@ export const ForgotPasswordSchemaBody = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email format'),
 });
 export const ForgotPasswordSchema = z.object({
-  body:ForgotPasswordSchemaBody
+  body: ForgotPasswordSchemaBody,
 });
 
 export type ForgotPasswordRequestDTO = z.infer<typeof ForgotPasswordSchemaBody>;
@@ -75,8 +75,8 @@ export const VerifyOtpSchemaBody = z.object({
 });
 
 export const VerifyOtpSchema = z.object({
-  body: VerifyOtpSchemaBody
-})
+  body: VerifyOtpSchemaBody,
+});
 
 export type VerifyOtpRequestDTO = z.infer<typeof VerifyOtpSchemaBody>;
 

@@ -43,7 +43,7 @@ export class VendorController implements IVendorController {
   });
   //=====================================================================================
   vendorVerificationSubmit = asyncHandler(async (req, res) => {
-    const payload:VendorVerificationRequestDTO = req.body;
+    const payload: VendorVerificationRequestDTO = req.body;
 
     const result = await this._vendorService.vendorVerificationSubmit(req.user!.id, payload);
 

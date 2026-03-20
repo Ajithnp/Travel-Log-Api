@@ -1,9 +1,11 @@
+import { RawPublicPackageDocument } from 'interfaces/repository_interfaces/IBasePackageRepository';
 import {
   BasePackageSingleResponseDTO,
   PackageDetailDTO,
   PackageScheduleContextResponseDTO,
-} from 'types/dtos/admin/response.dtos';
-import { IBasePackagePopulated, IFile } from 'types/entities/base-package.entity';
+} from '../../types/dtos/admin/response.dtos';
+import { IBasePackagePopulated, IFile } from '../../types/entities/base-package.entity';
+import { PublicPackageSummary } from '../../types/user/types';
 
 export class PackageMapper {
   static toResponse(pkg: IBasePackagePopulated): BasePackageSingleResponseDTO {
@@ -74,6 +76,34 @@ export class PackageMapper {
       status: pkg.status,
       days: Number(pkg.days ?? 0),
       nights: Number(pkg.nights ?? 0),
+    };
+  }
+
+  static toPublicListing(p: any): PublicPackageSummary {
+    return {
+      _id: p._id,
+      title: p.title,
+      description: p.description ? p.description.substring(0, 200) + '…' : '',
+      location: p.location ?? null,
+      state: p.state ?? null,
+      difficultyLevel: p.difficultyLevel ?? null,
+      days: p.days ?? null,
+      nights: p.nights ?? null,
+      usp: p.usp ?? null,
+      images: p.images ?? [],
+      category: p.category ?? null,
+      vendor: {
+        _id: p.vendor?._id ?? null,
+        name: p.vendor?.name ?? null,
+      },
+      startingFromPrice: p.startingFromPrice ?? 0,
+      earliestDate: p.earliestDate ?? null,
+      earliestEndDate: p.earliestEndDate ?? null,
+      earliestScheduleStatus: p.earliestScheduleStatus ?? null,
+      scheduleCount: p.scheduleCount ?? 0,
+      isSoldOut: p.isSoldOut ?? false,
+      averageRating: p.averageRating ?? 0,
+      totalReviews: p.totalReviews ?? 0,
     };
   }
 }
