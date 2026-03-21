@@ -31,6 +31,18 @@ export class BaseRepository<T> implements IBaseRepository<T> {
       .lean()) as P | null;
   }
 
+  async findOnePopulatedMany<P = T>(
+    query: FilterQuery<T>,
+    populate: Array<{ path: string; select?: string }>,
+  ): Promise<P | null> {
+    let q = this.model.findOne(query);
+
+    for (const p of populate) {
+      q = q.populate(p.path, p.select) as typeof q;
+    }
+    return (await q.lean()) as P | null;
+  }
+
   async findById(id: string): Promise<T | null> {
     return await this.model.findById(id).exec();
   }

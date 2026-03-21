@@ -4,8 +4,13 @@ import {
   PackageDetailDTO,
   PackageScheduleContextResponseDTO,
 } from '../../types/dtos/admin/response.dtos';
-import { IBasePackagePopulated, IFile } from '../../types/entities/base-package.entity';
+import {
+  IBasePackagePopulated,
+  IFile,
+  IPopulatedPackageDetails,
+} from '../../types/entities/base-package.entity';
 import { PublicPackageSummary } from '../../types/user/types';
+import { PublicPackageDetailDTO } from 'types/dtos/user/response.dtos';
 
 export class PackageMapper {
   static toResponse(pkg: IBasePackagePopulated): BasePackageSingleResponseDTO {
@@ -104,6 +109,48 @@ export class PackageMapper {
       isSoldOut: p.isSoldOut ?? false,
       averageRating: p.averageRating ?? 0,
       totalReviews: p.totalReviews ?? 0,
+    };
+  }
+
+  static toPublicDetailResponse(pkg: IPopulatedPackageDetails): PublicPackageDetailDTO {
+    return {
+      packageId: pkg._id.toString(),
+      vendor: {
+        id: pkg.vendorId._id.toString(),
+        name: pkg.vendorId.name ?? '',
+      },
+      title: pkg.title ?? '',
+      location: pkg.location ?? '',
+      state: pkg.state ?? '',
+      usp: pkg.usp ?? '',
+      category: pkg.categoryId?.name ?? null,
+      difficultyLevel: pkg.difficultyLevel ?? undefined,
+      description: pkg.description ?? '',
+      days: pkg.days ?? '',
+      nights: pkg.nights ?? '',
+      basePrice: pkg.basePrice ?? '',
+      images: pkg.images?.map((image: IFile) => ({ key: image.key })) ?? [],
+      itinerary:
+        pkg.itinerary?.map((day) => ({
+          dayNumber: day.dayNumber ?? 0,
+          title: day.title ?? '',
+          activities:
+            day.activities?.map((activity) => ({
+              startTime: activity.startTime ?? '',
+              endTime: activity.endTime ?? '',
+              title: activity.title ?? '',
+              description: activity.description ?? '',
+              location: activity.location ?? '',
+              specials: activity.specials ?? [],
+              included: activity.included ?? false,
+            })) ?? [],
+        })) ?? [],
+      inclusions: pkg.inclusions ?? [],
+      exclusions: pkg.exclusions ?? [],
+      packingList: pkg.packingList ?? [],
+      cancellationPolicy: pkg.cancellationPolicy ?? null,
+      status: pkg.status,
+      isActive: pkg.isActive,
     };
   }
 }

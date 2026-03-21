@@ -48,3 +48,20 @@ export interface IBasePackageEntity extends Document {
 export interface IBasePackagePopulated extends Omit<IBasePackageEntity, 'categoryId'> {
   categoryId: { name: string };
 }
+
+export interface PopulatedVendor {
+  _id: string;
+  name: string;
+  email?: string;
+}
+
+interface PopulatedCategory {
+  _id: string;
+  name: string;
+  slug?: string;
+}
+export interface IPopulatedPackageDetails
+  extends Omit<IBasePackageEntity, 'vendorId' | 'categoryId'> {
+  vendorId: PopulatedVendor;
+  categoryId: PopulatedCategory;
+}

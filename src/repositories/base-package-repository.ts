@@ -1,7 +1,6 @@
 import { injectable } from 'tsyringe';
 import {
   IBasePackageRepository,
-  PublicPackageSummary,
   RawPublicPackageDocument,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';

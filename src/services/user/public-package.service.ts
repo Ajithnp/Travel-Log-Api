@@ -9,8 +9,13 @@ import { PublicPackageQuery } from 'validators/public-package.validation';
 import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICategoryRepository';
 import { CategoryMapper } from '../../shared/mappers/category.mapper';
 import { ActiveCategoriesResponseDTO } from '../../types/dtos/vendor/response.dtos';
-import { PublicPackageListResponse } from '../../types/dtos/user/response.dtos';
+import {
+  PublicPackageDetailDTO,
+  PublicPackageListResponse,
+} from '../../types/dtos/user/response.dtos';
 import { PackageMapper } from '../../shared/mappers/package.mapper';
+import { IPopulatedPackageDetails } from '../../types/entities/base-package.entity';
+import { ERROR_MESSAGES } from '../../shared/constants/messages';
 
 @injectable()
 export class PublicPackageService implements IPublicPackageService {
@@ -55,5 +60,25 @@ export class PublicPackageService implements IPublicPackageService {
     const categoriesDoc = await this._categoryRepository.findActiveCategories();
 
     return categoriesDoc.map(CategoryMapper.toActiveCategoriesResponse);
+  }
+
+  async getPackageDetails(packageId: string): Promise<PublicPackageDetailDTO> {
+    const pkg = await this._basePackageRepository.findOnePopulatedMany<IPopulatedPackageDetails>(
+      { _id: packageId },
+      [
+        { path: 'vendorId', select: '_id name' },
+        { path: 'categoryId', select: 'name slug' },
+      ],
+    );
+
+    if (!pkg) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.BAD_REQUEST);
+    }
+
+    return PackageMapper.toPublicDetailResponse({
+      ...pkg,
+      vendorId: pkg.vendorId,
+      categoryId: pkg.categoryId,
+    });
   }
 }

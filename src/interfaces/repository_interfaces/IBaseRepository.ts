@@ -15,6 +15,11 @@ export interface IBaseRepository<T> {
     populate: { path: string; select?: string },
   ): Promise<P | null>;
 
+  findOnePopulatedMany<P = T>(
+    query: FilterQuery<T>,
+    populate: Array<{ path: string; select?: string }>,
+  ): Promise<P | null>;
+
   countDocuments(filter?: FilterQuery<T>): Promise<number>;
 
   findByIdAndUpdate(

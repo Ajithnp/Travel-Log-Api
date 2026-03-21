@@ -45,4 +45,17 @@ export class UserController implements IUserController {
 
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
+
+  getPackageDetails = asyncHandler(async (req, res) => {
+    const { packageId } = req.params;
+
+    const result = await this._publicPackageService.getPackageDetails(packageId);
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 }
