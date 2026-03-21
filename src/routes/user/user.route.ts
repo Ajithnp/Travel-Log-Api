@@ -47,6 +47,11 @@ export class UserRoutes extends BaseRoute {
     );
 
     this._router.get(
+      '/packages/:packageId/schedules',
+      this._userController.getPackageSchedules.bind(this._userController),
+    );
+
+    this._router.get(
       '/me',
       isAuthenticated,
       authorize([USER_ROLES.USER]),

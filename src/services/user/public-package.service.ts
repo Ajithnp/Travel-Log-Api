@@ -12,10 +12,13 @@ import { ActiveCategoriesResponseDTO } from '../../types/dtos/vendor/response.dt
 import {
   PublicPackageDetailDTO,
   PublicPackageListResponse,
+  PublicScheduleDTO,
 } from '../../types/dtos/user/response.dtos';
 import { PackageMapper } from '../../shared/mappers/package.mapper';
 import { IPopulatedPackageDetails } from '../../types/entities/base-package.entity';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
+import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
+import { ScheduleMapper } from '../../shared/mappers/schedule.mapper';
 
 @injectable()
 export class PublicPackageService implements IPublicPackageService {
@@ -24,6 +27,8 @@ export class PublicPackageService implements IPublicPackageService {
     private _basePackageRepository: IBasePackageRepository,
     @inject('ICategoryRepository')
     private _categoryRepository: ICategoryRepository,
+    @inject('ISchedulePackageRepository')
+    private _schedulePackageRepository: ISchedulePackageRepository,
   ) {}
 
   async getPublicPackages(query: PublicPackageQuery): Promise<PublicPackageListResponse> {
@@ -80,5 +85,15 @@ export class PublicPackageService implements IPublicPackageService {
       vendorId: pkg.vendorId,
       categoryId: pkg.categoryId,
     });
+  }
+
+  async getPublicSchedulesByPackage(packageId: string): Promise<PublicScheduleDTO[]> {
+    const schedules = await this._schedulePackageRepository.findPublicSchedulesByPackage(packageId);
+
+    if (!schedules) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.BAD_REQUEST);
+    }
+
+    return schedules.map((schedule) => ScheduleMapper.toPublicSchedule(schedule));
   }
 }

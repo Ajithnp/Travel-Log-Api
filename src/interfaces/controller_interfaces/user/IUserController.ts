@@ -4,4 +4,5 @@ export interface IUserController {
   getPublicPackages: RequestHandler;
   getCategories: RequestHandler;
   getPackageDetails: RequestHandler;
+  getPackageSchedules: RequestHandler;
 }

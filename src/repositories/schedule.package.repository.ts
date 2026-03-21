@@ -91,4 +91,14 @@ export class SchedulePackageRepository
       {} as Record<string, number>,
     );
   }
+
+  async findPublicSchedulesByPackage(packageId: string): Promise<ISchedule[]> {
+    return this.model
+      .find({
+        packageId: new mongoose.Types.ObjectId(packageId),
+        status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT] },
+      })
+      .sort({ startDate: 1 })
+      .lean();
+  }
 }

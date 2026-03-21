@@ -1,6 +1,8 @@
 import { DifficultyLevel } from 'types/entities/base-package.entity';
 import { PublicPackageSummary } from '../../../types/user/types';
 import { PackageStatus } from 'types/type';
+import { PricingType } from 'types/entities/schedule.entity';
+import { ScheduleStatus } from 'shared/constants/constants';
 
 export interface UserProfileResponseDTO {
   id: string;
@@ -69,4 +71,19 @@ export interface PublicPackageDetailDTO {
   cancellationPolicy: string | null;
   status: PackageStatus;
   isActive: boolean;
+}
+
+export interface SchedulePricingDTO {
+  type: PricingType;
+  peopleCount: number;
+  price: number;
+}
+
+export interface PublicScheduleDTO {
+  scheduleId: string;
+  startDate: Date;
+  endDate: Date;
+  status: ScheduleStatus;
+  seatsRemaining: number;
+  pricing: SchedulePricingDTO[];
 }
