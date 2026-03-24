@@ -1,6 +1,5 @@
-import { z } from "zod";
-import { uploadedFileSchema } from "./vendor-verification";
-
+import { z } from 'zod';
+import { uploadedFileSchema } from './vendor-verification';
 
 export const updateProfileLogoSchema = z
   .object({

@@ -10,10 +10,65 @@ import { AppError } from '../../errors/AppError';
 import { IApiResponse } from 'types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { UserProfileResponseDTO } from '../../types/dtos/user/response.dtos';
+import { IPublicPackageService } from '../../interfaces/service_interfaces/user/IPublicPackageService';
+import logger from '../../config/logger';
+import { PublicPackageQuery } from 'validators/public-package.validation';
 @injectable()
 export class UserController implements IUserController {
   constructor(
     @inject('IUserService')
     private _userService: IUserService,
+    @inject('IPublicPackageService')
+    private _publicPackageService: IPublicPackageService,
   ) {}
+
+  getPublicPackages = asyncHandler(async (req, res) => {
+    const query = req.query as unknown as PublicPackageQuery;
+
+    const result = await this._publicPackageService.getPublicPackages(query);
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getCategories = asyncHandler(async (req, res) => {
+    const result = await this._publicPackageService.getCategories();
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getPackageDetails = asyncHandler(async (req, res) => {
+    const { packageId } = req.params;
+
+    const result = await this._publicPackageService.getPackageDetails(packageId);
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getPackageSchedules = asyncHandler(async (req, res) => {
+    const { packageId } = req.params;
+
+    const result = await this._publicPackageService.getPublicSchedulesByPackage(packageId);
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 }

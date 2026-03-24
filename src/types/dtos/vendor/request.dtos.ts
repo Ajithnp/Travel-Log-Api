@@ -1,5 +1,3 @@
-
-
 interface VendorVerificationFile {
   fieldName: string;
   key: string;
@@ -14,11 +12,8 @@ export interface VendorVerificationRequestDTO {
   ifsc: string;
   accountHolderName: string;
   bankName: string;
-  branch:string
-
+  branch: string;
 }
-
-
 
 //==== category=====
 

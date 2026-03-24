@@ -11,9 +11,7 @@ import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRep
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
-import {
-  VendorVerificationRequestDTO,
-} from '../../types/dtos/vendor/request.dtos';
+import { VendorVerificationRequestDTO } from '../../types/dtos/vendor/request.dtos';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { UpdateProfileLogoRequestDTO } from '../../validators/vendor/profile.validation';
 @injectable()
@@ -110,8 +108,6 @@ export class VendorService implements IVendorService {
       );
     }
 
-
-
     if (vendorDoc && vendorDoc.status === VENDOR_VERIFICATION_STATUS.REJECTED) {
       // remove existing files from s3;
       const oldFiles = [
@@ -121,11 +117,11 @@ export class VendorService implements IVendorService {
         vendorDoc.documents?.ownerIdentity?.key,
       ].filter(Boolean) as string[];
 
-    if (oldFiles.length > 0) {
-      await this._fileStorage.deleteFiles(oldFiles);
+      if (oldFiles.length > 0) {
+        await this._fileStorage.deleteFiles(oldFiles);
       }
     }
-   
+
     const fileFieldMap: Record<string, keyof IDocuments> = {
       businessLicence: 'businessLicence',
       businessPan: 'businessPan',
@@ -133,42 +129,40 @@ export class VendorService implements IVendorService {
       ownerIdentityProof: 'ownerIdentity',
     };
 
-      const updatedDocuments: Partial<IDocuments> = {};
+    const updatedDocuments: Partial<IDocuments> = {};
 
-  verificationData.files.forEach((file) => {
-    const field = fileFieldMap[file.fieldName];
-    if (field) {
-      updatedDocuments[field] = {
-        key:       file.key,
-        fieldName: file.fieldName,  
-      };
-    }
-  })
+    verificationData.files.forEach((file) => {
+      const field = fileFieldMap[file.fieldName];
+      if (field) {
+        updatedDocuments[field] = {
+          key: file.key,
+          fieldName: file.fieldName,
+        };
+      }
+    });
 
     const vendorData: Partial<IVendorInfo> = {
       userId: new Types.ObjectId(vendorId),
-      businessInfo: {                               
-      GSTIN:             verificationData.gstin,
-      businessAddress:   verificationData.businessAddress,
-      contactPersonName: verificationData.ownerName,
+      businessInfo: {
+        GSTIN: verificationData.gstin,
+        businessAddress: verificationData.businessAddress,
+        contactPersonName: verificationData.ownerName,
       },
       bankDetails: {
         accountHolderName: verificationData.accountHolderName,
         accountNumber: verificationData.accountNumber,
         bankName: verificationData.bankName,
         branch: verificationData.branch,
-        ifsc: verificationData.ifsc
+        ifsc: verificationData.ifsc,
       },
-          documents: {                                  
-      ...vendorDoc?.documents,                    
-      ...updatedDocuments,                        
+      documents: {
+        ...vendorDoc?.documents,
+        ...updatedDocuments,
       } as IDocuments,
-          
-    status:          VENDOR_VERIFICATION_STATUS.UNDER_REVIEW,
-    reasonForReject: '',
+
+      status: VENDOR_VERIFICATION_STATUS.UNDER_REVIEW,
+      reasonForReject: '',
     };
-
-
 
     if (!vendorDoc) {
       vendorDoc = await this._vendorInfoRepository.create(vendorData);

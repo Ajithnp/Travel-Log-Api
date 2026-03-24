@@ -6,6 +6,7 @@ import {
 } from 'types/dtos/vendor/response.dtos';
 import { SCHEDULE_STATUS } from '../../shared/constants/constants';
 import { ScheduleListResponseDTO } from '../../types/common/IPaginationResponse';
+import { PublicScheduleDTO } from '../../types/dtos/user/response.dtos';
 
 export class ScheduleMapper {
   static mapPricing = (tier: IPricingTier): PricingTierDTO => ({
@@ -78,6 +79,21 @@ export class ScheduleMapper {
       totalRefunded: schedule.totalRefunded ?? null,
       createdAt: schedule.createdAt,
       updatedAt: schedule.updatedAt,
+    };
+  }
+
+  static toPublicSchedule(schedule: ISchedule): PublicScheduleDTO {
+    return {
+      scheduleId: schedule._id.toString(),
+      startDate: schedule.startDate,
+      endDate: schedule.endDate,
+      status: schedule.status,
+      seatsRemaining: schedule.totalSeats - schedule.seatsBooked,
+      pricing: schedule.pricing.map((tier) => ({
+        type: tier.type,
+        peopleCount: tier.peopleCount,
+        price: tier.price,
+      })),
     };
   }
 }
