@@ -1,4 +1,4 @@
-import { DifficultyLevel } from 'types/entities/base-package.entity';
+import { CancellationPolicies, DifficultyLevel } from 'types/entities/base-package.entity';
 import { PublicPackageSummary } from '../../../types/user/types';
 import { PackageStatus } from 'types/type';
 import { PricingType } from 'types/entities/schedule.entity';
@@ -68,7 +68,7 @@ export interface PublicPackageDetailDTO {
   inclusions: string[];
   exclusions: string[];
   packingList: string[];
-  cancellationPolicy: string | null;
+  cancellationPolicy: CancellationPolicies | undefined;
   status: PackageStatus;
   isActive: boolean;
 }

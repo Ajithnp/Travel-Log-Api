@@ -108,7 +108,7 @@ export class BasePackageRepository
       pipeline.push({ $match: { daysNum: durationMatch } });
     }
 
-    // ── Stage 2: Category lookup + filter ───────────────────────────────
+    // ── Stage 2: Category lookup + filter ─────────────
     pipeline.push({
       $lookup: {
         from: 'categories',
@@ -137,7 +137,7 @@ export class BasePackageRepository
       });
     }
 
-    // ── Stage 3: Join schedules ──────────────────────────────────────────
+    // ── Stage 3: Join schedules ───────────────────
     pipeline.push({
       $lookup: {
         from: 'schedulepackages',
@@ -176,7 +176,7 @@ export class BasePackageRepository
       $match: { 'activeSchedules.0': { $exists: true } },
     });
 
-    // ── Stage 5: Compute derived fields ─────────────────────────────────
+    // ── Stage 5: Compute derived fields ──────────
     pipeline.push({
       $addFields: {
         startingFromPrice: {
@@ -282,7 +282,7 @@ export class BasePackageRepository
       },
     });
 
-    // ── Stage 6: Price range filter ──────────────────────────────────────
+    // ── Stage 6: Price range filter ─────────────────
     const minPrice = filters.minPrice !== undefined ? Number(filters.minPrice) : undefined;
     const maxPrice = filters.maxPrice !== undefined ? Number(filters.maxPrice) : undefined;
 
@@ -296,14 +296,14 @@ export class BasePackageRepository
       pipeline.push({ $match: { startingFromPrice: priceMatch } });
     }
 
-    // ── Stage 7: Rating filter ───────────────────────────────────────────
+    // ── Stage 7: Rating filter ─────────────────────────
     if (filters.minRating !== undefined) {
       pipeline.push({
         $match: { averageRating: { $gte: filters.minRating } },
       });
     }
 
-    // ── Stage 8: Vendor lookup ───────────────────────────────────────────
+    // ── Stage 8: Vendor lookup ─────────────────
     pipeline.push({
       $lookup: {
         from: 'users',

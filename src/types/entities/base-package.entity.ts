@@ -1,4 +1,5 @@
 import mongoose, { Document, Types } from 'mongoose';
+
 import { PackageStatus } from 'shared/constants/constants';
 export interface IFile {
   key: string;
@@ -19,7 +20,7 @@ export interface DayItinerary {
 }
 
 export type DifficultyLevel = 'Easy' | 'Moderate' | 'Challenging' | 'Extreme';
-
+export type CancellationPolicies = 'Flexible' | 'Moderate' | 'Strict' | 'Non-Refundable';
 export interface IBasePackageEntity extends Document {
   _id: mongoose.Types.ObjectId;
   vendorId: Types.ObjectId;
@@ -37,7 +38,7 @@ export interface IBasePackageEntity extends Document {
   inclusions?: string[];
   exclusions?: string[];
   packingList?: string[];
-  cancellationPolicy?: 'Flexible' | 'Moderate' | 'Strict' | 'Non-Refundable';
+  cancellationPolicy?: CancellationPolicies;
   difficultyLevel?: DifficultyLevel;
   status: PackageStatus;
   isActive: boolean;

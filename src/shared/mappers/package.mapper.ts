@@ -148,7 +148,7 @@ export class PackageMapper {
       inclusions: pkg.inclusions ?? [],
       exclusions: pkg.exclusions ?? [],
       packingList: pkg.packingList ?? [],
-      cancellationPolicy: pkg.cancellationPolicy ?? null,
+      cancellationPolicy: pkg.cancellationPolicy ,
       status: pkg.status,
       isActive: pkg.isActive,
     };
