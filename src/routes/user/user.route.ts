@@ -15,6 +15,9 @@ import {
   UpdateProfileSchema,
 } from '../../types/dtos/user/request.dtos';
 import { publicPackageQuerySchema } from '../../validators/public-package.validation';
+import { makeRateLimiter } from '../../middlewares/rate.limiter.middleware';
+import { wishlistToggleLimiter } from '../../config/rate.limiter.config';
+
 @injectable()
 export class UserRoutes extends BaseRoute {
   constructor(
@@ -88,6 +91,22 @@ export class UserRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.USER, USER_ROLES.VENDOR]),
       this._userProfileController.resetPassword.bind(this._userProfileController),
+    );
+
+    // wishlist
+      this._router.post(
+       'wishlist/:packageId',
+       isAuthenticated,
+       authorize([USER_ROLES.USER]),
+       makeRateLimiter(wishlistToggleLimiter, 'userId'),
+      this._userController.toggleWishlist.bind(this._userController),
+    );
+
+    this._router.get(
+      'wishlist/ids',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._userController.getWishlistedIds.bind(this._userController),
     );
   }
 }

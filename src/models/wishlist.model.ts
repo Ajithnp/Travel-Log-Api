@@ -1,7 +1,9 @@
 import { Schema , model} from "mongoose";
 import { IWishlistEntity } from "types/entities/wishlist.entity";
 
-const wishlistSchema = new Schema<IWishlistEntity>(
+export type WishlistDocument = IWishlistEntity & Document;
+
+const wishlistSchema = new Schema<WishlistDocument>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -21,4 +23,4 @@ const wishlistSchema = new Schema<IWishlistEntity>(
 );
 
 
-export const WishlistModel = model<IWishlistEntity>('Wishlist', wishlistSchema);
+export const WishlistModel = model<WishlistDocument>('Wishlist', wishlistSchema);

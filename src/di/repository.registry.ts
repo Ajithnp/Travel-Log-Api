@@ -9,6 +9,8 @@ import { ICategoryRepository } from '../interfaces/repository_interfaces/ICatego
 import { CategoryRepository } from '../repositories/category.repository';
 import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
 import { SchedulePackageRepository } from '../repositories/schedule.package.repository';
+import { IWishlistRepository } from '../interfaces/repository_interfaces/IWishlistRepository';
+import { WishlistRepository } from '../repositories/wishlist-repository';
 export class RepositoryRegistry {
   static registerRepositories(): void {
     container.register<IUserRepository>('IUserRepository', {
@@ -30,6 +32,10 @@ export class RepositoryRegistry {
     });
     container.register<ICategoryRepository>('ICategoryRepository', {
       useClass: CategoryRepository,
+    });
+
+    container.register<IWishlistRepository>('IWishlistRepository', {
+      useClass: WishlistRepository,
     });
 
     // Register other repositories here

@@ -3,6 +3,8 @@ import { IBaseRepository } from "./IBaseRepository";
 
 export interface IWishlistRepository extends IBaseRepository<IWishlistEntity> { 
 
-    addPackage(userId: string, packageId: string): Promise<IWishlist>;
-    
+    addPackage(userId: string, packageId: string): Promise<IWishlistEntity>;
+    isPackageWishlisted(userId: string, packageId: string): Promise<boolean>;
+    removePackage(userId: string, packageId: string): Promise<IWishlistEntity | null>;
+    findWishlistedIds(userId: string): Promise<Pick<IWishlistEntity, 'packages'> | null>;
 }
