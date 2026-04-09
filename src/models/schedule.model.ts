@@ -98,7 +98,7 @@ const ScheduleSchema = new Schema<ISchedule>(
 );
 
 ScheduleSchema.index({ packageId: 1, status: 1 });
-ScheduleSchema.index({ vendorId: 1, status: 1, startDate: -1 }); 
+ScheduleSchema.index({ vendorId: 1, status: 1, startDate: -1 });
 
 ScheduleSchema.index({ status: 1, startDate: 1 }); // cron works
 ScheduleSchema.index({ status: 1, endDate: 1 });

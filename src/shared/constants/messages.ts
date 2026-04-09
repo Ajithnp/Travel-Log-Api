@@ -103,4 +103,7 @@ export const ERROR_MESSAGES = {
   CANNOT_SCHEDULE_TRIPS_FOUR_MONTH_IN_ADVANCE:
     'Trips cannot be scheduled more than 4 months in advance',
   SCHEDULE_NOT_FOUND: 'Schedule not found',
+
+  // wishlist
+  PACKAGE_NOT_AVAILABLE: 'This package is not available for wishlisting',
 } as const;

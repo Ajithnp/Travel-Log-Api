@@ -3,9 +3,10 @@ import { RateLimiterRedis, RateLimiterRes } from 'rate-limiter-flexible';
 import { HTTP_STATUS } from '../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../shared/constants/messages';
 
-export function makeRateLimiter(limiter: RateLimiterRedis) {
+export function makeRateLimiter(limiter: RateLimiterRedis, keyFrom: 'ip' | 'userId' = 'ip') {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const key = req.ip || 'unknown';
+    const key: string =
+      keyFrom === 'userId' ? (req.user?.id ?? req.ip ?? 'anonymous') : (req.ip ?? 'unknown');
     try {
       await limiter.consume(key);
       next();

@@ -5,4 +5,8 @@ export interface IUserController {
   getCategories: RequestHandler;
   getPackageDetails: RequestHandler;
   getPackageSchedules: RequestHandler;
+  toggleWishlist: RequestHandler;
+  getWishlistedIds: RequestHandler;
+  getWishlist: RequestHandler;
+  getWishlistCount: RequestHandler;
 }

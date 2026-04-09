@@ -20,3 +20,11 @@ export const searchLimiter = new RateLimiterRedis({
   points: 20,
   duration: 60,
 });
+
+export const wishlistToggleLimiter = new RateLimiterRedis({
+  storeClient: redisClient,
+  points: 30, // 30 toggles allowed
+  duration: 60, // per 60 seconds
+  blockDuration: 60, // block for 60 seconds
+  useRedisPackage: true,
+});

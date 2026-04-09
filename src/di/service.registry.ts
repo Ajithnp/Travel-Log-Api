@@ -33,6 +33,8 @@ import { ISchedulePackageService } from '../interfaces/service_interfaces/vendor
 import { SchedulePackageService } from '../services/vendor/shedule.package.service';
 import { IPublicPackageService } from '../interfaces/service_interfaces/user/IPublicPackageService';
 import { PublicPackageService } from '../services/user/public-package.service';
+import { IWishlistService } from '../interfaces/service_interfaces/user/IWishlistService';
+import { WishlistService } from '../services/user/wishlist.service';
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -101,6 +103,10 @@ export class ServiceRegistry {
 
     container.register<IPublicPackageService>('IPublicPackageService', {
       useClass: PublicPackageService,
+    });
+
+    container.register<IWishlistService>('IWishlistService', {
+      useClass: WishlistService,
     });
   } // Register other services here
 }
