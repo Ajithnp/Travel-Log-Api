@@ -106,7 +106,7 @@ export class ServiceRegistry {
     });
 
     container.register<IWishlistService>('IWishlistService', {
-    useClass: WishlistService,
+      useClass: WishlistService,
     });
   } // Register other services here
 }

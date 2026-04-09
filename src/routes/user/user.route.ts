@@ -94,19 +94,33 @@ export class UserRoutes extends BaseRoute {
     );
 
     // wishlist
-      this._router.post(
-       'wishlist/:packageId',
-       isAuthenticated,
-       authorize([USER_ROLES.USER]),
-       makeRateLimiter(wishlistToggleLimiter, 'userId'),
+    this._router.post(
+      '/wishlist/:packageId',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      makeRateLimiter(wishlistToggleLimiter, 'userId'),
       this._userController.toggleWishlist.bind(this._userController),
     );
 
     this._router.get(
-      'wishlist/ids',
+      '/wishlist/ids',
       isAuthenticated,
       authorize([USER_ROLES.USER]),
       this._userController.getWishlistedIds.bind(this._userController),
+    );
+
+    this._router.get(
+      '/wishlist',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._userController.getWishlist.bind(this._userController),
+    );
+
+    this._router.get(
+      '/wishlist/count',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._userController.getWishlistCount.bind(this._userController),
     );
   }
 }

@@ -105,5 +105,5 @@ export const ERROR_MESSAGES = {
   SCHEDULE_NOT_FOUND: 'Schedule not found',
 
   // wishlist
-  PACKAGE_NOT_AVAILABLE:'This package is not available for wishlisting'
+  PACKAGE_NOT_AVAILABLE: 'This package is not available for wishlisting',
 } as const;
