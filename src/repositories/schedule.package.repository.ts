@@ -101,4 +101,11 @@ export class SchedulePackageRepository
       .sort({ startDate: 1 })
       .lean();
   }
+
+    async countCompletedByVendor(vendorId: string): Promise<number> {
+    return this.countDocuments({
+      vendorId: toObjectId(vendorId),
+      status: SCHEDULE_STATUS.COMPLETED,
+    });
+  }
 }

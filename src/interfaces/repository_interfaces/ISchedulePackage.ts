@@ -18,4 +18,6 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
   getStatusCounts(vendorId: string): Promise<Record<string, number>>;
 
   findPublicSchedulesByPackage(packageId: string): Promise<ISchedule[]>;
+
+  countCompletedByVendor(vendorId: string): Promise<number>;
 }

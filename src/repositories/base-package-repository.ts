@@ -362,4 +362,219 @@ export class BasePackageRepository
 
     return { packages, total };
   }
+
+  // ─── Vendor Public Profile — packages by a single vendor ─────────────────
+  async findVendorPublicPackages(
+    vendorId: string,
+    page: number,
+    limit: number,
+  ): Promise<{ packages: RawPublicPackageDocument[]; total: number }> {
+    const vendorObjectId = new mongoose.Types.ObjectId(vendorId);
+
+    const pipeline: mongoose.PipelineStage[] = [
+      // ── Stage 1: Match this vendor's published + active packages ──────────
+      {
+        $match: {
+          vendorId: vendorObjectId,
+          status: PACKAGE_STATUS.PUBLISHED,
+          isActive: true,
+        },
+      },
+
+      // ── Stage 2: Category lookup ────────────────
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'categoryData',
+        },
+      },
+      {
+        $addFields: {
+          category: { $arrayElemAt: ['$categoryData', 0] },
+        },
+      },
+
+      // ── Stage 3: Join active schedules ───────────────────
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          let: { pkgId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$packageId', '$$pkgId'] },
+                    { $in: ['$status', [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT]] },
+                  ],
+                },
+              },
+            },
+            { $sort: { startDate: 1 } },
+            { $project: { pricing: 1, startDate: 1, endDate: 1, status: 1 } },
+          ],
+          as: 'activeSchedules',
+        },
+      },
+
+      // ── Stage 4: Drop packages with no active schedules ───────────────────
+      { $match: { 'activeSchedules.0': { $exists: true } } },
+
+      // ── Stage 5: Compute derived price / date / status fields ─────────────
+      {
+        $addFields: {
+          startingFromPrice: {
+            $min: {
+              $map: {
+                input: '$activeSchedules',
+                as: 'sc',
+                in: {
+                  $let: {
+                    vars: {
+                      soloTier: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: '$$sc.pricing',
+                              as: 'p',
+                              cond: { $eq: ['$$p.type', 'SOLO'] },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: '$$soloTier.price',
+                  },
+                },
+              },
+            },
+          },
+
+          earliestDate: { $min: '$activeSchedules.startDate' },
+
+          earliestEndDate: {
+            $let: {
+              vars: {
+                earliestSchedule: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: '$activeSchedules',
+                        as: 'sc',
+                        cond: {
+                          $eq: ['$$sc.startDate', { $min: '$activeSchedules.startDate' }],
+                        },
+                      },
+                    },
+                    0,
+                  ],
+                },
+              },
+              in: '$$earliestSchedule.endDate',
+            },
+          },
+
+          earliestScheduleStatus: {
+            $let: {
+              vars: {
+                earliestSchedule: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: '$activeSchedules',
+                        as: 'sc',
+                        cond: {
+                          $eq: ['$$sc.startDate', { $min: '$activeSchedules.startDate' }],
+                        },
+                      },
+                    },
+                    0,
+                  ],
+                },
+              },
+              in: '$$earliestSchedule.status',
+            },
+          },
+
+          scheduleCount: { $size: '$activeSchedules' },
+
+          isSoldOut: {
+            $eq: [
+              {
+                $size: {
+                  $filter: {
+                    input: '$activeSchedules',
+                    as: 'sc',
+                    cond: { $eq: ['$$sc.status', SCHEDULE_STATUS.SOLD_OUT] },
+                  },
+                },
+              },
+              { $size: '$activeSchedules' },
+            ],
+          },
+        },
+      },
+
+      // ── Stage 6: Vendor lookup (needed for package card vendor.name) ──────
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendorData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          vendor: { $arrayElemAt: ['$vendorData', 0] },
+        },
+      },
+
+      // ── Stage 7: Facet — count + sort (newest) + paginate + project ───────
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $sort: { createdAt: -1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                title: 1,
+                description: 1,
+                location: 1,
+                state: 1,
+                difficultyLevel: 1,
+                days: 1,
+                nights: 1,
+                usp: 1,
+                images: { $slice: ['$images', 1] },
+                category: { _id: 1, name: 1, slug: 1, icon: 1 },
+                vendor: { _id: 1, name: 1 },
+                startingFromPrice: 1,
+                earliestDate: 1,
+                earliestEndDate: 1,
+                earliestScheduleStatus: 1,
+                scheduleCount: 1,
+                isSoldOut: 1,
+                averageRating: 1,
+                totalReviews: 1,
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    const total = result.metadata[0]?.total ?? 0;
+    const packages = result.data ?? [];
+
+    return { packages, total };
+  }
 }

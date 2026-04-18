@@ -9,4 +9,5 @@ export interface IUserController {
   getWishlistedIds: RequestHandler;
   getWishlist: RequestHandler;
   getWishlistCount: RequestHandler;
+  getVendorPublicProfile: RequestHandler;
 }
