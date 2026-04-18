@@ -18,6 +18,12 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     packages: RawPublicPackageDocument[];
     total: number;
   }>;
+
+    findVendorPublicPackages(
+    vendorId: string,
+    page: number,
+    limit: number,
+  ): Promise<{ packages: RawPublicPackageDocument[]; total: number }>;
 }
 
 export interface RawPublicPackageDocument {

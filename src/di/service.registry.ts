@@ -35,6 +35,9 @@ import { IPublicPackageService } from '../interfaces/service_interfaces/user/IPu
 import { PublicPackageService } from '../services/user/public-package.service';
 import { IWishlistService } from '../interfaces/service_interfaces/user/IWishlistService';
 import { WishlistService } from '../services/user/wishlist.service';
+import { IPublicVendorService } from '../interfaces/service_interfaces/user/IPublicVendorService';
+import { PublicVendorService } from '../services/user/public-vendor.service';
+
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -107,6 +110,10 @@ export class ServiceRegistry {
 
     container.register<IWishlistService>('IWishlistService', {
       useClass: WishlistService,
+    });
+
+    container.register<IPublicVendorService>('IPublicVendorService', {
+      useClass: PublicVendorService,
     });
   } // Register other services here
 }

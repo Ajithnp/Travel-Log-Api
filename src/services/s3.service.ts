@@ -17,7 +17,7 @@ export class S3Service implements IFileStorageService {
       Bucket: this._bucketName,
       Key: key,
     });
-    const url = await getSignedUrl(this._s3Client, command, { expiresIn: 300 });
+    const url = await getSignedUrl(this._s3Client, command, { expiresIn: 900 });
     return url;
   }
 

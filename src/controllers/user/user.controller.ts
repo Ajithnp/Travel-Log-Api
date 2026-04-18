@@ -9,6 +9,9 @@ import { IPublicPackageService } from '../../interfaces/service_interfaces/user/
 import { PublicPackageQuery } from 'validators/public-package.validation';
 import { IWishlistService } from '../../interfaces/service_interfaces/user/IWishlistService';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
+import { VendorPublicProfileResponseDTO } from 'types/dtos/user/response.dtos';
+import { IPublicVendorService } from 'interfaces/service_interfaces/user/IPublicVendorService';
+
 @injectable()
 export class UserController implements IUserController {
   constructor(
@@ -18,6 +21,8 @@ export class UserController implements IUserController {
     private _publicPackageService: IPublicPackageService,
     @inject('IWishlistService')
     private _wishlistService: IWishlistService,
+    @inject('IPublicVendorService')
+    private _publicVendorService: IPublicVendorService,
   ) {}
 
   getPublicPackages = asyncHandler(async (req, res) => {
@@ -120,6 +125,21 @@ export class UserController implements IUserController {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
       data: { count: result },
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  
+  getVendorPublicProfile = asyncHandler(async (req, res) => {
+    const { vendorId } = req.params;
+    const { page, limit } = getPaginationOptions(req);
+    const result = await this._publicVendorService.getVendorPublicProfile(vendorId, page, limit);
+
+    const successResponse: IApiResponse<VendorPublicProfileResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
     };
 
     res.status(HTTP_STATUS.OK).json(successResponse);
