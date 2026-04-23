@@ -61,4 +61,7 @@ export const config = {
     SALT_ROUNDS: requireEnv('BCRYPT_SALT_ROUNDS'),
     PASSWORD_HASH_SECRET: requireEnv('PASSWORD_HASH_SECRET'),
   },
+  payment: {
+    STRIPE_SECRET_KEY: requireEnv('STRIPE_SECRET_KEY'),
+  }
 };
