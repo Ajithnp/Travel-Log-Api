@@ -1,3 +1,5 @@
+import { GoogleAuth } from "google-auth-library";
+
 export const SUCCESS_MESSAGES = {
   REGISTRATION_SUCCESSFUL: 'User registered successfully.',
   LOGIN_SUCCESSFUL: 'User logged in successfully.',
@@ -40,6 +42,7 @@ export const ERROR_MESSAGES = {
   ACCOUNT_BLOCKED: 'Your account has been blocked. Please contact support.',
   INPUT_VALIDATION_FAILED: 'Input validation failed. Please check your data.',
   EMAIL_ALREADY_EXISTS: 'A user with this email already exists.',
+  GOOGLE_AUTH_FORGOT_PASSWORD: 'This email is registered with Google authentication. Please use Google login.',
   USER_NOT_FOUND: 'User not found.',
   INVALID_CREDENTIALS: 'Invalid email or password.',
   RESOURCE_NOT_FOUND: 'The requested resource was not found.',
