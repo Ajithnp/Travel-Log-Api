@@ -1,6 +1,7 @@
 import { ISchedule, ISchedulePopulated } from 'types/entities/schedule.entity';
 import { IBaseRepository } from './IBaseRepository';
 import { FilterType } from 'types/db';
+import mongoose, { UpdateResult } from 'mongoose';
 
 export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
   findOverlapping(
@@ -20,4 +21,28 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
   findPublicSchedulesByPackage(packageId: string): Promise<ISchedule[]>;
 
   countCompletedByVendor(vendorId: string): Promise<number>;
+
+  holdSeats(
+    scheduleId: string,
+    seatsCount: number,
+    session?: mongoose.ClientSession,
+  ): Promise<UpdateResult>;
+
+  releaseHeldSeats(
+    scheduleId: string,
+    seatsCount: number,
+    session?: mongoose.ClientSession,
+  ): Promise<UpdateResult>;
+
+  confirmSeats(
+    scheduleId: string,
+    seatsCount: number,
+    session?: mongoose.ClientSession,
+  ): Promise<UpdateResult>;
+
+  cancelSeats(
+    scheduleId: string,
+    seatsCount: number,
+    session?: mongoose.ClientSession,
+  ): Promise<UpdateResult>;
 }

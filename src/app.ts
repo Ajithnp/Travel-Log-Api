@@ -12,6 +12,7 @@ import { corsOption } from './middlewares/cors.middleware';
 import { errorMiddleware } from './middlewares/error.handler.middleware';
 import { VendorRoutes } from './routes/vendor/vendor.routes';
 import { UserRoutes } from './routes/user/user.route';
+import { BookingRoutes } from './routes/user/booking.route';
 import { S3Routes } from './routes/shared/s3.routes';
 
 export default class App {
@@ -53,6 +54,7 @@ export default class App {
     this._app.use('/api/v1/admin', container.resolve(AdminRoutes).router);
     this._app.use('/api/v1/user', container.resolve(UserRoutes).router);
     this._app.use('/api/v1/s3', container.resolve(S3Routes).router);
+    this._app.use('/api/v1/bookings', container.resolve(BookingRoutes).router);
   }
 
   public get expressApp(): Application {

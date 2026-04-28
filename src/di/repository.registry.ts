@@ -11,11 +11,18 @@ import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/
 import { SchedulePackageRepository } from '../repositories/schedule.package.repository';
 import { IWishlistRepository } from '../interfaces/repository_interfaces/IWishlistRepository';
 import { WishlistRepository } from '../repositories/wishlist-repository';
+import { IBookingRepository } from '../interfaces/repository_interfaces/IBookingRepository';
+import { BookingRepository } from '../repositories/booking.repository';
 export class RepositoryRegistry {
   static registerRepositories(): void {
     container.register<IUserRepository>('IUserRepository', {
       useClass: UserRepository,
     });
+
+    container.register<IBookingRepository>('IBookingRepository', {
+      useClass: BookingRepository,
+    });
+
     //vendor-repository
     container.register<IVendorInfoRepository>('IvendorInfoRepository', {
       useClass: VendorInfoRepository,

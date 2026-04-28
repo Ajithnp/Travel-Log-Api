@@ -37,6 +37,8 @@ import { IWishlistService } from '../interfaces/service_interfaces/user/IWishlis
 import { WishlistService } from '../services/user/wishlist.service';
 import { IPublicVendorService } from '../interfaces/service_interfaces/user/IPublicVendorService';
 import { PublicVendorService } from '../services/user/public-vendor.service';
+import { IBookingService } from '../interfaces/service_interfaces/user/IBookingService';
+import { BookingService } from '../services/user/booking.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -114,6 +116,10 @@ export class ServiceRegistry {
 
     container.register<IPublicVendorService>('IPublicVendorService', {
       useClass: PublicVendorService,
+    });
+
+    container.register<IBookingService>('IBookingService', {
+      useClass: BookingService,
     });
   } // Register other services here
 }

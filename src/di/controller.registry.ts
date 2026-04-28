@@ -21,6 +21,8 @@ import { IVendorCategoryController } from '../interfaces/controller_interfaces/v
 import { VendorCategoryController } from '../controllers/vendor/vendor-category.controller';
 import { ISchedulePackageController } from '../interfaces/controller_interfaces/vendor/IShedulePackageController';
 import { ShedulePackageController } from '../controllers/vendor/shedule-package-controller';
+import { IBookingController } from '../interfaces/controller_interfaces/user/IBookingController';
+import { BookingController } from '../controllers/user/booking.controller';
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -64,6 +66,10 @@ export class ControllerRegistry {
 
     container.register<IUserProfileController>('IUserProfileController', {
       useClass: UserProfileController,
+    });
+
+    container.register<IBookingController>('IBookingController', {
+      useClass: BookingController,
     });
 
     // Register other controllers here

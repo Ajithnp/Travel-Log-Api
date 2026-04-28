@@ -33,6 +33,12 @@ export const SUCCESS_MESSAGES = {
 
   // schedule
   SCHEDULE_CREATED_SUCCESSFULLY: 'Schedule created successfully',
+
+  // booking
+  SEATS_HELD_SUCCESS: 'Seats held successfully. Complete payment within 10 minutes.',
+  BOOKING_CONFIRMED: 'Booking confirmed successfully.',
+  SEAT_HOLD_RELEASED: 'Seat hold released.',
+  BOOKING_ALREADY_CONFIRMED: 'Booking is already confirmed.',
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -103,7 +109,30 @@ export const ERROR_MESSAGES = {
   CANNOT_SCHEDULE_TRIPS_FOUR_MONTH_IN_ADVANCE:
     'Trips cannot be scheduled more than 4 months in advance',
   SCHEDULE_NOT_FOUND: 'Schedule not found',
+  SCHEDULE_NOT_AVAILABLE_FOR_BOOKING: 'This schedule is not available for booking.',
+  INVALID_TIER_TYPE: 'Invalid tier type for this schedule',
 
   // wishlist
   PACKAGE_NOT_AVAILABLE: 'This package is not available for wishlisting',
+
+  // seat reservation / booking
+  SEATS_NOT_AVAILABLE: 'The selected schedule does not have enough available seats.',
+  RESERVATION_NOT_FOUND: 'Seat reservation not found.',
+  RESERVATION_ALREADY_PROCESSED: 'This reservation has already been confirmed or released.',
+  RESERVATION_EXPIRED: 'Your seat hold has expired. Please start the booking again.',
+  PAYMENT_INTENT_FAILED: 'Failed to initialise payment. Please try again.',
+  PAYMENT_NOT_COMPLETED: 'Payment has not been completed. Please complete the payment first.',
+  BOOKING_NOT_FOUND: 'Booking not found.',
+  BOOKING_ALREADY_CANCELLED: 'This booking has already been cancelled.',
+  BOOKING_CANCELLATION_FAILED: 'Failed to cancel the booking. Please try again.',
+  BOOKING_CONFIRMATION_FAILED: 'Failed to confirm the booking. Please try again.',
+  ALREADY_HAVE_ACTIVE_BOOKING: 'You already have an active booking for this schedule.',
+  INVALID_GROUP_TYPE: 'Invalid group type selected.',
+  FAILED_TO_RESERVE_SEAT:
+    'Failed to reserve seats. They may have just been booked by someone else. Please try again.',
+  PAYMENT_CONFIRMATION_FAILED:
+    'Payment initiation failed. Your booking has been cancelled and seats have been released. Please try again.',
+  INVALID_PAYMENT_INTENT_ID: 'Invalid payment intent ID.',
+
+  TRAVELER_INFO_INCOMPLETE: 'Lead traveler must provide email and phone number.',
 } as const;

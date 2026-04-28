@@ -63,5 +63,5 @@ export const config = {
   },
   payment: {
     STRIPE_SECRET_KEY: requireEnv('STRIPE_SECRET_KEY'),
-  }
+  },
 };

@@ -89,15 +89,15 @@ export interface PublicScheduleDTO {
 }
 // ====== vendor public profile =========
 export interface VendorPublicProfileVendorDTO {
-  businessName: string;       
-  profilePhoto: string | null; 
-  about: null;                 // future field — not in model yet
-  location: string | null;     
-  averageRating: number;       
-  totalPackages: number;       
-  totalTripsCompleted: number; 
-  createdAt: Date;             
-  isVerified: boolean;         
+  businessName: string;
+  profilePhoto: string | null;
+  about: null; // future field — not in model yet
+  location: string | null;
+  averageRating: number;
+  totalPackages: number;
+  totalTripsCompleted: number;
+  createdAt: Date;
+  isVerified: boolean;
 }
 
 export interface VendorPublicProfileResponseDTO {
