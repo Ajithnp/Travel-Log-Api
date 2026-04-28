@@ -89,6 +89,10 @@ export const changePasswordSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 
+export const ChangePasswordRequestSchema = z.object({
+  body:changePasswordSchema
+})
+
 export type ChangePasswordRequestDTO = z.infer<typeof changePasswordSchema>;
 
 export interface RefreshTokenRequestDTO {

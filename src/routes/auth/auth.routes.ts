@@ -10,7 +10,7 @@ import {
   GoogleAuthRequestSchema,
   ForgotPasswordSchema,
   VerifyOtpSchema,
-  changePasswordSchema,
+  ChangePasswordRequestSchema
 } from '../../types/dtos/auth/request.dtos';
 
 @injectable()
@@ -68,7 +68,7 @@ export class AuthRoutes extends BaseRoute {
 
     this._router.post(
       '/change-password',
-      validateDTO(changePasswordSchema),
+      validateDTO(ChangePasswordRequestSchema),
       this._authController.changePassword.bind(this._authController),
     );
 
