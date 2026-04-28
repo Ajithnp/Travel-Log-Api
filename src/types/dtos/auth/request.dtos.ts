@@ -54,6 +54,10 @@ export const GoogleAuthSchema = z.object({
   clientId: z.string().nonempty('Client id is required'),
 });
 
+export const GoogleAuthRequestSchema = z.object({
+  body: GoogleAuthSchema,
+});
+
 export type GoogleAuthRequestDTO = z.infer<typeof GoogleAuthSchema>;
 
 export const ForgotPasswordSchemaBody = z.object({
@@ -84,6 +88,10 @@ export const changePasswordSchema = z.object({
   email: z.string().nonempty('Email is required').email('Invalid email format'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
+
+export const ChangePasswordRequestSchema = z.object({
+  body:changePasswordSchema
+})
 
 export type ChangePasswordRequestDTO = z.infer<typeof changePasswordSchema>;
 

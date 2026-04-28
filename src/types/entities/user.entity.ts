@@ -8,6 +8,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   phone: string;
+  authProvider: 'local' | 'google';
   googleId: string;
   password: string;
   profile?: string;
