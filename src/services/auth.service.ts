@@ -200,6 +200,7 @@ export class AuthService implements IAuthService {
         email: userData.email,
         googleId: userData.googleId,
         isEmailVerified: true,
+        authProvider: 'google',
       });
     }
 

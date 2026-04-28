@@ -7,7 +7,7 @@ import {
   LoginRequestSchema,
   VerifyEmailRequestSchema,
   ResendOtpSchema,
-  GoogleAuthSchema,
+  GoogleAuthRequestSchema,
   ForgotPasswordSchema,
   VerifyOtpSchema,
   changePasswordSchema,
@@ -50,7 +50,7 @@ export class AuthRoutes extends BaseRoute {
 
     this._router.post(
       '/google/callback',
-      validateDTO(GoogleAuthSchema),
+      validateDTO(GoogleAuthRequestSchema),
       this._authController.googleAuthCallback.bind(this._authController),
     );
 

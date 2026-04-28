@@ -54,6 +54,10 @@ export const GoogleAuthSchema = z.object({
   clientId: z.string().nonempty('Client id is required'),
 });
 
+export const GoogleAuthRequestSchema = z.object({
+  body: GoogleAuthSchema,
+});
+
 export type GoogleAuthRequestDTO = z.infer<typeof GoogleAuthSchema>;
 
 export const ForgotPasswordSchemaBody = z.object({
