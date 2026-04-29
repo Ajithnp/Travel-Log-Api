@@ -3,7 +3,7 @@ import { AppError } from '../errors/AppError';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../shared/constants/messages';
 import { IApiResponse } from 'types/common/IApiResponse';
-import {isMongoServerError, isSyntaxError} from "../errors/guards/isMongoError";
+import { isMongoServerError, isSyntaxError } from '../errors/gurdes/isMongoError';
 import {handleMongoDuplicateError} from "../errors/MongoError";
 
 

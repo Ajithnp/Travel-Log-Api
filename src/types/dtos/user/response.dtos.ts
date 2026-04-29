@@ -11,6 +11,7 @@ export interface UserProfileResponseDTO {
   email: string;
   isBlocked: boolean;
   createdAt: string;
+  authProvider?: "google" | "local"
 }
 
 export interface IUpdateEmailResponseDTO {
