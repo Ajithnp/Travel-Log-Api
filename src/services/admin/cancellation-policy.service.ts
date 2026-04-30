@@ -22,5 +22,11 @@ export class CancellationPolicyService implements ICancellationPolicyService {
  
         const policy = await this._policyRepository.create(payload);
      return CancellationPolicyMapper.toResponseDto(policy);
+    }
+    
+    async getPolicies(): Promise<CancellationPolicyResponseDto[]> {
+
+        const policies = await this._policyRepository.findAll();
+     return policies.map(CancellationPolicyMapper.toResponseDto);
   }
 }

@@ -132,11 +132,18 @@ export class AdminRoutes extends BaseRoute {
 
     // ================ Cancellation Policy Management ===================
     this._router.post(
-      '/cancellation-policy',
+      '/cancellation-policies',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       validateDTO(CancellationPolicyRequestSchema),
       this._adminCancellationPolicyController.createPolicy.bind(this._adminCancellationPolicyController),
+    );
+
+    this._router.get(
+      '/cancellation-policies',
+      // isAuthenticated,
+      // authorize([USER_ROLES.ADMIN]),
+      this._adminCancellationPolicyController.getPolicies.bind(this._adminCancellationPolicyController),
     );
   }
 }

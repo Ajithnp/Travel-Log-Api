@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 
 export interface IAdminCancellationPolicyController { 
-    createPolicy:RequestHandler;
+    createPolicy: RequestHandler;
+    getPolicies: RequestHandler;
 } 

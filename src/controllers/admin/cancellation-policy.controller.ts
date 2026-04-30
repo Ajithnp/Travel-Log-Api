@@ -25,5 +25,20 @@ export class AdminCancellationPolicyController implements IAdminCancellationPoli
         };
     
         res.status(HTTP_STATUS.CREATED).json(successResponse);
+     });
+    
+    getPolicies = expressAsyncHandler(async (req, res) => {
+        const data = await this._policyService.getPolicies();
+
+        const successResponse: IApiResponse<typeof data> = {
+          success: SUCCESS_STATUS.SUCCESS,
+          message: SUCCESS_MESSAGES.OK,
+          data,
+        };
+
+        res.status(HTTP_STATUS.OK).json(successResponse);
       });
 }
+    
+    
+      

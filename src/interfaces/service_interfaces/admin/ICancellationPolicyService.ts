@@ -3,4 +3,5 @@ import { CancellationPolicyResponseDto, CreateCancellationPolicyDto } from "type
 
 export interface ICancellationPolicyService { 
     createPolicy(payload: CreateCancellationPolicyDto): Promise<CancellationPolicyResponseDto>;
+    getPolicies(): Promise<CancellationPolicyResponseDto[]> 
 }
