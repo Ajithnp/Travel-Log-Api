@@ -9,12 +9,16 @@ import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import { BlockOrUnblockUserSchema } from '../../types/dtos/admin/user/request.dtos';
 import { UpdateVendorVerificationSchema } from '../../types/dtos/admin/vendor/request.dtos';
 import { IAdminCategoryController } from '../../interfaces/controller_interfaces/admin/IAdminCategoryController';
+import { IAdminCancellationPolicyController } from '../../interfaces/controller_interfaces/admin/IAdminCancellationPolicyController';
 import {
   createCategorySchema,
   reviewCategorySchema,
   reviewedCategorySchema,
   updateCategorySchema,
 } from '../../validators/category.validation';
+import { CancellationPolicyRequestSchema } from '../../types/dtos/admin/cancellation-policy.dtos';
+
+
 @injectable()
 export class AdminRoutes extends BaseRoute {
   constructor(
@@ -24,6 +28,8 @@ export class AdminRoutes extends BaseRoute {
     private _adminVendorController: IAdminVendorController,
     @inject('IAdminCategoryController')
     private _adminCategoryController: IAdminCategoryController,
+    @inject('IAdminCancellationPolicyController')
+    private _adminCancellationPolicyController: IAdminCancellationPolicyController,
   ) {
     super();
     this.initializeRoutes();
@@ -122,6 +128,15 @@ export class AdminRoutes extends BaseRoute {
       authorize([USER_ROLES.ADMIN]),
       validateDTO(reviewedCategorySchema),
       this._adminCategoryController.getReviwedRequest.bind(this._adminCategoryController),
+    );
+
+    // ================ Cancellation Policy Management ===================
+    this._router.post(
+      '/cancellation-policy',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(CancellationPolicyRequestSchema),
+      this._adminCancellationPolicyController.createPolicy.bind(this._adminCancellationPolicyController),
     );
   }
 }

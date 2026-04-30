@@ -9,5 +9,9 @@ export class CancellationPolicyRepository  extends BaseRepository<ICancellationP
    
     constructor() {
          super(CancellationPolicyModel)
-     }
+    }
+    
+    async findByKey(key: string): Promise<ICancellationPolicy | null> {
+        return this.findOne({ key });
+    }
 }

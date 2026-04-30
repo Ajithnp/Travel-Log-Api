@@ -6,6 +6,7 @@ export interface ICancellationRule {
 }
  
 export interface ICancellationPolicy extends Document {
+  _id: mongoose.Types.ObjectId;
   key: string;         
   label: string;         
   description?: string;
