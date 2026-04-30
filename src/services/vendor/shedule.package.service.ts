@@ -108,6 +108,7 @@ export class SchedulePackageService implements ISchedulePackageService {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
+
     if (pkg.status !== PACKAGE_STATUS.PUBLISHED) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_PUBLISHED, HTTP_STATUS.BAD_REQUEST);
     }
