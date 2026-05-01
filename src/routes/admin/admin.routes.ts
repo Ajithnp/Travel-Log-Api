@@ -16,8 +16,11 @@ import {
   reviewedCategorySchema,
   updateCategorySchema,
 } from '../../validators/category.validation';
-import { CancellationPolicyRequestSchema, PolicyStatusRequestSchema, PolicyStatusSchema } from '../../types/dtos/admin/cancellation-policy.dtos';
-
+import {
+  CancellationPolicyRequestSchema,
+  PolicyStatusRequestSchema,
+  PolicyStatusSchema,
+} from '../../types/dtos/admin/cancellation-policy.dtos';
 
 @injectable()
 export class AdminRoutes extends BaseRoute {
@@ -136,14 +139,18 @@ export class AdminRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       validateDTO(CancellationPolicyRequestSchema),
-      this._adminCancellationPolicyController.createPolicy.bind(this._adminCancellationPolicyController),
+      this._adminCancellationPolicyController.createPolicy.bind(
+        this._adminCancellationPolicyController,
+      ),
     );
 
     this._router.get(
       '/cancellation-policies',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
-      this._adminCancellationPolicyController.getPolicies.bind(this._adminCancellationPolicyController),
+      this._adminCancellationPolicyController.getPolicies.bind(
+        this._adminCancellationPolicyController,
+      ),
     );
 
     this._router.patch(
@@ -151,7 +158,9 @@ export class AdminRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       validateDTO(PolicyStatusRequestSchema),
-      this._adminCancellationPolicyController.togglePolicyActiveStatus.bind(this._adminCancellationPolicyController),
+      this._adminCancellationPolicyController.togglePolicyActiveStatus.bind(
+        this._adminCancellationPolicyController,
+      ),
     );
   }
 }

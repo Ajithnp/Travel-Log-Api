@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-
-
 export const CancellationRuleSchema = z.object({
   daysBeforeTrip: z
     .number({ required_error: 'daysBeforeTrip is required' })
@@ -19,10 +17,7 @@ export const CreateCancellationPolicySchema = z.object({
     .min(1)
     .max(50)
     .regex(/^[a-z0-9_]+$/, 'key must be lowercase letters, numbers, or underscores'),
-  label: z
-    .string({ required_error: 'label is required' })
-    .min(1, 'label cannot be empty')
-    .max(100),
+  label: z.string({ required_error: 'label is required' }).min(1, 'label cannot be empty').max(100),
   description: z.string().max(500).optional(),
   rules: z
     .array(CancellationRuleSchema)
@@ -33,13 +28,12 @@ export const CreateCancellationPolicySchema = z.object({
         const days = rules.map((r) => r.daysBeforeTrip);
         return new Set(days).size === days.length;
       },
-      { message: 'Each rule must have a unique daysBeforeTrip value' }
+      { message: 'Each rule must have a unique daysBeforeTrip value' },
     ),
-
 });
 
 export const CancellationPolicyRequestSchema = z.object({
-body: CreateCancellationPolicySchema,
+  body: CreateCancellationPolicySchema,
 });
 
 export const UpdateCancellationPolicySchema = z
@@ -55,7 +49,7 @@ export const UpdateCancellationPolicySchema = z
           const days = rules.map((r) => r.daysBeforeTrip);
           return new Set(days).size === days.length;
         },
-        { message: 'Each rule must have a unique daysBeforeTrip value' }
+        { message: 'Each rule must have a unique daysBeforeTrip value' },
       )
       .optional(),
   })
@@ -64,14 +58,12 @@ export const UpdateCancellationPolicySchema = z
   });
 
 export const PolicyStatusSchema = z.object({
- isActive: z.boolean({ required_error: 'isActive is required' }),
+  isActive: z.boolean({ required_error: 'isActive is required' }),
 });
 
 export const PolicyStatusRequestSchema = z.object({
   body: PolicyStatusSchema,
 });
-
-
 
 export type CreateCancellationPolicyDto = z.infer<typeof CreateCancellationPolicySchema>;
 export type UpdateCancellationPolicyDto = z.infer<typeof UpdateCancellationPolicySchema>;

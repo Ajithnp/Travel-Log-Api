@@ -37,7 +37,7 @@ import { IWishlistService } from '../interfaces/service_interfaces/user/IWishlis
 import { WishlistService } from '../services/user/wishlist.service';
 import { IPublicVendorService } from '../interfaces/service_interfaces/user/IPublicVendorService';
 import { PublicVendorService } from '../services/user/public-vendor.service';
-import {ICancellationPolicyService} from '../interfaces/service_interfaces/admin/ICancellationPolicyService';
+import { ICancellationPolicyService } from '../interfaces/service_interfaces/admin/ICancellationPolicyService';
 import { CancellationPolicyService } from '../services/admin/cancellation-policy.service';
 
 export class ServiceRegistry {

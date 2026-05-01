@@ -1,5 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { ICancellationPolicy, ICancellationRule } from '../types/entities/cancellation-policy.entity';
+import {
+  ICancellationPolicy,
+  ICancellationRule,
+} from '../types/entities/cancellation-policy.entity';
 
 const CancellationRuleSchema = new Schema<ICancellationRule>(
   {
@@ -15,9 +18,9 @@ const CancellationRuleSchema = new Schema<ICancellationRule>(
       max: 100,
     },
   },
-  { _id: false }
+  { _id: false },
 );
- 
+
 const CancellationPolicySchema = new Schema<ICancellationPolicy>(
   {
     key: {
@@ -54,13 +57,13 @@ const CancellationPolicySchema = new Schema<ICancellationPolicy>(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 CancellationPolicySchema.index({ isActive: 1 });
 CancellationPolicySchema.index({ key: 1, isActive: 1 });
- 
+
 export const CancellationPolicyModel = mongoose.model<ICancellationPolicy>(
   'CancellationPolicy',
-  CancellationPolicySchema
+  CancellationPolicySchema,
 );

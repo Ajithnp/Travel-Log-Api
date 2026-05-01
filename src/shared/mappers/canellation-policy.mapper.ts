@@ -1,5 +1,8 @@
-import { CancellationPolicyResponseDto, PaginatedPoliciesResponseDto } from "types/dtos/admin/cancellation-policy.dtos";
-import { ICancellationPolicy } from "types/entities/cancellation-policy.entity";
+import {
+  CancellationPolicyResponseDto,
+  PaginatedPoliciesResponseDto,
+} from 'types/dtos/admin/cancellation-policy.dtos';
+import { ICancellationPolicy } from 'types/entities/cancellation-policy.entity';
 
 export class CancellationPolicyMapper {
   static toResponseDto(policy: ICancellationPolicy): CancellationPolicyResponseDto {
@@ -17,10 +20,10 @@ export class CancellationPolicyMapper {
       updatedAt: policy.updatedAt.toISOString(),
     };
   }
- 
+
   static toPaginatedResponseDto(
     policies: ICancellationPolicy[],
-    total: number
+    total: number,
   ): PaginatedPoliciesResponseDto {
     return {
       data: policies.map(CancellationPolicyMapper.toResponseDto),

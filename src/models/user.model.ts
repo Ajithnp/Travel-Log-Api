@@ -17,10 +17,10 @@ const userSchema = new Schema<IUser>(
       unique: true,
     },
     authProvider: {
-    type: String,
-    enum: ["local", "google"],
-    default: "local"
-  },
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+    },
     googleId: {
       type: String,
       unique: true,

@@ -90,8 +90,8 @@ export const changePasswordSchema = z.object({
 });
 
 export const ChangePasswordRequestSchema = z.object({
-  body:changePasswordSchema
-})
+  body: changePasswordSchema,
+});
 
 export type ChangePasswordRequestDTO = z.infer<typeof changePasswordSchema>;
 

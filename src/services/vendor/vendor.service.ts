@@ -85,11 +85,11 @@ export class VendorService implements IVendorService {
     //   profileLogo: { key: file.key },
     // });
     await this._vendorInfoRepository.findByIdAndUpdate(payload.vendorInfoId, {
-  "documents.profileLogo": {
-    key: file.key,
-    fieldName: "companyLogo",
-  },
-});
+      'documents.profileLogo': {
+        key: file.key,
+        fieldName: 'companyLogo',
+      },
+    });
   }
 
   async vendorVerificationSubmit(

@@ -21,13 +21,11 @@ export class PublicVendorService implements IPublicVendorService {
     private _schedulePackageRepository: ISchedulePackageRepository,
   ) {}
 
-  
   async getVendorPublicProfile(
     vendorId: string,
     page: number,
     limit: number,
   ): Promise<VendorPublicProfileResponseDTO> {
-
     const vendorInfo = await this._vendorInfoRepository.findVendorWithUserId(vendorId);
 
     if (
@@ -42,7 +40,7 @@ export class PublicVendorService implements IPublicVendorService {
       this._basePackageRepository.findVendorPublicPackages(vendorId, page, limit),
       this._schedulePackageRepository.countCompletedByVendor(vendorId),
     ]);
-      
+
     const totalPages = Math.ceil(total / limit);
 
     return {

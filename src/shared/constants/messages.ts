@@ -1,4 +1,4 @@
-import { GoogleAuth } from "google-auth-library";
+import { GoogleAuth } from 'google-auth-library';
 
 export const SUCCESS_MESSAGES = {
   REGISTRATION_SUCCESSFUL: 'User registered successfully.',
@@ -42,7 +42,8 @@ export const ERROR_MESSAGES = {
   ACCOUNT_BLOCKED: 'Your account has been blocked. Please contact support.',
   INPUT_VALIDATION_FAILED: 'Input validation failed. Please check your data.',
   EMAIL_ALREADY_EXISTS: 'A user with this email already exists.',
-  GOOGLE_AUTH_FORGOT_PASSWORD: 'This email is registered with Google authentication. Please use Google login.',
+  GOOGLE_AUTH_FORGOT_PASSWORD:
+    'This email is registered with Google authentication. Please use Google login.',
   GOOGLE_USER_CANT_CHANGE_EMAIL: 'Google users cannot change email',
   GOOGLE_USER_CANT_CHANGE_PASSWORD: 'Google users cannot change password',
   USER_NOT_FOUND: 'User not found.',
@@ -65,7 +66,7 @@ export const ERROR_MESSAGES = {
   USER_NOT_EXIST_OR_EMAIL_NOT_VERIFIED_OR_USER_BLOCKED:
     'User not exist or Email not verified or User blocked',
   PASSWORD_DO_NOT_MATCH: 'Password do not match',
-  PASSWORD_INCORRECT:'The current password you entered is incorrect. ',
+  PASSWORD_INCORRECT: 'The current password you entered is incorrect. ',
   VERIFY_YOUR_EMAIL: 'Please verify your email',
   EMAIL_OR_OTP_ARE_MISSING: 'Email or Otp are missing',
   INVALID_OTP: 'Invalid otp',
@@ -112,4 +113,8 @@ export const ERROR_MESSAGES = {
 
   // wishlist
   PACKAGE_NOT_AVAILABLE: 'This package is not available for wishlisting',
+
+  // cancellation policy
+  CANCELLATION_POLICY_NOT_FOUND: 'Cancellation policy not found',
+  FAILED_TO_UPDATE_CANCELLATION_POLICY_STATUS: 'Failed to update cancellation policy status',
 } as const;
