@@ -8,8 +8,7 @@ export interface CreatePaymentIntentDTO {
 export interface PaymentIntentResult {
   gatewayPaymentId: string;
   clientSecret?: string;
-  orderId?: string;
-  status: 'created' | 'pending';
+   url: string | null;
 }
 
 export interface IPaymentGateway {

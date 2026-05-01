@@ -37,7 +37,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     session?: mongoose.ClientSession,
   ): Promise<IBooking | null> {
     return this.model
-      .findByIdAndUpdate(bookingId, { paymentIntentId }, { new: true, session })
+      .findByIdAndUpdate(bookingId, {transactionId: paymentIntentId }, { new: true, session })
       .lean() as Promise<IBooking | null>;
   }
 

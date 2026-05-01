@@ -20,9 +20,8 @@ export class BookingController implements IBookingController {
   initiateBooking = expressAsyncHandler(async (req, res) => {
     console.log('Initiate booking request received');
 
-    const userId = req.user!.id;
-    console.log('User ID:', userId);
-    console.log('request body:', req.body);
+    // const userId = req.user!.id;
+    const userId = '69f04e5a12da1a1b63f8c6e9'
     const { packageId, scheduleId, tierType, seatsCount, travelers, amountInPaise } = req.body;
     console.log('request body:', req.body);
 
@@ -35,8 +34,6 @@ export class BookingController implements IBookingController {
       travelers,
       amountInPaise,
     };
-
-    console.log('Initiate booking payload:', payload);
 
     const result = await this._bookingService.initiateBooking(payload);
 

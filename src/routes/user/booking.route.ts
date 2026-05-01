@@ -19,8 +19,8 @@ export class BookingRoutes extends BaseRoute {
   protected initializeRoutes(): void {
     this._router.post(
       '/initiate',
-      isAuthenticated,
-      authorize([USER_ROLES.USER]),
+      // isAuthenticated,
+      // authorize([USER_ROLES.USER]),
       this._bookingController.initiateBooking.bind(this._bookingController),
       );
       

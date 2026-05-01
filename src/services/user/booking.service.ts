@@ -6,7 +6,6 @@ import {
   InitiateBookingDTO,
   InitiateBookingResponseDTO,
 } from '../../interfaces/service_interfaces/user/IBookingService';
-import { ISeatReservationRepository } from '../../interfaces/repository_interfaces/ISeatReservationRepository';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -19,6 +18,7 @@ import { PLATFORM_COMMISSION_RATE } from '../../shared/constants/platform';
 import { IPaymentGateway } from '../../infrastructure/payment-gateways/IPaymentGateway';
 import mongoose from 'mongoose';
 import { BOOKING_STATUS, PAYMENT_STATUS, SEAT_HOLD_DURATION_MS } from '../../shared/constants/booking';
+import { toObjectId } from '../../shared/utils/database/objectId.helper';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -39,12 +39,14 @@ export class BookingService implements IBookingService {
   let session: mongoose.ClientSession | null = null;
 
   try {
-    // ─────────────────────────────────────────────
-    // 1. Validate schedule
-    // ─────────────────────────────────────────────
-    const schedule = await this._schedulePackageRepo.findById(
-      payload.scheduleId,
+   
+    //==Validate schedule==
+    const sheduleId = toObjectId(payload.scheduleId);
+   
+    const schedule = await this._schedulePackageRepo.findOne(
+      { _id: sheduleId },
     );
+    console.log('Schedule found:', schedule);
 
     if (!schedule) {
       throw new AppError(
@@ -61,12 +63,11 @@ export class BookingService implements IBookingService {
       );
     }
 
-    // ─────────────────────────────────────────────
+    
     // 2. Validate package
-    // ─────────────────────────────────────────────
-    const pkg = await this._packageRepo.findById(
-      schedule.packageId.toString(),
-    );
+    
+    const pkg = await this._packageRepo.findOne({ _id: schedule.packageId });
+    console.log('Package found:', pkg);
 
     if (!pkg) {
       throw new AppError(
@@ -85,9 +86,8 @@ export class BookingService implements IBookingService {
       );
     }
 
-    // ─────────────────────────────────────────────
     // 3. Validate tier
-    // ─────────────────────────────────────────────
+
     const priceTier = schedule.pricing.find(
       (tier) => tier.type === payload.tierType,
     );
@@ -112,10 +112,10 @@ export class BookingService implements IBookingService {
         HTTP_STATUS.BAD_REQUEST,
       );
     }
-
-    // ─────────────────────────────────────────────
     // 4. Validate travelers
-    // ─────────────────────────────────────────────
+
+    console.log('Validating travelers:', payload.travelers.length);
+
     if (
       !payload.travelers ||
       payload.travelers.length !== payload.seatsCount
@@ -146,7 +146,6 @@ export class BookingService implements IBookingService {
       );
     }
 
-    // ─────────────────────────────────────────────
     // 5. Duplicate booking check
     // ─────────────────────────────────────────────
     const existingBooking =
@@ -154,15 +153,14 @@ export class BookingService implements IBookingService {
         payload.userId,
         payload.scheduleId,
       );
-
-    if (existingBooking) {
+    
+    if (existingBooking?.bookingStatus === BOOKING_STATUS.CONFIRMED) {
       throw new AppError(
         ERROR_MESSAGES.ALREADY_HAVE_ACTIVE_BOOKING,
         HTTP_STATUS.CONFLICT,
       );
     }
 
-    // ─────────────────────────────────────────────
     // 6. Financial calculation
     // ─────────────────────────────────────────────
     const discountAmount = 0;
@@ -186,30 +184,10 @@ export class BookingService implements IBookingService {
           100,
       ) / 100;
 
-    const seatHoldExpiry = new Date(
-      Date.now() + SEAT_HOLD_DURATION_MS,
-    );
-
-    // ─────────────────────────────────────────────
-    // 7. Start transaction
+    //  Start transaction
     // ─────────────────────────────────────────────
     session = await mongoose.startSession();
     session.startTransaction();
-
-    // Hold seats INSIDE transaction only
-    const held =
-      await this._schedulePackageRepo.holdSeats(
-        payload.scheduleId,
-        payload.seatsCount,
-        session,
-      );
-
-    if (held.modifiedCount === 0) {
-      throw new AppError(
-        ERROR_MESSAGES.FAILED_TO_RESERVE_SEAT,
-        HTTP_STATUS.CONFLICT,
-      );
-    }
 
     // Create booking
     const booking =
@@ -228,7 +206,6 @@ export class BookingService implements IBookingService {
 
           groupType: payload.tierType,
           travelerCount: payload.seatsCount,
-          seatHoldExpiry,
 
           travelers: payload.travelers.map(
             (traveler) => ({
@@ -253,28 +230,25 @@ export class BookingService implements IBookingService {
     await session.endSession();
     session = null;
 
-    // ─────────────────────────────────────────────
+
     // 8. Create payment intent AFTER commit
     // ─────────────────────────────────────────────
     try {
-      const payment =
-        await this.paymentGateway.createPaymentIntent(
-          {
-            amount: priceTier.price,
-            currency: "inr",
-            bookingId: booking._id.toString(),
-            metadata: {
-              userId: payload.userId,
-              scheduleId: payload.scheduleId,
-              bookingId:
-                booking._id.toString(),
-              tierType: payload.tierType,
-              seatsCount: String(
-                payload.seatsCount,
-              ),
-            },
-          },
-        );
+      
+    const payment = await this.paymentGateway.createPaymentIntent({
+    amount: priceTier.price,
+    currency: 'inr',
+    bookingId: booking._id.toString(),
+    metadata: {
+      userId: payload.userId,
+      scheduleId: payload.scheduleId,
+      tierType: payload.tierType,
+      seatsCount: String(payload.seatsCount),
+      startDate: schedule.startDate?.toISOString().split('T')[0] ?? '', 
+      endDate: schedule.endDate?.toISOString().split('T')[0] ?? '',     
+      packageName: pkg.title ?? '',
+    },
+  });
 
       await this._bookingRepo.attachPaymentIntent(
         booking._id.toString(),
@@ -284,16 +258,12 @@ export class BookingService implements IBookingService {
       return {
         clientSecret: payment.clientSecret!,
         bookingId: booking._id.toString(),
-        expiresAt:
-          seatHoldExpiry.toISOString(),
+        checkoutUrl: payment.url,
+         
       };
     } catch (paymentError) {
       // Payment intent failed after booking created
-
-      await this._schedulePackageRepo.releaseHeldSeats(
-        payload.scheduleId,
-        payload.seatsCount,
-      );
+      console.error('Payment error details:', paymentError); // ← add this temporarily
 
       await this._bookingRepo.markFailedPayment(
         booking._id.toString(),

@@ -33,7 +33,7 @@ export interface ConfirmBookingDTO {
 export interface InitiateBookingResponseDTO {
   bookingId: string;
   clientSecret: string;
-  expiresAt: string; // ISO string — client uses for countdown timer
+  checkoutUrl: string | null;  // redirect the user 
 }
 
 export interface ConfirmBookingResponseDTO {
