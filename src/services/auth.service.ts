@@ -251,7 +251,7 @@ export class AuthService implements IAuthService {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN);
     }
 
-    if(isUserEmailExist.authProvider === 'google') {
+    if (isUserEmailExist.authProvider === 'google') {
       throw new AppError(ERROR_MESSAGES.GOOGLE_AUTH_FORGOT_PASSWORD, HTTP_STATUS.BAD_REQUEST);
     }
 

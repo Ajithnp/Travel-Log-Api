@@ -10,7 +10,7 @@ import {
   GoogleAuthRequestSchema,
   ForgotPasswordSchema,
   VerifyOtpSchema,
-  ChangePasswordRequestSchema
+  ChangePasswordRequestSchema,
 } from '../../types/dtos/auth/request.dtos';
 
 @injectable()

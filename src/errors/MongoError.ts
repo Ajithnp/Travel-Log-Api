@@ -1,4 +1,4 @@
-import { MongoServerError } from "types/errors";
+import { MongoServerError } from 'types/errors';
 
 const FIELD_LABELS: Record<string, string> = {
   phone: 'Phone number',

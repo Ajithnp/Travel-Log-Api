@@ -21,6 +21,8 @@ import { IVendorCategoryController } from '../interfaces/controller_interfaces/v
 import { VendorCategoryController } from '../controllers/vendor/vendor-category.controller';
 import { ISchedulePackageController } from '../interfaces/controller_interfaces/vendor/IShedulePackageController';
 import { ShedulePackageController } from '../controllers/vendor/shedule-package-controller';
+import { IAdminCancellationPolicyController } from '../interfaces/controller_interfaces/admin/IAdminCancellationPolicyController';
+import { AdminCancellationPolicyController } from '../controllers/admin/cancellation-policy.controller';
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -55,6 +57,9 @@ export class ControllerRegistry {
     });
     container.register<IAdminCategoryController>('IAdminCategoryController', {
       useClass: AdminCategoryController,
+    });
+    container.register<IAdminCancellationPolicyController>('IAdminCancellationPolicyController', {
+      useClass: AdminCancellationPolicyController,
     });
 
     //user controllers

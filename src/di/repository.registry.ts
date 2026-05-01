@@ -11,6 +11,8 @@ import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/
 import { SchedulePackageRepository } from '../repositories/schedule.package.repository';
 import { IWishlistRepository } from '../interfaces/repository_interfaces/IWishlistRepository';
 import { WishlistRepository } from '../repositories/wishlist-repository';
+import { ICancellationPolicyRepository } from '../interfaces/repository_interfaces/ICancellationPolicyRepository';
+import { CancellationPolicyRepository } from '../repositories/cancellation-policy.repository';
 export class RepositoryRegistry {
   static registerRepositories(): void {
     container.register<IUserRepository>('IUserRepository', {
@@ -36,6 +38,10 @@ export class RepositoryRegistry {
 
     container.register<IWishlistRepository>('IWishlistRepository', {
       useClass: WishlistRepository,
+    });
+
+    container.register<ICancellationPolicyRepository>('ICancellationPolicyRepository', {
+      useClass: CancellationPolicyRepository,
     });
 
     // Register other repositories here

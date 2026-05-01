@@ -19,7 +19,7 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     total: number;
   }>;
 
-    findVendorPublicPackages(
+  findVendorPublicPackages(
     vendorId: string,
     page: number,
     limit: number,

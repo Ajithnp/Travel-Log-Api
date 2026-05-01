@@ -82,12 +82,8 @@ export class UserService implements IUserService {
     const user = await this._userRepository.findOne({ email });
 
     if (user) {
-
       if (user.authProvider === 'google') {
-        throw new AppError(
-          ERROR_MESSAGES.GOOGLE_USER_CANT_CHANGE_EMAIL,
-          HTTP_STATUS.BAD_REQUEST
-        )
+        throw new AppError(ERROR_MESSAGES.GOOGLE_USER_CANT_CHANGE_EMAIL, HTTP_STATUS.BAD_REQUEST);
       }
 
       throw new AppError(
@@ -154,7 +150,7 @@ export class UserService implements IUserService {
     const user = await this._userRepository.findOne({ email });
 
     if (user?.authProvider === 'google') {
-      throw new AppError(ERROR_MESSAGES.GOOGLE_USER_CANT_CHANGE_PASSWORD,HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(ERROR_MESSAGES.GOOGLE_USER_CANT_CHANGE_PASSWORD, HTTP_STATUS.BAD_REQUEST);
     }
 
     if (!user)

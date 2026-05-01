@@ -102,7 +102,7 @@ export class SchedulePackageRepository
       .lean();
   }
 
-    async countCompletedByVendor(vendorId: string): Promise<number> {
+  async countCompletedByVendor(vendorId: string): Promise<number> {
     return this.countDocuments({
       vendorId: toObjectId(vendorId),
       status: SCHEDULE_STATUS.COMPLETED,
