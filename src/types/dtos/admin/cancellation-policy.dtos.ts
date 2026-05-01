@@ -63,8 +63,12 @@ export const UpdateCancellationPolicySchema = z
     message: 'At least one field must be provided for update',
   });
 
-export const PolicyIdParamSchema = z.object({
-  id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid MongoDB ObjectId'),
+export const PolicyStatusSchema = z.object({
+ isActive: z.boolean({ required_error: 'isActive is required' }),
+});
+
+export const PolicyStatusRequestSchema = z.object({
+  body: PolicyStatusSchema,
 });
 
 
@@ -72,6 +76,7 @@ export const PolicyIdParamSchema = z.object({
 export type CreateCancellationPolicyDto = z.infer<typeof CreateCancellationPolicySchema>;
 export type UpdateCancellationPolicyDto = z.infer<typeof UpdateCancellationPolicySchema>;
 export type CancellationRuleDto = z.infer<typeof CancellationRuleSchema>;
+export type StatusToggleDto = z.infer<typeof PolicyStatusSchema>;
 
 // response DTOs
 

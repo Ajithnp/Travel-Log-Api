@@ -16,7 +16,7 @@ import {
   reviewedCategorySchema,
   updateCategorySchema,
 } from '../../validators/category.validation';
-import { CancellationPolicyRequestSchema } from '../../types/dtos/admin/cancellation-policy.dtos';
+import { CancellationPolicyRequestSchema, PolicyStatusRequestSchema, PolicyStatusSchema } from '../../types/dtos/admin/cancellation-policy.dtos';
 
 
 @injectable()
@@ -141,9 +141,17 @@ export class AdminRoutes extends BaseRoute {
 
     this._router.get(
       '/cancellation-policies',
-      // isAuthenticated,
-      // authorize([USER_ROLES.ADMIN]),
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
       this._adminCancellationPolicyController.getPolicies.bind(this._adminCancellationPolicyController),
+    );
+
+    this._router.patch(
+      '/cancellation-policies/:policyId',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(PolicyStatusRequestSchema),
+      this._adminCancellationPolicyController.togglePolicyActiveStatus.bind(this._adminCancellationPolicyController),
     );
   }
 }

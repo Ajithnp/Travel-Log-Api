@@ -14,4 +14,12 @@ export class CancellationPolicyRepository  extends BaseRepository<ICancellationP
     async findByKey(key: string): Promise<ICancellationPolicy | null> {
         return this.findOne({ key });
     }
+
+   async toggleActive(id: string, isActive: boolean): Promise<ICancellationPolicy | null> {
+    return this.model.findOneAndUpdate(
+      { _id: id },
+      { isActive  },
+      { new: true }
+    ).lean<ICancellationPolicy>();
+  }
 }
