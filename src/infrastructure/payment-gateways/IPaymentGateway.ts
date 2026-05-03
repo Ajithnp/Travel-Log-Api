@@ -1,3 +1,7 @@
+
+import Stripe from 'stripe';
+export type StripeWebhookEvent = ReturnType<typeof Stripe.prototype.webhooks.constructEvent>;
+export type StripeCheckoutSession = Awaited<ReturnType<typeof Stripe.prototype.checkout.sessions.retrieve>>;
 export interface CreatePaymentIntentDTO {
   amount: number;
   currency: string;
@@ -13,5 +17,6 @@ export interface PaymentIntentResult {
 
 export interface IPaymentGateway {
   createPaymentIntent(data: CreatePaymentIntentDTO): Promise<PaymentIntentResult>;
-  confirmPayment(gatewayPaymentId: string): Promise<boolean>;
+  verifyWebhookEvent(rawBody: Buffer, signature: string): StripeWebhookEvent;
+  verifyStripeSession(stripeSessionId: string): Promise<StripeCheckoutSession>;
 }

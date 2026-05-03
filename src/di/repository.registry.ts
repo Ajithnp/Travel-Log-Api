@@ -15,13 +15,7 @@ import { IBookingRepository } from '../interfaces/repository_interfaces/IBooking
 import { BookingRepository } from '../repositories/booking.repository';
 export class RepositoryRegistry {
   static registerRepositories(): void {
-    container.register<IUserRepository>('IUserRepository', {
-      useClass: UserRepository,
-    });
 
-    container.register<IBookingRepository>('IBookingRepository', {
-      useClass: BookingRepository,
-    });
 
     //vendor-repository
     container.register<IVendorInfoRepository>('IvendorInfoRepository', {
@@ -30,13 +24,15 @@ export class RepositoryRegistry {
     container.register<IVendorInfoRepository>('IVendorInfoRepository', {
       useClass: VendorInfoRepository,
     });
+
+        container.register<ISchedulePackageRepository>('ISchedulePackageRepository', {
+      useClass: SchedulePackageRepository,
+        });
+    
     container.register<IBasePackageRepository>('IBasePackageRepository', {
       useClass: BasePackageRepository,
     });
 
-    container.register<ISchedulePackageRepository>('ISchedulePackageRepository', {
-      useClass: SchedulePackageRepository,
-    });
     container.register<ICategoryRepository>('ICategoryRepository', {
       useClass: CategoryRepository,
     });
@@ -44,6 +40,18 @@ export class RepositoryRegistry {
     container.register<IWishlistRepository>('IWishlistRepository', {
       useClass: WishlistRepository,
     });
+
+    //user-repository
+
+        container.register<IBookingRepository>('IBookingRepository', {
+      useClass: BookingRepository,
+        });
+    
+        container.register<IUserRepository>('IUserRepository', {
+      useClass: UserRepository,
+    });
+
+
 
     // Register other repositories here
   }

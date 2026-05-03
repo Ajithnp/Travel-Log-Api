@@ -53,8 +53,8 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
   confirmBooking(
     userId: string,
-    scheduleId: string,
     bookingId: string,
+    stripePaymentIntentId: string,
     session?: mongoose.ClientSession,
   ): Promise<IBooking | null> {
     return this.model
@@ -62,11 +62,13 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         {
           _id: new mongoose.Types.ObjectId(bookingId),
           userId: new mongoose.Types.ObjectId(userId),
-          scheduleId: new mongoose.Types.ObjectId(scheduleId),
+
         },
         {
           bookingStatus: BOOKING_STATUS.CONFIRMED,
           paymentStatus: BOOKING_STATUS.CONFIRMED,
+          paymentMethod: 'stripe',
+          transactionId: stripePaymentIntentId,
         },
         { new: true, session },
       )
@@ -93,4 +95,12 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       .populate('vendorId', 'businessName profilePhoto')
       .lean() as Promise<IBooking | null>;
   }
+
+  async findByIdAndUserLean(id: string, userId: string): Promise<IBooking | null> {
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  return BookingModel.findOne({
+    _id: new mongoose.Types.ObjectId(id),
+    userId: new mongoose.Types.ObjectId(userId),
+  }).lean() as Promise<IBooking | null>; 
+}
 }

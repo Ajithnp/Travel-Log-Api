@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { IEmailUtils } from 'interfaces/common_interfaces/IEmailUtils';
+import { IEmailUtils } from '../../interfaces/common_interfaces/IEmailUtils';
 import { injectable } from 'tsyringe';
 import { config } from '../../config/env';
 

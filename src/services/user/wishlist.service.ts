@@ -1,4 +1,4 @@
-import { IWishlistService } from 'interfaces/service_interfaces/user/IWishlistService';
+import { IWishlistService } from '../../interfaces/service_interfaces/user/IWishlistService';
 import { inject, injectable } from 'tsyringe';
 import { IWishlistRepository } from '../../interfaces/repository_interfaces/IWishlistRepository';
 import { ICacheService } from '../../interfaces/service_interfaces/ICacheService';
@@ -6,7 +6,7 @@ import {
   IWishlistIdsResponse,
   IWishlistResponse,
   IWishlistToggleResponse,
-} from 'types/entities/wishlist.entity';
+} from '../../types/entities/wishlist.entity';
 import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
 import { PACKAGE_STATUS } from '../../shared/constants/constants';
 import { AppError } from '../../errors/AppError';

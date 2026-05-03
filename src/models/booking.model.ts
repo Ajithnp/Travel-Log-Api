@@ -59,11 +59,13 @@ const TravelerSchema = new Schema<ITraveler>(
 
 const BookingSchema = new Schema<IBooking>(
   {
+  
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     packageId: { type: Schema.Types.ObjectId, ref: 'Package', required: true },
-    scheduleId: { type: Schema.Types.ObjectId, ref: 'Schedule', required: true },
+    scheduleId: { type: Schema.Types.ObjectId, ref: 'SchedulePackage', required: true },
     vendorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 
+    bookingCode: {type: String, required:true},
     groupType: {
       type: String,
       enum: Object.values(GROUP_TYPE),

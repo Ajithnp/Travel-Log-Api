@@ -1,9 +1,9 @@
 import { container } from 'tsyringe';
-import { IAuthService } from 'interfaces/service_interfaces/IAuthService';
+import { IAuthService } from '../interfaces/service_interfaces/IAuthService';
 import { AuthService } from '../services/auth.service';
-import { ITokenService } from 'interfaces/service_interfaces/ITokenService';
+import { ITokenService } from '../interfaces/service_interfaces/ITokenService';
 import { TokenService } from '../services/jwt.service';
-import { IGoogleService } from 'interfaces/service_interfaces/IGoogleService';
+import { IGoogleService } from '../interfaces/service_interfaces/IGoogleService';
 import { GoogleService } from '../services/google.auth.service';
 import { IOtpService } from '../interfaces/service_interfaces/IOtpService';
 import { OtpService } from '../services/otp.service';
@@ -39,7 +39,8 @@ import { IPublicVendorService } from '../interfaces/service_interfaces/user/IPub
 import { PublicVendorService } from '../services/user/public-vendor.service';
 import { IBookingService } from '../interfaces/service_interfaces/user/IBookingService';
 import { BookingService } from '../services/user/booking.service';
-
+import {IPaymentWebhookService} from '../interfaces/service_interfaces/IPaymentWebhookService';
+import { PaymentWebhookService } from '../services/payment-webhook.service';
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -68,6 +69,10 @@ export class ServiceRegistry {
 
     container.register<IFileStorageService>('IFileStorageService', {
       useClass: S3Service,
+    });
+
+    container.register<IPaymentWebhookService>('IPaymentWebhookService', {
+      useClass: PaymentWebhookService,
     });
 
     container.register<IFileStorageHandlerService>('IFileStorageHandlerService', {

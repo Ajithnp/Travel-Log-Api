@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
-import { IGoogleUser } from 'types/IGoogleUser';
-import { IGoogleService } from 'interfaces/service_interfaces/IGoogleService';
+import { IGoogleUser } from '../types/IGoogleUser';
+import { IGoogleService } from '../interfaces/service_interfaces/IGoogleService';
 import { OAuth2Client } from 'google-auth-library';
 import { AppError } from '../errors/AppError';
 import { HTTP_STATUS } from '../shared/constants/http_status_code';

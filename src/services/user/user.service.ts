@@ -14,7 +14,7 @@ import {
   UserProfileResponseDTO,
 } from '../../types/dtos/user/response.dtos';
 import { inject, injectable } from 'tsyringe';
-import { IOtpService } from 'interfaces/service_interfaces/IOtpService';
+import { IOtpService } from '../../interfaces/service_interfaces/IOtpService';
 import { IBcryptUtils } from '../../interfaces/common_interfaces/IBcryptUtils';
 import { Types } from 'mongoose';
 import { IEmailUtils } from '../../interfaces/common_interfaces/IEmailUtils';

@@ -5,6 +5,7 @@ import {
   IBookingService,
   InitiateBookingDTO,
   InitiateBookingResponseDTO,
+  VerifyPaymentResponseDTO,
 } from '../../interfaces/service_interfaces/user/IBookingService';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
 import { AppError } from '../../errors/AppError';
@@ -17,8 +18,9 @@ import { IBookingRepository } from '../../interfaces/repository_interfaces/IBook
 import { PLATFORM_COMMISSION_RATE } from '../../shared/constants/platform';
 import { IPaymentGateway } from '../../infrastructure/payment-gateways/IPaymentGateway';
 import mongoose from 'mongoose';
-import { BOOKING_STATUS, PAYMENT_STATUS, SEAT_HOLD_DURATION_MS } from '../../shared/constants/booking';
+import { BOOKING_STATUS, PAYMENT_STATUS, VERIFY_PAYMENT_STATUS } from '../../shared/constants/booking';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
+import { generateBookingCode } from '../../shared/utils/generate-booking-code.helper';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -46,7 +48,7 @@ export class BookingService implements IBookingService {
     const schedule = await this._schedulePackageRepo.findOne(
       { _id: sheduleId },
     );
-    console.log('Schedule found:', schedule);
+
 
     if (!schedule) {
       throw new AppError(
@@ -65,10 +67,8 @@ export class BookingService implements IBookingService {
 
     
     // 2. Validate package
-    
     const pkg = await this._packageRepo.findOne({ _id: schedule.packageId });
-    console.log('Package found:', pkg);
-
+ 
     if (!pkg) {
       throw new AppError(
         ERROR_MESSAGES.PACKAGE_NOT_FOUND,
@@ -113,9 +113,6 @@ export class BookingService implements IBookingService {
       );
     }
     // 4. Validate travelers
-
-    console.log('Validating travelers:', payload.travelers.length);
-
     if (
       !payload.travelers ||
       payload.travelers.length !== payload.seatsCount
@@ -203,7 +200,8 @@ export class BookingService implements IBookingService {
             payload.scheduleId,
           ),
           vendorId: schedule.vendorId,
-
+          
+          bookingCode: generateBookingCode(),
           groupType: payload.tierType,
           travelerCount: payload.seatsCount,
 
@@ -231,8 +229,8 @@ export class BookingService implements IBookingService {
     session = null;
 
 
-    // 8. Create payment intent AFTER commit
-    // ─────────────────────────────────────────────
+    //  Create payment intent 
+   
     try {
       
     const payment = await this.paymentGateway.createPaymentIntent({
@@ -262,8 +260,6 @@ export class BookingService implements IBookingService {
          
       };
     } catch (paymentError) {
-      // Payment intent failed after booking created
-      console.error('Payment error details:', paymentError); // ← add this temporarily
 
       await this._bookingRepo.markFailedPayment(
         booking._id.toString(),
@@ -282,14 +278,13 @@ export class BookingService implements IBookingService {
 
       await session.endSession();
     }
-
     throw error;
   }
 }
 
   async confirmBooking(payload: ConfirmBookingDTO): Promise<ConfirmBookingResponseDTO> {
-    //  Verify booking exists and belongs to user
-    const booking = await this._bookingRepo.findByIdAndUser(payload.bookingId, payload.userId);
+
+    const booking = await this._bookingRepo.findByIdAndUserLean(payload.bookingId, payload.userId);
     if (!booking) {
       throw new AppError(ERROR_MESSAGES.BOOKING_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
@@ -302,39 +297,24 @@ export class BookingService implements IBookingService {
       };
     }
 
-    // check if the payment intent ID matches
-    if (booking.transactionId !== payload.stripePaymentIntentId) {
-      throw new AppError(ERROR_MESSAGES.INVALID_PAYMENT_INTENT_ID, HTTP_STATUS.BAD_REQUEST);
-    }
-
-    // Confirm payment with gateway
-    const paymentConfirmed = await this.paymentGateway.confirmPayment(
-      payload.stripePaymentIntentId!,
-    );
-
-    if (!paymentConfirmed) {
-      await this._bookingRepo.markFailedPayment(booking._id.toString());
-      await this._schedulePackageRepo.releaseHeldSeats(
-        booking.scheduleId.toString(),
-        booking.travelerCount,
-      );
-    }
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
+
+      const updatedBooking = await this._bookingRepo.confirmBooking(
+        payload.userId.toString(),
+        payload.bookingId.toString(),
+        payload.stripePaymentIntentId,
+        session,
+      );
+
       await this._schedulePackageRepo.confirmSeats(
         booking.scheduleId.toString(),
         booking.travelerCount,
         session,
-      );
+      )
 
-      const updatedBooking = await this._bookingRepo.confirmBooking(
-        payload.userId.toString(),
-        booking.scheduleId.toString(),
-        payload.bookingId.toString(),
-        session,
-      );
       await session.commitTransaction();
       session.endSession();
 
@@ -348,4 +328,30 @@ export class BookingService implements IBookingService {
       throw error;
     }
   }
+
+  async verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO> { 
+
+    const session = await this.paymentGateway.verifyStripeSession(stripeSessionId);
+
+    const bookingId = session.metadata?.bookingId;
+
+  if (!bookingId) {
+    return { status: VERIFY_PAYMENT_STATUS.FAILURE };
+  }
+
+    if (session.payment_status !== 'paid') {
+        return { status: VERIFY_PAYMENT_STATUS.FAILURE };
+    }
+
+    const booking = await this._bookingRepo.findById(bookingId);
+    if (!booking) {
+      return { status: VERIFY_PAYMENT_STATUS.FAILURE };
+    }
+    return {
+      status: booking.bookingStatus === BOOKING_STATUS.CONFIRMED ? VERIFY_PAYMENT_STATUS.SUCCESS : VERIFY_PAYMENT_STATUS.FAILURE,
+      bookingId: booking.bookingCode,
+      amount: booking.grossAmount
+    };
+}
+
 }

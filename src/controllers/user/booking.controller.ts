@@ -5,6 +5,7 @@ import {
   IBookingService,
   InitiateBookingDTO,
   InitiateBookingResponseDTO,
+  VerifyPaymentResponseDTO,
 } from '../../interfaces/service_interfaces/user/IBookingService';
 import expressAsyncHandler from 'express-async-handler';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
@@ -18,13 +19,10 @@ export class BookingController implements IBookingController {
   ) {}
 
   initiateBooking = expressAsyncHandler(async (req, res) => {
-    console.log('Initiate booking request received');
-
-    // const userId = req.user!.id;
-    const userId = '69f04e5a12da1a1b63f8c6e9'
+   
+    const userId = req.user!.id;
     const { packageId, scheduleId, tierType, seatsCount, travelers, amountInPaise } = req.body;
-    console.log('request body:', req.body);
-
+  
     const payload: InitiateBookingDTO = {
       userId,
       packageId,
@@ -46,22 +44,17 @@ export class BookingController implements IBookingController {
     res.status(HTTP_STATUS.CREATED).json(response);
   });
 
-  confirmBooking = expressAsyncHandler(async (req, res) => {
-    const userId = req.user!.id;
-    const { reservationId, stripePaymentIntentId } = req.body;
+  verifyPayment = expressAsyncHandler(async (req, res) => {
+    const { session_id } = req.query as { session_id: string };
 
-    const result = await this._bookingService.confirmBooking({
-      userId,
-      bookingId: reservationId,
-      stripePaymentIntentId,
-    });
+    const result = await this._bookingService.verifyPayment(session_id);
 
-    const response: IApiResponse<ConfirmBookingResponseDTO> = {
+    const response: IApiResponse<VerifyPaymentResponseDTO> = {
       success: SUCCESS_STATUS.SUCCESS,
-      message: SUCCESS_MESSAGES.BOOKING_CONFIRMED,
+      message: result.status === 'success' ? SUCCESS_MESSAGES.PAYMENT_VERIFIED : SUCCESS_MESSAGES.PAYMENT_VERIFICATION_FAILED,
       data: result,
     };
-
     res.status(HTTP_STATUS.OK).json(response);
-  });
+  })
+
 }

@@ -1,16 +1,15 @@
 import asyncHandler from 'express-async-handler';
-import { NextFunction, Request, Response } from 'express';
-import { IAuthController } from 'interfaces/controller_interfaces/IAuthController';
+import { IAuthController } from '../../interfaces/controller_interfaces/IAuthController';
 import { inject, injectable } from 'tsyringe';
-import { IAuthService } from 'interfaces/service_interfaces/IAuthService';
-import { IApiResponse } from 'types/common/IApiResponse';
+import { IAuthService } from '../../interfaces/service_interfaces/IAuthService';
+import { IApiResponse } from '../../types/common/IApiResponse';
 import { clearAuthCookies, setAuthCookies } from '../../shared/utils/cookie.helper';
 import { SUCCESS_STATUS, HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../shared/constants/messages';
 import { AppError } from '../../errors/AppError';
 import { IAuthResponseDTO } from '../../types/dtos/auth/auth.response.dtos';
 import { JWT_TOKEN } from '../../shared/constants/jwt.token';
-import { IOtpService } from 'interfaces/service_interfaces/IOtpService';
+import { IOtpService } from '../../interfaces/service_interfaces/IOtpService';
 import {
   LoginResponseDTO,
   SignupResponseDTO,

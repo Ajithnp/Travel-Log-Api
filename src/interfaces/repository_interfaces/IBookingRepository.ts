@@ -1,4 +1,4 @@
-import { BookingStatus, IBooking, PaymentStatus } from 'types/entities/booking.entity';
+import { BookingStatus, IBooking, PaymentStatus } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
 
@@ -11,6 +11,8 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   findByIdAndUser(id: string, userId: string): Promise<IBooking | null>;
 
+  findByIdAndUserLean(id: string, userId: string): Promise<IBooking | null> 
+
   attachPaymentIntent(
     bookingId: string,
     paymentIntentId: string,
@@ -19,8 +21,8 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   confirmBooking(
     userId: string,
-    scheduleId: string,
     bookingId: string,
+    sripePaymentIntentId: string,
     session?: mongoose.ClientSession,
   ): Promise<IBooking | null>;
 

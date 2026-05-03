@@ -1,7 +1,7 @@
 import { container } from 'tsyringe';
-import { IBcryptUtils } from 'interfaces/common_interfaces/IBcryptUtils';
+import { IBcryptUtils } from '../interfaces/common_interfaces/IBcryptUtils';
 import { BcryptUtils } from '../shared/utils/password.hasher.helper';
-import { IEmailUtils } from 'interfaces/common_interfaces/IEmailUtils';
+import { IEmailUtils } from '../interfaces/common_interfaces/IEmailUtils';
 import { EmailUtils } from '../shared/utils/email.transporter.helper';
 import { IPaymentGateway } from '../infrastructure/payment-gateways/IPaymentGateway';
 import { StripeGateway } from '../infrastructure/payment-gateways/StripeGateway';

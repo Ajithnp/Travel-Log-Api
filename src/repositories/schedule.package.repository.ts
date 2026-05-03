@@ -109,67 +109,34 @@ export class SchedulePackageRepository
     });
   }
 
-  async holdSeats(
-    scheduleId: string,
-    seatsCount: number,
-    session?: mongoose.ClientSession,
-  ): Promise<UpdateResult> {
-    return this.model.updateOne(
-      {
-        _id: new Types.ObjectId(scheduleId),
-        status: SCHEDULE_STATUS.UPCOMING,
-        $expr: {
-          $gte: ['$totalSeats', { $add: ['$seatsBooked', '$seatsHeld', seatsCount] }],
-        },
-      },
-      { $inc: { seatsHeld: seatsCount } },
-      { new: true, session },
-    );
-  }
 
-  async releaseHeldSeats(
-    scheduleId: string,
-    seatsCount: number,
-    session?: mongoose.ClientSession,
-  ): Promise<UpdateResult> {
-    return this.model.updateOne(
-      { _id: new Types.ObjectId(scheduleId) },
-      { $inc: { seatsHeld: -seatsCount } },
-      { new: true, session },
-    );
-  }
+async confirmSeats(
+  scheduleId: string,
+  seatsCount: number,
+  session?: mongoose.ClientSession,
+): Promise<UpdateResult> {
+  return this.model.updateOne(
+    {
+      _id: new Types.ObjectId(scheduleId),
+    
+    },
+    { $inc: { seatsBooked: seatsCount } }, 
+    { session },                            
+  );
+}
 
-  async confirmSeats(
-    scheduleId: string,
-    seatsCount: number,
-    session?: mongoose.ClientSession,
-  ): Promise<UpdateResult> {
-    return this.model.updateOne(
-      {
-        _id: new Types.ObjectId(scheduleId),
-        $expr: {
-          $gte: ['$seatsHeld', seatsCount],
-        },
-      },
-      { $inc: { seatsHeld: -seatsCount, seatsBooked: seatsCount } },
-      { new: true, session },
-    );
-  }
-
-  async cancelSeats(
-    scheduleId: string,
-    seatsCount: number,
-    session?: mongoose.ClientSession,
-  ): Promise<UpdateResult> {
-    return this.model.updateOne(
-      {
-        _id: new Types.ObjectId(scheduleId),
-        $expr: {
-          $gte: ['$seatsBooked', seatsCount],
-        },
-      },
-      { $inc: { seatsBooked: -seatsCount, seatsHeld: seatsCount } },
-      { new: true, session },
-    );
-  }
+ async cancelSeats(
+  scheduleId: string,
+  seatsCount: number,
+  session?: mongoose.ClientSession,
+): Promise<UpdateResult> {
+  return this.model.updateOne(
+    {
+      _id: new Types.ObjectId(scheduleId),
+    
+    },
+    { $inc: { seatsBooked: -seatsCount } }, 
+    { session },                            
+  );
+}
 }

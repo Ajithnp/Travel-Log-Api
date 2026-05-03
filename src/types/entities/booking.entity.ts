@@ -20,6 +20,7 @@ export interface ITraveler {
 export interface IBooking extends Document {
   _id: mongoose.Types.ObjectId;
   // Core references
+  bookingCode: string; 
   userId: mongoose.Types.ObjectId;
   packageId: mongoose.Types.ObjectId;
   scheduleId: mongoose.Types.ObjectId;

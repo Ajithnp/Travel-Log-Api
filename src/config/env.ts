@@ -63,5 +63,6 @@ export const config = {
   },
   payment: {
     STRIPE_SECRET_KEY: requireEnv('STRIPE_SECRET_KEY'),
+    STRIPE_WEBHOOK_SECRET: requireEnv('STRIPE_WEBHOOK_SECRET'),
   },
 };

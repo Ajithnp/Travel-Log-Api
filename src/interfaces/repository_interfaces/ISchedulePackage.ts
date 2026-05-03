@@ -22,18 +22,6 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
 
   countCompletedByVendor(vendorId: string): Promise<number>;
 
-  holdSeats(
-    scheduleId: string,
-    seatsCount: number,
-    session?: mongoose.ClientSession,
-  ): Promise<UpdateResult>;
-
-  releaseHeldSeats(
-    scheduleId: string,
-    seatsCount: number,
-    session?: mongoose.ClientSession,
-  ): Promise<UpdateResult>;
-
   confirmSeats(
     scheduleId: string,
     seatsCount: number,

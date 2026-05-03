@@ -2,10 +2,10 @@ import { inject, injectable } from 'tsyringe';
 import { IFileStorageService } from '../interfaces/service_interfaces/IStorageService';
 import { ICacheService } from '../interfaces/service_interfaces/ICacheService';
 import { IFileStorageHandlerService } from '../interfaces/service_interfaces/IFileStorageBusinessService';
-import { IGetUploadUrlPayload } from 'types/dtos/common/request.dtos';
-import { IGetUploadUrlResponse } from 'types/dtos/common/response.dtos';
+import { IGetUploadUrlPayload } from '../types/dtos/common/request.dtos';
+import { IGetUploadUrlResponse } from '../types/dtos/common/response.dtos';
 import { smallHasher } from '../shared/utils/small.hasher.helper';
-import { SignedUrlViewResponse } from 'types/dtos/common/response.dtos';
+import { SignedUrlViewResponse } from '../types/dtos/common/response.dtos';
 @injectable()
 ///Orchestrstion,
 export class FileStorageHandlerService implements IFileStorageHandlerService {

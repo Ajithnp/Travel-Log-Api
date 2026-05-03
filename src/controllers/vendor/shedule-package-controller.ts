@@ -1,4 +1,4 @@
-import { ISchedulePackageController } from 'interfaces/controller_interfaces/vendor/IShedulePackageController';
+import { ISchedulePackageController } from '../../interfaces/controller_interfaces/vendor/IShedulePackageController';
 import { inject, injectable } from 'tsyringe';
 import { ISchedulePackageService } from '../../interfaces/service_interfaces/vendor/ISchedulePackage';
 import expressAsyncHandler from 'express-async-handler';
@@ -6,7 +6,7 @@ import { CreateScheduleInputDTO } from '../../types/dtos/vendor/request.dtos';
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
-import { FilterType } from 'types/db';
+import { FilterType } from '../../types/db';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
 
 @injectable()

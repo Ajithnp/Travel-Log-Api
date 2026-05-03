@@ -12,6 +12,11 @@ export const PAYMENT_STATUS = {
   PARTIALLY_REFUNDED: 'partially_refunded',
 } as const;
 
+export const VERIFY_PAYMENT_STATUS = {
+  SUCCESS: 'success',
+  FAILURE: 'failure',
+} as const;
+
 export const BOOKING_STATUS = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',

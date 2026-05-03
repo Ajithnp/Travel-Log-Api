@@ -1,7 +1,7 @@
 import { container } from 'tsyringe';
-import { IAuthController } from 'interfaces/controller_interfaces/IAuthController';
+import { IAuthController } from '../interfaces/controller_interfaces/IAuthController';
 import { AuthController } from '../controllers/auth/auth.controller';
-import { IAdminUserController } from 'interfaces/controller_interfaces/admin/IAdminUserController';
+import { IAdminUserController } from '../interfaces/controller_interfaces/admin/IAdminUserController';
 import { AdminUserController } from '../controllers/admin/admin.user.controller';
 import { IAdminVendorController } from '../interfaces/controller_interfaces/admin/IAdminVendorController';
 import { AdminVendorController } from '../controllers/admin/admin.vendor.controller';
@@ -23,6 +23,8 @@ import { ISchedulePackageController } from '../interfaces/controller_interfaces/
 import { ShedulePackageController } from '../controllers/vendor/shedule-package-controller';
 import { IBookingController } from '../interfaces/controller_interfaces/user/IBookingController';
 import { BookingController } from '../controllers/user/booking.controller';
+import { IPaymentWebhookController } from '../interfaces/controller_interfaces/IPaymentWebhook';
+import { PaymentWebhookController } from '../controllers/payment-webhook.controller';
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -31,6 +33,10 @@ export class ControllerRegistry {
 
     container.register<IS3Controller>('IS3Controller', {
       useClass: S3Controller,
+    });
+
+    container.register<IPaymentWebhookController>('IPaymentWebhookController', {
+      useClass: PaymentWebhookController,
     });
     //vendor controllers
     container.register<IVendorController>('IVendorController', {

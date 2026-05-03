@@ -23,6 +23,7 @@ export const SUCCESS_MESSAGES = {
   PACKAGE_CREATION_SUCCESS: 'Package creation successfull',
   PACKAGE_UPDATION_SUCCESS: 'Package updation success',
 
+
   // category
   CATEGORY_CREATED: 'Category created successfully',
   CATEGORY_UPDATED: 'Category updated successfully',
@@ -39,6 +40,9 @@ export const SUCCESS_MESSAGES = {
   BOOKING_CONFIRMED: 'Booking confirmed successfully.',
   SEAT_HOLD_RELEASED: 'Seat hold released.',
   BOOKING_ALREADY_CONFIRMED: 'Booking is already confirmed.',
+  BOOKING_CANCELLED: 'Booking cancelled successfully.',
+  PAYMENT_VERIFIED: 'Payment verified successfully.',
+  PAYMENT_VERIFICATION_FAILED: 'Payment verification failed.',
 } as const;
 
 export const ERROR_MESSAGES = {

@@ -1,5 +1,5 @@
 import { injectable } from 'tsyringe';
-import { IBcryptUtils } from 'interfaces/common_interfaces/IBcryptUtils';
+import { IBcryptUtils } from '../../interfaces/common_interfaces/IBcryptUtils';
 import bcrypt from 'bcrypt';
 import { config } from '../../config/env';
 

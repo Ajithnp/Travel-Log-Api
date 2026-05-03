@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe';
-import { PaginatedData } from 'types/common/IPaginationResponse';
+import { PaginatedData } from '../../types/common/IPaginationResponse';
 import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/IAdminVendorService';
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';

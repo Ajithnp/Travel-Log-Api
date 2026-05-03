@@ -5,7 +5,7 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { injectable, inject } from 'tsyringe';
 import { PackageSortOption, PublicPackageFilters } from '../../types/db';
 import logger from '../../config/logger';
-import { PublicPackageQuery } from 'validators/public-package.validation';
+import { PublicPackageQuery } from '../../validators/public-package.validation';
 import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICategoryRepository';
 import { CategoryMapper } from '../../shared/mappers/category.mapper';
 import { ActiveCategoriesResponseDTO } from '../../types/dtos/vendor/response.dtos';

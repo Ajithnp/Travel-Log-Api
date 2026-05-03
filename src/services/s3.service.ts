@@ -5,7 +5,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import s3Client from '../config/s3.config';
 import { IGetUploadUrlPayload } from '../types/dtos/common/request.dtos';
 import { IGetUploadUrlResponse } from '../types/dtos/common/response.dtos';
-import { IFileStorageService } from 'interfaces/service_interfaces/IStorageService';
+import { IFileStorageService } from '../interfaces/service_interfaces/IStorageService';
 import { SignedUrlViewResponse } from '../types/dtos/common/response.dtos';
 @injectable()
 export class S3Service implements IFileStorageService {

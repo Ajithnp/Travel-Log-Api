@@ -18,7 +18,6 @@ export interface InitiateBookingDTO {
   emergencyContact?: string;
   relation?: string;
   }>;
-  /** Final amount to charge (in INR, integer paise — Stripe requires paise) */
   amountInPaise: number;
 }
 
@@ -41,7 +40,18 @@ export interface ConfirmBookingResponseDTO {
   message: string;
 }
 
+export type VerifyPaymentResponseDTO =
+  | {
+      status: "success";
+      bookingId: string;
+      amount: number;
+    }
+  | {
+      status: "failure";
+    };
+
 export interface IBookingService {
   initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO>;
   confirmBooking(payload: ConfirmBookingDTO): Promise<ConfirmBookingResponseDTO>;
+  verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO>;
 }

@@ -1,9 +1,9 @@
-import { ISchedulePopulated, IPricingTier, ISchedule } from 'types/entities/schedule.entity';
+import { ISchedulePopulated, IPricingTier, ISchedule } from '../../types/entities/schedule.entity';
 import {
   ScheduleListItemDTO,
   PricingTierDTO,
   ScheduleResponse,
-} from 'types/dtos/vendor/response.dtos';
+} from '../../types/dtos/vendor/response.dtos';
 import { SCHEDULE_STATUS } from '../../shared/constants/constants';
 import { ScheduleListResponseDTO } from '../../types/common/IPaginationResponse';
 import { PublicScheduleDTO } from '../../types/dtos/user/response.dtos';

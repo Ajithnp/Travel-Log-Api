@@ -1,6 +1,6 @@
-import Stripe from 'stripe';
+import  Stripe  from 'stripe';
 import { config } from '../../config/env'
-import { IPaymentGateway, CreatePaymentIntentDTO, PaymentIntentResult } from './IPaymentGateway';
+import { IPaymentGateway, CreatePaymentIntentDTO, PaymentIntentResult, StripeWebhookEvent, StripeCheckoutSession } from './IPaymentGateway';
 import { injectable } from 'tsyringe';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -12,24 +12,16 @@ export class StripeGateway implements IPaymentGateway {
 
   constructor() {
     this.stripe = new Stripe(config.payment.STRIPE_SECRET_KEY, {
-      apiVersion: '2026-03-25.dahlia',
+      apiVersion: '2026-04-22.dahlia',
       typescript: true,
     });
   }
 
+  // ── Checkout session ──────
+
   async createPaymentIntent(
     data: CreatePaymentIntentDTO,
   ): Promise<PaymentIntentResult> {
-
-    console.log('Stripe session payload:', {
-  amount: data.amount,
-  unit_amount: Math.round(data.amount * 100),
-  currency: data.currency,
-  packageName: data.metadata?.packageName,
-  success_url: `${config.server.HOST}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-  stripeKeyPrefix: config.payment.STRIPE_SECRET_KEY?.slice(0, 7),
-    });
-    
 
     try {
       const session = await this.stripe.checkout.sessions.create({
@@ -73,7 +65,7 @@ export class StripeGateway implements IPaymentGateway {
           packageName: data.metadata?.packageName ?? '',
         },
 
-        success_url: `${config.cors.ALLOWED_ORIGINS}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${config.cors.ALLOWED_ORIGINS}/booking/confirm?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${config.cors.ALLOWED_ORIGINS}/payment/cancel?session_id={CHECKOUT_SESSION_ID}&bookingId=${data.bookingId}`,
       });
 
@@ -100,9 +92,32 @@ export class StripeGateway implements IPaymentGateway {
     }
   }
 
-
-  async confirmPayment(gatewayPaymentId: string): Promise<boolean> {
-    const intent = await this.stripe.paymentIntents.retrieve(gatewayPaymentId);
-    return intent.status === 'succeeded';
+  // ── Webhook verification ──
+  
+   verifyWebhookEvent(rawBody: Buffer, signature: string): StripeWebhookEvent {
+    try {
+      return  this.stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        config.payment.STRIPE_WEBHOOK_SECRET,
+      );
+    } catch (err) {
+      throw new AppError(
+        `Webhook signature verification failed: ${(err as Error).message}`,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
   }
+
+  async verifyStripeSession(stripeSessionId: string): Promise<StripeCheckoutSession> {
+    try {
+      return await this.stripe.checkout.sessions.retrieve(stripeSessionId);
+    } catch (err) {
+      throw new AppError(
+        `Failed to retrieve Stripe session: ${(err as Error).message}`,
+        HTTP_STATUS.BAD_GATEWAY,
+      );
+    }
+  }
+
 }

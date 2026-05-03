@@ -6,11 +6,11 @@ import { IVendorController } from '../../interfaces/controller_interfaces/vendor
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { IVendorService } from '../../interfaces/service_interfaces/vendor/IVendorService';
-import { IApiResponse } from 'types/common/IApiResponse';
+import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
-import { VendorVerificationRequestDTO } from 'types/dtos/vendor/request.dtos';
+import { VendorVerificationRequestDTO } from '../../types/dtos/vendor/request.dtos';
 @injectable()
 export class VendorController implements IVendorController {
   constructor(

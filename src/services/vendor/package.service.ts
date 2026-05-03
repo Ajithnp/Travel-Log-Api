@@ -21,9 +21,9 @@ import {
 import { PACKAGE_STATUS } from '../../shared/constants/constants';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICategoryRepository';
-import { FilterType } from 'types/db';
+import { FilterType } from '../../types/db';
 import { PackageMapper } from '../../shared/mappers/package.mapper';
-import { IBasePackagePopulated, IFile } from 'types/entities/base-package.entity';
+import { IBasePackagePopulated, IFile } from '../../types/entities/base-package.entity';
 @injectable()
 export class PackageService implements IPackageService {
   constructor(
