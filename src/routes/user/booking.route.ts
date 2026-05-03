@@ -25,13 +25,20 @@ export class BookingRoutes extends BaseRoute {
       authorize([USER_ROLES.USER]),
       validateDTO(InitiateBookingRequestSchema),
       this._bookingController.initiateBooking.bind(this._bookingController),
-      );
+    );
       
-      this._router.get(
-        '/verify-payment',
-        isAuthenticated,
-        authorize([USER_ROLES.USER]),
-        this._bookingController.verifyPayment.bind(this._bookingController),
-      );
+    this._router.get(
+      '/verify-payment',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._bookingController.verifyPayment.bind(this._bookingController),
+    );
+    
+    this._router.get(
+      '/',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._bookingController.getBookings.bind(this._bookingController),
+    );
   }
 }

@@ -1,4 +1,6 @@
+import { BookingListResult } from 'types/entities/booking.entity';
 import { PricingType } from '../../../types/entities/schedule.entity';
+import { BookingFilters } from 'interfaces/repository_interfaces/IBookingRepository';
 
 // ─── Request DTOs ───────
 
@@ -27,6 +29,8 @@ export interface ConfirmBookingDTO {
   stripePaymentIntentId: string;
 }
 
+export type GetBookingsDTO = Omit<BookingFilters, 'userId'> 
+
 // ─── Response DTOs ───
 
 export interface InitiateBookingResponseDTO {
@@ -49,9 +53,20 @@ export type VerifyPaymentResponseDTO =
   | {
       status: "failure";
     };
+export interface PaginatedBookingResponse {
+  bookings: BookingListResult['bookings'];
+  total:    number;
+  page:     number;
+  limit:    number;
+  totalPages: number;
+}
+
+
 
 export interface IBookingService {
   initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO>;
   confirmBooking(payload: ConfirmBookingDTO): Promise<ConfirmBookingResponseDTO>;
   verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO>;
+  getBookings(userId: string, filters: GetBookingsDTO): Promise<PaginatedBookingResponse>;
+  // getBookingById(userId: string, bookingId: string): Promise<IBooking | null>;
 }

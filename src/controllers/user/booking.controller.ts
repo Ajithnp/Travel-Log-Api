@@ -2,6 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { IBookingController } from '../../interfaces/controller_interfaces/user/IBookingController';
 import {
   ConfirmBookingResponseDTO,
+  GetBookingsDTO,
   IBookingService,
   InitiateBookingDTO,
   InitiateBookingResponseDTO,
@@ -11,6 +12,8 @@ import expressAsyncHandler from 'express-async-handler';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { IApiResponse } from '../../types/common/IApiResponse';
+import { getPaginationOptions } from '../../shared/utils/pagination.helper';
+import { BookingStatus } from '../../types/entities/booking.entity';
 @injectable()
 export class BookingController implements IBookingController {
   constructor(
@@ -55,6 +58,28 @@ export class BookingController implements IBookingController {
       data: result,
     };
     res.status(HTTP_STATUS.OK).json(response);
-  })
+  });
+
+  getBookings = expressAsyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+
+    const {search, page, limit, selectedFilter } = getPaginationOptions(req);
+    const payload: GetBookingsDTO = {
+      search,
+      page,
+      limit,
+      bookingStatus: selectedFilter as BookingStatus 
+    }
+
+    const result = await this._bookingService.getBookings(userId, payload);
+
+    const response: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(response);
+  });
 
 }

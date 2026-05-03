@@ -2,9 +2,11 @@ import { inject, injectable } from 'tsyringe';
 import {
   ConfirmBookingDTO,
   ConfirmBookingResponseDTO,
+  GetBookingsDTO,
   IBookingService,
   InitiateBookingDTO,
   InitiateBookingResponseDTO,
+  PaginatedBookingResponse,
   VerifyPaymentResponseDTO,
 } from '../../interfaces/service_interfaces/user/IBookingService';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
@@ -33,254 +35,254 @@ export class BookingService implements IBookingService {
     private _bookingRepo: IBookingRepository,
     @inject('IPaymentGateway')
     private paymentGateway: IPaymentGateway,
-  ) {}
+  ) { }
 
   async initiateBooking(
-  payload: InitiateBookingDTO,
-): Promise<InitiateBookingResponseDTO> {
-  let session: mongoose.ClientSession | null = null;
+    payload: InitiateBookingDTO,
+  ): Promise<InitiateBookingResponseDTO> {
+    let session: mongoose.ClientSession | null = null;
 
-  try {
+    try {
    
-    //==Validate schedule==
-    const sheduleId = toObjectId(payload.scheduleId);
+      //==Validate schedule==
+      const sheduleId = toObjectId(payload.scheduleId);
    
-    const schedule = await this._schedulePackageRepo.findOne(
-      { _id: sheduleId },
-    );
-
-
-    if (!schedule) {
-      throw new AppError(
-        ERROR_MESSAGES.SCHEDULE_NOT_FOUND,
-        HTTP_STATUS.NOT_FOUND,
+      const schedule = await this._schedulePackageRepo.findOne(
+        { _id: sheduleId },
       );
-    }
 
-    if (schedule.status !== SCHEDULE_STATUS.UPCOMING) {
-      throw new AppError(
-        statusMessages[schedule.status] ??
+
+      if (!schedule) {
+        throw new AppError(
+          ERROR_MESSAGES.SCHEDULE_NOT_FOUND,
+          HTTP_STATUS.NOT_FOUND,
+        );
+      }
+
+      if (schedule.status !== SCHEDULE_STATUS.UPCOMING) {
+        throw new AppError(
+          statusMessages[schedule.status] ??
           ERROR_MESSAGES.SCHEDULE_NOT_AVAILABLE_FOR_BOOKING,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
 
     
-    // 2. Validate package
-    const pkg = await this._packageRepo.findOne({ _id: schedule.packageId });
+      // 2. Validate package
+      const pkg = await this._packageRepo.findOne({ _id: schedule.packageId });
  
-    if (!pkg) {
-      throw new AppError(
-        ERROR_MESSAGES.PACKAGE_NOT_FOUND,
-        HTTP_STATUS.NOT_FOUND,
+      if (!pkg) {
+        throw new AppError(
+          ERROR_MESSAGES.PACKAGE_NOT_FOUND,
+          HTTP_STATUS.NOT_FOUND,
+        );
+      }
+
+      if (
+        pkg.status !== PACKAGE_STATUS.PUBLISHED ||
+        !pkg.isActive
+      ) {
+        throw new AppError(
+          ERROR_MESSAGES.PACKAGE_NOT_AVAILABLE,
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
+
+      // 3. Validate tier
+
+      const priceTier = schedule.pricing.find(
+        (tier) => tier.type === payload.tierType,
       );
-    }
 
-    if (
-      pkg.status !== PACKAGE_STATUS.PUBLISHED ||
-      !pkg.isActive
-    ) {
-      throw new AppError(
-        ERROR_MESSAGES.PACKAGE_NOT_AVAILABLE,
-        HTTP_STATUS.BAD_REQUEST,
+      if (!priceTier) {
+        throw new AppError(
+          ERROR_MESSAGES.INVALID_TIER_TYPE,
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
+
+      if (priceTier.peopleCount !== payload.seatsCount) {
+        throw new AppError(
+          `Selected tier is for ${priceTier.peopleCount} people, but ${payload.seatsCount} seats were requested.`,
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
+
+      if (!priceTier.price || priceTier.price <= 0) {
+        throw new AppError(
+          ERROR_MESSAGES.INVALID_GROUP_TYPE,
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
+      // 4. Validate travelers
+      if (
+        !payload.travelers ||
+        payload.travelers.length !== payload.seatsCount
+      ) {
+        throw new AppError(
+          ERROR_MESSAGES.TRAVELER_INFO_INCOMPLETE,
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
+
+      const leads = payload.travelers.filter(
+        (traveler) => traveler.isLead,
       );
-    }
 
-    // 3. Validate tier
+      if (leads.length !== 1) {
+        throw new AppError(
+          ERROR_MESSAGES.TRAVELER_INFO_INCOMPLETE,
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
 
-    const priceTier = schedule.pricing.find(
-      (tier) => tier.type === payload.tierType,
-    );
+      const leadTraveler = leads[0];
 
-    if (!priceTier) {
-      throw new AppError(
-        ERROR_MESSAGES.INVALID_TIER_TYPE,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
+      if (!leadTraveler.phoneNumber?.trim()) {
+        throw new AppError(
+          ERROR_MESSAGES.TRAVELER_INFO_INCOMPLETE,
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
 
-    if (priceTier.peopleCount !== payload.seatsCount) {
-      throw new AppError(
-        `Selected tier is for ${priceTier.peopleCount} people, but ${payload.seatsCount} seats were requested.`,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
-
-    if (!priceTier.price || priceTier.price <= 0) {
-      throw new AppError(
-        ERROR_MESSAGES.INVALID_GROUP_TYPE,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
-    // 4. Validate travelers
-    if (
-      !payload.travelers ||
-      payload.travelers.length !== payload.seatsCount
-    ) {
-      throw new AppError(
-        ERROR_MESSAGES.TRAVELER_INFO_INCOMPLETE,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
-
-    const leads = payload.travelers.filter(
-      (traveler) => traveler.isLead,
-    );
-
-    if (leads.length !== 1) {
-      throw new AppError(
-        ERROR_MESSAGES.TRAVELER_INFO_INCOMPLETE,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
-
-    const leadTraveler = leads[0];
-
-    if (!leadTraveler.phoneNumber?.trim()) {
-      throw new AppError(
-        ERROR_MESSAGES.TRAVELER_INFO_INCOMPLETE,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
-
-    // 5. Duplicate booking check
-    // ─────────────────────────────────────────────
-    const existingBooking =
-      await this._bookingRepo.findActiveBookingByUserAndSchedule(
-        payload.userId,
-        payload.scheduleId,
-      );
+      // 5. Duplicate booking check
+      // ─────────────────────────────────────────────
+      const existingBooking =
+        await this._bookingRepo.findActiveBookingByUserAndSchedule(
+          payload.userId,
+          payload.scheduleId,
+        );
     
-    if (existingBooking?.bookingStatus === BOOKING_STATUS.CONFIRMED) {
-      throw new AppError(
-        ERROR_MESSAGES.ALREADY_HAVE_ACTIVE_BOOKING,
-        HTTP_STATUS.CONFLICT,
-      );
-    }
+      if (existingBooking?.bookingStatus === BOOKING_STATUS.CONFIRMED) {
+        throw new AppError(
+          ERROR_MESSAGES.ALREADY_HAVE_ACTIVE_BOOKING,
+          HTTP_STATUS.CONFLICT,
+        );
+      }
 
-    // 6. Financial calculation
-    // ─────────────────────────────────────────────
-    const discountAmount = 0;
-    const walletAmountUsed = 0;
+      // 6. Financial calculation
+      // ─────────────────────────────────────────────
+      const discountAmount = 0;
+      const walletAmountUsed = 0;
 
-    const finalAmount =
-      priceTier.price -
-      discountAmount -
-      walletAmountUsed;
+      const finalAmount =
+        priceTier.price -
+        discountAmount -
+        walletAmountUsed;
 
-    const platformCommission =
-      Math.round(
-        priceTier.price *
+      const platformCommission =
+        Math.round(
+          priceTier.price *
           PLATFORM_COMMISSION_RATE *
           100,
-      ) / 100;
+        ) / 100;
 
-    const vendorEarning =
-      Math.round(
-        (priceTier.price - platformCommission) *
+      const vendorEarning =
+        Math.round(
+          (priceTier.price - platformCommission) *
           100,
-      ) / 100;
+        ) / 100;
 
-    //  Start transaction
-    // ─────────────────────────────────────────────
-    session = await mongoose.startSession();
-    session.startTransaction();
+      //  Start transaction
+      // ─────────────────────────────────────────────
+      session = await mongoose.startSession();
+      session.startTransaction();
 
-    // Create booking
-    const booking =
-      await this._bookingRepo.createBooking(
-        {
-          userId: new mongoose.Types.ObjectId(
-            payload.userId,
-          ),
-          packageId: new mongoose.Types.ObjectId(
-            payload.packageId,
-          ),
-          scheduleId: new mongoose.Types.ObjectId(
-            payload.scheduleId,
-          ),
-          vendorId: schedule.vendorId,
+      // Create booking
+      const booking =
+        await this._bookingRepo.createBooking(
+          {
+            userId: new mongoose.Types.ObjectId(
+              payload.userId,
+            ),
+            packageId: new mongoose.Types.ObjectId(
+              payload.packageId,
+            ),
+            scheduleId: new mongoose.Types.ObjectId(
+              payload.scheduleId,
+            ),
+            vendorId: schedule.vendorId,
           
-          bookingCode: generateBookingCode(),
-          groupType: payload.tierType,
-          travelerCount: payload.seatsCount,
+            bookingCode: generateBookingCode(),
+            groupType: payload.tierType,
+            travelerCount: payload.seatsCount,
 
-          travelers: payload.travelers.map(
-            (traveler) => ({
-              ...traveler,
-            }),
-          ),
+            travelers: payload.travelers.map(
+              (traveler) => ({
+                ...traveler,
+              }),
+            ),
 
-          grossAmount: priceTier.price,
-          discountAmount,
-          walletAmountUsed,
-          finalAmount,
-          platformCommission,
-          vendorEarning,
+            grossAmount: priceTier.price,
+            discountAmount,
+            walletAmountUsed,
+            finalAmount,
+            platformCommission,
+            vendorEarning,
 
-          paymentStatus: PAYMENT_STATUS.PENDING,
-          bookingStatus: BOOKING_STATUS.PENDING,
-        },
-        session,
-      );
+            paymentStatus: PAYMENT_STATUS.PENDING,
+            bookingStatus: BOOKING_STATUS.PENDING,
+          },
+          session,
+        );
 
-    await session.commitTransaction();
-    await session.endSession();
-    session = null;
-
-
-    //  Create payment intent 
-   
-    try {
-      
-    const payment = await this.paymentGateway.createPaymentIntent({
-    amount: priceTier.price,
-    currency: 'inr',
-    bookingId: booking._id.toString(),
-    metadata: {
-      userId: payload.userId,
-      scheduleId: payload.scheduleId,
-      tierType: payload.tierType,
-      seatsCount: String(payload.seatsCount),
-      startDate: schedule.startDate?.toISOString().split('T')[0] ?? '', 
-      endDate: schedule.endDate?.toISOString().split('T')[0] ?? '',     
-      packageName: pkg.title ?? '',
-    },
-  });
-
-      await this._bookingRepo.attachPaymentIntent(
-        booking._id.toString(),
-        payment.gatewayPaymentId,
-      );
-
-      return {
-        clientSecret: payment.clientSecret!,
-        bookingId: booking._id.toString(),
-        checkoutUrl: payment.url,
-         
-      };
-    } catch (paymentError) {
-
-      await this._bookingRepo.markFailedPayment(
-        booking._id.toString(),
-      );
-
-      throw new AppError(
-        ERROR_MESSAGES.PAYMENT_CONFIRMATION_FAILED,
-        HTTP_STATUS.INTERNAL_SERVER_ERROR,
-      );
-    }
-  } catch (error) {
-    if (session) {
-      try {
-        await session.abortTransaction();
-      } catch (_) {}
-
+      await session.commitTransaction();
       await session.endSession();
+      session = null;
+
+
+      //  Create payment intent 
+   
+      try {
+      
+        const payment = await this.paymentGateway.createPaymentIntent({
+          amount: priceTier.price,
+          currency: 'inr',
+          bookingId: booking._id.toString(),
+          metadata: {
+            userId: payload.userId,
+            scheduleId: payload.scheduleId,
+            tierType: payload.tierType,
+            seatsCount: String(payload.seatsCount),
+            startDate: schedule.startDate?.toISOString().split('T')[0] ?? '',
+            endDate: schedule.endDate?.toISOString().split('T')[0] ?? '',
+            packageName: pkg.title ?? '',
+          },
+        });
+
+        await this._bookingRepo.attachPaymentIntent(
+          booking._id.toString(),
+          payment.gatewayPaymentId,
+        );
+
+        return {
+          clientSecret: payment.clientSecret!,
+          bookingId: booking._id.toString(),
+          checkoutUrl: payment.url,
+         
+        };
+      } catch (paymentError) {
+
+        await this._bookingRepo.markFailedPayment(
+          booking._id.toString(),
+        );
+
+        throw new AppError(
+          ERROR_MESSAGES.PAYMENT_CONFIRMATION_FAILED,
+          HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        );
+      }
+    } catch (error) {
+      if (session) {
+        try {
+          await session.abortTransaction();
+        } catch (_) { }
+
+        await session.endSession();
+      }
+      throw error;
     }
-    throw error;
   }
-}
 
   async confirmBooking(payload: ConfirmBookingDTO): Promise<ConfirmBookingResponseDTO> {
 
@@ -329,18 +331,18 @@ export class BookingService implements IBookingService {
     }
   }
 
-  async verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO> { 
+  async verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO> {
 
     const session = await this.paymentGateway.verifyStripeSession(stripeSessionId);
 
     const bookingId = session.metadata?.bookingId;
 
-  if (!bookingId) {
-    return { status: VERIFY_PAYMENT_STATUS.FAILURE };
-  }
+    if (!bookingId) {
+      return { status: VERIFY_PAYMENT_STATUS.FAILURE };
+    }
 
     if (session.payment_status !== 'paid') {
-        return { status: VERIFY_PAYMENT_STATUS.FAILURE };
+      return { status: VERIFY_PAYMENT_STATUS.FAILURE };
     }
 
     const booking = await this._bookingRepo.findById(bookingId);
@@ -352,6 +354,26 @@ export class BookingService implements IBookingService {
       bookingId: booking.bookingCode,
       amount: booking.grossAmount
     };
+
+  }
+
+  async getBookings(userId: string, filters: GetBookingsDTO): Promise<PaginatedBookingResponse> {
+     
+    const { bookings, total } = await this._bookingRepo.findBookings({
+      userId,
+      bookingStatus: filters.bookingStatus,
+      search: filters.search,
+      page: filters.page,
+      limit: filters.limit
+    });
+    
+    return {
+      bookings,
+      total,
+      page: filters.page,
+      limit: filters.limit,
+      totalPages: Math.ceil(total / filters.limit)
+    };
+  }
 }
 
-}

@@ -66,3 +66,25 @@ export interface IBooking extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// populated types
+
+// Add this to your booking entity file
+
+export interface PopulatedBooking extends Omit<IBooking, 'packageId' | 'scheduleId'> {
+  packageId: {
+    title: string;
+    state: string;
+    location: string;
+  };
+  scheduleId: {
+    startDate: string;
+    endDate: string;
+    reportingTime: string;
+  } | null;
+}
+
+export interface BookingListResult {
+  bookings: PopulatedBooking[];
+  total: number;
+}

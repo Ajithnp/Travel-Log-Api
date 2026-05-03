@@ -1,4 +1,4 @@
-import { BookingStatus, IBooking, PaymentStatus } from '../../types/entities/booking.entity';
+import { BookingListResult, BookingStatus, IBooking, PaymentStatus } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
 
@@ -27,34 +27,15 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   ): Promise<IBooking | null>;
 
   markFailedPayment(bookingId: string): Promise<IBooking | null>;
+
+  findBookings(filters: BookingFilters): Promise<BookingListResult>;
 }
 
-export interface CreateBookingDTO {
-  userId: string;
-  packageId: string;
-  scheduleId: string;
-  vendorId: string;
-  groupType: string;
-  travelerCount: number;
-  travelers: Array<{
-    name: string;
-    age: number;
-    gender?: string;
-    phone?: string;
-    isLead: boolean;
-  }>;
-  grossAmount: number;
-  discountAmount: number;
-  walletAmountUsed: number;
-  finalAmount: number;
-  platformCommission: number;
-  vendorEarning: number;
-  seatHoldExpiry: Date;
-}
 
 export interface BookingFilters {
   userId: string;
   bookingStatus?: BookingStatus;
+  search?: string;
   page: number;
   limit: number;
 }
