@@ -588,5 +588,13 @@ async softDelete(id: Types.ObjectId, vendorId: string): Promise<IBasePackageEnti
     { isDeleted: true, deletedAt: new Date() },
     { new: true }
   ).exec();
-}
+  };
+
+  async restore(id: string, vendorId:string): Promise<IBasePackageEntity | null> {
+  return await this.model.findOneAndUpdate(
+    { _id: toObjectId(id), vendorId:toObjectId(vendorId), isDeleted: true },    
+    { isDeleted: false, deletedAt: null },
+    { new: true }
+  ).exec();
+  };
 }

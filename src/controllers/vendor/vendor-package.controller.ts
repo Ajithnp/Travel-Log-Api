@@ -105,4 +105,16 @@ export class VendorPackageController implements IVendorPackageController {
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
+
+    restorePackage = expressAsyncHandler(async (req, res) => {
+    const vendorId = req.user!.id;
+      const packageId = req.params.packageId;
+     await this._packageService.restorePackage(packageId, vendorId);
+
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 }

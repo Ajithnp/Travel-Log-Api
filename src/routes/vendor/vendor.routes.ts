@@ -86,9 +86,16 @@ export class VendorRoutes extends BaseRoute {
 
     this._router.delete(
       '/packages/:packageId',
-      // isAuthenticated,
-      // authorize([USER_ROLES.VENDOR]),
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
       this._vendorPackageController.deletePackage.bind(this._vendorPackageController),
+    );
+
+    this.router.patch(
+      '/packages/:packageId/restore',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorPackageController.restorePackage.bind(this._vendorPackageController),
     );
 
     this._router.get(

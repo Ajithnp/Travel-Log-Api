@@ -236,4 +236,14 @@ export class PackageService implements IPackageService {
     };
 
   };
+
+  async restorePackage(packageId: string, vendorId: string): Promise<void> {
+  const product = await this._basePackageRepository.restore(packageId, vendorId);
+
+  if (!product) {
+    throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    };
+
+  };
+
 }

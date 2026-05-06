@@ -25,7 +25,9 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     limit: number,
   ): Promise<{ packages: RawPublicPackageDocument[]; total: number }>;
 
-  softDelete(id:Types.ObjectId, vendorId:string): Promise<IBasePackageEntity | null>
+  softDelete(id: Types.ObjectId, vendorId: string): Promise<IBasePackageEntity | null>;
+
+  restore(id: string, vendorId: string): Promise<IBasePackageEntity | null>;
 }
 
 export interface RawPublicPackageDocument {
