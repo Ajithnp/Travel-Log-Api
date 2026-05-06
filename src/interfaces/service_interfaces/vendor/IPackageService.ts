@@ -19,4 +19,5 @@ export interface IPackageService {
     vendorId: string,
     packageId: string,
   ): Promise<PackageScheduleContextResponseDTO>;
+  deletePackage(packageId: string, vendorId: string): Promise<void>;
 }

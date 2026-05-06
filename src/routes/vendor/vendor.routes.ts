@@ -84,6 +84,13 @@ export class VendorRoutes extends BaseRoute {
       this._vendorPackageController.fetPackagesWithId.bind(this._vendorPackageController),
     );
 
+    this._router.delete(
+      '/packages/:packageId',
+      // isAuthenticated,
+      // authorize([USER_ROLES.VENDOR]),
+      this._vendorPackageController.deletePackage.bind(this._vendorPackageController),
+    );
+
     this._router.get(
       '/packages/:id/schedule-context',
       isAuthenticated,

@@ -15,12 +15,14 @@ import {
   PackageDetailDTO,
   PackageScheduleContextResponseDTO,
 } from '../../types/dtos/admin/response.dtos';
-import { PACKAGE_STATUS } from '../../shared/constants/constants';
+import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../../shared/constants/constants';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICategoryRepository';
 import { FilterType } from '../../types/db';
 import { PackageMapper } from '../../shared/mappers/package.mapper';
 import { IBasePackagePopulated, IFile } from '../../types/entities/base-package.entity';
+import logger from '../../config/logger';
+import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
 @injectable()
 export class PackageService implements IPackageService {
   constructor(
@@ -32,6 +34,9 @@ export class PackageService implements IPackageService {
     private _fileStorageHandlerService: IFileStorageHandlerService,
     @inject('ICategoryRepository')
     private _categoryRepository: ICategoryRepository,
+    @inject('ISchedulePackageRepository')
+    private _scheduleRepository: ISchedulePackageRepository,
+
   ) {}
 
   private async processPackageImages(images: { key: string; status: string }[]): Promise<IFile[]> {
@@ -206,4 +211,29 @@ export class PackageService implements IPackageService {
 
     return PackageMapper.toScheduleContext(pkg);
   }
+
+  // delete
+  async deletePackage(packageId: string, vendorId: string): Promise<void> {
+    const packageObjectId = toObjectId(packageId);
+
+  const isPackageExist = await this._basePackageRepository.findOne({_id:packageObjectId})
+
+  if (!isPackageExist) {
+    throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    };
+   
+    
+    const isScheduleExists = await this._scheduleRepository.findOne({ packageId: packageObjectId, status: SCHEDULE_STATUS.UPCOMING });
+    
+    if (isScheduleExists) {
+       throw new AppError(ERROR_MESSAGES.PACKAGE_HAS_ACTIVE_SCHEDULE, HTTP_STATUS.BAD_REQUEST);
+    }
+    
+    const data = await this._basePackageRepository.softDelete(packageObjectId, vendorId);
+  
+    if (!data) {
+   throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    };
+
+  };
 }

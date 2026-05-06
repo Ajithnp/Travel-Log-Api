@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response , NextFunction} from 'express';
 import { AppError } from '../errors/AppError';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../shared/constants/messages';
@@ -6,7 +6,7 @@ import { IApiResponse } from 'types/common/IApiResponse';
 import { isMongoServerError, isSyntaxError } from '../errors/gurdes/isMongoError';
 import { handleMongoDuplicateError } from '../errors/MongoError';
 
-export const errorMiddleware = (err: Error | AppError | any, req: Request, res: Response) => {
+export const errorMiddleware = (err: Error | AppError | any, req: Request, res: Response, next: NextFunction ) => {
   let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
   let message: string = ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR;
   let errorCode: string | undefined;
