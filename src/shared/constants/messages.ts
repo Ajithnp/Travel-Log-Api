@@ -1,5 +1,3 @@
-import { GoogleAuth } from 'google-auth-library';
-
 export const SUCCESS_MESSAGES = {
   REGISTRATION_SUCCESSFUL: 'User registered successfully.',
   LOGIN_SUCCESSFUL: 'User logged in successfully.',
@@ -24,7 +22,6 @@ export const SUCCESS_MESSAGES = {
   PROFILE_UPDATED: 'Profile updated successfully',
   PACKAGE_CREATION_SUCCESS: 'Package creation successfull',
   PACKAGE_UPDATION_SUCCESS: 'Package updation success',
-
 
   // category
   CATEGORY_CREATED: 'Category created successfully',
@@ -52,10 +49,14 @@ export const ERROR_MESSAGES = {
   ACCOUNT_BLOCKED: 'Your account has been blocked. Please contact support.',
   INPUT_VALIDATION_FAILED: 'Input validation failed. Please check your data.',
   EMAIL_ALREADY_EXISTS: 'A user with this email already exists.',
+
   GOOGLE_AUTH_FORGOT_PASSWORD:
     'This email is registered with Google authentication. Please use Google login.',
   GOOGLE_USER_CANT_CHANGE_EMAIL: 'Google users cannot change email',
   GOOGLE_USER_CANT_CHANGE_PASSWORD: 'Google users cannot change password',
+  INVALID_TOKEN: 'Invalid token',
+  FAILED_TO_VERIFY_TOKEN: 'Failed to verify Google token',
+
   USER_NOT_FOUND: 'User not found.',
   INVALID_CREDENTIALS: 'Invalid email or password.',
   RESOURCE_NOT_FOUND: 'The requested resource was not found.',
@@ -150,5 +151,4 @@ export const ERROR_MESSAGES = {
   // cancellation policy
   CANCELLATION_POLICY_NOT_FOUND: 'Cancellation policy not found',
   FAILED_TO_UPDATE_CANCELLATION_POLICY_STATUS: 'Failed to update cancellation policy status',
-
 } as const;

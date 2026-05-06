@@ -36,8 +36,8 @@ export default class App {
   }
 
   private configureWebhookRoute(): void {
-  this._app.use('/api/v1/payment', container.resolve(PaymentWebhookRoutes).router);
-}
+    this._app.use('/api/v1/payment', container.resolve(PaymentWebhookRoutes).router);
+  }
   //  middleware configurations
   private configureMiddleware(): void {
     this._app.use(express.json());
@@ -61,7 +61,6 @@ export default class App {
     this._app.use('/api/v1/user', container.resolve(UserRoutes).router);
     this._app.use('/api/v1/s3', container.resolve(S3Routes).router);
     this._app.use('/api/v1/bookings', container.resolve(BookingRoutes).router);
-    
   }
 
   public get expressApp(): Application {

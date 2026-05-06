@@ -1,7 +1,6 @@
-import mongoose, { Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { IBasePackageEntity } from '../types/entities/base-package.entity';
 import { PACKAGE_STATUS } from '../shared/constants/constants';
-import { DifficultyLevel } from '../types/entities/base-package.entity';
 
 /* ---------- Sub Schemas ---------- */
 

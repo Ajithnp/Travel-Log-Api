@@ -1,6 +1,12 @@
-import  Stripe  from 'stripe';
-import { config } from '../../config/env'
-import { IPaymentGateway, CreatePaymentIntentDTO, PaymentIntentResult, StripeWebhookEvent, StripeCheckoutSession } from './IPaymentGateway';
+import Stripe from 'stripe';
+import { config } from '../../config/env';
+import {
+  IPaymentGateway,
+  CreatePaymentIntentDTO,
+  PaymentIntentResult,
+  StripeWebhookEvent,
+  StripeCheckoutSession,
+} from './IPaymentGateway';
 import { injectable } from 'tsyringe';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -19,10 +25,7 @@ export class StripeGateway implements IPaymentGateway {
 
   // ── Checkout session ──────
 
-  async createPaymentIntent(
-    data: CreatePaymentIntentDTO,
-  ): Promise<PaymentIntentResult> {
-
+  async createPaymentIntent(data: CreatePaymentIntentDTO): Promise<PaymentIntentResult> {
     try {
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -37,12 +40,8 @@ export class StripeGateway implements IPaymentGateway {
               product_data: {
                 name: data.metadata?.packageName ?? 'Travel Package',
                 description: [
-                  data.metadata?.tierType
-                    ? `Tier: ${data.metadata.tierType}`
-                    : null,
-                  data.metadata?.seatsCount
-                    ? `Seats: ${data.metadata.seatsCount}`
-                    : null,
+                  data.metadata?.tierType ? `Tier: ${data.metadata.tierType}` : null,
+                  data.metadata?.seatsCount ? `Seats: ${data.metadata.seatsCount}` : null,
                   data.metadata?.startDate && data.metadata?.endDate
                     ? `Travel: ${data.metadata.startDate} → ${data.metadata.endDate}`
                     : null,
@@ -83,20 +82,17 @@ export class StripeGateway implements IPaymentGateway {
       };
     } catch (error) {
       if (error instanceof Stripe.errors.StripeError) {
-        throw new AppError(
-          `Stripe error: ${error.message}`,
-          HTTP_STATUS.BAD_GATEWAY,
-        );
+        throw new AppError(`Stripe error: ${error.message}`, HTTP_STATUS.BAD_GATEWAY);
       }
       throw error;
     }
   }
 
   // ── Webhook verification ──
-  
-   verifyWebhookEvent(rawBody: Buffer, signature: string): StripeWebhookEvent {
+
+  verifyWebhookEvent(rawBody: Buffer, signature: string): StripeWebhookEvent {
     try {
-      return  this.stripe.webhooks.constructEvent(
+      return this.stripe.webhooks.constructEvent(
         rawBody,
         signature,
         config.payment.STRIPE_WEBHOOK_SECRET,
@@ -119,5 +115,4 @@ export class StripeGateway implements IPaymentGateway {
       );
     }
   }
-
 }

@@ -1,6 +1,5 @@
 import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
-import { Request, Response } from 'express';
 import { IAdminVendorController } from '../../interfaces/controller_interfaces/admin/IAdminVendorController';
 import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/IAdminVendorService';
 import { IApiResponse } from '../../types/common/IApiResponse';

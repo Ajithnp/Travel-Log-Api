@@ -29,7 +29,7 @@ export class TokenService implements ITokenService {
       if (!decoded || typeof decoded === 'string') return null;
 
       return decoded as ITokenPayload;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -41,7 +41,7 @@ export class TokenService implements ITokenService {
       if (!decoded || typeof decoded === 'string') return null;
 
       return decoded as ITokenPayload;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -52,7 +52,7 @@ export class TokenService implements ITokenService {
 
       if (!decodedToken || typeof decodedToken === 'string') return null;
       return decodedToken as ITokenPayload;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

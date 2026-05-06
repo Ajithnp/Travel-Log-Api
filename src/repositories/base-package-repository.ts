@@ -6,11 +6,10 @@ import {
 import { BaseRepository } from './base.repository';
 import { IBasePackageEntity, IBasePackagePopulated } from '../types/entities/base-package.entity';
 import { PackageModel } from '../models/package.model';
-import { FilterType, PackageSortOption, PublicPackageFilters } from '../types/db';
+import { FilterType, PublicPackageFilters } from '../types/db';
 import mongoose, { FilterQuery } from 'mongoose';
 import { MongoNumberRange } from '../types/db';
 import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
-import logger from '../config/logger';
 
 @injectable()
 export class BasePackageRepository

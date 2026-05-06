@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { BOOKING_STATUS, CANCELLED_BY, GROUP_TYPE, PAYMENT_STATUS } from 'shared/constants/booking';
 
 export type GroupType = (typeof GROUP_TYPE)[keyof typeof GROUP_TYPE];
@@ -20,7 +20,7 @@ export interface ITraveler {
 export interface IBooking extends Document {
   _id: mongoose.Types.ObjectId;
   // Core references
-  bookingCode: string; 
+  bookingCode: string;
   userId: mongoose.Types.ObjectId;
   packageId: mongoose.Types.ObjectId;
   scheduleId: mongoose.Types.ObjectId;

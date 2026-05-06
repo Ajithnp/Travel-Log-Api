@@ -1,10 +1,7 @@
 import { Server } from 'socket.io';
 import { Server as HttpServer } from 'http';
-
-import { SocketData } from './types/socket.types';
 import { config } from '../../config/env';
 import logger from '../../config/logger';
-import { Namespace } from 'socket.io';
 
 export class SocketServer {
   private static instance: SocketServer;

@@ -1,4 +1,4 @@
-import { BookingListResult, IBooking } from 'types/entities/booking.entity';
+import { BookingListResult } from 'types/entities/booking.entity';
 import { PricingType } from '../../../types/entities/schedule.entity';
 import { BookingFilters } from '../../../interfaces/repository_interfaces/IBookingRepository';
 import { BookingDetailDTO } from '../../../shared/mappers/booking.mapper';
@@ -12,14 +12,14 @@ export interface InitiateBookingDTO {
   tierType: PricingType;
   seatsCount: number;
   travelers: Array<{
-   fullName: string;
-  idType: string;
-  idNumber: string;
-  isLead: boolean;
-  phoneNumber?: string;
-  emailAddress?: string;
-  emergencyContact?: string;
-  relation?: string;
+    fullName: string;
+    idType: string;
+    idNumber: string;
+    isLead: boolean;
+    phoneNumber?: string;
+    emailAddress?: string;
+    emergencyContact?: string;
+    relation?: string;
   }>;
   amountInPaise: number;
 }
@@ -30,14 +30,14 @@ export interface ConfirmBookingDTO {
   stripePaymentIntentId: string;
 }
 
-export type GetBookingsDTO = Omit<BookingFilters, 'userId'> 
+export type GetBookingsDTO = Omit<BookingFilters, 'userId'>;
 
 // ─── Response DTOs ───
 
 export interface InitiateBookingResponseDTO {
   bookingId: string;
   clientSecret: string;
-  checkoutUrl: string | null;  // redirect the user 
+  checkoutUrl: string | null; // redirect the user
 }
 
 export interface ConfirmBookingResponseDTO {
@@ -47,22 +47,20 @@ export interface ConfirmBookingResponseDTO {
 
 export type VerifyPaymentResponseDTO =
   | {
-      status: "success";
+      status: 'success';
       bookingId: string;
       amount: number;
     }
   | {
-      status: "failure";
+      status: 'failure';
     };
 export interface PaginatedBookingResponse {
   bookings: BookingListResult['bookings'];
-  total:    number;
-  page:     number;
-  limit:    number;
+  total: number;
+  page: number;
+  limit: number;
   totalPages: number;
 }
-
-
 
 export interface IBookingService {
   initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO>;

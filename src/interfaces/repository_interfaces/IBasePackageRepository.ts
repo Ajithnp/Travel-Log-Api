@@ -1,6 +1,5 @@
 import { FilterType, PublicPackageFilters } from 'types/db';
 import {
-  DifficultyLevel,
   IBasePackageEntity,
   IBasePackagePopulated,
 } from '../../types/entities/base-package.entity';

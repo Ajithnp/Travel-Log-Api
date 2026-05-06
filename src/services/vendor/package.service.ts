@@ -2,10 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { IPackageService } from '../../interfaces/service_interfaces/vendor/IPackageService';
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
-import {
-  CreateBasePackageDTO,
-  BasePackageResponseDTO,
-} from '../../validators/vendor/package/base-package.schema';
+import { CreateBasePackageDTO } from '../../validators/vendor/package/base-package.schema';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';

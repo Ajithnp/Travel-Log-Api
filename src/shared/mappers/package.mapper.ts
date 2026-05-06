@@ -18,13 +18,13 @@ export class PackageMapper {
       title: pkg.title ?? '',
       location: pkg.location ?? '',
       state: pkg.state ?? '',
-      durationDays: Number(pkg.days) ?? 0,
-      durationNights: Number(pkg.nights) ?? 0,
+      durationDays: Number(pkg.days) || 0,
+      durationNights: Number(pkg.nights) || 0,
       imageUrl: pkg.images?.map((image: IFile) => ({ key: image.key })) ?? [],
       status: pkg.status,
       category: pkg.categoryId?.name ?? '',
       difficultyLevel: pkg.difficultyLevel ?? '',
-      basePrice: Number(pkg.basePrice) ?? 0,
+      basePrice: Number(pkg.basePrice) || 0,
     };
   }
 

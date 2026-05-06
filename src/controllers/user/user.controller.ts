@@ -76,7 +76,7 @@ export class UserController implements IUserController {
   });
 
   toggleWishlist = asyncHandler(async (req, res) => {
-    const userId = req.user?.id!;
+    const userId = req.user.id;
     const { packageId } = req.params;
 
     const result = await this._wishlistService.toggleWishlist(userId, packageId);
@@ -90,7 +90,7 @@ export class UserController implements IUserController {
   });
 
   getWishlistedIds = asyncHandler(async (req, res) => {
-    const userId = req.user?.id!;
+    const userId = req.user.id;
 
     const result = await this._wishlistService.getWishlistedIds(userId);
     const successResponse: IApiResponse<typeof result> = {
@@ -103,7 +103,7 @@ export class UserController implements IUserController {
   });
 
   getWishlist = asyncHandler(async (req, res) => {
-    const userId = req.user?.id!;
+    const userId = req.user.id;
     const { page, limit } = getPaginationOptions(req);
 
     const result = await this._wishlistService.getWishlist(userId, page, limit);
@@ -118,7 +118,7 @@ export class UserController implements IUserController {
   });
 
   getWishlistCount = asyncHandler(async (req, res) => {
-    const userId = req.user?.id!;
+    const userId = req.user.id;
 
     const result = await this._wishlistService.getWishlistCount(userId);
     const successResponse: IApiResponse<{ count: number }> = {

@@ -4,7 +4,7 @@ import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/I
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { IUser } from '../../types/entities/user.entity';
-import { IVendorInfo, IVendorInfoWithUser } from '../../types/entities/vendor.info.entity';
+import { IVendorInfo } from '../../types/entities/vendor.info.entity';
 import { IVendorInfoResponseDTO } from '../../types/dtos/vendor/vendor.info.response.dtos';
 import { VendorVerificationUpdateDTO } from '../../types/dtos/admin/request.dtos';
 import { AppError } from '../../errors/AppError';

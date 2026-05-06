@@ -1,9 +1,8 @@
 import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
 import { IS3Controller } from '../interfaces/controller_interfaces/IS3Controller';
-import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../errors/AppError';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../shared/constants/messages';
+import { SUCCESS_MESSAGES } from '../shared/constants/messages';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../shared/constants/http_status_code';
 import { IApiResponse } from '../types/common/IApiResponse';
 import { IGetUploadUrlResponse } from '../types/dtos/common/response.dtos';

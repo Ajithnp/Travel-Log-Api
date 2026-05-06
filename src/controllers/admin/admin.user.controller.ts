@@ -1,7 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
 import { IAdminUserController } from '../../interfaces/controller_interfaces/admin/IAdminUserController';
-import { Request, Response } from 'express';
 import { IAdminUserService } from '../../interfaces/service_interfaces/admin/IAdminUserService';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';

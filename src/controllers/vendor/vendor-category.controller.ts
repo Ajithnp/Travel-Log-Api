@@ -17,7 +17,7 @@ export class VendorCategoryController implements IVendorCategoryController {
   ) {}
 
   getVendorsRequestCategories = asyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
     const filters: FilterType = {
       selectedFilter,
@@ -49,7 +49,7 @@ export class VendorCategoryController implements IVendorCategoryController {
   });
 
   requestCategory = asyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
 
     const payload: VendorCategoryRequestInputDTO = req.body;
     await this._vendorCategoryService.requestCategory(vendorId, payload);

@@ -1,8 +1,4 @@
-import {
-  IWishlist,
-  IWishlistEntity,
-  IWishlistPopulatedDocument,
-} from 'types/entities/wishlist.entity';
+import { IWishlistEntity, IWishlistPopulatedDocument } from 'types/entities/wishlist.entity';
 import { IBaseRepository } from './IBaseRepository';
 
 export interface IWishlistRepository extends IBaseRepository<IWishlistEntity> {

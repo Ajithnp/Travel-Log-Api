@@ -1,4 +1,4 @@
-import { injectable, inject } from 'tsyringe';
+import { injectable } from 'tsyringe';
 import { BaseRepository } from './base.repository';
 import { ISchedule, ISchedulePopulated } from '../types/entities/schedule.entity';
 import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
@@ -109,34 +109,31 @@ export class SchedulePackageRepository
     });
   }
 
+  async confirmSeats(
+    scheduleId: string,
+    seatsCount: number,
+    session?: mongoose.ClientSession,
+  ): Promise<UpdateResult> {
+    return this.model.updateOne(
+      {
+        _id: new Types.ObjectId(scheduleId),
+      },
+      { $inc: { seatsBooked: seatsCount } },
+      { session },
+    );
+  }
 
-async confirmSeats(
-  scheduleId: string,
-  seatsCount: number,
-  session?: mongoose.ClientSession,
-): Promise<UpdateResult> {
-  return this.model.updateOne(
-    {
-      _id: new Types.ObjectId(scheduleId),
-    
-    },
-    { $inc: { seatsBooked: seatsCount } }, 
-    { session },                            
-  );
-}
-
- async cancelSeats(
-  scheduleId: string,
-  seatsCount: number,
-  session?: mongoose.ClientSession,
-): Promise<UpdateResult> {
-  return this.model.updateOne(
-    {
-      _id: new Types.ObjectId(scheduleId),
-    
-    },
-    { $inc: { seatsBooked: -seatsCount } }, 
-    { session },                            
-  );
-}
+  async cancelSeats(
+    scheduleId: string,
+    seatsCount: number,
+    session?: mongoose.ClientSession,
+  ): Promise<UpdateResult> {
+    return this.model.updateOne(
+      {
+        _id: new Types.ObjectId(scheduleId),
+      },
+      { $inc: { seatsBooked: -seatsCount } },
+      { session },
+    );
+  }
 }

@@ -1,4 +1,4 @@
-import { BookingListResult, BookingStatus, IBooking, PaymentStatus } from '../../types/entities/booking.entity';
+import { BookingListResult, BookingStatus, IBooking } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
 
@@ -11,7 +11,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   findByIdAndUser(id: string, userId: string): Promise<IBooking | null>;
 
-  findByIdAndUserLean(id: string, userId: string): Promise<IBooking | null> 
+  findByIdAndUserLean(id: string, userId: string): Promise<IBooking | null>;
 
   attachPaymentIntent(
     bookingId: string,
@@ -29,9 +29,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   markFailedPayment(bookingId: string): Promise<IBooking | null>;
 
   findBookings(filters: BookingFilters): Promise<BookingListResult>;
-
 }
-
 
 export interface BookingFilters {
   userId: string;

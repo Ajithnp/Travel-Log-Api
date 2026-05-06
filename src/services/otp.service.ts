@@ -28,8 +28,6 @@ export class OtpService implements IOtpService {
 
     await this._cacheService.set(key, hashedOtp, OTP.OTP_TTL_SECONDS);
 
-    const storedOtp = await this._cacheService.get(key);
-
     this._emailUtil.sendEmail({
       to: email,
       subject: 'verify Your Email Adress',
