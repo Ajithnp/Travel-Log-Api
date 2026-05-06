@@ -9,6 +9,7 @@ import { IApiResponse } from '../../types/common/IApiResponse';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
 import { CreateBasePackageDTO } from '../../validators/vendor/package/base-package.schema';
 import { FilterType } from '../../types/db';
+import expressAsyncHandler from 'express-async-handler';
 
 @injectable()
 export class VendorPackageController implements IVendorPackageController {
@@ -89,6 +90,31 @@ export class VendorPackageController implements IVendorPackageController {
       data: pkg,
     };
 
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  deletePackage = expressAsyncHandler(async (req, res) => {
+    const vendorId = req.user!.id;
+    
+    const packageId = req.params.packageId;
+     await this._packageService.deletePackage(packageId, vendorId);
+
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+    restorePackage = expressAsyncHandler(async (req, res) => {
+    const vendorId = req.user!.id;
+      const packageId = req.params.packageId;
+     await this._packageService.restorePackage(packageId, vendorId);
+
+    const successResponse: IApiResponse = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+    };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 }

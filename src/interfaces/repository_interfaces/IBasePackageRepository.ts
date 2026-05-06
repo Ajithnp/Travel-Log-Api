@@ -6,6 +6,7 @@ import {
 import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
 import { PublicPackageImageDTO } from 'types/user/types';
+import { Types } from 'mongoose';
 
 export interface IBasePackageRepository extends IBaseRepository<IBasePackageEntity> {
   findPackages(
@@ -23,6 +24,10 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     page: number,
     limit: number,
   ): Promise<{ packages: RawPublicPackageDocument[]; total: number }>;
+
+  softDelete(id: Types.ObjectId, vendorId: string): Promise<IBasePackageEntity | null>;
+
+  restore(id: string, vendorId: string): Promise<IBasePackageEntity | null>;
 }
 
 export interface RawPublicPackageDocument {

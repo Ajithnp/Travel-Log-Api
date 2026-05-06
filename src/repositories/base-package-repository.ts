@@ -7,9 +7,10 @@ import { BaseRepository } from './base.repository';
 import { IBasePackageEntity, IBasePackagePopulated } from '../types/entities/base-package.entity';
 import { PackageModel } from '../models/package.model';
 import { FilterType, PublicPackageFilters } from '../types/db';
-import mongoose, { FilterQuery } from 'mongoose';
+import mongoose, { FilterQuery, Types } from 'mongoose';
 import { MongoNumberRange } from '../types/db';
 import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
+import { toObjectId } from '../shared/utils/database/objectId.helper';
 
 @injectable()
 export class BasePackageRepository
@@ -576,4 +577,24 @@ export class BasePackageRepository
 
     return { packages, total };
   }
+
+async softDelete(id: Types.ObjectId, vendorId: string): Promise<IBasePackageEntity | null> {
+  return await this.model.findOneAndUpdate(
+    { 
+      _id: id, 
+      vendorId: toObjectId(vendorId),  
+      isDeleted: false 
+    },
+    { isDeleted: true, deletedAt: new Date() },
+    { new: true }
+  ).exec();
+  };
+
+  async restore(id: string, vendorId:string): Promise<IBasePackageEntity | null> {
+  return await this.model.findOneAndUpdate(
+    { _id: toObjectId(id), vendorId:toObjectId(vendorId), isDeleted: true },    
+    { isDeleted: false, deletedAt: null },
+    { new: true }
+  ).exec();
+  };
 }

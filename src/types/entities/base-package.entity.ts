@@ -42,6 +42,7 @@ export interface IBasePackageEntity extends Document {
   difficultyLevel?: DifficultyLevel;
   status: PackageStatus;
   isActive: boolean;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

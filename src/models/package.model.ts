@@ -89,6 +89,11 @@ const packageSchema = new Schema<IBasePackageEntity>(
       index: true,
     },
 
+    isDeleted: {
+      type: Boolean,
+      default:false
+    },
+
     isActive: {
       type: Boolean,
       default: false,

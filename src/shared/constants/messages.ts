@@ -106,7 +106,7 @@ export const ERROR_MESSAGES = {
   PACKAGE_ACTIVE: 'This package is not active and cannot be edited.',
   PACKAGE_CANNOT_EDIT: 'This package cannot be edited.',
   PACKAGE_NOT_PUBLISHED: 'Package must be published before creating a schedule. Publish it first.',
-
+  PACKAGE_HAS_ACTIVE_SCHEDULE:'This Package can not delete, it has active schedules',
   // category
   CATEGORY_NOT_FOUND: 'Category not found',
   CATEGORY_CANNOT_EDIT: 'This Category cannot be edited',
