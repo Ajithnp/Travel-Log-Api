@@ -1,5 +1,5 @@
 import { ICategory } from '../types/entities/category.entity';
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { CATEGORY_STATUS } from '../shared/constants/constants';
 import { generateSlug } from '../shared/utils/slug.generator.helper';
 

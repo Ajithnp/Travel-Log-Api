@@ -18,7 +18,7 @@ export class AdminCategoryController implements IAdminCategoryController {
   ) {}
 
   createCategory = asyncHandler(async (req, res) => {
-    const adminId = req.user?.id!;
+    const adminId = req.user.id;
     const payload = req.body;
     await this._adminCategoryService.createCategory(adminId, payload);
 
@@ -31,7 +31,7 @@ export class AdminCategoryController implements IAdminCategoryController {
   });
 
   updateCategory = asyncHandler(async (req, res) => {
-    const adminId = req.user?.id!;
+    const adminId = req.user.id;
     const { id } = req.params;
     const payload = req.body;
     await this._adminCategoryService.updateCategory(adminId, id, payload);
@@ -91,7 +91,7 @@ export class AdminCategoryController implements IAdminCategoryController {
   });
 
   reviewCategoryRequest = asyncHandler(async (req, res) => {
-    const adminId = req.user?.id!;
+    const adminId = req.user.id;
     const { id } = req.params;
     const { action, rejectionReason } = req.body;
 

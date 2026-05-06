@@ -1,8 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
-import { Request, Response } from 'express';
 import { IVendorController } from '../../interfaces/controller_interfaces/vendor/IVendorController';
-
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { IVendorService } from '../../interfaces/service_interfaces/vendor/IVendorService';

@@ -17,7 +17,7 @@ export class ShedulePackageController implements ISchedulePackageController {
   ) {}
 
   createSchedule = expressAsyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
     const packageId = req.params.packageId;
 
     const payload: CreateScheduleInputDTO = {
@@ -35,7 +35,7 @@ export class ShedulePackageController implements ISchedulePackageController {
   });
 
   fetchSchedules = expressAsyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
 
     const startDate = req.query.startDate as string | undefined;

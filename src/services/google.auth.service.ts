@@ -4,6 +4,7 @@ import { IGoogleService } from '../interfaces/service_interfaces/IGoogleService'
 import { OAuth2Client } from 'google-auth-library';
 import { AppError } from '../errors/AppError';
 import { HTTP_STATUS } from '../shared/constants/http_status_code';
+import { ERROR_MESSAGES } from '../shared/constants/messages';
 
 @injectable()
 export class GoogleService implements IGoogleService {
@@ -22,7 +23,7 @@ export class GoogleService implements IGoogleService {
 
       const payload = ticket.getPayload();
       if (!payload || !payload.sub || !payload.email) {
-        throw new AppError('Invalid token', HTTP_STATUS.BAD_REQUEST);
+        throw new AppError(ERROR_MESSAGES.INVALID_TOKEN, HTTP_STATUS.BAD_REQUEST);
       }
 
       const response = {
@@ -33,8 +34,8 @@ export class GoogleService implements IGoogleService {
       };
 
       return response;
-    } catch (error) {
-      throw new AppError('Failed to verify Google token', HTTP_STATUS.UNAUTHORIZED);
+    } catch {
+      throw new AppError(ERROR_MESSAGES.FAILED_TO_VERIFY_TOKEN, HTTP_STATUS.UNAUTHORIZED);
     }
   }
 }

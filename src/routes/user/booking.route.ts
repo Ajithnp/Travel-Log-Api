@@ -7,7 +7,6 @@ import { authorize } from '../../middlewares/aurhorization.middleware';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
 import { InitiateBookingRequestSchema } from '../../validators/user/booking.validation';
 
-
 @injectable()
 export class BookingRoutes extends BaseRoute {
   constructor(
@@ -26,14 +25,14 @@ export class BookingRoutes extends BaseRoute {
       validateDTO(InitiateBookingRequestSchema),
       this._bookingController.initiateBooking.bind(this._bookingController),
     );
-      
+
     this._router.get(
       '/verify-payment',
       isAuthenticated,
       authorize([USER_ROLES.USER]),
       this._bookingController.verifyPayment.bind(this._bookingController),
     );
-    
+
     this._router.get(
       '/',
       isAuthenticated,

@@ -1,6 +1,9 @@
 import { BookingListResult, IBooking, PopulatedBooking } from '../types/entities/booking.entity';
 import { BaseRepository } from './base.repository';
-import { BookingFilters, IBookingRepository } from '../interfaces/repository_interfaces/IBookingRepository';
+import {
+  BookingFilters,
+  IBookingRepository,
+} from '../interfaces/repository_interfaces/IBookingRepository';
 import BookingModel from '../models/booking.model';
 import mongoose from 'mongoose';
 import { BOOKING_STATUS } from '../shared/constants/booking';
@@ -38,7 +41,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     session?: mongoose.ClientSession,
   ): Promise<IBooking | null> {
     return this.model
-      .findByIdAndUpdate(bookingId, {transactionId: paymentIntentId }, { new: true, session })
+      .findByIdAndUpdate(bookingId, { transactionId: paymentIntentId }, { new: true, session })
       .lean() as Promise<IBooking | null>;
   }
 
@@ -63,7 +66,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         {
           _id: new mongoose.Types.ObjectId(bookingId),
           userId: new mongoose.Types.ObjectId(userId),
-
         },
         {
           bookingStatus: BOOKING_STATUS.CONFIRMED,
@@ -85,33 +87,31 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       .lean() as Promise<IBooking | null>;
   }
 
-
   async findByIdAndUserLean(id: string, userId: string): Promise<IBooking | null> {
-  if (!mongoose.Types.ObjectId.isValid(id)) return null;
-  return BookingModel.findOne({
-    _id: new mongoose.Types.ObjectId(id),
-    userId: new mongoose.Types.ObjectId(userId),
-  }).lean() as Promise<IBooking | null>; 
+    if (!mongoose.Types.ObjectId.isValid(id)) return null;
+    return BookingModel.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+      userId: new mongoose.Types.ObjectId(userId),
+    }).lean() as Promise<IBooking | null>;
   }
-  
+
   async findBookings(filters: BookingFilters): Promise<BookingListResult> {
-   
     const pipeline: mongoose.PipelineStage[] = [];
 
     const matchStage: FilterQuery<IBooking> = {
       userId: new mongoose.Types.ObjectId(filters.userId),
     };
 
-      if (filters.bookingStatus) {
-            matchStage.bookingStatus = filters.bookingStatus
+    if (filters.bookingStatus) {
+      matchStage.bookingStatus = filters.bookingStatus;
     }
-    
+
     pipeline.push({ $match: matchStage });
 
-      // Lookup package details
+    // Lookup package details
     pipeline.push({
       $lookup: {
-        from: 'packages',       
+        from: 'packages',
         localField: 'packageId',
         foreignField: '_id',
         as: 'packageId',
@@ -121,21 +121,21 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     pipeline.push({ $unwind: '$packageId' });
 
     // Filter by package location (search)
-      if (filters.search) {
-        pipeline.push({
-          $match: {
-            'packageId.location': {
-              $regex: filters.search,
-              $options: 'i',      
-            },
+    if (filters.search) {
+      pipeline.push({
+        $match: {
+          'packageId.location': {
+            $regex: filters.search,
+            $options: 'i',
           },
-        });
-    };
+        },
+      });
+    }
 
     // Lookup schedule details
     pipeline.push({
       $lookup: {
-        from: 'schedulepackages',      
+        from: 'schedulepackages',
         localField: 'scheduleId',
         foreignField: '_id',
         as: 'scheduleId',
@@ -144,8 +144,8 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
     pipeline.push({ $unwind: { path: '$scheduleId', preserveNullAndEmptyArrays: true } });
 
-      // Sort
-    pipeline.push({ $sort: { createdAt: -1 } })
+    // Sort
+    pipeline.push({ $sort: { createdAt: -1 } });
 
     // Facet for pagination + total count in one query
 
@@ -167,8 +167,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
               createdAt: 1,
               travelerCount: 1,
               grossAmount: 1,
-              bookingCode:1,
-             
+              bookingCode: 1,
             },
           },
         ],
@@ -181,21 +180,20 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     const totalCount = result.totalCount[0] ? result.totalCount[0].count : 0;
 
     return { bookings, total: totalCount };
-  };
+  }
 
   async findByIdAndUser(id: string, userId: string): Promise<IBooking | null> {
- 
-  if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
-    return null
-  }
- 
+    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
+      return null;
+    }
+
     const booking = await BookingModel.findOne({
       _id: new mongoose.Types.ObjectId(id),
       userId: new mongoose.Types.ObjectId(userId),
     })
- 
+
       // ── Package populate ──────
-    
+
       .populate({
         path: 'packageId',
         select: [
@@ -213,34 +211,27 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           'packingList',
           'categoryId',
         ].join(' '),
-           populate: {
-           path:   'categoryId',   
-           select: 'name'  
+        populate: {
+          path: 'categoryId',
+          select: 'name',
         },
-    })
- 
-    // ── Schedule populate ─────
-    .populate({
-      path:   'scheduleId',
-      select: [
-        'startDate',
-        'endDate',
-        'reportingTime',
-        'reportingLocation',
-        'notes',
-      ].join(' '),
-    })
- 
-    // ── Vendor populate ──────
+      })
 
-    .populate({
-      path:   'vendorId',
-      select: 'name ',
-    })
+      // ── Schedule populate ─────
+      .populate({
+        path: 'scheduleId',
+        select: ['startDate', 'endDate', 'reportingTime', 'reportingLocation', 'notes'].join(' '),
+      })
 
-    .lean()   
- 
-  return booking as IBooking | null
-}
-  
+      // ── Vendor populate ──────
+
+      .populate({
+        path: 'vendorId',
+        select: 'name ',
+      })
+
+      .lean();
+
+    return booking as IBooking | null;
+  }
 }

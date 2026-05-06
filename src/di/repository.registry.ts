@@ -18,8 +18,6 @@ import { CancellationPolicyRepository } from '../repositories/cancellation-polic
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
-
-
     //vendor-repository
     container.register<IVendorInfoRepository>('IvendorInfoRepository', {
       useClass: VendorInfoRepository,
@@ -28,10 +26,10 @@ export class RepositoryRegistry {
       useClass: VendorInfoRepository,
     });
 
-        container.register<ISchedulePackageRepository>('ISchedulePackageRepository', {
+    container.register<ISchedulePackageRepository>('ISchedulePackageRepository', {
       useClass: SchedulePackageRepository,
-        });
-    
+    });
+
     container.register<IBasePackageRepository>('IBasePackageRepository', {
       useClass: BasePackageRepository,
     });
@@ -48,8 +46,8 @@ export class RepositoryRegistry {
 
     container.register<IBookingRepository>('IBookingRepository', {
       useClass: BookingRepository,
-        });
-    
+    });
+
     container.register<IUserRepository>('IUserRepository', {
       useClass: UserRepository,
     });
@@ -57,7 +55,6 @@ export class RepositoryRegistry {
     container.register<ICancellationPolicyRepository>('ICancellationPolicyRepository', {
       useClass: CancellationPolicyRepository,
     });
-
 
     // Register other repositories here
   }

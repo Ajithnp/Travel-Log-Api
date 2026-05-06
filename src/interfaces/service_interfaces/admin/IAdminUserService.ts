@@ -1,4 +1,3 @@
-import { IUser } from '../../../types/entities/user.entity';
 import { PaginatedData } from '../../../types/common/IPaginationResponse';
 import { UserProfileResponseDTO } from 'types/dtos/user/response.dtos';
 

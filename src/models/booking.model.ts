@@ -1,6 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
 import { IBooking, ITraveler } from '../types/entities/booking.entity';
-import { BOOKING_STATUS, CANCELLED_BY, GROUP_TYPE, PAYMENT_STATUS } from '../shared/constants/booking';
+import {
+  BOOKING_STATUS,
+  CANCELLED_BY,
+  GROUP_TYPE,
+  PAYMENT_STATUS,
+} from '../shared/constants/booking';
 
 const TravelerSchema = new Schema<ITraveler>(
   {
@@ -54,18 +59,17 @@ const TravelerSchema = new Schema<ITraveler>(
       default: null,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const BookingSchema = new Schema<IBooking>(
   {
-  
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     packageId: { type: Schema.Types.ObjectId, ref: 'Package', required: true },
     scheduleId: { type: Schema.Types.ObjectId, ref: 'SchedulePackage', required: true },
     vendorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 
-    bookingCode: {type: String, required:true},
+    bookingCode: { type: String, required: true },
     groupType: {
       type: String,
       enum: Object.values(GROUP_TYPE),

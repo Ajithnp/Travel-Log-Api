@@ -22,10 +22,8 @@ import { PaginatedCategoryResponse, PaginatedData } from '../../types/common/IPa
 import { CategoryFilters } from '../../types/db';
 import {
   CategoryRequestResponseDTO,
-  CategoryResponseDTO,
   CategoryRequestReviewedResponseDTO,
 } from '../../types/dtos/admin/response.dtos';
-import { ICategory, ICategoryRequestPopulated } from '../../types/entities/category.entity';
 import { CategoryMapper } from '../../shared/mappers/category.mapper';
 @injectable()
 export class CategoryService implements IAdminCategoryService {
@@ -157,7 +155,7 @@ export class CategoryService implements IAdminCategoryService {
 
       const slug = generateSlug(category.name);
 
-      const approved = await this._categoryRepository.reviewRequest(id, {
+      await this._categoryRepository.reviewRequest(id, {
         status: CATEGORY_STATUS.ACTIVE,
         slug,
         isActive: true,
@@ -166,7 +164,7 @@ export class CategoryService implements IAdminCategoryService {
       return;
     }
 
-    const rejected = await this._categoryRepository.reviewRequest(id, {
+    await this._categoryRepository.reviewRequest(id, {
       status: CATEGORY_STATUS.REJECTED,
       isActive: false,
       adminId,

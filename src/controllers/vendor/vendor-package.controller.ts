@@ -18,7 +18,7 @@ export class VendorPackageController implements IVendorPackageController {
   ) {}
 
   createPackage = asyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
     const payload: CreateBasePackageDTO = req.body;
 
     const { packageId } = await this._packageService.createPackage(vendorId, payload);
@@ -32,7 +32,7 @@ export class VendorPackageController implements IVendorPackageController {
   });
 
   updatePackage = asyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
     const { packageId } = req.params;
     const payload = req.body;
 
@@ -46,7 +46,7 @@ export class VendorPackageController implements IVendorPackageController {
   });
 
   fetchPackages = asyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
     const filters: FilterType = {
       page,
@@ -64,7 +64,7 @@ export class VendorPackageController implements IVendorPackageController {
   });
 
   fetPackagesWithId = asyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
     const { id } = req.params;
 
     const packages = await this._packageService.fetchPackagesWithId(vendorId, id);
@@ -78,7 +78,7 @@ export class VendorPackageController implements IVendorPackageController {
   });
 
   getPackageScheduleContext = asyncHandler(async (req, res) => {
-    const vendorId = req.user?.id!;
+    const vendorId = req.user.id;
     const { id } = req.params;
 
     const pkg = await this._packageService.fetchPackageScheduleContext(vendorId, id);

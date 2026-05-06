@@ -39,7 +39,7 @@ import { IPublicVendorService } from '../interfaces/service_interfaces/user/IPub
 import { PublicVendorService } from '../services/user/public-vendor.service';
 import { IBookingService } from '../interfaces/service_interfaces/user/IBookingService';
 import { BookingService } from '../services/user/booking.service';
-import {IPaymentWebhookService} from '../interfaces/service_interfaces/IPaymentWebhookService';
+import { IPaymentWebhookService } from '../interfaces/service_interfaces/IPaymentWebhookService';
 import { PaymentWebhookService } from '../services/payment-webhook.service';
 import { ICancellationPolicyService } from '../interfaces/service_interfaces/admin/ICancellationPolicyService';
 import { CancellationPolicyService } from '../services/admin/cancellation-policy.service';

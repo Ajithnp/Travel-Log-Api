@@ -1,9 +1,7 @@
-import { IFiles } from 'types/entities/vendor.info.entity';
-import { VENDOR_STATUS } from '../../../shared/constants/common';
 import { IFile } from 'types/entities/base-package.entity';
 
 export interface VendorVerificationUpdateDTO {
-  status: VENDOR_STATUS.Approved | VENDOR_STATUS.Rejected;
+  status: 'Rejected' | 'Approved';
   reasonForReject?: string; // optional for approval, required for rejection
 }
 

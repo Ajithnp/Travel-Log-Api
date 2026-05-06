@@ -1,7 +1,7 @@
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { inject, injectable } from 'tsyringe';
 import { IVendorService } from '../../interfaces/service_interfaces/vendor/IVendorService';
-import { IDocuments, IFiles, IVendorInfo } from '../../types/entities/vendor.info.entity';
+import { IDocuments, IVendorInfo } from '../../types/entities/vendor.info.entity';
 import { Types } from 'mongoose';
 import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { AppError } from '../../errors/AppError';
@@ -9,7 +9,6 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
-import { USER_ROLES } from '../../shared/constants/roles';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
 import { VendorVerificationRequestDTO } from '../../types/dtos/vendor/request.dtos';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';

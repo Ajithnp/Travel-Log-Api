@@ -1,7 +1,6 @@
 import {
   CancellationPolicyResponseDto,
   CreateCancellationPolicyDto,
-  StatusToggleDto,
 } from 'types/dtos/admin/cancellation-policy.dtos';
 
 export interface ICancellationPolicyService {

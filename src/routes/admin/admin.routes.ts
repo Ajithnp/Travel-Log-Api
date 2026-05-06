@@ -19,7 +19,6 @@ import {
 import {
   CancellationPolicyRequestSchema,
   PolicyStatusRequestSchema,
-  PolicyStatusSchema,
 } from '../../types/dtos/admin/cancellation-policy.dtos';
 
 @injectable()

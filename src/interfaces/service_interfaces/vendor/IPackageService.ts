@@ -1,8 +1,5 @@
 import { PaginatedData } from 'types/common/IPaginationResponse';
-import {
-  BasePackageResponseDTO,
-  CreateBasePackageDTO,
-} from 'validators/vendor/package/base-package.schema';
+import { CreateBasePackageDTO } from 'validators/vendor/package/base-package.schema';
 import {
   BasePackageSingleResponseDTO,
   PackageDetailDTO,

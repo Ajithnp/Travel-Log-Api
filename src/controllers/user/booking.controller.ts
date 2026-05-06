@@ -1,7 +1,6 @@
 import { inject, injectable } from 'tsyringe';
 import { IBookingController } from '../../interfaces/controller_interfaces/user/IBookingController';
 import {
-  ConfirmBookingResponseDTO,
   GetBookingsDTO,
   IBookingService,
   InitiateBookingDTO,
@@ -22,10 +21,9 @@ export class BookingController implements IBookingController {
   ) {}
 
   initiateBooking = expressAsyncHandler(async (req, res) => {
-   
     const userId = req.user!.id;
     const { packageId, scheduleId, tierType, seatsCount, travelers, amountInPaise } = req.body;
-  
+
     const payload: InitiateBookingDTO = {
       userId,
       packageId,
@@ -54,7 +52,10 @@ export class BookingController implements IBookingController {
 
     const response: IApiResponse<VerifyPaymentResponseDTO> = {
       success: SUCCESS_STATUS.SUCCESS,
-      message: result.status === 'success' ? SUCCESS_MESSAGES.PAYMENT_VERIFIED : SUCCESS_MESSAGES.PAYMENT_VERIFICATION_FAILED,
+      message:
+        result.status === 'success'
+          ? SUCCESS_MESSAGES.PAYMENT_VERIFIED
+          : SUCCESS_MESSAGES.PAYMENT_VERIFICATION_FAILED,
       data: result,
     };
     res.status(HTTP_STATUS.OK).json(response);
@@ -63,13 +64,13 @@ export class BookingController implements IBookingController {
   getBookings = expressAsyncHandler(async (req, res) => {
     const userId = req.user!.id;
 
-    const {search, page, limit, selectedFilter } = getPaginationOptions(req);
+    const { search, page, limit, selectedFilter } = getPaginationOptions(req);
     const payload: GetBookingsDTO = {
       search,
       page,
       limit,
-      bookingStatus: selectedFilter as BookingStatus 
-    }
+      bookingStatus: selectedFilter as BookingStatus,
+    };
 
     const result = await this._bookingService.getBookings(userId, payload);
 
@@ -84,8 +85,8 @@ export class BookingController implements IBookingController {
 
   getBookingDetails = expressAsyncHandler(async (req, res) => {
     const { bookingId } = req.params as { bookingId: string };
-     const userId = req.user!.id;
-  
+    const userId = req.user!.id;
+
     const result = await this._bookingService.getBookingDetails(userId, bookingId);
 
     const response: IApiResponse<typeof result> = {
@@ -95,5 +96,4 @@ export class BookingController implements IBookingController {
     };
     res.status(HTTP_STATUS.OK).json(response);
   });
-
 }

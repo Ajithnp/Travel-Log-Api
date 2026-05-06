@@ -1,6 +1,5 @@
 import { inject, injectable } from 'tsyringe';
 import BaseRoute from '../base.route';
-import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { IS3Controller } from '../../interfaces/controller_interfaces/IS3Controller';
 
 @injectable()
