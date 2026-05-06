@@ -1,9 +1,9 @@
 import { container } from 'tsyringe';
-import { IAuthService } from 'interfaces/service_interfaces/IAuthService';
+import { IAuthService } from '../interfaces/service_interfaces/IAuthService';
 import { AuthService } from '../services/auth.service';
-import { ITokenService } from 'interfaces/service_interfaces/ITokenService';
+import { ITokenService } from '../interfaces/service_interfaces/ITokenService';
 import { TokenService } from '../services/jwt.service';
-import { IGoogleService } from 'interfaces/service_interfaces/IGoogleService';
+import { IGoogleService } from '../interfaces/service_interfaces/IGoogleService';
 import { GoogleService } from '../services/google.auth.service';
 import { IOtpService } from '../interfaces/service_interfaces/IOtpService';
 import { OtpService } from '../services/otp.service';
@@ -37,6 +37,10 @@ import { IWishlistService } from '../interfaces/service_interfaces/user/IWishlis
 import { WishlistService } from '../services/user/wishlist.service';
 import { IPublicVendorService } from '../interfaces/service_interfaces/user/IPublicVendorService';
 import { PublicVendorService } from '../services/user/public-vendor.service';
+import { IBookingService } from '../interfaces/service_interfaces/user/IBookingService';
+import { BookingService } from '../services/user/booking.service';
+import {IPaymentWebhookService} from '../interfaces/service_interfaces/IPaymentWebhookService';
+import { PaymentWebhookService } from '../services/payment-webhook.service';
 import { ICancellationPolicyService } from '../interfaces/service_interfaces/admin/ICancellationPolicyService';
 import { CancellationPolicyService } from '../services/admin/cancellation-policy.service';
 
@@ -68,6 +72,10 @@ export class ServiceRegistry {
 
     container.register<IFileStorageService>('IFileStorageService', {
       useClass: S3Service,
+    });
+
+    container.register<IPaymentWebhookService>('IPaymentWebhookService', {
+      useClass: PaymentWebhookService,
     });
 
     container.register<IFileStorageHandlerService>('IFileStorageHandlerService', {
@@ -119,6 +127,10 @@ export class ServiceRegistry {
 
     container.register<IPublicVendorService>('IPublicVendorService', {
       useClass: PublicVendorService,
+    });
+
+    container.register<IBookingService>('IBookingService', {
+      useClass: BookingService,
     });
   } // Register other services here
 }

@@ -7,7 +7,7 @@ import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICat
 import {
   ICreateCategoryInputDTO,
   IUpdateCategoryInputDTO,
-} from '.../../types/dtos/admin/request.dtos';
+} from '../../types/dtos/admin/request.dtos';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { generateSlug } from '../../shared/utils/slug.generator.helper';

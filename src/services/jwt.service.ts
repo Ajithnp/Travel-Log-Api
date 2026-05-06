@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { ITokenPayload, ITokenService } from 'interfaces/service_interfaces/ITokenService';
+import { ITokenPayload, ITokenService } from '../interfaces/service_interfaces/ITokenService';
 import { config } from '../config/env';
 import { injectable } from 'tsyringe';
 import { JWT_TOKEN } from '../shared/constants/jwt.token';

@@ -1,13 +1,13 @@
 import { inject, injectable } from 'tsyringe';
 import { IUserRepository } from '../interfaces/repository_interfaces/IUserRepository';
-import { IBcryptUtils } from 'interfaces/common_interfaces/IBcryptUtils';
+import { IBcryptUtils } from '../interfaces/common_interfaces/IBcryptUtils';
 import { IAuthService } from '../interfaces/service_interfaces/IAuthService';
-import { ITokenService } from 'interfaces/service_interfaces/ITokenService';
-import { IGoogleService } from 'interfaces/service_interfaces/IGoogleService';
+import { ITokenService } from '../interfaces/service_interfaces/ITokenService';
+import { IGoogleService } from '../interfaces/service_interfaces/IGoogleService';
 import { AppError } from '../errors/AppError';
 import { ERROR_MESSAGES } from '../shared/constants/messages';
 import { HTTP_STATUS } from '../shared/constants/http_status_code';
-import { IOtpService } from 'interfaces/service_interfaces/IOtpService';
+import { IOtpService } from '../interfaces/service_interfaces/IOtpService';
 import {
   LoginRequestDTO,
   SignupRequestDTO,

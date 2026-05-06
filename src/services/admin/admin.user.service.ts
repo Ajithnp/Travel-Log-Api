@@ -8,7 +8,7 @@ import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ITokenService } from '../../interfaces/service_interfaces/ITokenService';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
 import { FilterQuery, Types } from 'mongoose';
-import { UserProfileResponseDTO } from 'types/dtos/user/response.dtos';
+import { UserProfileResponseDTO } from '../../types/dtos/user/response.dtos';
 
 @injectable()
 export class AdminUserService implements IAdminUserService {

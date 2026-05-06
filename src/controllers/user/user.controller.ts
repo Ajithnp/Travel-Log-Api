@@ -3,14 +3,14 @@ import { inject, injectable } from 'tsyringe';
 import { IUserController } from '../../interfaces/controller_interfaces/user/IUserController';
 import { IUserService } from '../../interfaces/service_interfaces/user/IUserService';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
-import { IApiResponse } from 'types/common/IApiResponse';
+import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { IPublicPackageService } from '../../interfaces/service_interfaces/user/IPublicPackageService';
-import { PublicPackageQuery } from 'validators/public-package.validation';
+import { PublicPackageQuery } from '../../validators/public-package.validation';
 import { IWishlistService } from '../../interfaces/service_interfaces/user/IWishlistService';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
-import { VendorPublicProfileResponseDTO } from 'types/dtos/user/response.dtos';
-import { IPublicVendorService } from 'interfaces/service_interfaces/user/IPublicVendorService';
+import { VendorPublicProfileResponseDTO } from '../../types/dtos/user/response.dtos';
+import { IPublicVendorService } from '../../interfaces/service_interfaces/user/IPublicVendorService';
 
 @injectable()
 export class UserController implements IUserController {

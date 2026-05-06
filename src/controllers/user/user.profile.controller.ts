@@ -1,6 +1,5 @@
 import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
-import { Request, Response } from 'express';
 import { IUserService } from '../../interfaces/service_interfaces/user/IUserService';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
@@ -11,7 +10,7 @@ import {
   UserProfileResponseDTO,
   IUpdateEmailResponseDTO,
 } from '../../types/dtos/user/response.dtos';
-import { IUserProfileController } from 'interfaces/controller_interfaces/user/IUserProfileController';
+import { IUserProfileController } from '../../interfaces/controller_interfaces/user/IUserProfileController';
 import { clearAuthCookies } from '../../shared/utils/cookie.helper';
 import { JWT_TOKEN } from '../../shared/constants/jwt.token';
 @injectable()

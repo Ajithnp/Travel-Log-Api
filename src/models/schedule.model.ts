@@ -78,6 +78,12 @@ const ScheduleSchema = new Schema<ISchedule>(
       min: [0, 'Seats booked cannot be negative'],
     },
 
+    seatsHeld: {
+      type: Number,
+      default: 0,
+      min: [0, 'Seats held cannot be negative'],
+    },
+
     status: {
       type: String,
       enum: Object.values(SCHEDULE_STATUS),

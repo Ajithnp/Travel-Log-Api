@@ -15,19 +15,15 @@ export interface ISchedule extends Document {
   _id: mongoose.Types.ObjectId;
   packageId: mongoose.Types.ObjectId;
   vendorId: mongoose.Types.ObjectId;
-
   startDate: Date;
   endDate: Date;
   reportingTime: string; // "05:00" — stored as HH:mm string
   reportingLocation: string;
-
   pricing: IPricingTier[];
-
   totalSeats: number;
   seatsBooked: number;
-
+  seatsHeld: number;
   status: ScheduleStatus;
-
   cancellationReason?: string;
   cancelledAt?: Date;
   cancelledBookings?: number; // how many bookings were refunded

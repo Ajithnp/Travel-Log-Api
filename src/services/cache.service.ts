@@ -1,4 +1,4 @@
-import { ICacheService } from 'interfaces/service_interfaces/ICacheService';
+import { ICacheService } from '../interfaces/service_interfaces/ICacheService';
 import { injectable } from 'tsyringe';
 import redisClient from '../config/redis.config';
 

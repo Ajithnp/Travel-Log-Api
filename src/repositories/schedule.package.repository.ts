@@ -3,10 +3,10 @@ import { BaseRepository } from './base.repository';
 import { ISchedule, ISchedulePopulated } from '../types/entities/schedule.entity';
 import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
 import SchedulePackageModel from '../models/schedule.model';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { SCHEDULE_STATUS } from '../shared/constants/constants';
 import { FilterType } from 'types/db';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, UpdateResult } from 'mongoose';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
 
 @injectable()
@@ -108,4 +108,35 @@ export class SchedulePackageRepository
       status: SCHEDULE_STATUS.COMPLETED,
     });
   }
+
+
+async confirmSeats(
+  scheduleId: string,
+  seatsCount: number,
+  session?: mongoose.ClientSession,
+): Promise<UpdateResult> {
+  return this.model.updateOne(
+    {
+      _id: new Types.ObjectId(scheduleId),
+    
+    },
+    { $inc: { seatsBooked: seatsCount } }, 
+    { session },                            
+  );
+}
+
+ async cancelSeats(
+  scheduleId: string,
+  seatsCount: number,
+  session?: mongoose.ClientSession,
+): Promise<UpdateResult> {
+  return this.model.updateOne(
+    {
+      _id: new Types.ObjectId(scheduleId),
+    
+    },
+    { $inc: { seatsBooked: -seatsCount } }, 
+    { session },                            
+  );
+}
 }

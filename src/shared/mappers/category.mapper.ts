@@ -2,12 +2,12 @@ import {
   CategoryRequestResponseDTO,
   CategoryRequestReviewedResponseDTO,
   CategoryResponseDTO,
-} from 'types/dtos/admin/response.dtos';
+} from '../../types/dtos/admin/response.dtos';
 import {
   ActiveCategoriesResponseDTO,
   VendorRequestedCategoryResponseDTO,
-} from 'types/dtos/vendor/response.dtos';
-import { ICategory, ICategoryRequestPopulated } from 'types/entities/category.entity';
+} from '../../types/dtos/vendor/response.dtos';
+import { ICategory, ICategoryRequestPopulated } from '../../types/entities/category.entity';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
   month: 'short',

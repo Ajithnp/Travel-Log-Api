@@ -5,7 +5,7 @@ import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { IPackageService } from '../../interfaces/service_interfaces/vendor/IPackageService';
-import { IApiResponse } from 'types/common/IApiResponse';
+import { IApiResponse } from '../../types/common/IApiResponse';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
 import { CreateBasePackageDTO } from '../../validators/vendor/package/base-package.schema';
 import { FilterType } from '../../types/db';

@@ -1,4 +1,3 @@
-import { RawPublicPackageDocument } from 'interfaces/repository_interfaces/IBasePackageRepository';
 import {
   BasePackageSingleResponseDTO,
   PackageDetailDTO,
@@ -10,7 +9,7 @@ import {
   IPopulatedPackageDetails,
 } from '../../types/entities/base-package.entity';
 import { PublicPackageSummary } from '../../types/user/types';
-import { PublicPackageDetailDTO } from 'types/dtos/user/response.dtos';
+import { PublicPackageDetailDTO } from '../../types/dtos/user/response.dtos';
 
 export class PackageMapper {
   static toResponse(pkg: IBasePackagePopulated): BasePackageSingleResponseDTO {

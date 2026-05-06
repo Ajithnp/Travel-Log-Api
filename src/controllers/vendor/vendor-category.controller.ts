@@ -7,7 +7,7 @@ import { getPaginationOptions } from '../../shared/utils/pagination.helper';
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
-import { VendorCategoryRequestInputDTO } from 'types/dtos/vendor/request.dtos';
+import { VendorCategoryRequestInputDTO } from '../../types/dtos/vendor/request.dtos';
 
 @injectable()
 export class VendorCategoryController implements IVendorCategoryController {
