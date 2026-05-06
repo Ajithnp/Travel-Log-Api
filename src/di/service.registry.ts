@@ -41,6 +41,9 @@ import { IBookingService } from '../interfaces/service_interfaces/user/IBookingS
 import { BookingService } from '../services/user/booking.service';
 import {IPaymentWebhookService} from '../interfaces/service_interfaces/IPaymentWebhookService';
 import { PaymentWebhookService } from '../services/payment-webhook.service';
+import { ICancellationPolicyService } from '../interfaces/service_interfaces/admin/ICancellationPolicyService';
+import { CancellationPolicyService } from '../services/admin/cancellation-policy.service';
+
 export class ServiceRegistry {
   static registerServices(): void {
     container.register<IAuthService>('IAuthService', {
@@ -104,6 +107,9 @@ export class ServiceRegistry {
     });
     container.register<IAdminCategoryService>('IAdminCategoryService', {
       useClass: CategoryService,
+    });
+    container.register<ICancellationPolicyService>('ICancellationPolicyService', {
+      useClass: CancellationPolicyService,
     });
 
     //user services

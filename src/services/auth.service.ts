@@ -200,6 +200,7 @@ export class AuthService implements IAuthService {
         email: userData.email,
         googleId: userData.googleId,
         isEmailVerified: true,
+        authProvider: 'google',
       });
     }
 
@@ -248,6 +249,10 @@ export class AuthService implements IAuthService {
 
     if (isUserEmailExist.isBlocked) {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN);
+    }
+
+    if (isUserEmailExist.authProvider === 'google') {
+      throw new AppError(ERROR_MESSAGES.GOOGLE_AUTH_FORGOT_PASSWORD, HTTP_STATUS.BAD_REQUEST);
     }
 
     const { otpExpiresIn, serverTime } = await this._otpService.sendOtp(email);

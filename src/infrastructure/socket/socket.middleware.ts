@@ -1,5 +1,3 @@
-// socket/middleware/socket.auth.middleware.ts
-
 import { Socket } from 'socket.io';
 import { container } from 'tsyringe';
 import { ITokenService } from '../../interfaces/service_interfaces/ITokenService';

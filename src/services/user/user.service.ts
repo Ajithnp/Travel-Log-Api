@@ -53,6 +53,7 @@ export class UserService implements IUserService {
       name: userDoc.name,
       email: userDoc.email,
       phone: userDoc.phone,
+      authProvider: userDoc.authProvider,
       createdAt: userDoc.createdAt.toDateString(),
       isBlocked: userDoc.isBlocked,
     };
@@ -61,6 +62,7 @@ export class UserService implements IUserService {
 
   async updateProfile(payload: UpdateProfileRequestDTO): Promise<void> {
     const { email, ...updateData } = payload;
+
     const user = await this._userRepository.findOne({ email });
     if (!user) throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
 
@@ -80,6 +82,10 @@ export class UserService implements IUserService {
     const user = await this._userRepository.findOne({ email });
 
     if (user) {
+      if (user.authProvider === 'google') {
+        throw new AppError(ERROR_MESSAGES.GOOGLE_USER_CANT_CHANGE_EMAIL, HTTP_STATUS.BAD_REQUEST);
+      }
+
       throw new AppError(
         ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
         HTTP_STATUS.BAD_REQUEST,
@@ -143,12 +149,16 @@ export class UserService implements IUserService {
 
     const user = await this._userRepository.findOne({ email });
 
+    if (user?.authProvider === 'google') {
+      throw new AppError(ERROR_MESSAGES.GOOGLE_USER_CANT_CHANGE_PASSWORD, HTTP_STATUS.BAD_REQUEST);
+    }
+
     if (!user)
       throw new AppError(ERROR_MESSAGES.EMAIL_NOT_FOUND, HTTP_STATUS.NOT_FOUND, 'USER_NOT_FOUND');
 
     const isMatch = await this._bcryptUtils.comparePassword(oldPassword, user.password);
 
-    if (!isMatch) throw new AppError(ERROR_MESSAGES.PASSWORD_DO_NOT_MATCH, HTTP_STATUS.BAD_REQUEST);
+    if (!isMatch) throw new AppError(ERROR_MESSAGES.PASSWORD_INCORRECT, HTTP_STATUS.BAD_REQUEST);
 
     const hashedPassword = await this._bcryptUtils.hashPassword(newPassword);
 

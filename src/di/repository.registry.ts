@@ -13,6 +13,9 @@ import { IWishlistRepository } from '../interfaces/repository_interfaces/IWishli
 import { WishlistRepository } from '../repositories/wishlist-repository';
 import { IBookingRepository } from '../interfaces/repository_interfaces/IBookingRepository';
 import { BookingRepository } from '../repositories/booking.repository';
+import { ICancellationPolicyRepository } from '../interfaces/repository_interfaces/ICancellationPolicyRepository';
+import { CancellationPolicyRepository } from '../repositories/cancellation-policy.repository';
+
 export class RepositoryRegistry {
   static registerRepositories(): void {
 
@@ -43,14 +46,17 @@ export class RepositoryRegistry {
 
     //user-repository
 
-        container.register<IBookingRepository>('IBookingRepository', {
+    container.register<IBookingRepository>('IBookingRepository', {
       useClass: BookingRepository,
         });
     
-        container.register<IUserRepository>('IUserRepository', {
+    container.register<IUserRepository>('IUserRepository', {
       useClass: UserRepository,
     });
 
+    container.register<ICancellationPolicyRepository>('ICancellationPolicyRepository', {
+      useClass: CancellationPolicyRepository,
+    });
 
 
     // Register other repositories here

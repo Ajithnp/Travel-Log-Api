@@ -25,6 +25,9 @@ import { IBookingController } from '../interfaces/controller_interfaces/user/IBo
 import { BookingController } from '../controllers/user/booking.controller';
 import { IPaymentWebhookController } from '../interfaces/controller_interfaces/IPaymentWebhook';
 import { PaymentWebhookController } from '../controllers/payment-webhook.controller';
+import { IAdminCancellationPolicyController } from '../interfaces/controller_interfaces/admin/IAdminCancellationPolicyController';
+import { AdminCancellationPolicyController } from '../controllers/admin/cancellation-policy.controller';
+
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -63,6 +66,9 @@ export class ControllerRegistry {
     });
     container.register<IAdminCategoryController>('IAdminCategoryController', {
       useClass: AdminCategoryController,
+    });
+    container.register<IAdminCancellationPolicyController>('IAdminCancellationPolicyController', {
+      useClass: AdminCancellationPolicyController,
     });
 
     //user controllers

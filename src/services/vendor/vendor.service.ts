@@ -81,8 +81,14 @@ export class VendorService implements IVendorService {
     }
 
     const file = payload.files[0];
+    // await this._vendorInfoRepository.findByIdAndUpdate(payload.vendorInfoId, {
+    //   profileLogo: { key: file.key },
+    // });
     await this._vendorInfoRepository.findByIdAndUpdate(payload.vendorInfoId, {
-      profileLogo: { key: file.key },
+      'documents.profileLogo': {
+        key: file.key,
+        fieldName: 'companyLogo',
+      },
     });
   }
 
