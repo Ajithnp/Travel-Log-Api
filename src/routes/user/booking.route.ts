@@ -40,5 +40,11 @@ export class BookingRoutes extends BaseRoute {
       authorize([USER_ROLES.USER]),
       this._bookingController.getBookings.bind(this._bookingController),
     );
+    this._router.get(
+      '/:bookingId',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._bookingController.getBookingDetails.bind(this._bookingController),
+    );
   }
 }

@@ -29,6 +29,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   markFailedPayment(bookingId: string): Promise<IBooking | null>;
 
   findBookings(filters: BookingFilters): Promise<BookingListResult>;
+
 }
 
 

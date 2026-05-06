@@ -23,6 +23,7 @@ import mongoose from 'mongoose';
 import { BOOKING_STATUS, PAYMENT_STATUS, VERIFY_PAYMENT_STATUS } from '../../shared/constants/booking';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
 import { generateBookingCode } from '../../shared/utils/generate-booking-code.helper';
+import { BookingDetailDTO, BookingMapper, RawPopulatedBooking } from '../../shared/mappers/booking.mapper';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -375,5 +376,16 @@ export class BookingService implements IBookingService {
       totalPages: Math.ceil(total / filters.limit)
     };
   }
+
+  async getBookingDetails(userId: string, bookingId: string): Promise<BookingDetailDTO> {
+    
+    const booking = await this._bookingRepo.findByIdAndUser(bookingId, userId);
+         if (!booking) {
+      throw new AppError('Booking not found', HTTP_STATUS.NOT_FOUND)
+    }
+    return BookingMapper.toDetailedResponse(booking as RawPopulatedBooking)
+  }
+
+  
 }
 

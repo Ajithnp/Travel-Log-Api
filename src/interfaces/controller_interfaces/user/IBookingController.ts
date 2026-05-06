@@ -4,5 +4,5 @@ export interface IBookingController {
   initiateBooking: RequestHandler;
   verifyPayment: RequestHandler;
   getBookings: RequestHandler;
-  // getBookingById: RequestHandler;
+  getBookingDetails: RequestHandler;
 }

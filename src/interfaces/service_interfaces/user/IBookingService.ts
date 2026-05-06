@@ -1,6 +1,7 @@
-import { BookingListResult } from 'types/entities/booking.entity';
+import { BookingListResult, IBooking } from 'types/entities/booking.entity';
 import { PricingType } from '../../../types/entities/schedule.entity';
-import { BookingFilters } from 'interfaces/repository_interfaces/IBookingRepository';
+import { BookingFilters } from '../../../interfaces/repository_interfaces/IBookingRepository';
+import { BookingDetailDTO } from '../../../shared/mappers/booking.mapper';
 
 // ─── Request DTOs ───────
 
@@ -68,5 +69,5 @@ export interface IBookingService {
   confirmBooking(payload: ConfirmBookingDTO): Promise<ConfirmBookingResponseDTO>;
   verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO>;
   getBookings(userId: string, filters: GetBookingsDTO): Promise<PaginatedBookingResponse>;
-  // getBookingById(userId: string, bookingId: string): Promise<IBooking | null>;
+  getBookingDetails(userId: string, bookingId: string): Promise<BookingDetailDTO>;
 }

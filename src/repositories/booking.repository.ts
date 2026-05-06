@@ -85,17 +85,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       .lean() as Promise<IBooking | null>;
   }
 
-  async findByIdAndUser(id: string, userId: string): Promise<IBooking | null> {
-    if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    return BookingModel.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-      userId: new mongoose.Types.ObjectId(userId),
-    })
-      .populate('packageId', 'title destination duration cancellationPolicy images meetingPoint')
-      .populate('scheduleId', 'startDate endDate reportingTime reportingLocation pricing notes')
-      .populate('vendorId', 'businessName profilePhoto')
-      .lean() as Promise<IBooking | null>;
-  }
 
   async findByIdAndUserLean(id: string, userId: string): Promise<IBooking | null> {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
@@ -194,6 +183,64 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     return { bookings, total: totalCount };
   };
 
-  
+  async findByIdAndUser(id: string, userId: string): Promise<IBooking | null> {
+ 
+  if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
+    return null
+  }
+ 
+    const booking = await BookingModel.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+      userId: new mongoose.Types.ObjectId(userId),
+    })
+ 
+      // ── Package populate ──────
+    
+      .populate({
+        path: 'packageId',
+        select: [
+          'title',
+          'location',
+          'state',
+          'usp',
+          'days',
+          'nights',
+          'difficultyLevel',
+          'cancellationPolicy',
+          'itinerary',
+          'inclusions',
+          'exclusions',
+          'packingList',
+          'categoryId',
+        ].join(' '),
+           populate: {
+           path:   'categoryId',   
+           select: 'name'  
+        },
+    })
+ 
+    // ── Schedule populate ─────
+    .populate({
+      path:   'scheduleId',
+      select: [
+        'startDate',
+        'endDate',
+        'reportingTime',
+        'reportingLocation',
+        'notes',
+      ].join(' '),
+    })
+ 
+    // ── Vendor populate ──────
+
+    .populate({
+      path:   'vendorId',
+      select: 'name ',
+    })
+
+    .lean()   
+ 
+  return booking as IBooking | null
+}
   
 }

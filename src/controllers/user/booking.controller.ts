@@ -82,4 +82,18 @@ export class BookingController implements IBookingController {
     res.status(HTTP_STATUS.OK).json(response);
   });
 
+  getBookingDetails = expressAsyncHandler(async (req, res) => {
+    const { bookingId } = req.params as { bookingId: string };
+     const userId = req.user!.id;
+  
+    const result = await this._bookingService.getBookingDetails(userId, bookingId);
+
+    const response: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+    res.status(HTTP_STATUS.OK).json(response);
+  });
+
 }
