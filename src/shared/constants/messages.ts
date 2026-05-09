@@ -100,7 +100,7 @@ export const ERROR_MESSAGES = {
   VENDOR_VERIFICARION_STATUS_APPROVED: 'Your profile is already approved',
   VENDOR_VERIFICATION_STATUS_PENDING: 'Your profile is already under review',
   VENDOR_NOT_VERIFIED: 'Vendor not verified',
-
+  VENDOR_REAPPLY_NOT_ALLOWED: 'Vendor re-apply not allowed',
   PACKAGE_ALREADY_EXISTS: 'Package already exists',
   PACKAGE_NOT_FOUND: 'Package not found',
   PACKAGE_ACTIVE: 'This package is not active and cannot be edited.',

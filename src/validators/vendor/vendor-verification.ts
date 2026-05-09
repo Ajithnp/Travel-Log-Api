@@ -22,6 +22,11 @@ export const VendorVerificationBodySchema = z.object({
     .string()
     .min(1, 'Business address is required')
     .min(5, 'Business address must be at least 5 characters'),
+  
+  bio: z
+    .string()
+    .min(1, 'Bio is required')
+    .min(15, 'Bio must be at least 15 characters'),
 
   accountNumber: z
     .string()

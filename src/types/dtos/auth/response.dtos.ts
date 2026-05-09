@@ -6,7 +6,7 @@ export interface SignupResponseDTO {
 }
 
 export interface LoginResponseDTO {
-  id?: string;
+  id: string;
   name: string;
   email: string;
   isEmailverified: boolean;

@@ -53,6 +53,21 @@ export class VendorRoutes extends BaseRoute {
       validateDTO(VendorVerificationSchema),
       this._vendorController.vendorVerificationSubmit.bind(this._vendorController),
     );
+
+    this._router.get(
+      '/verification/:vendorId/rejected',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorController.getRejectedVendor.bind(this._vendorController),
+    );
+
+    this._router.put(
+      '/verification/:vendorInfoId',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(VendorVerificationSchema),
+      this._vendorController.vendorVerificationReapply.bind(this._vendorController),
+    );
     /*---------------Package management--------------------- */
     this._router.post(
       '/packages',
