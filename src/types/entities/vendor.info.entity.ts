@@ -11,6 +11,7 @@ export type VendorStatus = 'Pending' | 'UnderReview' | 'Approved' | 'Rejected' |
 export interface IBusinessInfo {
   contactPersonName: string;
   businessAddress: string;
+   bio: string;
   GSTIN: string;
 }
 
@@ -30,6 +31,7 @@ export interface IBankDetails {
 }
 
 export interface IVendorInfo extends Document {
+   _id: Types.ObjectId;
   userId: Types.ObjectId;
   businessInfo: IBusinessInfo;
   documents: IDocuments;
@@ -47,4 +49,37 @@ export interface IVendorInfoPopulated extends Omit<IVendorInfo, 'userId'> {
 
 export interface IVendorInfoWithUser extends IVendorInfo {
   user: IUser;
+}
+
+export interface IBusinessInfoDTO {
+  contactPersonName: string;
+  businessAddress: string;
+  GSTIN: string;
+}
+
+export interface IDocumentsDTO {
+  businessLicence: IFiles;
+  profileLogo: IFiles;
+  businessPan: IFiles;
+  ownerIdentity: IFiles;
+}
+
+export interface IBankDetailsDTO {
+  accountNumber: string;
+  ifsc: string;
+  accountHolderName: string;
+  bankName: string;
+  branch: string;
+}
+
+// ─── First time submit ─────
+export interface VendorVerificationSubmitDTO {
+  businessInfo: IBusinessInfoDTO;
+  documents: IDocumentsDTO;
+  bankDetails: IBankDetailsDTO;
+}
+export interface VendorVerificationReSubmitDTO {
+  businessInfo?: Partial<IBusinessInfoDTO>;
+  documents?: Partial<IDocumentsDTO>;
+  bankDetails?: Partial<IBankDetailsDTO>;
 }

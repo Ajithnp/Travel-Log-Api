@@ -9,11 +9,14 @@ import { SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
 import { VendorVerificationRequestDTO } from '../../types/dtos/vendor/request.dtos';
+import { IVendorVerificationResponse, IVendorVerificationService } from '../../interfaces/service_interfaces/vendor/IvendorVerificationService';
 @injectable()
 export class VendorController implements IVendorController {
   constructor(
     @inject('IVendorService')
     private _vendorService: IVendorService,
+    @inject('IVendorVerificationService')
+    private _vendorVerificationService: IVendorVerificationService,
   ) {}
 
   profile = asyncHandler(async (req, res) => {
@@ -43,7 +46,7 @@ export class VendorController implements IVendorController {
   vendorVerificationSubmit = asyncHandler(async (req, res) => {
     const payload: VendorVerificationRequestDTO = req.body;
 
-    const result = await this._vendorService.vendorVerificationSubmit(req.user!.id, payload);
+    const result = await this._vendorVerificationService.vendorVerificationSubmit(req.user!.id, payload);
 
     const successResponse: IApiResponse<IVendorVerificationResponseDTO> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -56,4 +59,31 @@ export class VendorController implements IVendorController {
   });
 
   //===========================================================================
+
+  getRejectedVendor = asyncHandler(async (req, res) => {
+    const vendorId = req.params.vendorId;
+
+    const result = await this._vendorVerificationService.getRejectedVendor(vendorId);
+
+    const successResponse: IApiResponse<IVendorVerificationResponse> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.VERIFICATION_FORM_UPLOAD_SUCCESSFULLY,
+      data:result
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  vendorVerificationReapply = asyncHandler(async (req, res) => {
+    const { vendorInfoId } = req.params;
+    
+    const result = await this._vendorVerificationService.vendorVerificationReapply(req.user!.id, vendorInfoId, req.body as VendorVerificationRequestDTO);
+
+    const successResponse: IApiResponse<IVendorVerificationResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.VERIFICATION_FORM_UPLOAD_SUCCESSFULLY,
+      data: result
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
 }

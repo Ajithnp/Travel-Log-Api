@@ -5,6 +5,7 @@ export interface IVendorInfoResponseDTO {
   isProfileVerified: boolean;
   contactPersonName: string;
   businessAddress: string;
+  bio: string;
   businessLicence: string;
   ownerIdentity: string;
   businessPan: string;

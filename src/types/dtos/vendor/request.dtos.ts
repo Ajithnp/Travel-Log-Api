@@ -7,6 +7,7 @@ export interface VendorVerificationRequestDTO {
   files: VendorVerificationFile[];
   ownerName: string;
   businessAddress: string;
+  bio: string;
   gstin: string;
   accountNumber: string;
   ifsc: string;

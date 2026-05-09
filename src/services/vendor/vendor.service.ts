@@ -1,16 +1,13 @@
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { inject, injectable } from 'tsyringe';
 import { IVendorService } from '../../interfaces/service_interfaces/vendor/IVendorService';
-import { IDocuments, IVendorInfo } from '../../types/entities/vendor.info.entity';
 import { Types } from 'mongoose';
-import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
-import { VendorVerificationRequestDTO } from '../../types/dtos/vendor/request.dtos';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { UpdateProfileLogoRequestDTO } from '../../validators/vendor/profile.validation';
 @injectable()
@@ -80,9 +77,6 @@ export class VendorService implements IVendorService {
     }
 
     const file = payload.files[0];
-    // await this._vendorInfoRepository.findByIdAndUpdate(payload.vendorInfoId, {
-    //   profileLogo: { key: file.key },
-    // });
     await this._vendorInfoRepository.findByIdAndUpdate(payload.vendorInfoId, {
       'documents.profileLogo': {
         key: file.key,
@@ -91,92 +85,7 @@ export class VendorService implements IVendorService {
     });
   }
 
-  async vendorVerificationSubmit(
-    vendorId: string,
-    verificationData: VendorVerificationRequestDTO,
-  ): Promise<IVendorVerificationResponseDTO> {
-    let vendorDoc = await this._vendorInfoRepository.findOne({
-      userId: new Types.ObjectId(vendorId),
-    });
 
-    if (vendorDoc?.status === VENDOR_VERIFICATION_STATUS.APPROVED) {
-      throw new AppError(
-        ERROR_MESSAGES.VENDOR_VERIFICARION_STATUS_APPROVED,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
 
-    if (vendorDoc?.status === VENDOR_VERIFICATION_STATUS.PENDING) {
-      throw new AppError(
-        ERROR_MESSAGES.VENDOR_VERIFICATION_STATUS_PENDING,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
 
-    if (vendorDoc && vendorDoc.status === VENDOR_VERIFICATION_STATUS.REJECTED) {
-      // remove existing files from s3;
-      const oldFiles = [
-        vendorDoc.documents?.businessLicence?.key,
-        vendorDoc.documents?.businessPan?.key,
-        vendorDoc.documents?.profileLogo?.key,
-        vendorDoc.documents?.ownerIdentity?.key,
-      ].filter(Boolean) as string[];
-
-      if (oldFiles.length > 0) {
-        await this._fileStorage.deleteFiles(oldFiles);
-      }
-    }
-
-    const fileFieldMap: Record<string, keyof IDocuments> = {
-      businessLicence: 'businessLicence',
-      businessPan: 'businessPan',
-      companyLogo: 'profileLogo',
-      ownerIdentityProof: 'ownerIdentity',
-    };
-
-    const updatedDocuments: Partial<IDocuments> = {};
-
-    verificationData.files.forEach((file) => {
-      const field = fileFieldMap[file.fieldName];
-      if (field) {
-        updatedDocuments[field] = {
-          key: file.key,
-          fieldName: file.fieldName,
-        };
-      }
-    });
-
-    const vendorData: Partial<IVendorInfo> = {
-      userId: new Types.ObjectId(vendorId),
-      businessInfo: {
-        GSTIN: verificationData.gstin,
-        businessAddress: verificationData.businessAddress,
-        contactPersonName: verificationData.ownerName,
-      },
-      bankDetails: {
-        accountHolderName: verificationData.accountHolderName,
-        accountNumber: verificationData.accountNumber,
-        bankName: verificationData.bankName,
-        branch: verificationData.branch,
-        ifsc: verificationData.ifsc,
-      },
-      documents: {
-        ...vendorDoc?.documents,
-        ...updatedDocuments,
-      } as IDocuments,
-
-      status: VENDOR_VERIFICATION_STATUS.UNDER_REVIEW,
-      reasonForReject: '',
-    };
-
-    if (!vendorDoc) {
-      vendorDoc = await this._vendorInfoRepository.create(vendorData);
-    } else {
-      vendorDoc.set(vendorData);
-      await vendorDoc.save();
-    }
-    return {
-      isProfileVerified: vendorDoc.isProfileVerified,
-    };
-  }
 }

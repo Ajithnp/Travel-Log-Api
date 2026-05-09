@@ -43,6 +43,8 @@ import { IPaymentWebhookService } from '../interfaces/service_interfaces/IPaymen
 import { PaymentWebhookService } from '../services/payment-webhook.service';
 import { ICancellationPolicyService } from '../interfaces/service_interfaces/admin/ICancellationPolicyService';
 import { CancellationPolicyService } from '../services/admin/cancellation-policy.service';
+import { IVendorVerificationService } from '../interfaces/service_interfaces/vendor/IvendorVerificationService';
+import { VendorVerificationService } from '../services/vendor/vendor-verification.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -86,6 +88,11 @@ export class ServiceRegistry {
     container.register<IVendorService>('IVendorService', {
       useClass: VendorService,
     });
+
+    container.register<IVendorVerificationService>('IVendorVerificationService', {
+      useClass: VendorVerificationService,
+    });
+    
     container.register<IPackageService>('IPackageService', {
       useClass: PackageService,
     });

@@ -58,6 +58,7 @@ export class AdminVendorService implements IAdminVendorService {
         profileLogo: vendor.documents?.profileLogo?.key ?? '',
         isProfileVerified: vendor.isProfileVerified,
         contactPersonName: vendor.businessInfo?.contactPersonName,
+        bio: vendor.businessInfo?.bio,
         businessAddress: vendor.businessInfo?.businessAddress,
         businessLicence: vendor.documents?.businessLicence?.key ?? '',
         ownerIdentity: vendor.documents?.ownerIdentity?.key ?? '',
