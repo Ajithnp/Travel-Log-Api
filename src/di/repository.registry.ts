@@ -15,6 +15,8 @@ import { IBookingRepository } from '../interfaces/repository_interfaces/IBooking
 import { BookingRepository } from '../repositories/booking.repository';
 import { ICancellationPolicyRepository } from '../interfaces/repository_interfaces/ICancellationPolicyRepository';
 import { CancellationPolicyRepository } from '../repositories/cancellation-policy.repository';
+import { INotificationRepository } from '../interfaces/repository_interfaces/INotificationRepository';
+import { NotificationRepository } from '../repositories/notification-repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -54,6 +56,12 @@ export class RepositoryRegistry {
 
     container.register<ICancellationPolicyRepository>('ICancellationPolicyRepository', {
       useClass: CancellationPolicyRepository,
+    });
+
+    // shared repositories
+
+    container.register<INotificationRepository>('INotificationRepository', {
+      useClass: NotificationRepository,
     });
 
     // Register other repositories here

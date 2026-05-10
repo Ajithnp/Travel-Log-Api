@@ -42,7 +42,7 @@ export class WishlistService implements IWishlistService {
     if (!pkg.isActive || pkg.status !== PACKAGE_STATUS.PUBLISHED) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_AVAILABLE, HTTP_STATUS.FORBIDDEN);
     }
-    // ── Check current wishlist state ──
+  
     const alreadyWishlisted = await this._wishlistRepository.isPackageWishlisted(userId, packageId);
 
     if (alreadyWishlisted) {
