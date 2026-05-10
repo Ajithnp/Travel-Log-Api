@@ -4,15 +4,14 @@ import { ALL_NOTIFICATION_TYPES, INotification } from "../types/entities/notific
 
 const NotificationSchema = new Schema<INotification>(
   {
-    receipientId: {
+    recipientId: {          
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
-    receipientRole: {
+    recipientRole: {       
       type: String,
-      enum: ["user","admin","vendor"],
+      enum: ["user", "admin", "vendor"],
       required: true,
     },
     senderId: {

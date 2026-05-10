@@ -5,6 +5,10 @@ import expressAsyncHandler from "express-async-handler";
 import { IApiResponse } from "../types/common/IApiResponse";
 import { HTTP_STATUS, SUCCESS_STATUS } from "../shared/constants/http_status_code";
 import { SUCCESS_MESSAGES } from "../shared/constants/messages";
+import { UserRole } from "../types/entities/user.entity";
+import { getPaginationOptions } from "../shared/utils/pagination.helper";
+import { GetNotificationsQuery } from "../interfaces/repository_interfaces/INotificationRepository";
+import { NotificationType } from "../types/entities/notification.entity";
 
 
 
@@ -26,6 +30,29 @@ export class NotificationController implements INotificationController {
        };
        res.status(HTTP_STATUS.CREATED).json(successResponse);
      });
-    
-    
+
+     getUserNotifications = expressAsyncHandler(async (req, res) => {
+
+        const {page, limit, selectedFilter} = getPaginationOptions(req);
+
+
+        const query: GetNotificationsQuery = {
+            recipientId: req.user?.id as string,
+            recipientRole: req.user?.role as UserRole,
+            page,
+            limit,
+            ...(selectedFilter && {
+                    notificationType: selectedFilter as NotificationType
+            }),
+        };
+
+       const result = await this._notificationService.getUserNotifications(query);
+   
+       const successResponse: IApiResponse<typeof result> = {
+         success: SUCCESS_STATUS.SUCCESS,
+         message: SUCCESS_MESSAGES.OK,
+         data: result,
+       };
+       res.status(HTTP_STATUS.CREATED).json(successResponse);
+     });
 }

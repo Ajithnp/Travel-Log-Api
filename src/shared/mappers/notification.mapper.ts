@@ -7,8 +7,8 @@ export class NotificationMapper {
     static toNotification(notification: INotification): NotificationResponseDTO {
         return {
             _id: notification._id.toString(),
-            recipientId: notification.receipientId.toString(),
-            recipientRole: notification.receipientRole,
+            recipientId: notification.recipientId.toString(),
+            recipientRole: notification.recipientRole,
             senderId: notification.senderId ? notification.senderId.toString() : null,
             notificationType: notification.notificationType,
             title: notification.title,

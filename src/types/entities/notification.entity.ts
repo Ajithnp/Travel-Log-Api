@@ -52,8 +52,8 @@ export const ALL_NOTIFICATION_TYPES: string[] = [
 
 export interface INotification extends Document {
   _id: Types.ObjectId;
-  receipientId: Types.ObjectId;
-  receipientRole: UserRole;
+  recipientId: Types.ObjectId;
+  recipientRole: UserRole;
   senderId?: Types.ObjectId;
   notificationType: NotificationType;
   title: string;
@@ -63,4 +63,11 @@ export interface INotification extends Document {
   isRead: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface NotificationListResult {
+  notifications: INotification[];
+  total: number;
+  unreadCount: number;
+
 }
