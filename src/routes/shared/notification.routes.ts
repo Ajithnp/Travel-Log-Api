@@ -18,48 +18,36 @@ export class NotificationRoutes extends BaseRoute {
   protected initializeRoutes(): void {
     this._router.get(
       '/',
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.VENDOR, USER_ROLES.VENDOR, USER_ROLES.ADMIN]),
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR, USER_ROLES.USER, USER_ROLES.ADMIN]),
       this._notificationController.getUserNotifications.bind(this._notificationController),
     );
 
-    this._router.post(
-      '/create',
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.VENDOR]),
-    //   validateDTO(VendorVerificationSchema),
-      this._notificationController.createNotification.bind(this._notificationController),
-    );
-    
     this._router.get(
       '/unread-count',
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.VENDOR]),
-    //   validateDTO(VendorVerificationSchema),
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR, USER_ROLES.USER, USER_ROLES.ADMIN]),
       this._notificationController.getUnreadCount.bind(this._notificationController),
     );
 
     this._router.patch(
      "/mark-all-read",
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.VENDOR]),
-    //   validateDTO(VendorVerificationSchema),
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR, USER_ROLES.USER, USER_ROLES.ADMIN]),
       this._notificationController.markAllRead.bind(this._notificationController),
     );
 
     this._router.patch(
      "/:notificationId/mark-read",
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.VENDOR]),
-    //   validateDTO(VendorVerificationSchema),
+      isAuthenticated,
+     authorize([USER_ROLES.VENDOR, USER_ROLES.USER, USER_ROLES.ADMIN]),
       this._notificationController.markAsRead.bind(this._notificationController),
     );
 
     this._router.delete(
      "/:notificationId",
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.VENDOR]),
-    //   validateDTO(VendorVerificationSchema),
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR, USER_ROLES.USER, USER_ROLES.ADMIN]),
       this._notificationController.deleteNotification.bind(this._notificationController),
     );
 
