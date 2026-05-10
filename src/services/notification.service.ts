@@ -3,6 +3,7 @@ import { CreateNotificationDTO, INotificationService, NotificationResponseDTO, P
 import { GetNotificationsQuery, INotificationRepository } from "../interfaces/repository_interfaces/INotificationRepository";
 import { toObjectId } from "../shared/utils/database/objectId.helper";
 import { NotificationMapper } from "../shared/mappers/notification.mapper";
+import { UserRole } from "types/entities/user.entity";
 
 @injectable()
 export class NotificationService implements INotificationService {
@@ -44,8 +45,12 @@ export class NotificationService implements INotificationService {
         };
     };
 
-    // async getUserNotification(): Promise<void> {
-    //      const notification = await this._notificationRepo.create(payload)
-    // }
-    
+    async getUnreadCount(payload:{recipientId:string,recipientRole:UserRole}): Promise<{ unreadCount: number }> {
+
+        const count = await this._notificationRepo.getUnreadCount(payload);
+
+        return {unreadCount: count};
+
+
+    };
 }

@@ -4,6 +4,7 @@ import { BaseRepository } from "./base.repository";
 import { INotification, NotificationListResult } from "../types/entities/notification.entity";
 import { NotificationModel } from "../models/notification.model";
 import { FilterQuery, Types } from "mongoose";
+import { UserRole } from "types/entities/user.entity";
 
 @injectable()
 export class NotificationRepository extends BaseRepository<INotification> implements INotificationRepository {
@@ -43,5 +44,17 @@ export class NotificationRepository extends BaseRepository<INotification> implem
     ]);
     return { notifications, total, unreadCount };
 
-   }       
+   }  
+   
+    async getUnreadCount(query: {
+    recipientId: string,
+    recipientRole: UserRole
+  }): Promise<number> {
+    const count = await this.model.countDocuments({
+      recipientId: new Types.ObjectId(query.recipientId),
+      recipientRole:query.recipientRole,
+      isRead: false,
+    });
+    return count;
+  }
 }

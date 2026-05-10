@@ -4,6 +4,7 @@ import { IBaseRepository } from "./IBaseRepository";
 
 export interface INotificationRepository extends IBaseRepository<INotification> {
     findAllNotificationsByUserId(query: GetNotificationsQuery): Promise<NotificationListResult>;
+    getUnreadCount(query:{recipientId: string, recipientRole: UserRole}): Promise<number>
 }
 
 export interface GetNotificationsQuery {

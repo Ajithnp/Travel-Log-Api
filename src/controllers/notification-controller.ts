@@ -55,4 +55,16 @@ export class NotificationController implements INotificationController {
        };
        res.status(HTTP_STATUS.CREATED).json(successResponse);
      });
+
+    getUnreadCount = expressAsyncHandler(async (req, res) => {
+
+       const result = await this._notificationService.getUnreadCount({recipientId: req.user?.id as string, recipientRole: req.user?.role as UserRole});
+   
+       const successResponse: IApiResponse<typeof result> = {
+         success: SUCCESS_STATUS.SUCCESS,
+         message: SUCCESS_MESSAGES.OK,
+         data: result,
+       };
+       res.status(HTTP_STATUS.CREATED).json(successResponse);
+     });
 }

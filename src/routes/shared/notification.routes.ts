@@ -38,5 +38,14 @@ export class NotificationRoutes extends BaseRoute {
     //   validateDTO(VendorVerificationSchema),
       this._notificationController.createNotification.bind(this._notificationController),
     );
+    
+    this._router.get(
+      '/unread-count',
+    //   isAuthenticated,
+    //   authorize([USER_ROLES.VENDOR]),
+    //   validateDTO(VendorVerificationSchema),
+      this._notificationController.getUnreadCount.bind(this._notificationController),
+    );
+
   }
 }

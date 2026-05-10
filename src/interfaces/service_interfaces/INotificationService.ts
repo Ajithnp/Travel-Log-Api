@@ -6,6 +6,7 @@ import { UserRole } from "types/entities/user.entity";
 export interface INotificationService {
     createNotification(payload: CreateNotificationDTO): Promise<NotificationResponseDTO>;
     getUserNotifications(query: GetNotificationsQuery): Promise<PaginatedNotificationsDTO>;
+    getUnreadCount(payload:{recipientId:string,recipientRole:UserRole}): Promise<{ unreadCount: number }>;
 }
 
 export interface CreateNotificationDTO {
