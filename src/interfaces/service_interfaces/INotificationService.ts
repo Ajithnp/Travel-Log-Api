@@ -7,6 +7,8 @@ export interface INotificationService {
     createNotification(payload: CreateNotificationDTO): Promise<NotificationResponseDTO>;
     getUserNotifications(query: GetNotificationsQuery): Promise<PaginatedNotificationsDTO>;
     getUnreadCount(payload:{recipientId:string,recipientRole:UserRole}): Promise<{ unreadCount: number }>;
+    markAllRead(payload:{recipientId:string,recipientRole:UserRole}): Promise<{ modifiedCount: number }>;
+    markAsRead(notificationId:string, recipientId:string, recipientRole:UserRole): Promise<{ modifiedCount: number }>;
 }
 
 export interface CreateNotificationDTO {

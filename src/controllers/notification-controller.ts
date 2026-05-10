@@ -53,7 +53,7 @@ export class NotificationController implements INotificationController {
          message: SUCCESS_MESSAGES.OK,
          data: result,
        };
-       res.status(HTTP_STATUS.CREATED).json(successResponse);
+       res.status(HTTP_STATUS.OK).json(successResponse);
      });
 
     getUnreadCount = expressAsyncHandler(async (req, res) => {
@@ -65,6 +65,30 @@ export class NotificationController implements INotificationController {
          message: SUCCESS_MESSAGES.OK,
          data: result,
        };
-       res.status(HTTP_STATUS.CREATED).json(successResponse);
+       res.status(HTTP_STATUS.OK).json(successResponse);
+     });
+
+    markAllRead = expressAsyncHandler(async (req, res) => {
+
+       const result = await this._notificationService.markAllRead({recipientId: req.user?.id as string, recipientRole: req.user?.role as UserRole});
+   
+       const successResponse: IApiResponse<typeof result> = {
+         success: SUCCESS_STATUS.SUCCESS,
+         message: SUCCESS_MESSAGES.OK,
+         data: result,
+       };
+       res.status(HTTP_STATUS.OK).json(successResponse);
+     });
+
+     markAsRead = expressAsyncHandler(async (req, res) => {
+
+       const result = await this._notificationService.markAsRead('6a003e8198cde8a4337875f9', '69f04e5a12da1a1b63f8c6e9', 'user');
+   
+       const successResponse: IApiResponse<typeof result> = {
+         success: SUCCESS_STATUS.SUCCESS,
+         message: SUCCESS_MESSAGES.OK,
+         data: result,
+       };
+       res.status(HTTP_STATUS.OK).json(successResponse);
      });
 }

@@ -50,7 +50,15 @@ export class NotificationService implements INotificationService {
         const count = await this._notificationRepo.getUnreadCount(payload);
 
         return {unreadCount: count};
-
-
     };
+
+    async markAllRead(payload:{recipientId:string,recipientRole:UserRole}): Promise<{ modifiedCount: number }> {
+        const count = await this._notificationRepo.markAllRead(payload);
+        return {modifiedCount: count};
+    }
+
+    async markAsRead(notificationId:string, recipientId:string, recipientRole:UserRole): Promise<{ modifiedCount: number }> {
+        const result = await this._notificationRepo.markAsRead(notificationId, recipientId, recipientRole);
+        return {modifiedCount: result.modifiedCount};
+    }
 }

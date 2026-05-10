@@ -23,14 +23,6 @@ export class NotificationRoutes extends BaseRoute {
       this._notificationController.getUserNotifications.bind(this._notificationController),
     );
 
-    // this._router.patch(
-    //   '/me/profileLogo',
-    //   validateDTO(UpdateProfileLogoRequestSchema),
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.VENDOR]),
-    //   this._vendorController.updateProfileLogo.bind(this._vendorController),
-    // );
-
     this._router.post(
       '/create',
     //   isAuthenticated,
@@ -45,6 +37,22 @@ export class NotificationRoutes extends BaseRoute {
     //   authorize([USER_ROLES.VENDOR]),
     //   validateDTO(VendorVerificationSchema),
       this._notificationController.getUnreadCount.bind(this._notificationController),
+    );
+
+    this._router.patch(
+     "/mark-all-read",
+    //   isAuthenticated,
+    //   authorize([USER_ROLES.VENDOR]),
+    //   validateDTO(VendorVerificationSchema),
+      this._notificationController.markAllRead.bind(this._notificationController),
+    );
+
+    this._router.patch(
+     "/:notificationId/mark-read",
+    //   isAuthenticated,
+    //   authorize([USER_ROLES.VENDOR]),
+    //   validateDTO(VendorVerificationSchema),
+      this._notificationController.markAsRead.bind(this._notificationController),
     );
 
   }

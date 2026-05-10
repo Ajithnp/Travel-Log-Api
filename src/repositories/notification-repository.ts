@@ -57,4 +57,32 @@ export class NotificationRepository extends BaseRepository<INotification> implem
     });
     return count;
   }
+
+  async markAllRead(query: {
+    recipientId: string,
+    recipientRole: UserRole
+  }): Promise<number> {
+    const result = await this.model.updateMany(
+      {
+        recipientId: new Types.ObjectId(query.recipientId),
+        recipientRole: query.recipientRole,
+        isRead: false,
+      },
+      { $set: { isRead: true } }
+    );
+    return result.modifiedCount;
+  }
+
+  async markAsRead(notificationId: string, recipientId: string, recipientRole: UserRole): Promise<{ modifiedCount: number }> {
+    const result = await this.model.updateOne(
+      {
+        _id: new Types.ObjectId(notificationId),
+        recipientId: new Types.ObjectId(recipientId),
+        recipientRole,
+        isRead: false,
+      },
+      { $set: { isRead: true } }
+    );
+    return result;
+  }
 }
