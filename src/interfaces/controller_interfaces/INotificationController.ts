@@ -6,4 +6,5 @@ export interface INotificationController {
     getUnreadCount: RequestHandler;
     markAllRead: RequestHandler;
     markAsRead: RequestHandler;
+    deleteNotification: RequestHandler;
 }

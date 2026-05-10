@@ -55,5 +55,13 @@ export class NotificationRoutes extends BaseRoute {
       this._notificationController.markAsRead.bind(this._notificationController),
     );
 
+    this._router.delete(
+     "/:notificationId",
+    //   isAuthenticated,
+    //   authorize([USER_ROLES.VENDOR]),
+    //   validateDTO(VendorVerificationSchema),
+      this._notificationController.deleteNotification.bind(this._notificationController),
+    );
+
   }
 }

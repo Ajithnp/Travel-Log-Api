@@ -61,4 +61,9 @@ export class NotificationService implements INotificationService {
         const result = await this._notificationRepo.markAsRead(notificationId, recipientId, recipientRole);
         return {modifiedCount: result.modifiedCount};
     }
+
+    async deleteNotification(notificationId:string, recipientId:string, recipientRole:UserRole): Promise<void> {
+        await this._notificationRepo.findOneAndDelete({_id:toObjectId(notificationId), recipientId:toObjectId(recipientId), recipientRole:recipientRole });
+
+    }
 }

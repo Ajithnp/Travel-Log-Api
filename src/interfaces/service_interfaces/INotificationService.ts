@@ -9,6 +9,7 @@ export interface INotificationService {
     getUnreadCount(payload:{recipientId:string,recipientRole:UserRole}): Promise<{ unreadCount: number }>;
     markAllRead(payload:{recipientId:string,recipientRole:UserRole}): Promise<{ modifiedCount: number }>;
     markAsRead(notificationId:string, recipientId:string, recipientRole:UserRole): Promise<{ modifiedCount: number }>;
+    deleteNotification(notificationId:string, recipientId:string, recipientRole:UserRole): Promise<void>;
 }
 
 export interface CreateNotificationDTO {

@@ -82,13 +82,25 @@ export class NotificationController implements INotificationController {
 
      markAsRead = expressAsyncHandler(async (req, res) => {
 
-       const result = await this._notificationService.markAsRead('6a003e8198cde8a4337875f9', '69f04e5a12da1a1b63f8c6e9', 'user');
+       const result = await this._notificationService.markAsRead(req.params.notificationId, req.user?.id as string, req.user?.role as UserRole);
    
        const successResponse: IApiResponse<typeof result> = {
          success: SUCCESS_STATUS.SUCCESS,
          message: SUCCESS_MESSAGES.OK,
          data: result,
        };
+       res.status(HTTP_STATUS.OK).json(successResponse);
+     });
+
+     deleteNotification = expressAsyncHandler(async (req, res) => {
+
+       await this._notificationService.deleteNotification(req.params.notificationId, req.user?.id as string, req.user?.role as UserRole);
+   
+       const successResponse: IApiResponse = {
+         success: SUCCESS_STATUS.SUCCESS,
+         message: SUCCESS_MESSAGES.OK,
+       };
+
        res.status(HTTP_STATUS.OK).json(successResponse);
      });
 }
