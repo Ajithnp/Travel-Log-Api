@@ -32,10 +32,15 @@ import {
   BookingMapper,
   RawPopulatedBooking,
 } from '../../shared/mappers/booking.mapper';
+import { INotificationService } from '../../interfaces/service_interfaces/INotificationService';
+import { UserNotificationType, VendorNotificationType } from '../../types/entities/notification.entity';
+import { USER_ROLES } from '../../shared/constants/roles';
 
 @injectable()
 export class BookingService implements IBookingService {
   constructor(
+    @inject('INotificationService')
+    private _notificationService: INotificationService,
     @inject('ISchedulePackageRepository')
     private _schedulePackageRepo: ISchedulePackageRepository,
     @inject('IBasePackageRepository')
@@ -254,6 +259,44 @@ export class BookingService implements IBookingService {
       await session.commitTransaction();
       session.endSession();
 
+      // ── 2. Notify the USER who booked
+     await Promise.all([
+
+       this._notificationService.createNotification({
+        recipientId: booking.userId.toString(),
+        recipientRole: USER_ROLES.USER,
+        senderId: booking.vendorId.toString(),
+        notificationType: UserNotificationType.BookingConfirmed,
+        title: 'Booking Confirmed',
+        message: `Your booking for "${booking.packageId?.title}" has been confirmed.`,
+        data: {
+          bookingUId:booking._id.toString(),
+          bookingId: booking.bookingCode,
+          packageName: booking.packageId.title,
+        },
+        redirectUrl: `/user/bookings/${booking._id.toString()}`,
+      }),
+
+      // ── 3. Notify the VENDOR about the new booking
+
+       this._notificationService.createNotification({
+        recipientId: booking.vendorId.toString(),
+        recipientRole: USER_ROLES.VENDOR,
+        senderId: booking.userId.toString(),
+        notificationType: VendorNotificationType.NewBooking,
+        title: 'New Booking',
+        message: `You have a new booking for "${booking.packageId?.title}".`,
+        data: {
+          bookingId: booking._id.toString(),
+          bookingCode: booking.bookingCode,
+          scheduleId: booking.scheduleId.toString(),
+          packageId: booking.packageId._id.toString(),
+          packageName: booking.packageId.title,
+        },
+        redirectUrl: `/bookings/${booking._id.toString()}`
+      })
+      ])
+
       return {
         bookingId: updatedBooking!._id.toString(),
         message: SUCCESS_MESSAGES.BOOKING_CONFIRMED,
@@ -318,3 +361,38 @@ export class BookingService implements IBookingService {
     return BookingMapper.toDetailedResponse(booking as RawPopulatedBooking);
   }
 }
+
+
+/**
+ *   async processPayment(userId: string, bookingId: string, amount: number) {
+    try {
+      const payment = await this.paymentRepository.charge(userId, amount);
+ 
+      // Payment success → notify user
+      await this.notificationService.createNotification({
+        recipientId:      userId,
+        recipientRole:    UserRole.User,
+        notificationType: UserNotificationType.PaymentSuccess,
+        title:            "Payment Successful ✅",
+        message:          `Your payment of ₹${amount} was processed successfully.`,
+        data:             { bookingId, amount, paymentId: payment._id },
+        redirectUrl:      `/bookings/${bookingId}`,
+      });
+ 
+      return payment;
+    } catch (err) {
+      // Payment failed → notify user
+      await this.notificationService.createNotification({
+        recipientId:      userId,
+        recipientRole:    UserRole.User,
+        notificationType: UserNotificationType.PaymentFailed,
+        title:            "Payment Failed ❌",
+        message:          `Your payment of ₹${amount} failed. Please try again.`,
+        data:             { bookingId, amount },
+        redirectUrl:      `/bookings/${bookingId}/payment`,
+      });
+ 
+      throw err;
+    }
+  }
+ */

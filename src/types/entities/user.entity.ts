@@ -1,6 +1,7 @@
 import { Document, Types } from 'mongoose';
+import { USER_ROLES } from 'shared/constants/roles';
 
-export type UserRole = 'admin' | 'user' | 'vendor';
+export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 
 export interface IUser extends Document {
   _id: Types.ObjectId;

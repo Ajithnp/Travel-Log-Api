@@ -45,6 +45,8 @@ import { ICancellationPolicyService } from '../interfaces/service_interfaces/adm
 import { CancellationPolicyService } from '../services/admin/cancellation-policy.service';
 import { IVendorVerificationService } from '../interfaces/service_interfaces/vendor/IvendorVerificationService';
 import { VendorVerificationService } from '../services/vendor/vendor-verification.service';
+import { INotificationService } from '../interfaces/service_interfaces/INotificationService';
+import { NotificationService } from '../services/notification.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -82,6 +84,10 @@ export class ServiceRegistry {
 
     container.register<IFileStorageHandlerService>('IFileStorageHandlerService', {
       useClass: FileStorageHandlerService,
+    });
+
+    container.register<INotificationService>('INotificationService', {
+      useClass: NotificationService,
     });
 
     //vendor-services

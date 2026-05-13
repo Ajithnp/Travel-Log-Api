@@ -27,6 +27,8 @@ import { IPaymentWebhookController } from '../interfaces/controller_interfaces/I
 import { PaymentWebhookController } from '../controllers/payment-webhook.controller';
 import { IAdminCancellationPolicyController } from '../interfaces/controller_interfaces/admin/IAdminCancellationPolicyController';
 import { AdminCancellationPolicyController } from '../controllers/admin/cancellation-policy.controller';
+import { INotificationController } from '../interfaces/controller_interfaces/INotificationController';
+import { NotificationController } from '../controllers/notification-controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -41,6 +43,11 @@ export class ControllerRegistry {
     container.register<IPaymentWebhookController>('IPaymentWebhookController', {
       useClass: PaymentWebhookController,
     });
+
+    container.register<INotificationController>('INotificationController', {
+      useClass: NotificationController,
+    });
+
     //vendor controllers
     container.register<IVendorController>('IVendorController', {
       useClass: VendorController,

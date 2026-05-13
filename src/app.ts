@@ -15,6 +15,7 @@ import { UserRoutes } from './routes/user/user.route';
 import { BookingRoutes } from './routes/user/booking.route';
 import { S3Routes } from './routes/shared/s3.routes';
 import { PaymentWebhookRoutes } from './routes/shared/payment-webhook.route';
+import { NotificationRoutes } from './routes/shared/notification.routes';
 
 export default class App {
   private _app: Application;
@@ -43,13 +44,13 @@ export default class App {
     this._app.use(express.json());
     this._app.use(cors(corsOption));
     this._app.use(cookieParser());
-    this._app.use(
-      morgan('combined', {
-        stream: {
-          write: (message) => logger.http(message.trim()),
-        },
-      }),
-    );
+    // this._app.use(
+    //   morgan('combined', {
+    //     stream: {
+    //       write: (message) => logger.http(message.trim()),
+    //     },
+    //   }),
+    // );
     this._app.use(express.urlencoded({ extended: true }));
   }
 
@@ -61,6 +62,7 @@ export default class App {
     this._app.use('/api/v1/user', container.resolve(UserRoutes).router);
     this._app.use('/api/v1/s3', container.resolve(S3Routes).router);
     this._app.use('/api/v1/bookings', container.resolve(BookingRoutes).router);
+    this._app.use('/api/v1/notifications', container.resolve(NotificationRoutes).router);
   }
 
   public get expressApp(): Application {
