@@ -12,7 +12,7 @@ export interface INotificationRepository extends IBaseRepository<INotification> 
 export interface GetNotificationsQuery {
     recipientId: string;
     recipientRole: UserRole;
-    notificationType?: NotificationType;
+    isRead?: boolean;
     page: number;                         
     limit: number;                      
 }

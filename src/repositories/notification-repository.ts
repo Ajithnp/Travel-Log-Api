@@ -14,19 +14,17 @@ export class NotificationRepository extends BaseRepository<INotification> implem
     }
 
     async findAllNotificationsByUserId(query: GetNotificationsQuery): Promise<NotificationListResult> {
-        const { recipientId, recipientRole, notificationType, page , limit} = query;
+        const { recipientId, recipientRole, isRead, page , limit} = query;
 
         const filter: FilterQuery<INotification> = {
             recipientId: new Types.ObjectId(recipientId),
             recipientRole,
         };
-
-        if (notificationType) {
-            filter.notificationType = notificationType;
-        }
+       
+        if (isRead !== undefined) filter.isRead = isRead;
 
     const skip = (page - 1) * limit;
-
+    
     const [notifications, total, unreadCount] = await Promise.all([
       this.model.find(filter)
         .sort({ createdAt: -1 })

@@ -15,6 +15,7 @@ import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { CACHE_KEYS, CACHE_TTL } from '../../types/cache';
 import { WishlistMapper } from '../../shared/mappers/wishlist.mapper';
 
+
 @injectable()
 export class WishlistService implements IWishlistService {
   constructor(

@@ -1,4 +1,4 @@
-import { BookingListResult, IBooking, PopulatedBooking } from '../types/entities/booking.entity';
+import { BookingListResult, IBooking, IBookingPopulated, PopulatedBooking } from '../types/entities/booking.entity';
 import { BaseRepository } from './base.repository';
 import {
   BookingFilters,
@@ -8,6 +8,7 @@ import BookingModel from '../models/booking.model';
 import mongoose from 'mongoose';
 import { BOOKING_STATUS } from '../shared/constants/booking';
 import { FilterQuery } from 'mongoose';
+import { populate } from 'dotenv';
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
@@ -26,7 +27,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     userId: string,
     scheduleId: string,
   ): Promise<IBooking | null> {
-    return BookingModel.findOne({
+    return this.model.findOne({
       userId: new mongoose.Types.ObjectId(userId),
       scheduleId: new mongoose.Types.ObjectId(scheduleId),
       bookingStatus: {
@@ -80,19 +81,19 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
   async findById(id: string): Promise<IBooking | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    return BookingModel.findById(id)
+    return this.model.findById(id)
       .populate('packageId', 'title destination duration cancellationPolicy images meetingPoint')
       .populate('scheduleId', 'startDate endDate reportingTime reportingLocation pricing notes')
       .populate('vendorId', 'businessName profilePhoto')
       .lean() as Promise<IBooking | null>;
   }
 
-  async findByIdAndUserLean(id: string, userId: string): Promise<IBooking | null> {
+  async findByIdAndUserLean(id: string, userId: string): Promise<IBookingPopulated | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    return BookingModel.findOne({
+    return this.model.findOne({
       _id: new mongoose.Types.ObjectId(id),
       userId: new mongoose.Types.ObjectId(userId),
-    }).lean() as Promise<IBooking | null>;
+    }).populate('packageId', 'title').lean() as Promise<IBookingPopulated | null>;
   }
 
   async findBookings(filters: BookingFilters): Promise<BookingListResult> {
@@ -187,7 +188,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       return null;
     }
 
-    const booking = await BookingModel.findOne({
+    const booking = await this.model.findOne({
       _id: new mongoose.Types.ObjectId(id),
       userId: new mongoose.Types.ObjectId(userId),
     })

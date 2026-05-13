@@ -64,7 +64,7 @@ export class StripeGateway implements IPaymentGateway {
           packageName: data.metadata?.packageName ?? '',
         },
 
-        success_url: `${config.cors.ALLOWED_ORIGINS}/booking/confirm?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${config.cors.ALLOWED_ORIGINS}/user/booking/confirm?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${config.cors.ALLOWED_ORIGINS}/payment/cancel?session_id={CHECKOUT_SESSION_ID}&bookingId=${data.bookingId}`,
       });
 

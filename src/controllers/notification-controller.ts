@@ -33,16 +33,16 @@ export class NotificationController implements INotificationController {
 
      getUserNotifications = expressAsyncHandler(async (req, res) => {
 
-        const {page, limit, selectedFilter} = getPaginationOptions(req);
-
-
+        const {page, limit} = getPaginationOptions(req);
+        const isRead = req.query.isRead;
+        
         const query: GetNotificationsQuery = {
             recipientId: req.user?.id as string,
             recipientRole: req.user?.role as UserRole,
             page,
             limit,
-            ...(selectedFilter && {
-                    notificationType: selectedFilter as NotificationType
+            ...(isRead && {
+                    isRead: isRead === 'true'
             }),
         };
 

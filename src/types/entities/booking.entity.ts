@@ -69,7 +69,14 @@ export interface IBooking extends Document {
 
 // populated types
 
-// Add this to your booking entity file
+export interface IPopulatedPackage {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+}
+
+export interface IBookingPopulated extends Omit<IBooking, 'packageId'> {
+  packageId: IPopulatedPackage;
+}
 
 export interface PopulatedBooking extends Omit<IBooking, 'packageId' | 'scheduleId'> {
   packageId: {

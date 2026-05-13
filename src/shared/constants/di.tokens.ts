@@ -19,4 +19,5 @@ export const COMMON_TOKENS = {
 
 export const REPOSITORY_TOKENS = {
   USER_REPOSITORY: 'IUserRepository',
+  NOTIFICATION_REPOSITORY: 'INotificationRepository',
 } as const;

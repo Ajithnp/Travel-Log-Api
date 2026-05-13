@@ -44,13 +44,13 @@ export default class App {
     this._app.use(express.json());
     this._app.use(cors(corsOption));
     this._app.use(cookieParser());
-    this._app.use(
-      morgan('combined', {
-        stream: {
-          write: (message) => logger.http(message.trim()),
-        },
-      }),
-    );
+    // this._app.use(
+    //   morgan('combined', {
+    //     stream: {
+    //       write: (message) => logger.http(message.trim()),
+    //     },
+    //   }),
+    // );
     this._app.use(express.urlencoded({ extended: true }));
   }
 

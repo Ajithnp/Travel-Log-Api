@@ -13,7 +13,7 @@ export interface INotificationService {
 }
 
 export interface CreateNotificationDTO {
-  recipientId: string | Types.ObjectId;
+  recipientId?: string 
   recipientRole: UserRole;
   senderId?: string | Types.ObjectId | null;
   notificationType: NotificationType;
@@ -21,6 +21,18 @@ export interface CreateNotificationDTO {
   message: string;
   data?: Record<string, unknown>;
   redirectUrl?: string | null;
+}
+
+export interface createBroadcastNotification{
+    targetRole: UserRole;
+    senderId?: string | Types.ObjectId | null;
+    notificationType: NotificationType;
+    title: string;
+    message: string;
+    data?: Record<string, unknown>;
+    redirectUrl?: string | null;
+    createdAt?: Date;
+    isRead?: boolean;
 }
  
 
