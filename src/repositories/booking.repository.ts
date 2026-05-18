@@ -1,4 +1,9 @@
-import { BookingListResult, IBooking, IBookingPopulated, PopulatedBooking } from '../types/entities/booking.entity';
+import {
+  BookingListResult,
+  IBooking,
+  IBookingPopulated,
+  PopulatedBooking,
+} from '../types/entities/booking.entity';
 import { BaseRepository } from './base.repository';
 import {
   BookingFilters,
@@ -27,13 +32,15 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     userId: string,
     scheduleId: string,
   ): Promise<IBooking | null> {
-    return this.model.findOne({
-      userId: new mongoose.Types.ObjectId(userId),
-      scheduleId: new mongoose.Types.ObjectId(scheduleId),
-      bookingStatus: {
-        $nin: [BOOKING_STATUS.CANCELLED_BY_USER, BOOKING_STATUS.CANCELLED_BY_VENDOR],
-      },
-    }).lean() as Promise<IBooking | null>;
+    return this.model
+      .findOne({
+        userId: new mongoose.Types.ObjectId(userId),
+        scheduleId: new mongoose.Types.ObjectId(scheduleId),
+        bookingStatus: {
+          $nin: [BOOKING_STATUS.CANCELLED_BY_USER, BOOKING_STATUS.CANCELLED_BY_VENDOR],
+        },
+      })
+      .lean() as Promise<IBooking | null>;
   }
 
   attachPaymentIntent(
@@ -81,7 +88,8 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
   async findById(id: string): Promise<IBooking | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    return this.model.findById(id)
+    return this.model
+      .findById(id)
       .populate('packageId', 'title destination duration cancellationPolicy images meetingPoint')
       .populate('scheduleId', 'startDate endDate reportingTime reportingLocation pricing notes')
       .populate('vendorId', 'businessName profilePhoto')
@@ -90,10 +98,16 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
   async findByIdAndUserLean(id: string, userId: string): Promise<IBookingPopulated | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    return this.model.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-      userId: new mongoose.Types.ObjectId(userId),
-    }).populate('packageId', 'title').lean() as Promise<IBookingPopulated | null>;
+    return (
+      this.model
+        .findOne({
+          _id: new mongoose.Types.ObjectId(id),
+          userId: new mongoose.Types.ObjectId(userId),
+        })
+        .populate('packageId', 'title')
+        // .populate('scheduleId', 'startDate')
+        .lean() as Promise<IBookingPopulated | null>
+    );
   }
 
   async findBookings(filters: BookingFilters): Promise<BookingListResult> {
@@ -188,12 +202,11 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       return null;
     }
 
-    const booking = await this.model.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-      userId: new mongoose.Types.ObjectId(userId),
-    })
-
-      // ── Package populate ──────
+    const booking = await this.model
+      .findOne({
+        _id: new mongoose.Types.ObjectId(id),
+        userId: new mongoose.Types.ObjectId(userId),
+      })
 
       .populate({
         path: 'packageId',
@@ -217,14 +230,10 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           select: 'name',
         },
       })
-
-      // ── Schedule populate ─────
       .populate({
         path: 'scheduleId',
         select: ['startDate', 'endDate', 'reportingTime', 'reportingLocation', 'notes'].join(' '),
       })
-
-      // ── Vendor populate ──────
 
       .populate({
         path: 'vendorId',

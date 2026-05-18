@@ -14,7 +14,7 @@ const businessInfoSchema = new Schema(
     contactPersonName: { type: String, default: null },
     businessAddress: { type: String, default: null },
     GSTIN: { type: String, default: null },
-    bio:{ type: String, default: null },
+    bio: { type: String, default: null },
   },
   { _id: false },
 );
@@ -39,8 +39,6 @@ const bankDetailsSchema = new Schema(
   },
   { _id: false },
 );
-
-
 
 const vendorInfoSchema = new Schema<IVendorInfo>(
   {

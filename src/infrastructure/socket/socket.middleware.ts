@@ -1,4 +1,4 @@
-import { ExtendedError } from "socket.io";
+import { ExtendedError } from 'socket.io';
 import { container } from 'tsyringe';
 import { ITokenService } from '../../interfaces/service_interfaces/ITokenService';
 import { ITokenBlackListService } from '../../interfaces/service_interfaces/ITokenBlacklistService';
@@ -7,7 +7,7 @@ import { SERVICE_TOKENS, REPOSITORY_TOKENS } from '../../shared/constants/di.tok
 import { JWT_TOKEN } from '../../shared/constants/jwt.token';
 import { AuthenticatedSocket } from './types/socket.types';
 import logger from '../../config/logger';
-import {parse} from "cookie";
+import { parse } from 'cookie';
 
 type AppSocket = AuthenticatedSocket;
 
@@ -16,11 +16,10 @@ export const socketAuthMiddleware = async (
   next: (err?: ExtendedError) => void,
 ): Promise<void> => {
   try {
-    const rawCookies = socket.handshake.headers?.cookie ?? "";
+    const rawCookies = socket.handshake.headers?.cookie ?? '';
     const parsedCookies = parse(rawCookies);
     const token: string | undefined =
-      parsedCookies[JWT_TOKEN.ACCESS_TOKEN] ||
-      socket.handshake.auth?.[JWT_TOKEN.ACCESS_TOKEN]
+      parsedCookies[JWT_TOKEN.ACCESS_TOKEN] || socket.handshake.auth?.[JWT_TOKEN.ACCESS_TOKEN];
 
     if (!token) {
       return next(new Error('AUTH_ERROR: Access token missing'));
@@ -53,7 +52,7 @@ export const socketAuthMiddleware = async (
     }
 
     socket.data.userId = decoded.userId ?? user._id.toString();
-    socket.data.role   = decoded.role;
+    socket.data.role = decoded.role;
 
     logger.info(
       `[Socket Auth] Authenticated: userId=${socket.data.userId} role=${socket.data.role}`,

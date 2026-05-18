@@ -17,6 +17,10 @@ import { ICancellationPolicyRepository } from '../interfaces/repository_interfac
 import { CancellationPolicyRepository } from '../repositories/cancellation-policy.repository';
 import { INotificationRepository } from '../interfaces/repository_interfaces/INotificationRepository';
 import { NotificationRepository } from '../repositories/notification-repository';
+import { IChatRepository } from '../interfaces/repository_interfaces/IChatRepository';
+import { ChatRepository } from '../repositories/chat.repository';
+import { IMessageRepository } from '../interfaces/repository_interfaces/IMessage.repository';
+import { MessageRepository } from '../repositories/message.repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -62,6 +66,14 @@ export class RepositoryRegistry {
 
     container.register<INotificationRepository>('INotificationRepository', {
       useClass: NotificationRepository,
+    });
+
+    container.register<IChatRepository>('IChatRepository', {
+      useClass: ChatRepository,
+    });
+
+    container.register<IMessageRepository>('IMessageRepository', {
+      useClass: MessageRepository,
     });
 
     // Register other repositories here

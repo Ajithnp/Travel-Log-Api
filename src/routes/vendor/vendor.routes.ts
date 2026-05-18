@@ -14,6 +14,8 @@ import { ISchedulePackageController } from '../../interfaces/controller_interfac
 import { createScheduleSchema } from '../../validators/vendor/schedule-package.validation';
 import { UpdateProfileLogoRequestSchema } from '../../validators/vendor/profile.validation';
 import { VendorVerificationSchema } from '../../validators/vendor/vendor-verification';
+import { IChatController } from '../../interfaces/controller_interfaces/IChatController';
+
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
@@ -25,6 +27,8 @@ export class VendorRoutes extends BaseRoute {
     private _vendorCategoryController: IVendorCategoryController,
     @inject('ISchedulePackageController')
     private _schedulePackageController: ISchedulePackageController,
+    @inject('IChatController')
+    private _chatController: IChatController,
   ) {
     super();
     this.initializeRoutes();
@@ -170,5 +174,62 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       this._schedulePackageController.getSchedule.bind(this._schedulePackageController),
     );
+    //===chat
+    this._router.get(
+      '/chats',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._chatController.getVendorChats.bind(this._chatController),
+    );
+
+    this._router.get(
+      '/chats/:chatId/messages',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._chatController.getVendorChatMessages.bind(this._chatController),
+    );
+
+    this._router.post(
+      '/chats/:chatId/messages',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._chatController.sendVendorMessage.bind(this._chatController),
+    );
+
+    this._router.patch(
+      '/chats/:chatId/pin',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._chatController.pinMessage.bind(this._chatController),
+    );
+
+    this._router.patch(
+      '/chats/:chatId/members/:userId',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._chatController.removeMember.bind(this._chatController),
+    );
+
+    this._router.patch(
+      '/chats/:chatId/archive',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._chatController.archiveChat.bind(this._chatController),
+    );
+
+    this._router.get(
+      '/chats/:chatId/members',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._chatController.getChatMembers.bind(this._chatController),
+    );
+
+    this._router.patch(
+      '/chats/:chatId/read',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._chatController.markChatAsReadForVendor.bind(this._chatController),
+    );
+
   }
 }

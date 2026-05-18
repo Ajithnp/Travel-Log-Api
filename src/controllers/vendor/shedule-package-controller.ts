@@ -73,5 +73,4 @@ export class ShedulePackageController implements ISchedulePackageController {
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
-
 }

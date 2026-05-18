@@ -17,6 +17,7 @@ import {
 import { publicPackageQuerySchema } from '../../validators/public-package.validation';
 import { makeRateLimiter } from '../../middlewares/rate.limiter.middleware';
 import { wishlistToggleLimiter } from '../../config/rate.limiter.config';
+import { IChatController } from '../../interfaces/controller_interfaces/IChatController';
 
 @injectable()
 export class UserRoutes extends BaseRoute {
@@ -26,6 +27,9 @@ export class UserRoutes extends BaseRoute {
 
     @inject('IUserProfileController')
     private _userProfileController: IUserProfileController,
+
+    @inject('IChatController')
+    private _chatController: IChatController,
   ) {
     super();
     this.initializeRoutes();
@@ -126,6 +130,28 @@ export class UserRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.USER]),
       this._userController.getWishlistCount.bind(this._userController),
+    );
+
+    // Chat
+    this._router.get(
+      '/chats/:chatId',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._chatController.getUserChat.bind(this._chatController),
+    );
+
+    this._router.post(
+      '/chats/:chatId/messages',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._chatController.sendUserMessage.bind(this._chatController),
+    );
+
+    this._router.get(
+      '/chats/:chatId/messages',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._chatController.getUserChatMessages.bind(this._chatController),
     );
   }
 }

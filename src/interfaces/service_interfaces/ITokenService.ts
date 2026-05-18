@@ -2,7 +2,7 @@ import { JwtPayload } from 'jsonwebtoken';
 
 export interface ITokenPayload extends JwtPayload {
   id: string;
-  name?: string;
+  name: string;
   email: string;
   role: 'user' | 'admin' | 'vendor';
   exp?: number;

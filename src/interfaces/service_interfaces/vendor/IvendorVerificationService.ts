@@ -1,17 +1,17 @@
-import { VendorVerificationRequestDTO } from "types/dtos/vendor/request.dtos";
-import { IFiles, VendorStatus } from "../../../types/entities/vendor.info.entity";
-import { IVendorVerificationResponseDTO } from "types/dtos/vendor/vendorVerificationResponse.dtos";
+import { VendorVerificationRequestDTO } from 'types/dtos/vendor/request.dtos';
+import { IFiles, VendorStatus } from '../../../types/entities/vendor.info.entity';
+import { IVendorVerificationResponseDTO } from 'types/dtos/vendor/vendorVerificationResponse.dtos';
 
 export interface IVendorVerificationService {
-  getVerificationData(vendorId: string): Promise<void>
-  getRejectedVendor(vendorId: string): Promise<IVendorVerificationResponse>
- vendorVerificationSubmit(
+  getVerificationData(vendorId: string): Promise<void>;
+  getRejectedVendor(vendorId: string): Promise<IVendorVerificationResponse>;
+  vendorVerificationSubmit(
     vendorId: string,
     verificationData: VendorVerificationRequestDTO,
   ): Promise<IVendorVerificationResponseDTO>;
   vendorVerificationReapply(
     vendorId: string,
-    vendorInfoId:string,
+    vendorInfoId: string,
     verificationData: VendorVerificationRequestDTO,
   ): Promise<IVendorVerificationResponseDTO>;
 }
@@ -35,7 +35,7 @@ export interface IVendorVerificationResponse {
   businessPan?: IFiles;
   companyLogo?: IFiles;
   ownerIdentityProof?: IFiles;
-    
+
   status: VendorStatus;
   rejectedReason: string;
 }

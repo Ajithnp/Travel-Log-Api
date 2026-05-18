@@ -1,11 +1,8 @@
-import { IVendorVerificationResponse} from "../../interfaces/service_interfaces/vendor/IvendorVerificationService";
-import { IVendorInfo } from "../../types/entities/vendor.info.entity";
+import { IVendorVerificationResponse } from '../../interfaces/service_interfaces/vendor/IvendorVerificationService';
+import { IVendorInfo } from '../../types/entities/vendor.info.entity';
 
 export class VendorverificationMapper {
-
-  static toVendorRejectedResponse(
-    vendor: IVendorInfo
-  ): IVendorVerificationResponse {
+  static toVendorRejectedResponse(vendor: IVendorInfo): IVendorVerificationResponse {
     return {
       id: vendor._id.toString(),
       gstin: vendor.businessInfo.GSTIN,
@@ -25,7 +22,7 @@ export class VendorverificationMapper {
       ownerIdentityProof: vendor.documents.ownerIdentity,
 
       status: vendor.status,
-      rejectedReason: vendor.reasonForReject ?? "",
+      rejectedReason: vendor.reasonForReject ?? '',
     };
   }
 }

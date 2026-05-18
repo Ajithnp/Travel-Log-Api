@@ -1,4 +1,9 @@
-import { BookingListResult, BookingStatus, IBooking, IBookingPopulated } from '../../types/entities/booking.entity';
+import {
+  BookingListResult,
+  BookingStatus,
+  IBooking,
+  IBookingPopulated,
+} from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
 

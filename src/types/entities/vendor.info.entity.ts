@@ -11,7 +11,7 @@ export type VendorStatus = 'Pending' | 'UnderReview' | 'Approved' | 'Rejected' |
 export interface IBusinessInfo {
   contactPersonName: string;
   businessAddress: string;
-   bio: string;
+  bio: string;
   GSTIN: string;
 }
 
@@ -31,7 +31,7 @@ export interface IBankDetails {
 }
 
 export interface IVendorInfo extends Document {
-   _id: Types.ObjectId;
+  _id: Types.ObjectId;
   userId: Types.ObjectId;
   businessInfo: IBusinessInfo;
   documents: IDocuments;

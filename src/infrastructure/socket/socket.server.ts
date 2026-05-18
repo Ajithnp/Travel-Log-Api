@@ -9,16 +9,19 @@ import { socketAuthMiddleware } from './socket.middleware';
 import { AuthenticatedSocket, TypedIOServer } from './types/socket.types';
 import { registerNotificationHandlers } from './handlers/notification-handler';
 import { notificationEmitter } from './namespaces/notification-emitter';
+import { IChatRepository } from '../../interfaces/repository_interfaces/IChatRepository';
+import { registerChatHandlers } from './handlers/chat-handler';
+import { chatEmitter } from './namespaces/chat-emitter';
 
 export function initSocketServer(httpServer: HttpServer): TypedIOServer {
   const io = new SocketIOServer(httpServer, {
     cors: {
       origin: config.cors.ALLOWED_ORIGINS,
-      methods: ['GET', 'POST'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
       credentials: true,
     },
     pingInterval: 25000,
-    pingTimeout: 5000, 
+    pingTimeout: 5000,
     maxHttpBufferSize: 1e6,
     transports: ['websocket', 'polling'],
   });
@@ -27,26 +30,24 @@ export function initSocketServer(httpServer: HttpServer): TypedIOServer {
     socketAuthMiddleware(socket as AuthenticatedSocket, next);
   });
 
-
   const notificationRepository = container.resolve<INotificationRepository>(
     REPOSITORY_TOKENS.NOTIFICATION_REPOSITORY,
   );
 
+  const chatRepository = container.resolve<IChatRepository>(REPOSITORY_TOKENS.CHAT_REPOSITORY);
+
   // ── Connection handler(fires every time a new user connects)
   io.on('connection', (socket) => {
-    registerNotificationHandlers(
-      io,
-      socket as AuthenticatedSocket,
-      notificationRepository,
-    );
+    registerNotificationHandlers(io, socket as AuthenticatedSocket, notificationRepository);
+    registerChatHandlers(io, socket as AuthenticatedSocket, chatRepository);
   });
 
- 
   // ANY service can call:
   // notificationEmitter.send(target, payload)
 
   notificationEmitter.init(io);
-  
+  chatEmitter.init(io);
+
   logger.info(
     `[Socket.IO] Server initialized | Origins: ${
       Array.isArray(config.cors.ALLOWED_ORIGINS)
