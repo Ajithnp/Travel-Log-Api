@@ -33,8 +33,14 @@ import {
   RawPopulatedBooking,
 } from '../../shared/mappers/booking.mapper';
 import { INotificationService } from '../../interfaces/service_interfaces/INotificationService';
-import { UserNotificationType, VendorNotificationType } from '../../types/entities/notification.entity';
+import {
+  UserNotificationType,
+  VendorNotificationType,
+} from '../../types/entities/notification.entity';
 import { USER_ROLES } from '../../shared/constants/roles';
+import { IChatService } from '../../interfaces/service_interfaces/IChatService';
+import { generateChatName } from '../../shared/utils/chat-name-builder';
+import { IChatRepository } from '../../interfaces/repository_interfaces/IChatRepository';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -49,6 +55,11 @@ export class BookingService implements IBookingService {
     private _bookingRepo: IBookingRepository,
     @inject('IPaymentGateway')
     private paymentGateway: IPaymentGateway,
+    @inject('IChatService')
+    private _chatService: IChatService,
+    @inject('IChatRepository')
+    private _chatRepo: IChatRepository,
+
   ) {}
 
   async initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO> {
@@ -129,7 +140,7 @@ export class BookingService implements IBookingService {
       }
 
       // 6. Financial calculation
-      // ─────────────────────────────────────────────
+      // ──────────────────────────────────────
       const discountAmount = 0;
       const walletAmountUsed = 0;
 
@@ -231,7 +242,6 @@ export class BookingService implements IBookingService {
       throw new AppError(ERROR_MESSAGES.BOOKING_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    // already confirmed
     if (booking.bookingStatus === BOOKING_STATUS.CONFIRMED) {
       return {
         bookingId: booking._id.toString(),
@@ -259,43 +269,53 @@ export class BookingService implements IBookingService {
       await session.commitTransaction();
       session.endSession();
 
-      // ── 2. Notify the USER who booked
-     await Promise.all([
+      const schedule = await this._schedulePackageRepo.findById(booking.scheduleId.toString());
+      if (!schedule) {
+        throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+      }
 
-       this._notificationService.createNotification({
-        recipientId: booking.userId.toString(),
-        recipientRole: USER_ROLES.USER,
-        senderId: booking.vendorId.toString(),
-        notificationType: UserNotificationType.BookingConfirmed,
-        title: 'Booking Confirmed',
-        message: `Your booking for "${booking.packageId?.title}" has been confirmed.`,
-        data: {
-          bookingUId:booking._id.toString(),
-          bookingId: booking.bookingCode,
-          packageName: booking.packageId.title,
-        },
-        redirectUrl: `/user/bookings/${booking._id.toString()}`,
-      }),
+      await Promise.all([
+        this._notificationService.createNotification({
+          recipientId: booking.userId.toString(),
+          recipientRole: USER_ROLES.USER,
+          senderId: booking.vendorId.toString(),
+          notificationType: UserNotificationType.BookingConfirmed,
+          title: 'Booking Confirmed',
+          message: `Your booking for "${booking.packageId?.title}" has been confirmed.`,
+          data: {
+            bookingUId: booking._id.toString(),
+            bookingId: booking.bookingCode,
+            packageName: booking.packageId.title,
+          },
+          redirectUrl: `/user/bookings/${booking._id.toString()}`,
+        }),
 
-      // ── 3. Notify the VENDOR about the new booking
+        this._notificationService.createNotification({
+          recipientId: booking.vendorId.toString(),
+          recipientRole: USER_ROLES.VENDOR,
+          senderId: booking.userId.toString(),
+          notificationType: VendorNotificationType.NewBooking,
+          title: 'New Booking',
+          message: `You have a new booking for "${booking.packageId?.title}".`,
+          data: {
+            bookingId: booking._id.toString(),
+            bookingCode: booking.bookingCode,
+            scheduleId: booking.scheduleId.toString(),
+            packageId: booking.packageId._id.toString(),
+            packageName: booking.packageId.title,
+          },
+          redirectUrl: `/bookings/${booking._id.toString()}`,
+        }),
+      ]);
+      // ── 4. Create chat room
 
-       this._notificationService.createNotification({
-        recipientId: booking.vendorId.toString(),
-        recipientRole: USER_ROLES.VENDOR,
-        senderId: booking.userId.toString(),
-        notificationType: VendorNotificationType.NewBooking,
-        title: 'New Booking',
-        message: `You have a new booking for "${booking.packageId?.title}".`,
-        data: {
-          bookingId: booking._id.toString(),
-          bookingCode: booking.bookingCode,
-          scheduleId: booking.scheduleId.toString(),
-          packageId: booking.packageId._id.toString(),
-          packageName: booking.packageId.title,
-        },
-        redirectUrl: `/bookings/${booking._id.toString()}`
-      })
-      ])
+      await this._chatService.ensureRoomExists(
+        generateChatName(booking.packageId.title, schedule.startDate.toISOString()),
+        toObjectId(booking.scheduleId.toString()),
+        toObjectId(booking.packageId._id.toString()),
+        toObjectId(booking.vendorId.toString()),
+        toObjectId(booking.userId.toString()),
+      );
 
       return {
         bookingId: updatedBooking!._id.toString(),
@@ -356,12 +376,18 @@ export class BookingService implements IBookingService {
   async getBookingDetails(userId: string, bookingId: string): Promise<BookingDetailDTO> {
     const booking = await this._bookingRepo.findByIdAndUser(bookingId, userId);
     if (!booking) {
-      throw new AppError('Booking not found', HTTP_STATUS.NOT_FOUND);
+      throw new AppError(ERROR_MESSAGES.BOOKING_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
-    return BookingMapper.toDetailedResponse(booking as RawPopulatedBooking);
-  }
-}
+    const chatRoom = await this._chatRepo.findChatRoomByScheduleId(booking.scheduleId);
 
+    const bookingDetail = BookingMapper.toDetailedResponse(booking as RawPopulatedBooking);
+
+    return {
+      ...bookingDetail,
+      chatId:chatRoom?._id.toString()
+    }
+  };
+}
 
 /**
  *   async processPayment(userId: string, bookingId: string, amount: number) {

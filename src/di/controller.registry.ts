@@ -29,6 +29,8 @@ import { IAdminCancellationPolicyController } from '../interfaces/controller_int
 import { AdminCancellationPolicyController } from '../controllers/admin/cancellation-policy.controller';
 import { INotificationController } from '../interfaces/controller_interfaces/INotificationController';
 import { NotificationController } from '../controllers/notification-controller';
+import { IChatController } from '../interfaces/controller_interfaces/IChatController';
+import { ChatController } from '../controllers/chat-controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -46,6 +48,10 @@ export class ControllerRegistry {
 
     container.register<INotificationController>('INotificationController', {
       useClass: NotificationController,
+    });
+
+    container.register<IChatController>('IChatController', {
+      useClass: ChatController,
     });
 
     //vendor controllers

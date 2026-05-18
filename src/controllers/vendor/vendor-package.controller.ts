@@ -95,9 +95,9 @@ export class VendorPackageController implements IVendorPackageController {
 
   deletePackage = expressAsyncHandler(async (req, res) => {
     const vendorId = req.user!.id;
-    
+
     const packageId = req.params.packageId;
-     await this._packageService.deletePackage(packageId, vendorId);
+    await this._packageService.deletePackage(packageId, vendorId);
 
     const successResponse: IApiResponse = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -106,10 +106,10 @@ export class VendorPackageController implements IVendorPackageController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-    restorePackage = expressAsyncHandler(async (req, res) => {
+  restorePackage = expressAsyncHandler(async (req, res) => {
     const vendorId = req.user!.id;
-      const packageId = req.params.packageId;
-     await this._packageService.restorePackage(packageId, vendorId);
+    const packageId = req.params.packageId;
+    await this._packageService.restorePackage(packageId, vendorId);
 
     const successResponse: IApiResponse = {
       success: SUCCESS_STATUS.SUCCESS,

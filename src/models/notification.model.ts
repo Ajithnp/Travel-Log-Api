@@ -1,22 +1,21 @@
-import { model, Schema } from "mongoose";
-import { ALL_NOTIFICATION_TYPES, INotification } from "../types/entities/notification.entity";
-
+import { model, Schema } from 'mongoose';
+import { ALL_NOTIFICATION_TYPES, INotification } from '../types/entities/notification.entity';
 
 const NotificationSchema = new Schema<INotification>(
   {
-    recipientId: {          
+    recipientId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
-    recipientRole: {       
+    recipientRole: {
       type: String,
-      enum: ["user", "admin", "vendor"],
+      enum: ['user', 'admin', 'vendor'],
       required: true,
     },
     senderId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       default: null,
     },
     notificationType: {
@@ -53,14 +52,11 @@ const NotificationSchema = new Schema<INotification>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 NotificationSchema.index({ recipientId: 1, recipientRole: 1 });
 
 NotificationSchema.index({ createdAt: -1 });
 
-export const NotificationModel = model<INotification>(
-  "Notification",
-  NotificationSchema
-);
+export const NotificationModel = model<INotification>('Notification', NotificationSchema);

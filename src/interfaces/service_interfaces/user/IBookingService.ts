@@ -37,7 +37,7 @@ export type GetBookingsDTO = Omit<BookingFilters, 'userId'>;
 export interface InitiateBookingResponseDTO {
   bookingId: string;
   clientSecret: string;
-  checkoutUrl: string | null; // redirect the user
+  checkoutUrl: string | null;
 }
 
 export interface ConfirmBookingResponseDTO {

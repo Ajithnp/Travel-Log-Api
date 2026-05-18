@@ -74,12 +74,14 @@ export class AuthService implements IAuthService {
     //Genarate Tokens
     const accessToken = this._tokenService.generateAccessToken({
       id: user._id.toString(),
+      name: user.name,
       email: user.email,
       role: user.role,
     });
 
     const refreshToken = this._tokenService.generateRefreshToken({
       id: user._id.toString(),
+      name: user.name,
       email: user.email,
       role: user.role,
     });
@@ -160,12 +162,14 @@ export class AuthService implements IAuthService {
     const accessToken = this._tokenService.generateAccessToken({
       id: userDoc._id.toString(),
       email: email,
+      name: userDoc.name,
       role: userDoc.role,
     });
 
     const refreshToken = this._tokenService.generateRefreshToken({
       id: userDoc._id.toString(),
       email: email,
+      name: userDoc.name,
       role: userDoc.role,
     });
 
@@ -213,12 +217,14 @@ export class AuthService implements IAuthService {
     const accessToken = this._tokenService.generateAccessToken({
       id: user._id.toString(),
       email: user.email,
+      name: user.name,
       role: user.role,
     });
 
     const refreshToken = this._tokenService.generateRefreshToken({
       id: user._id.toString(),
       email: user.email,
+      name: user.name,
       role: user.role,
     });
 
@@ -309,6 +315,7 @@ export class AuthService implements IAuthService {
     const accessToken = this._tokenService.generateAccessToken({
       id: decoded.id,
       email: decoded.email,
+      name: decoded.name,
       role: decoded.role,
     });
 

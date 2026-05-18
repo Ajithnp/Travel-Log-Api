@@ -84,8 +84,4 @@ export class VendorService implements IVendorService {
       },
     });
   }
-
-
-
-
 }

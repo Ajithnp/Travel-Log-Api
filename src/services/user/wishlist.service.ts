@@ -15,7 +15,6 @@ import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { CACHE_KEYS, CACHE_TTL } from '../../types/cache';
 import { WishlistMapper } from '../../shared/mappers/wishlist.mapper';
 
-
 @injectable()
 export class WishlistService implements IWishlistService {
   constructor(
@@ -43,7 +42,7 @@ export class WishlistService implements IWishlistService {
     if (!pkg.isActive || pkg.status !== PACKAGE_STATUS.PUBLISHED) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_AVAILABLE, HTTP_STATUS.FORBIDDEN);
     }
-  
+
     const alreadyWishlisted = await this._wishlistRepository.isPackageWishlisted(userId, packageId);
 
     if (alreadyWishlisted) {

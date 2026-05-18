@@ -106,7 +106,7 @@ export const ERROR_MESSAGES = {
   PACKAGE_ACTIVE: 'This package is not active and cannot be edited.',
   PACKAGE_CANNOT_EDIT: 'This package cannot be edited.',
   PACKAGE_NOT_PUBLISHED: 'Package must be published before creating a schedule. Publish it first.',
-  PACKAGE_HAS_ACTIVE_SCHEDULE:'This Package can not delete, it has active schedules',
+  PACKAGE_HAS_ACTIVE_SCHEDULE: 'This Package can not delete, it has active schedules',
   // category
   CATEGORY_NOT_FOUND: 'Category not found',
   CATEGORY_CANNOT_EDIT: 'This Category cannot be edited',
@@ -147,6 +147,13 @@ export const ERROR_MESSAGES = {
   INVALID_PAYMENT_INTENT_ID: 'Invalid payment intent ID.',
 
   TRAVELER_INFO_INCOMPLETE: 'Lead traveler must provide email and phone number.',
+
+  // chat
+  CHAT_NOT_FOUND: 'Chat not found',
+  CHAT_ARCHIVED: 'Chat archived',
+  CHAT_NOT_ACTIVE: 'Chat not active',
+  CONTENT_REQUIRED: 'Message content is required.',
+  MEMBER_NOT_FOUND: 'Member not found',
 
   // cancellation policy
   CANCELLATION_POLICY_NOT_FOUND: 'Cancellation policy not found',

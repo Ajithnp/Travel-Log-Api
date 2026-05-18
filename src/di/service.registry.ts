@@ -47,6 +47,8 @@ import { IVendorVerificationService } from '../interfaces/service_interfaces/ven
 import { VendorVerificationService } from '../services/vendor/vendor-verification.service';
 import { INotificationService } from '../interfaces/service_interfaces/INotificationService';
 import { NotificationService } from '../services/notification.service';
+import { IChatService } from '../interfaces/service_interfaces/IChatService';
+import { ChatService } from '../services/chat.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -90,6 +92,10 @@ export class ServiceRegistry {
       useClass: NotificationService,
     });
 
+    container.register<IChatService>('IChatService', {
+      useClass: ChatService,
+    });
+
     //vendor-services
     container.register<IVendorService>('IVendorService', {
       useClass: VendorService,
@@ -98,7 +104,7 @@ export class ServiceRegistry {
     container.register<IVendorVerificationService>('IVendorVerificationService', {
       useClass: VendorVerificationService,
     });
-    
+
     container.register<IPackageService>('IPackageService', {
       useClass: PackageService,
     });

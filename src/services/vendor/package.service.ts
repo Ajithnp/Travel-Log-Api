@@ -36,7 +36,6 @@ export class PackageService implements IPackageService {
     private _categoryRepository: ICategoryRepository,
     @inject('ISchedulePackageRepository')
     private _scheduleRepository: ISchedulePackageRepository,
-
   ) {}
 
   private async processPackageImages(images: { key: string; status: string }[]): Promise<IFile[]> {
@@ -216,34 +215,33 @@ export class PackageService implements IPackageService {
   async deletePackage(packageId: string, vendorId: string): Promise<void> {
     const packageObjectId = toObjectId(packageId);
 
-  const isPackageExist = await this._basePackageRepository.findOne({_id:packageObjectId})
+    const isPackageExist = await this._basePackageRepository.findOne({ _id: packageObjectId });
 
-  if (!isPackageExist) {
-    throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
-    };
-   
-    
-    const isScheduleExists = await this._scheduleRepository.findOne({ packageId: packageObjectId, status: SCHEDULE_STATUS.UPCOMING });
-    
-    if (isScheduleExists) {
-       throw new AppError(ERROR_MESSAGES.PACKAGE_HAS_ACTIVE_SCHEDULE, HTTP_STATUS.BAD_REQUEST);
+    if (!isPackageExist) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
-    
-    const data = await this._basePackageRepository.softDelete(packageObjectId, vendorId);
-  
-    if (!data) {
-   throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
-    };
 
-  };
+    const isScheduleExists = await this._scheduleRepository.findOne({
+      packageId: packageObjectId,
+      status: SCHEDULE_STATUS.UPCOMING,
+    });
+
+    if (isScheduleExists) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_HAS_ACTIVE_SCHEDULE, HTTP_STATUS.BAD_REQUEST);
+    }
+
+    const data = await this._basePackageRepository.softDelete(packageObjectId, vendorId);
+
+    if (!data) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+  }
 
   async restorePackage(packageId: string, vendorId: string): Promise<void> {
-  const product = await this._basePackageRepository.restore(packageId, vendorId);
+    const product = await this._basePackageRepository.restore(packageId, vendorId);
 
-  if (!product) {
-    throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
-    };
-
-  };
-
+    if (!product) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+  }
 }

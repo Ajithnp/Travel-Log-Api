@@ -115,22 +115,22 @@ export class VendorInfoRepository
     return result;
   }
 
-//   async reApply(
-//   vendorId: Types.ObjectId,
-//   payload: 
-// ): Promise<IVendorInfo | null> {
-//   return await this.model.findOneAndUpdate(
-//     { 
-//       vendorId, 
-//       status: VENDOR_VERIFICATION_STATUS.REJECTED  
-//     },
-//     { 
-//       ...payload, 
-//       status: VENDOR_VERIFICATION_STATUS.PENDING,  
-//       reasonForReject: null,                        
-//       updatedAt: new Date(),
-//     },
-//     { new: true }
-//   );
-// }
+  //   async reApply(
+  //   vendorId: Types.ObjectId,
+  //   payload:
+  // ): Promise<IVendorInfo | null> {
+  //   return await this.model.findOneAndUpdate(
+  //     {
+  //       vendorId,
+  //       status: VENDOR_VERIFICATION_STATUS.REJECTED
+  //     },
+  //     {
+  //       ...payload,
+  //       status: VENDOR_VERIFICATION_STATUS.PENDING,
+  //       reasonForReject: null,
+  //       updatedAt: new Date(),
+  //     },
+  //     { new: true }
+  //   );
+  // }
 }
