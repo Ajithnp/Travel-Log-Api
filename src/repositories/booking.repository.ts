@@ -37,7 +37,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         userId: new mongoose.Types.ObjectId(userId),
         scheduleId: new mongoose.Types.ObjectId(scheduleId),
         bookingStatus: {
-          $nin: [BOOKING_STATUS.CANCELLED_BY_USER, BOOKING_STATUS.CANCELLED_BY_VENDOR],
+          $nin: [BOOKING_STATUS.CANCELLED_BY_USER],
         },
       })
       .lean() as Promise<IBooking | null>;
@@ -97,7 +97,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
   }
 
   async findByIdAndUserLean(id: string, userId: string): Promise<IBookingPopulated | null> {
-    if (!mongoose.Types.ObjectId.isValid(id)) return null;
     return (
       this.model
         .findOne({
@@ -105,7 +104,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           userId: new mongoose.Types.ObjectId(userId),
         })
         .populate('packageId', 'title')
-        // .populate('scheduleId', 'startDate')
         .lean() as Promise<IBookingPopulated | null>
     );
   }
@@ -158,11 +156,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     });
 
     pipeline.push({ $unwind: { path: '$scheduleId', preserveNullAndEmptyArrays: true } });
-
-    // Sort
     pipeline.push({ $sort: { createdAt: -1 } });
-
-    // Facet for pagination + total count in one query
 
     pipeline.push({
       $facet: {
@@ -225,10 +219,16 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           'packingList',
           'categoryId',
         ].join(' '),
-        populate: {
-          path: 'categoryId',
-          select: 'name',
-        },
+        populate: [
+          {
+            path: 'categoryId',
+            select: 'name',
+          },
+          {
+            path: 'cancellationPolicy',
+            select: '-createdAt -updatedAt -description',
+          },
+        ],
       })
       .populate({
         path: 'scheduleId',
@@ -243,5 +243,27 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       .lean();
 
     return booking as IBooking | null;
+  }
+
+  async cancelBooking(
+    bookingId: string,
+    userId: string,
+    update: {
+      cancellationReason: string;
+      cancellationStatus: string;
+      cancelledAt: Date;
+      cancelationRefundAmount?: number;
+    },
+  ): Promise<IBooking | null> {
+    return this.model
+      .findOneAndUpdate(
+        {
+          _id: bookingId,
+          userId: userId,
+        },
+        { $set: update },
+        { new: true },
+      )
+      .lean() as Promise<IBooking | null>;
   }
 }

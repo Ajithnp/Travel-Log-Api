@@ -33,6 +33,17 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   markFailedPayment(bookingId: string): Promise<IBooking | null>;
 
+  cancelBooking(
+    bookingId: string,
+    userId: string,
+    update: {
+      cancellationReason: string;
+      cancellationStatus: string;
+      cancelledAt: Date;
+      cancelationRefundAmount?: number;
+    },
+  ): Promise<IBooking | null>;
+
   findBookings(filters: BookingFilters): Promise<BookingListResult>;
 }
 

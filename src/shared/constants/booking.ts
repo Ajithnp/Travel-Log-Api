@@ -21,10 +21,15 @@ export const BOOKING_STATUS = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',
   CANCELLED_BY_USER: 'cancelled_by_user',
-  CANCELLED_BY_VENDOR: 'cancelled_by_vendor',
-  ATTENDED: 'attended',
   COMPLETED: 'completed',
   PAYMENT_FAILED: 'payment_failed',
+
+} as const;
+
+export const CANCELATION_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
 } as const;
 
 export const CANCELLED_BY = {
@@ -33,4 +38,4 @@ export const CANCELLED_BY = {
   ADMIN: 'admin',
 } as const;
 
-export const SEAT_HOLD_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+

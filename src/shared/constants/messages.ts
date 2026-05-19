@@ -127,7 +127,7 @@ export const ERROR_MESSAGES = {
   // wishlist
   PACKAGE_NOT_AVAILABLE: 'This package is not available for wishlisting',
 
-  // seat reservation / booking
+  //  booking
   SEATS_NOT_AVAILABLE: 'The selected schedule does not have enough available seats.',
   RESERVATION_NOT_FOUND: 'Seat reservation not found.',
   RESERVATION_ALREADY_PROCESSED: 'This reservation has already been confirmed or released.',
@@ -148,6 +148,9 @@ export const ERROR_MESSAGES = {
 
   TRAVELER_INFO_INCOMPLETE: 'Lead traveler must provide email and phone number.',
 
+  //cancellation
+  CANCELLATION_POLICY_NOT_APPLICABLE: 'Cancellation is no longer possible for this booking.',
+  BOOKING_CANNOT_BE_CANCELLED: 'This booking cannot be cancelled.',
   // chat
   CHAT_NOT_FOUND: 'Chat not found',
   CHAT_ARCHIVED: 'Chat archived',

@@ -146,9 +146,9 @@ export class AdminRoutes extends BaseRoute {
     this._router.get(
       '/cancellation-policies',
       isAuthenticated,
-      authorize([USER_ROLES.ADMIN]),
+      authorize([USER_ROLES.ADMIN,USER_ROLES.VENDOR]),
       this._adminCancellationPolicyController.getPolicies.bind(
-        this._adminCancellationPolicyController,
+      this._adminCancellationPolicyController,
       ),
     );
 

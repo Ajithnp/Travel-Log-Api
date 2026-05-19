@@ -5,4 +5,5 @@ export interface IBookingController {
   verifyPayment: RequestHandler;
   getBookings: RequestHandler;
   getBookingDetails: RequestHandler;
+  cancelBookingRequest: RequestHandler;
 }

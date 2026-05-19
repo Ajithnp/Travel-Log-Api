@@ -67,12 +67,15 @@ export class PackageService implements IPackageService {
     const vendorObjectId = toObjectId(vendorId);
     const packageObjectId = toObjectId(packageId);
 
-    const packageExist = await this._basePackageRepository.findOnePopulated<IBasePackagePopulated>(
+    const packageExist = await this._basePackageRepository.findOnePopulatedMany<IBasePackagePopulated>(
       {
         _id: packageObjectId,
         vendorId: vendorObjectId,
       },
-      { path: 'categoryId', select: 'name' },
+      [
+        { path: 'categoryId', select: 'name' },
+        { path: 'cancellationPolicy', select: '_id label key' },
+      ],
     );
 
     if (!packageExist) {
@@ -87,14 +90,12 @@ export class PackageService implements IPackageService {
     payload: CreateBasePackageDTO,
   ): Promise<{ packageId: string }> {
     const vendorObjectId = toObjectId(vendorId);
-    // Step 1 — Only approved vendors can create packages
     const vendor = await this._vendorInfoRepository.findVendorWithUserId(vendorId);
 
     if (!vendor || vendor.status !== VENDOR_VERIFICATION_STATUS.APPROVED) {
       throw new AppError(ERROR_MESSAGES.VENDOR_NOT_VERIFIED, HTTP_STATUS.FORBIDDEN);
     }
 
-    // Step 2 — Prevent duplicate published packages with same title
     if (payload.title) {
       const existingPublished = await this._basePackageRepository.findOne({
         vendorId: vendorObjectId,
@@ -123,13 +124,19 @@ export class PackageService implements IPackageService {
     if (payload.images && payload.images.length > 0) {
       imageKeys = await this.processPackageImages(payload.images);
     }
-    const { categoryId, images, ...restPayload } = payload;
+    const { categoryId, images, cancellationPolicy, ...restPayload } = payload;
+
+    let cancellationPolicyObjectId: Types.ObjectId | undefined;
+    if (cancellationPolicy) {
+      cancellationPolicyObjectId = toObjectId(cancellationPolicy);
+    }
 
     const newPackage = await this._basePackageRepository.create({
       ...restPayload,
       vendorId: vendorObjectId,
       ...(categoryObjectId && { categoryId: categoryObjectId }),
       ...(imageKeys && { images: imageKeys }),
+      ...(cancellationPolicyObjectId && { cancellationPolicy: cancellationPolicyObjectId }),
     });
 
     return { packageId: newPackage._id.toString() };
@@ -155,7 +162,7 @@ export class PackageService implements IPackageService {
       throw new AppError(ERROR_MESSAGES.PACKAGE_CANNOT_EDIT, HTTP_STATUS.BAD_REQUEST);
     }
 
-    const { categoryId, ...restPayload } = payload;
+    const { categoryId, cancellationPolicy, ...restPayload } = payload;
     let categoryObjectId: Types.ObjectId | undefined;
 
     if (categoryId) {
@@ -175,12 +182,18 @@ export class PackageService implements IPackageService {
       imageKeys = await this.processPackageImages(payload.images);
     }
 
+    let cancellationPolicyObjectId: Types.ObjectId | undefined;
+    if (cancellationPolicy) {
+      cancellationPolicyObjectId = toObjectId(cancellationPolicy);
+    }
+
     await this._basePackageRepository.findOneAndUpdate(
       { _id: packageObjectId },
       {
         ...restPayload,
         ...(categoryObjectId && { categoryId: categoryObjectId }),
         ...(imageKeys && { images: imageKeys }),
+        ...(cancellationPolicyObjectId && { cancellationPolicy: cancellationPolicyObjectId }),
       },
     );
   }
@@ -192,12 +205,15 @@ export class PackageService implements IPackageService {
     const vendorObjectId = toObjectId(vendorId);
     const packageObjectId = toObjectId(packageId);
 
-    const pkg = await this._basePackageRepository.findOnePopulated<IBasePackagePopulated>(
+    const pkg = await this._basePackageRepository.findOnePopulatedMany<IBasePackagePopulated>(
       {
         _id: packageObjectId,
         vendorId: vendorObjectId,
       },
-      { path: 'categoryId', select: 'name' },
+      [
+        { path: 'categoryId', select: 'name' },
+        { path: 'cancellationPolicy', select: '_id label key' },
+      ],
     );
 
     if (!pkg) {

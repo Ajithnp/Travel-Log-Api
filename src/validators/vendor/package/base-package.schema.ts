@@ -50,7 +50,7 @@ const draftPackageBackendSchema = basePackageBackendSchema.extend({
   exclusions: z.array(z.string()).optional(),
   packingList: z.array(z.string()).optional(),
 
-  cancellationPolicy: z.enum(['Flexible', 'Moderate', 'Strict', 'Non-Refundable']).optional(),
+  cancellationPolicy: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid cancellation policy').optional(),
 
   isActive: z.boolean().optional(),
 
@@ -148,9 +148,7 @@ export const publishPackageBackendSchema = basePackageBackendSchema
     exclusions: z.array(z.string().min(1)),
     packingList: z.array(z.string()),
 
-    cancellationPolicy: z.enum(['Flexible', 'Moderate', 'Strict', 'Non-Refundable'], {
-      errorMap: () => ({ message: 'Please select a valid cancellation policy' }),
-    }),
+    cancellationPolicy: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid cancellation policy'),
 
     isActive: z.boolean(),
 

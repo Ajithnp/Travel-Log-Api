@@ -1,6 +1,8 @@
 import { inject, injectable } from 'tsyringe';
 import { IBookingController } from '../../interfaces/controller_interfaces/user/IBookingController';
 import {
+  CancelBookingDTO,
+  CancelBookingResponseDTO,
   GetBookingsDTO,
   IBookingService,
   InitiateBookingDTO,
@@ -85,7 +87,7 @@ export class BookingController implements IBookingController {
 
   getBookingDetails = expressAsyncHandler(async (req, res) => {
     const { bookingId } = req.params as { bookingId: string };
-    const userId = req.user!.id;
+    const userId = req.user.id;
 
     const result = await this._bookingService.getBookingDetails(userId, bookingId);
 
@@ -94,6 +96,29 @@ export class BookingController implements IBookingController {
       message: SUCCESS_MESSAGES.OK,
       data: result,
     };
+    res.status(HTTP_STATUS.OK).json(response);
+  });
+
+  cancelBookingRequest = expressAsyncHandler(async (req, res) => {
+    const { bookingId } = req.params as { bookingId: string };
+    const userId = req.user!.id;
+    const { reason, details } = req.body;
+
+    const payload: CancelBookingDTO = {
+      userId,
+      bookingId,
+      reason,
+      details,
+    };
+
+    const result = await this._bookingService.cancelBookingRequest(payload);
+
+    const response: IApiResponse<CancelBookingResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.BOOKING_CANCELLED,
+      data: result,
+    };
+
     res.status(HTTP_STATUS.OK).json(response);
   });
 }

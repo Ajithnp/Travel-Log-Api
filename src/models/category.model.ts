@@ -81,8 +81,7 @@ CategorySchema.index({ name: 1 }, { unique: true });
 CategorySchema.index({ status: 1, isActive: 1 });
 CategorySchema.index({ requestedBy: 1, status: 1 });
 
-// ─── Pre-Save Hook — Auto-generate slug from name ────────────────
-// Runs every time a new document is saved
+
 CategorySchema.pre('save', function (next) {
   if (this.isNew || this.isModified('name')) {
     this.slug = generateSlug(this.name);

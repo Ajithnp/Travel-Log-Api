@@ -2,7 +2,6 @@ import { Schema, model } from 'mongoose';
 import { IBasePackageEntity } from '../types/entities/base-package.entity';
 import { PACKAGE_STATUS } from '../shared/constants/constants';
 
-/* ---------- Sub Schemas ---------- */
 
 const FileSchema = new Schema(
   {
@@ -33,7 +32,7 @@ const itineraryDaySchema = new Schema(
   { _id: false },
 );
 
-/* ---------- Base Package Schema ---------- */
+
 
 const packageSchema = new Schema<IBasePackageEntity>(
   {
@@ -78,8 +77,8 @@ const packageSchema = new Schema<IBasePackageEntity>(
     packingList: { type: [String], default: [] },
 
     cancellationPolicy: {
-      type: String,
-      enum: ['Flexible', 'Moderate', 'Strict', 'Non-Refundable'],
+      type: Schema.Types.ObjectId,
+      ref: 'CancellationPolicy',
     },
 
     status: {

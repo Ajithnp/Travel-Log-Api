@@ -62,10 +62,23 @@ export interface PaginatedBookingResponse {
   totalPages: number;
 }
 
+export interface CancelBookingDTO {
+  userId: string;
+  bookingId: string;
+  reason: string;
+  details?: string;
+}
+
+export interface CancelBookingResponseDTO {
+  refundAmount: number;
+  refundPercent: number;
+}
+
 export interface IBookingService {
   initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO>;
   confirmBooking(payload: ConfirmBookingDTO): Promise<ConfirmBookingResponseDTO>;
   verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO>;
   getBookings(userId: string, filters: GetBookingsDTO): Promise<PaginatedBookingResponse>;
   getBookingDetails(userId: string, bookingId: string): Promise<BookingDetailDTO>;
+  cancelBookingRequest(payload: CancelBookingDTO): Promise<CancelBookingResponseDTO>;
 }

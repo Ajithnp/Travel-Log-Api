@@ -5,7 +5,10 @@ import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
-import { InitiateBookingRequestSchema } from '../../validators/user/booking.validation';
+import {
+  CancelBookingRequestSchema,
+  InitiateBookingRequestSchema,
+} from '../../validators/user/booking.validation';
 
 @injectable()
 export class BookingRoutes extends BaseRoute {
@@ -44,6 +47,14 @@ export class BookingRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.USER]),
       this._bookingController.getBookingDetails.bind(this._bookingController),
+    );
+
+    this._router.patch(
+      '/:bookingId/cancel',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      validateDTO(CancelBookingRequestSchema),
+      this._bookingController.cancelBookingRequest.bind(this._bookingController),
     );
   }
 }

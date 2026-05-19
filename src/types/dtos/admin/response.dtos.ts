@@ -53,6 +53,11 @@ export interface ItineraryDayDTO {
   activities: ActivityDTO[];
 }
 
+export interface CancellationPolicyType {
+  _id: string;
+  label: string;
+  key: string;
+}
 export interface PackageDetailDTO {
   packageId: string;
   vendorId: string;
@@ -71,7 +76,7 @@ export interface PackageDetailDTO {
   inclusions: string[];
   exclusions: string[];
   packingList: string[];
-  cancellationPolicy: string | null;
+  cancellationPolicy: CancellationPolicyType | null;
   status: PackageStatus;
   isActive: boolean;
   createdAt: Date;

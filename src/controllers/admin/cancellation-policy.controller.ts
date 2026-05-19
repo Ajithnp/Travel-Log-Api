@@ -27,7 +27,7 @@ export class AdminCancellationPolicyController implements IAdminCancellationPoli
   });
 
   getPolicies = expressAsyncHandler(async (req, res) => {
-    const includeInactive = req.query.includeInactive === 'true';
+    const includeInactive:boolean = req.query.includeInactive === 'true';
     const data = await this._policyService.getPolicies(includeInactive);
 
     const successResponse: IApiResponse<typeof data> = {
