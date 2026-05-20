@@ -3,7 +3,6 @@ import { IBooking, ITraveler } from '../types/entities/booking.entity';
 import {
   BOOKING_STATUS,
   CANCELATION_STATUS,
-  CANCELLED_BY,
   GROUP_TYPE,
   PAYMENT_STATUS,
 } from '../shared/constants/booking';
@@ -125,6 +124,7 @@ const BookingSchema = new Schema<IBooking>(
       default: null,
     },
     cancelationRefundAmount: { type: Number, default: null },
+    cancellationRejectedReason: { type: String, trim: true, default: null },
 
     isAttended: { type: Boolean, default: false },
     attendedAt: { type: Date, default: null },

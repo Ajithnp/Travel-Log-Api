@@ -1,7 +1,9 @@
 import {
   BookingListResult,
+  CancellationRequestResult,
   IBooking,
   IBookingPopulated,
+  ICancellationRequestPopulatedBooking,
   PopulatedBooking,
 } from '../types/entities/booking.entity';
 import { BaseRepository } from './base.repository';
@@ -10,10 +12,9 @@ import {
   IBookingRepository,
 } from '../interfaces/repository_interfaces/IBookingRepository';
 import BookingModel from '../models/booking.model';
-import mongoose from 'mongoose';
-import { BOOKING_STATUS } from '../shared/constants/booking';
+import mongoose, { ClientSession } from 'mongoose';
+import { BOOKING_STATUS, CANCELATION_STATUS } from '../shared/constants/booking';
 import { FilterQuery } from 'mongoose';
-import { populate } from 'dotenv';
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
@@ -121,7 +122,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
     pipeline.push({ $match: matchStage });
 
-    // Lookup package details
+
     pipeline.push({
       $lookup: {
         from: 'packages',
@@ -145,7 +146,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       });
     }
 
-    // Lookup schedule details
     pipeline.push({
       $lookup: {
         from: 'schedulepackages',
@@ -266,4 +266,145 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       )
       .lean() as Promise<IBooking | null>;
   }
+
+  async getCancellationRequests(page: number, limit: number, status?: string): Promise<CancellationRequestResult> {
+    const pipeline: mongoose.PipelineStage[] = [];
+
+    const matchStage: FilterQuery<IBooking> = {
+      cancellationStatus: { $ne: null }
+    };
+    if (status) {
+      matchStage.cancellationStatus = status;
+    }
+
+    pipeline.push({ $match: matchStage });
+
+    pipeline.push({
+      $lookup: {
+        from: 'packages',
+        localField: 'packageId',
+        foreignField: '_id',
+        as: 'package',
+      },
+    });
+    pipeline.push({ $unwind: '$package' });
+
+    pipeline.push({
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
+      },
+    });
+    pipeline.push({ $unwind: '$user' });
+
+    pipeline.push({ $sort: { updatedAt: -1 } });
+
+    pipeline.push({
+      $facet: {
+        requests: [
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          {
+            $project: {
+              _id: { $toString: '$_id' },
+              bookingCode: 1,
+              updatedAt: 1,
+              finalAmount: 1,
+              cancelationRefundAmount: 1,
+              cancellationStatus: 1,
+              packageTittle: '$package.title',
+              userName: '$user.name',
+            },
+          },
+        ],
+        totalCount: [{ $count: 'count' }],
+      },
+    });
+
+    const [result] = await this.model.aggregate(pipeline);
+    const requests = result.requests || [];
+    const totalCount = result.totalCount[0] ? result.totalCount[0].count : 0;
+
+    return { requests, total: totalCount };
+  }
+
+  async getCancellationRequestById(bookingId: string): Promise<ICancellationRequestPopulatedBooking | null> {
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return null;
+    }
+
+    const booking = await this.model
+      .findOne({ _id: new mongoose.Types.ObjectId(bookingId) })
+      .populate({
+        path: 'userId',
+        select: 'name email phone',
+      })
+      .populate({
+        path: 'vendorId',
+        select: 'name',
+      })
+      .populate({
+        path: 'packageId',
+        select: 'title cancellationPolicy',
+        populate: {
+          path: 'cancellationPolicy',
+          select: '-createdAt -updatedAt -description',
+        },
+      })
+      .populate({
+        path: 'scheduleId',
+        select: 'startDate',
+      })
+      .lean() as ICancellationRequestPopulatedBooking | null;
+
+    return booking;
+  }
+
+  async updateCancellationStatus(bookingId: string, status: string): Promise<IBooking | null> {
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return null;
+    }
+    return this.model.findByIdAndUpdate(
+      bookingId,
+      { cancellationStatus: status },
+      { new: true }
+    ).lean() as Promise<IBooking | null>;
+  }
+
+  async findOneAndUpdateReject(bookingId: string, rejectedReason: string): Promise<IBooking | null> {
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return null;
+    }
+    return this.findOneAndUpdate(
+      {
+        _id: bookingId,
+      },
+      {
+        cancellationStatus: CANCELATION_STATUS.REJECTED,
+        cancellationRejectedReason: rejectedReason,
+      },
+      { new: true },
+    ) as Promise<IBooking | null>;
+  }
+
+  async findBookingWithSession(bookingId: string, session: ClientSession): Promise<IBooking | null> {
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return null;
+    }
+    return this.model.findOne({ _id: new mongoose.Types.ObjectId(bookingId) }).session(session).lean() as Promise<IBooking | null>;
+  }
+
+  async updateBookingWithSession(bookingId: string, update: Partial<IBooking>, session: ClientSession): Promise<IBooking | null> {
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return null;
+    }
+    return this.model.findOneAndUpdate(
+      { _id: new mongoose.Types.ObjectId(bookingId) },
+      update,
+      { new: true, session }
+    ).lean() as Promise<IBooking | null>;
+  }
 }
+

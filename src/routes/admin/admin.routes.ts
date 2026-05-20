@@ -6,7 +6,7 @@ import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
-import { BlockOrUnblockUserSchema } from '../../types/dtos/admin/user/request.dtos';
+import { BlockOrUnblockUserSchema, CancellationRejectSchema } from '../../types/dtos/admin/user/request.dtos';
 import { UpdateVendorVerificationSchema } from '../../types/dtos/admin/vendor/request.dtos';
 import { IAdminCategoryController } from '../../interfaces/controller_interfaces/admin/IAdminCategoryController';
 import { IAdminCancellationPolicyController } from '../../interfaces/controller_interfaces/admin/IAdminCancellationPolicyController';
@@ -44,6 +44,35 @@ export class AdminRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       this._adminUserContoller.getAllUsers.bind(this._adminUserContoller),
+    );
+
+    this._router.get(
+      '/users/cancellation-requests',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminUserContoller.getCancellationRequests.bind(this._adminUserContoller),
+    );
+
+    this._router.get(
+      '/users/cancellation-requests/:bookingId',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminUserContoller.getCancellationRequestDetails.bind(this._adminUserContoller),
+    );
+
+    this._router.patch(
+      '/users/cancellation-requests/:bookingId/reject',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(CancellationRejectSchema),
+      this._adminUserContoller.rejectCancellationRequest.bind(this._adminUserContoller),
+    );
+
+    this._router.patch(
+      '/users/cancellation-requests/:bookingId/approve',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminUserContoller.approveCancellationRequest.bind(this._adminUserContoller),
     );
 
     this._router.patch(

@@ -23,6 +23,7 @@ export enum AdminNotificationType {
   RepeatedCancellations = 'repeated_cancellations',
   LargeRefund = 'large_refund',
   AdminLogin = 'admin_login',
+  RejectedCancellation = 'rejected_cancellation',
 }
 
 export enum VendorNotificationType {

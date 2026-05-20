@@ -49,6 +49,7 @@ export interface IBooking extends Document {
   cancelationRefundAmount?: number;
   cancellationStatus?: CancelationStatus;
   cancelledAt?: Date;
+  cancellationRejectedReason?: string;
  
 
   isAttended: boolean;
@@ -92,4 +93,45 @@ export interface PopulatedBooking extends Omit<IBooking, 'packageId' | 'schedule
 export interface BookingListResult {
   bookings: PopulatedBooking[];
   total: number;
+}
+
+export interface PopulatedCancellationRequest {
+  _id: string;
+  bookingCode: string;
+  updatedAt: Date;
+  finalAmount: number;
+  cancelationRefundAmount: number;
+  cancellationStatus: CancelationStatus;
+  packageTittle: string;
+  userName: string;
+}
+
+export interface CancellationRequestResult {
+  requests: PopulatedCancellationRequest[];
+  total: number;
+}
+
+
+export interface ICancellationRequestPopulatedBooking extends Omit<IBooking, 'userId' | 'vendorId' | 'packageId' | 'scheduleId'> {
+  userId: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  vendorId: {
+    name: string;
+  };
+  packageId: {
+    title: string;
+    cancellationPolicy: {
+      _id: mongoose.Types.ObjectId;
+      key: string;
+      label: string;
+      isActive: boolean;
+      rules: { daysBeforeTrip: number; refundPercent: number }[];
+    } | null;
+  };
+  scheduleId: {
+    startDate: Date;
+  };
 }

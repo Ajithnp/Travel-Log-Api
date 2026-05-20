@@ -1,7 +1,70 @@
 import mongoose from 'mongoose';
-import { CancelationStatus } from '../../types/entities/booking.entity';
+import { CancelationStatus, ICancellationRequestPopulatedBooking } from '../../types/entities/booking.entity';
+
+export interface CancellationRequestDetails {
+  bookingId: string;
+  bookingCode:string;
+  userName: string;
+  email: string;
+  phoneNo: string;
+  vendorName: string;
+  startDate: Date;
+  packageName: string;
+  cancellationPolicy: CancellationPolicy | null;
+  travelersCount: number;
+  groupType: string;
+  cancellationReason: string | null;
+  updatedAt: Date;
+  finalAmount: number;
+  cancellationRefundAmount: number | null;
+  cancelledAt: Date | null;
+  cancellationRejectedReason: string | null;
+}
 
 export class BookingMapper {
+  static toCancellationRequestDetails(
+    booking: ICancellationRequestPopulatedBooking,
+  ): CancellationRequestDetails {
+    const pkg = booking.packageId;
+    const rawPolicy = pkg?.cancellationPolicy;
+
+    const cancellationPolicy: CancellationPolicy | null =
+      rawPolicy !== null && rawPolicy !== undefined
+        ? {
+            id: rawPolicy._id?.toString() ?? '',
+            key: rawPolicy.key ?? '',
+            label: rawPolicy.label ?? '',
+            rules: (rawPolicy.rules ?? []).map(
+              (rule): CancellationRule => ({
+                daysBeforeTrip: rule.daysBeforeTrip ?? 0,
+                refundPercent: rule.refundPercent ?? 0,
+              }),
+            ),
+            isActive: rawPolicy.isActive ?? false,
+          }
+        : null;
+
+    return {
+      bookingId: booking._id?.toString() ?? '',
+      bookingCode: booking.bookingCode || '',
+      userName: booking.userId?.name || '',
+      email: booking.userId?.email || '',
+      phoneNo: booking.userId?.phone || '',
+      vendorName: booking.vendorId?.name || '',
+      startDate: booking.scheduleId?.startDate,
+      packageName: pkg?.title ?? '',
+      cancellationPolicy,
+      travelersCount: booking.travelerCount ?? 0,
+      groupType: booking.groupType ?? 'SOLO',
+      cancellationReason: booking.cancellationReason ?? null,
+      updatedAt: booking.updatedAt,
+      finalAmount: booking.finalAmount ?? 0,
+      cancellationRefundAmount: booking.cancelationRefundAmount ?? null,
+      cancellationRejectedReason: booking.cancellationRejectedReason ?? null,
+      cancelledAt: booking.cancelledAt ?? null,
+    };
+  }
+
   static toDetailedResponse(booking: RawPopulatedBooking): BookingDetailDTO {
     const pkg = booking.packageId;
 
