@@ -1,6 +1,70 @@
 import mongoose from 'mongoose';
+import { CancelationStatus, ICancellationRequestPopulatedBooking } from '../../types/entities/booking.entity';
+
+export interface CancellationRequestDetails {
+  bookingId: string;
+  bookingCode:string;
+  userName: string;
+  email: string;
+  phoneNo: string;
+  vendorName: string;
+  startDate: Date;
+  packageName: string;
+  cancellationPolicy: CancellationPolicy | null;
+  travelersCount: number;
+  groupType: string;
+  cancellationReason: string | null;
+  updatedAt: Date;
+  finalAmount: number;
+  cancellationRefundAmount: number | null;
+  cancelledAt: Date | null;
+  cancellationRejectedReason: string | null;
+}
 
 export class BookingMapper {
+  static toCancellationRequestDetails(
+    booking: ICancellationRequestPopulatedBooking,
+  ): CancellationRequestDetails {
+    const pkg = booking.packageId;
+    const rawPolicy = pkg?.cancellationPolicy;
+
+    const cancellationPolicy: CancellationPolicy | null =
+      rawPolicy !== null && rawPolicy !== undefined
+        ? {
+            id: rawPolicy._id?.toString() ?? '',
+            key: rawPolicy.key ?? '',
+            label: rawPolicy.label ?? '',
+            rules: (rawPolicy.rules ?? []).map(
+              (rule): CancellationRule => ({
+                daysBeforeTrip: rule.daysBeforeTrip ?? 0,
+                refundPercent: rule.refundPercent ?? 0,
+              }),
+            ),
+            isActive: rawPolicy.isActive ?? false,
+          }
+        : null;
+
+    return {
+      bookingId: booking._id?.toString() ?? '',
+      bookingCode: booking.bookingCode || '',
+      userName: booking.userId?.name || '',
+      email: booking.userId?.email || '',
+      phoneNo: booking.userId?.phone || '',
+      vendorName: booking.vendorId?.name || '',
+      startDate: booking.scheduleId?.startDate,
+      packageName: pkg?.title ?? '',
+      cancellationPolicy,
+      travelersCount: booking.travelerCount ?? 0,
+      groupType: booking.groupType ?? 'SOLO',
+      cancellationReason: booking.cancellationReason ?? null,
+      updatedAt: booking.updatedAt,
+      finalAmount: booking.finalAmount ?? 0,
+      cancellationRefundAmount: booking.cancelationRefundAmount ?? null,
+      cancellationRejectedReason: booking.cancellationRejectedReason ?? null,
+      cancelledAt: booking.cancelledAt ?? null,
+    };
+  }
+
   static toDetailedResponse(booking: RawPopulatedBooking): BookingDetailDTO {
     const pkg = booking.packageId;
 
@@ -25,8 +89,6 @@ export class BookingMapper {
         }),
       );
 
-    // category====
-
     const rawCategory = pkg?.categoryId;
 
     const category: CategoryDTO | null =
@@ -41,6 +103,30 @@ export class BookingMapper {
           }
         : null;
 
+    // cancellation policy
+
+    const rawPolicy = pkg?.cancellationPolicy;
+
+    const cancellationPolicy: CancellationPolicy | null =
+      rawPolicy !== null &&
+      rawPolicy !== undefined &&
+      typeof rawPolicy === 'object' &&
+      '_id' in rawPolicy &&
+      'key' in rawPolicy
+        ? {
+            id: (rawPolicy as RawCancellationPolicy)._id?.toString() ?? '',
+            key: (rawPolicy as RawCancellationPolicy).key ?? '',
+            label: (rawPolicy as RawCancellationPolicy).label ?? '',
+            rules: ((rawPolicy as RawCancellationPolicy).rules ?? []).map(
+              (rule): CancellationRule => ({
+                daysBeforeTrip: rule.daysBeforeTrip ?? 0,
+                refundPercent: rule.refundPercent ?? 0,
+              }),
+            ),
+            isActive: (rawPolicy as RawCancellationPolicy).isActive ?? false,
+          }
+        : null;
+
     const mappedPackage: PackageDTO = {
       id: pkg?._id?.toString() ?? '',
       title: pkg?.title ?? '',
@@ -50,7 +136,7 @@ export class BookingMapper {
       days: pkg?.days ?? '',
       nights: pkg?.nights ?? '',
       difficultyLevel: pkg?.difficultyLevel ?? '',
-      cancellationPolicy: pkg?.cancellationPolicy ?? '',
+      cancellationPolicy,
       inclusions: pkg?.inclusions ?? [],
       exclusions: pkg?.exclusions ?? [],
       packingList: pkg?.packingList ?? [],
@@ -69,7 +155,6 @@ export class BookingMapper {
       notes: sched?.notes ?? null,
     };
 
-    // ── Vendor ────────
     const vendor = booking.vendorId;
 
     const mappedVendor: VendorDTO = {
@@ -103,7 +188,6 @@ export class BookingMapper {
       finalAmount: booking.finalAmount ?? 0,
     };
 
-    // ── Final DTO ─────
     return {
       id: booking._id?.toString() ?? '',
       bookingCode: booking.bookingCode ?? '',
@@ -119,6 +203,8 @@ export class BookingMapper {
 
       financials,
 
+      cancellationPolicy,
+
       paymentStatus: booking.paymentStatus ?? '',
       paymentMethod: booking.paymentMethod ?? null,
       transactionId: booking.transactionId ?? null,
@@ -127,6 +213,7 @@ export class BookingMapper {
       cancellationReason: booking.cancellationReason ?? null,
       cancelledAt: booking.cancelledAt?.toISOString?.() ?? null,
       cancelledBy: booking.cancelledBy ?? null,
+      cancellationStatus: booking.cancellationStatus ?? null,
 
       isAttended: booking.isAttended ?? false,
       attendedAt: booking.attendedAt?.toISOString?.() ?? null,
@@ -139,7 +226,7 @@ export class BookingMapper {
   }
 }
 
-// INPUTS
+
 
 interface RawActivity {
   startTime?: string | null;
@@ -162,6 +249,19 @@ interface RawCategory {
   name?: string;
 }
 
+interface RawCancellationRule {
+  daysBeforeTrip?: number;
+  refundPercent?: number;
+}
+
+interface RawCancellationPolicy {
+  _id?: mongoose.Types.ObjectId;
+  key?: string;
+  label?: string;
+  rules?: RawCancellationRule[];
+  isActive?: boolean;
+}
+
 interface RawPackage {
   _id?: mongoose.Types.ObjectId;
   title?: string;
@@ -171,7 +271,7 @@ interface RawPackage {
   days?: string;
   nights?: string;
   difficultyLevel?: string;
-  cancellationPolicy?: string;
+  cancellationPolicy?: RawCancellationPolicy | mongoose.Types.ObjectId | null;
   inclusions?: string[];
   exclusions?: string[];
   packingList?: string[];
@@ -226,6 +326,7 @@ export interface RawPopulatedBooking {
   paymentMethod?: string | null;
   transactionId?: string | null;
   bookingStatus?: string;
+  cancellationStatus?: CancelationStatus | null;
   cancellationReason?: string | null;
   cancelledAt?: Date | null;
   cancelledBy?: string | null;
@@ -280,12 +381,25 @@ export interface PackageDTO {
   days: string;
   nights: string;
   difficultyLevel: string;
-  cancellationPolicy: string;
+  cancellationPolicy: CancellationPolicy | null;
   inclusions: string[];
   exclusions: string[];
   packingList: string[];
   itinerary: ItineraryDayDTO[];
   category: CategoryDTO | null;
+}
+
+export interface CancellationRule {
+  daysBeforeTrip: number;
+  refundPercent: number;
+}
+
+export interface CancellationPolicy {
+  id: string;
+  key: string;
+  label: string;
+  rules: CancellationRule[];
+  isActive: boolean;
 }
 
 export interface ScheduleDTO {
@@ -324,11 +438,14 @@ export interface BookingDetailDTO {
 
   financials: FinancialsDTO;
 
+  cancellationPolicy: CancellationPolicy | null;
+
   paymentStatus: string;
   paymentMethod: string | null;
   transactionId: string | null;
 
   bookingStatus: string;
+  cancellationStatus: string | null;
   cancellationReason: string | null;
   cancelledAt: string | null;
   cancelledBy: string | null;

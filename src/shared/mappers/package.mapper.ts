@@ -61,7 +61,11 @@ export class PackageMapper {
       inclusions: pkg.inclusions ?? [],
       exclusions: pkg.exclusions ?? [],
       packingList: pkg.packingList ?? [],
-      cancellationPolicy: pkg.cancellationPolicy ?? null,
+      cancellationPolicy: pkg.cancellationPolicy ? {
+        _id: pkg.cancellationPolicy._id.toString(),
+        label: pkg.cancellationPolicy.label ?? '',
+        key: pkg.cancellationPolicy.key ?? '',
+      } : null,
       status: pkg.status,
       isActive: pkg.isActive,
       createdAt: pkg.createdAt,
@@ -147,7 +151,11 @@ export class PackageMapper {
       inclusions: pkg.inclusions ?? [],
       exclusions: pkg.exclusions ?? [],
       packingList: pkg.packingList ?? [],
-      cancellationPolicy: pkg.cancellationPolicy,
+      cancellationPolicy: pkg.cancellationPolicy ? {
+        _id: pkg.cancellationPolicy._id.toString(),
+        label: pkg.cancellationPolicy.label ?? '',
+        key: pkg.cancellationPolicy.key ?? '',
+      } : null,
       status: pkg.status,
       isActive: pkg.isActive,
     };

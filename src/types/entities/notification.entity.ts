@@ -5,6 +5,7 @@ import { UserRole } from './user.entity';
 
 export enum UserNotificationType {
   BookingConfirmed = 'booking_confirmed',
+  BookingCancelRequest = 'booking_cancel_request',
   PaymentSuccess = 'payment_success',
   PaymentFailed = 'payment_failed',
   TripReminder = 'trip_reminder',
@@ -22,6 +23,7 @@ export enum AdminNotificationType {
   RepeatedCancellations = 'repeated_cancellations',
   LargeRefund = 'large_refund',
   AdminLogin = 'admin_login',
+  RejectedCancellation = 'rejected_cancellation',
 }
 
 export enum VendorNotificationType {

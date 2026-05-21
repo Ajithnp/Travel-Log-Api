@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { IBooking, ITraveler } from '../types/entities/booking.entity';
 import {
   BOOKING_STATUS,
-  CANCELLED_BY,
+  CANCELATION_STATUS,
   GROUP_TYPE,
   PAYMENT_STATUS,
 } from '../shared/constants/booking';
@@ -115,13 +115,16 @@ const BookingSchema = new Schema<IBooking>(
       enum: Object.values(BOOKING_STATUS),
       default: BOOKING_STATUS.PENDING,
     },
+
     cancellationReason: { type: String, trim: true, default: null },
     cancelledAt: { type: Date, default: null },
-    cancelledBy: {
+    cancellationStatus: {
       type: String,
-      enum: Object.values(CANCELLED_BY),
+      enum: Object.values(CANCELATION_STATUS),
       default: null,
     },
+    cancelationRefundAmount: { type: Number, default: null },
+    cancellationRejectedReason: { type: String, trim: true, default: null },
 
     isAttended: { type: Boolean, default: false },
     attendedAt: { type: Date, default: null },

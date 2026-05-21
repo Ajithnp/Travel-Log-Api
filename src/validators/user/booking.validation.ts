@@ -100,13 +100,9 @@ export const initiateBookingSchema = z
       .positive('amountInPaise must be greater than 0'),
   })
 
-  /**
-   * Cross-field validations
-   */
+
   .superRefine((data, ctx) => {
-    /**
-     * seatsCount === travelers.length
-     */
+
     if (data.seatsCount !== data.travelers.length) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -115,9 +111,6 @@ export const initiateBookingSchema = z
       });
     }
 
-    /**
-     * Only one lead traveler allowed
-     */
     const leadCount = data.travelers.filter((t) => t.isLead).length;
 
     if (leadCount !== 1) {
@@ -128,9 +121,6 @@ export const initiateBookingSchema = z
       });
     }
 
-    /**
-     * Lead traveler should have phone + email
-     */
     data.travelers.forEach((traveler, index) => {
       if (traveler.isLead) {
         if (!traveler.phoneNumber) {
@@ -151,9 +141,6 @@ export const initiateBookingSchema = z
       }
     });
 
-    /**
-     * Tier rules
-     */
     if (data.tierType === 'SOLO' && data.seatsCount !== 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -184,3 +171,30 @@ export const InitiateBookingRequestSchema = z.object({
 });
 
 export type InitiateBookingInput = z.infer<typeof initiateBookingSchema>;
+
+// Cancel booking validation
+
+export const cancelBookingSchema = z.object({
+  reason: z
+    .string({
+      required_error: 'Cancellation reason is required',
+    })
+    .trim()
+    .min(3, 'Reason must be at least 3 characters')
+    .max(200, 'Reason must not exceed 200 characters'),
+
+  details: z
+    .string()
+    .trim()
+    .max(500, 'Details must not exceed 500 characters')
+    .optional(),
+});
+
+export const CancelBookingRequestSchema = z.object({
+  body: cancelBookingSchema,
+  params: z.object({
+    bookingId: objectIdSchema,
+  }),
+});
+
+export type CancelBookingInput = z.infer<typeof cancelBookingSchema>;

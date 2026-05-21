@@ -1,8 +1,9 @@
 import { CancellationPolicies, DifficultyLevel } from 'types/entities/base-package.entity';
 import { PublicPackageSummary } from '../../../types/user/types';
-import { PackageStatus } from 'types/type';
-import { PricingType } from 'types/entities/schedule.entity';
-import { ScheduleStatus } from 'shared/constants/constants';
+import { PackageStatus } from '../../../types/type';
+import { PricingType } from '../../../types/entities/schedule.entity';
+import { ScheduleStatus } from '../../../shared/constants/constants';
+import { CancellationPolicyType } from '../admin/response.dtos';
 
 export interface UserProfileResponseDTO {
   id: string;
@@ -69,7 +70,7 @@ export interface PublicPackageDetailDTO {
   inclusions: string[];
   exclusions: string[];
   packingList: string[];
-  cancellationPolicy: CancellationPolicies | undefined;
+  cancellationPolicy: CancellationPolicyType | null;
   status: PackageStatus;
   isActive: boolean;
 }
@@ -92,7 +93,7 @@ export interface PublicScheduleDTO {
 export interface VendorPublicProfileVendorDTO {
   businessName: string;
   profilePhoto: string | null;
-  about: null; // future field — not in model yet
+  about: null;
   location: string | null;
   averageRating: number;
   totalPackages: number;

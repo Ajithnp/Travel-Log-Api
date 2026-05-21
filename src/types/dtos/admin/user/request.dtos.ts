@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import mongoose from 'mongoose';
 
-/**
- * Reusable ObjectId validator
- */
+
 const objectIdSchema = z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
   message: 'Invalid user id',
 });
@@ -31,3 +29,11 @@ export const BlockOrUnblockUserSchema = z
   });
 
 export type BlockUnblockUserDTO = z.infer<typeof BlockOrUnblockUserSchema>;
+
+
+export const CancellationRejectSchema = z
+  .object({
+    body: z.object({
+      reason: z.string().trim().min(1, 'Reason is required to reject')
+    })
+  });

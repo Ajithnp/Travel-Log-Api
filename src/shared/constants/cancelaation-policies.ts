@@ -2,8 +2,9 @@ export const CANCELLATION_POLICIES = {
   flexible: {
     label: 'Flexible',
     rules: [
-      { daysBeforeTrip: 5, refundPercent: 90 },
-      { daysBeforeTrip: 3, refundPercent: 50 },
+      { daysBeforeTrip: 7, refundPercent: 90 },
+      { daysBeforeTrip: 5, refundPercent: 70 },
+      { daysBeforeTrip: 2, refundPercent: 50 },
       { daysBeforeTrip: 0, refundPercent: 0 },
     ],
   },
@@ -13,6 +14,7 @@ export const CANCELLATION_POLICIES = {
     rules: [
       { daysBeforeTrip: 7, refundPercent: 80 },
       { daysBeforeTrip: 5, refundPercent: 50 },
+      { daysBeforeTrip: 2, refundPercent: 30 },
       { daysBeforeTrip: 0, refundPercent: 0 },
     ],
   },
@@ -20,8 +22,8 @@ export const CANCELLATION_POLICIES = {
   strict: {
     label: 'Strict',
     rules: [
-      { daysBeforeTrip: 12, refundPercent: 70 },
-      { daysBeforeTrip: 7, refundPercent: 30 },
+      { daysBeforeTrip: 7, refundPercent: 60 },
+      { daysBeforeTrip: 5, refundPercent: 40 },
       { daysBeforeTrip: 0, refundPercent: 0 },
     ],
   },
@@ -31,3 +33,5 @@ export const CANCELLATION_POLICIES = {
     rules: [{ daysBeforeTrip: 0, refundPercent: 0 }],
   },
 };
+
+// minimum 10 days needs each trip creation

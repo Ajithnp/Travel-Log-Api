@@ -38,7 +38,7 @@ export interface IBasePackageEntity extends Document {
   inclusions?: string[];
   exclusions?: string[];
   packingList?: string[];
-  cancellationPolicy?: CancellationPolicies;
+  cancellationPolicy?: Types.ObjectId;
   difficultyLevel?: DifficultyLevel;
   status: PackageStatus;
   isActive: boolean;
@@ -47,8 +47,9 @@ export interface IBasePackageEntity extends Document {
   updatedAt: Date;
 }
 
-export interface IBasePackagePopulated extends Omit<IBasePackageEntity, 'categoryId'> {
+export interface IBasePackagePopulated extends Omit<IBasePackageEntity, 'categoryId' | 'cancellationPolicy'> {
   categoryId: { name: string };
+  cancellationPolicy: { label: string; key: string; _id: string };
 }
 
 export interface PopulatedVendor {
@@ -62,8 +63,14 @@ interface PopulatedCategory {
   name: string;
   slug?: string;
 }
+  interface PopulatedCancellationPolicy {
+  _id: string;
+  label: string;
+  key: string;
+}
 export interface IPopulatedPackageDetails
-  extends Omit<IBasePackageEntity, 'vendorId' | 'categoryId'> {
+  extends Omit<IBasePackageEntity, 'vendorId' | 'categoryId' | 'cancellationPolicy'> {
   vendorId: PopulatedVendor;
   categoryId: PopulatedCategory;
+  cancellationPolicy: PopulatedCancellationPolicy;
 }
