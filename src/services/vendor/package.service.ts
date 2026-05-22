@@ -67,16 +67,17 @@ export class PackageService implements IPackageService {
     const vendorObjectId = toObjectId(vendorId);
     const packageObjectId = toObjectId(packageId);
 
-    const packageExist = await this._basePackageRepository.findOnePopulatedMany<IBasePackagePopulated>(
-      {
-        _id: packageObjectId,
-        vendorId: vendorObjectId,
-      },
-      [
-        { path: 'categoryId', select: 'name' },
-        { path: 'cancellationPolicy', select: '_id label key' },
-      ],
-    );
+    const packageExist =
+      await this._basePackageRepository.findOnePopulatedMany<IBasePackagePopulated>(
+        {
+          _id: packageObjectId,
+          vendorId: vendorObjectId,
+        },
+        [
+          { path: 'categoryId', select: 'name' },
+          { path: 'cancellationPolicy', select: '_id label key' },
+        ],
+      );
 
     if (!packageExist) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);

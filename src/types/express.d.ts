@@ -6,6 +6,6 @@ declare module 'express-serve-static-core' {
     file?: Express.Multer.File; // single upload
     files?:
       | Express.Multer.File[] // multiple
-      | { [fieldname: string]: Express.Multer.File[] }; 
+      | { [fieldname: string]: Express.Multer.File[] };
   }
 }

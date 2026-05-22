@@ -18,6 +18,7 @@ import { publicPackageQuerySchema } from '../../validators/public-package.valida
 import { makeRateLimiter } from '../../middlewares/rate.limiter.middleware';
 import { wishlistToggleLimiter } from '../../config/rate.limiter.config';
 import { IChatController } from '../../interfaces/controller_interfaces/IChatController';
+import { IWalletController } from '../../interfaces/controller_interfaces/user/IWalletController';
 
 @injectable()
 export class UserRoutes extends BaseRoute {
@@ -30,6 +31,9 @@ export class UserRoutes extends BaseRoute {
 
     @inject('IChatController')
     private _chatController: IChatController,
+
+    @inject('IWalletController')
+    private _walletController: IWalletController,
   ) {
     super();
     this.initializeRoutes();
@@ -152,6 +156,21 @@ export class UserRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.USER]),
       this._chatController.getUserChatMessages.bind(this._chatController),
+    );
+
+    // Wallet
+    this._router.get(
+      '/wallet/balance',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._walletController.getWalletBalance.bind(this._walletController),
+    );
+
+    this._router.get(
+      '/wallet',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._walletController.getWallet.bind(this._walletController),
     );
   }
 }

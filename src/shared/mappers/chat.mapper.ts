@@ -43,7 +43,7 @@ export class ChatMapper {
     return {
       id: message._id.toString(),
       chatId: message.chatId.toString(),
-      senderId:message.senderId.toString(),
+      senderId: message.senderId.toString(),
       senderRole: message.senderRole,
       senderName: message.senderName,
       content: message.content,

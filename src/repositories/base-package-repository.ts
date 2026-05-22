@@ -57,7 +57,9 @@ export class BasePackageRepository
       this.model
         .find(query)
         .populate<{ categoryId: { name: string } }>('categoryId', 'name')
-        .populate<{ cancellationPolicy: { _id: string, label: string, key: string } }>('cancellationPolicy', '_id label key')
+        .populate<{
+          cancellationPolicy: { _id: string; label: string; key: string };
+        }>('cancellationPolicy', '_id label key')
         .sort({ createdAt: 1 })
         .skip(skip)
         .limit(filters.limit)

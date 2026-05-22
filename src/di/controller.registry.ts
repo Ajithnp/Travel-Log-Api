@@ -31,6 +31,8 @@ import { INotificationController } from '../interfaces/controller_interfaces/INo
 import { NotificationController } from '../controllers/notification-controller';
 import { IChatController } from '../interfaces/controller_interfaces/IChatController';
 import { ChatController } from '../controllers/chat-controller';
+import { IWalletController } from '../interfaces/controller_interfaces/user/IWalletController';
+import { WalletController } from '../controllers/user/wallet.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -95,6 +97,10 @@ export class ControllerRegistry {
 
     container.register<IBookingController>('IBookingController', {
       useClass: BookingController,
+    });
+
+    container.register<IWalletController>('IWalletController', {
+      useClass: WalletController,
     });
 
     // Register other controllers here

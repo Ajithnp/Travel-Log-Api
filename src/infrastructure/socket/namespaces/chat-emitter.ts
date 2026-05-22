@@ -33,7 +33,7 @@ export class ChatEmitter {
     }
 
     const room = SocketRooms.forChat(chatId);
-    const vendorRoom = SocketRooms.forUser(vendorId)
+    const vendorRoom = SocketRooms.forUser(vendorId);
     logger.info(`[ChatEmitter] Emitting '${CHAT_EVENTS.MESSAGE_NEW}' → room: "${room}"`);
     this.io.to(room).emit(CHAT_EVENTS.MESSAGE_NEW, payload);
     this.io.to(vendorRoom).emit(CHAT_EVENTS.MESSAGE_NEW, payload);
@@ -48,7 +48,6 @@ export class ChatEmitter {
     const room = SocketRooms.forChat(chatId);
     logger.info(`[ChatEmitter] Emitting '${CHAT_EVENTS.MESSAGE_NEW}' → room: "${room}"`);
     this.io.to(room).emit(CHAT_EVENTS.MESSAGE_NEW, payload);
-    
   }
 
   // Broadcast room update (pin / archive) to everyone in the chat room

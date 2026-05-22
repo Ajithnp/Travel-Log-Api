@@ -50,7 +50,10 @@ const draftPackageBackendSchema = basePackageBackendSchema.extend({
   exclusions: z.array(z.string()).optional(),
   packingList: z.array(z.string()).optional(),
 
-  cancellationPolicy: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid cancellation policy').optional(),
+  cancellationPolicy: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid cancellation policy')
+    .optional(),
 
   isActive: z.boolean().optional(),
 

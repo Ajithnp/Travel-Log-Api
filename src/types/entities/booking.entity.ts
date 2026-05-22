@@ -1,11 +1,19 @@
 import mongoose, { Document } from 'mongoose';
-import { BOOKING_STATUS, CANCELATION_STATUS, CANCELLED_BY, GROUP_TYPE, PAYMENT_STATUS } from 'shared/constants/booking';
+import {
+  BOOKING_STATUS,
+  CANCELATION_STATUS,
+  CANCELLED_BY,
+  GROUP_TYPE,
+  PAYMENT_METHOD,
+  PAYMENT_STATUS,
+} from 'shared/constants/booking';
 
 export type GroupType = (typeof GROUP_TYPE)[keyof typeof GROUP_TYPE];
 export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
 export type BookingStatus = (typeof BOOKING_STATUS)[keyof typeof BOOKING_STATUS];
 export type CancelledBy = (typeof CANCELLED_BY)[keyof typeof CANCELLED_BY];
 export type CancelationStatus = (typeof CANCELATION_STATUS)[keyof typeof CANCELATION_STATUS];
+export type PaymentMethod = (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD];
 
 export interface ITraveler {
   fullName: string;
@@ -31,8 +39,8 @@ export interface IBooking extends Document {
   travelers: ITraveler[];
 
   grossAmount: number; // pricing[groupType] from schedule at time of booking
-  discountAmount: number; // offer + coupon combined 
-  walletAmountUsed: number; // wallet balance applied 
+  discountAmount: number; // offer + coupon combined
+  walletAmountUsed: number; // wallet balance applied
   finalAmount: number; // grossAmount - discountAmount - walletAmountUsed
   platformCommission: number; // 15% of grossAmount
   vendorEarning: number; // grossAmount - platformCommission
@@ -41,27 +49,24 @@ export interface IBooking extends Document {
   offerId?: mongoose.Types.ObjectId | null;
 
   paymentStatus: PaymentStatus;
-  paymentMethod?: 'stripe' | 'wallet' | 'combined' | null;
-  transactionId?: string | null; 
-  
+  paymentMethod?: PaymentMethod | null;
+  transactionId?: string | null;
+
   bookingStatus: BookingStatus;
   cancellationReason?: string;
   cancelationRefundAmount?: number;
   cancellationStatus?: CancelationStatus;
   cancelledAt?: Date;
   cancellationRejectedReason?: string;
- 
 
   isAttended: boolean;
   attendedAt?: Date;
   hasReviewed: boolean;
-  ticketUrl?: string; 
+  ticketUrl?: string;
 
   createdAt: Date;
   updatedAt: Date;
 }
-
-
 
 export interface IPopulatedPackage {
   _id: mongoose.Types.ObjectId;
@@ -111,14 +116,16 @@ export interface CancellationRequestResult {
   total: number;
 }
 
-
-export interface ICancellationRequestPopulatedBooking extends Omit<IBooking, 'userId' | 'vendorId' | 'packageId' | 'scheduleId'> {
+export interface ICancellationRequestPopulatedBooking
+  extends Omit<IBooking, 'userId' | 'vendorId' | 'packageId' | 'scheduleId'> {
   userId: {
+    _id: mongoose.Types.ObjectId;
     name: string;
     email: string;
     phone: string;
   };
   vendorId: {
+    _id: mongoose.Types.ObjectId;
     name: string;
   };
   packageId: {
@@ -132,6 +139,7 @@ export interface ICancellationRequestPopulatedBooking extends Omit<IBooking, 'us
     } | null;
   };
   scheduleId: {
+    _id: mongoose.Types.ObjectId;
     startDate: Date;
   };
 }

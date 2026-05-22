@@ -67,7 +67,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
   confirmBooking(
     userId: string,
     bookingId: string,
-    stripePaymentIntentId: string,
+    stripePaymentIntentId?: string,
     session?: mongoose.ClientSession,
   ): Promise<IBooking | null> {
     return this.model
@@ -79,8 +79,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         {
           bookingStatus: BOOKING_STATUS.CONFIRMED,
           paymentStatus: BOOKING_STATUS.CONFIRMED,
-          paymentMethod: 'stripe',
-          transactionId: stripePaymentIntentId,
+          transactionId: stripePaymentIntentId ? stripePaymentIntentId : null,
         },
         { new: true, session },
       )
@@ -98,15 +97,13 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
   }
 
   async findByIdAndUserLean(id: string, userId: string): Promise<IBookingPopulated | null> {
-    return (
-      this.model
-        .findOne({
-          _id: new mongoose.Types.ObjectId(id),
-          userId: new mongoose.Types.ObjectId(userId),
-        })
-        .populate('packageId', 'title')
-        .lean() as Promise<IBookingPopulated | null>
-    );
+    return this.model
+      .findOne({
+        _id: new mongoose.Types.ObjectId(id),
+        userId: new mongoose.Types.ObjectId(userId),
+      })
+      .populate('packageId', 'title')
+      .lean() as Promise<IBookingPopulated | null>;
   }
 
   async findBookings(filters: BookingFilters): Promise<BookingListResult> {
@@ -121,7 +118,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     }
 
     pipeline.push({ $match: matchStage });
-
 
     pipeline.push({
       $lookup: {
@@ -267,11 +263,15 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       .lean() as Promise<IBooking | null>;
   }
 
-  async getCancellationRequests(page: number, limit: number, status?: string): Promise<CancellationRequestResult> {
+  async getCancellationRequests(
+    page: number,
+    limit: number,
+    status?: string,
+  ): Promise<CancellationRequestResult> {
     const pipeline: mongoose.PipelineStage[] = [];
 
     const matchStage: FilterQuery<IBooking> = {
-      cancellationStatus: { $ne: null }
+      cancellationStatus: { $ne: null },
     };
     if (status) {
       matchStage.cancellationStatus = status;
@@ -330,12 +330,14 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     return { requests, total: totalCount };
   }
 
-  async getCancellationRequestById(bookingId: string): Promise<ICancellationRequestPopulatedBooking | null> {
+  async getCancellationRequestById(
+    bookingId: string,
+  ): Promise<ICancellationRequestPopulatedBooking | null> {
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return null;
     }
 
-    const booking = await this.model
+    const booking = (await this.model
       .findOne({ _id: new mongoose.Types.ObjectId(bookingId) })
       .populate({
         path: 'userId',
@@ -357,7 +359,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         path: 'scheduleId',
         select: 'startDate',
       })
-      .lean() as ICancellationRequestPopulatedBooking | null;
+      .lean()) as ICancellationRequestPopulatedBooking | null;
 
     return booking;
   }
@@ -366,14 +368,15 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return null;
     }
-    return this.model.findByIdAndUpdate(
-      bookingId,
-      { cancellationStatus: status },
-      { new: true }
-    ).lean() as Promise<IBooking | null>;
+    return this.model
+      .findByIdAndUpdate(bookingId, { cancellationStatus: status }, { new: true })
+      .lean() as Promise<IBooking | null>;
   }
 
-  async findOneAndUpdateReject(bookingId: string, rejectedReason: string): Promise<IBooking | null> {
+  async findOneAndUpdateReject(
+    bookingId: string,
+    rejectedReason: string,
+  ): Promise<IBooking | null> {
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return null;
     }
@@ -389,22 +392,33 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     ) as Promise<IBooking | null>;
   }
 
-  async findBookingWithSession(bookingId: string, session: ClientSession): Promise<IBooking | null> {
+  async findBookingWithSession(
+    bookingId: string,
+    session: ClientSession,
+  ): Promise<IBookingPopulated | null> {
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return null;
     }
-    return this.model.findOne({ _id: new mongoose.Types.ObjectId(bookingId) }).session(session).lean() as Promise<IBooking | null>;
+    return this.model
+      .findOne({ _id: new mongoose.Types.ObjectId(bookingId) })
+      .populate('packageId', 'title')
+      .session(session)
+      .lean() as Promise<IBookingPopulated | null>;
   }
 
-  async updateBookingWithSession(bookingId: string, update: Partial<IBooking>, session: ClientSession): Promise<IBooking | null> {
+  async updateBookingWithSession(
+    bookingId: string,
+    update: Partial<IBooking>,
+    session: ClientSession,
+  ): Promise<IBooking | null> {
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return null;
     }
-    return this.model.findOneAndUpdate(
-      { _id: new mongoose.Types.ObjectId(bookingId) },
-      update,
-      { new: true, session }
-    ).lean() as Promise<IBooking | null>;
+    return this.model
+      .findOneAndUpdate({ _id: new mongoose.Types.ObjectId(bookingId) }, update, {
+        new: true,
+        session,
+      })
+      .lean() as Promise<IBooking | null>;
   }
 }
-

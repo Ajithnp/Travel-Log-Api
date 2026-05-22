@@ -10,12 +10,12 @@ export class MessageRepository extends BaseRepository<IMessage> implements IMess
   constructor() {
     super(MessageModel);
   }
- // cursor based pagination
+  // cursor based pagination
   async findMessagesByChatId(
     chatId: string,
     cursor?: string,
     limit: number = 10,
-  ): Promise<{ messages: IMessage[]; hasMore: boolean ,nextCursor: string | null }> {
+  ): Promise<{ messages: IMessage[]; hasMore: boolean; nextCursor: string | null }> {
     const query: FilterQuery<IMessage> = { chatId };
 
     if (cursor) {
@@ -23,21 +23,21 @@ export class MessageRepository extends BaseRepository<IMessage> implements IMess
     }
 
     const messages = await this.model
-        .find(query)
-        .sort({ _id: -1 }) 
-        .limit(limit + 1)
-        .lean()
+      .find(query)
+      .sort({ _id: -1 })
+      .limit(limit + 1)
+      .lean();
 
     const hasMore = messages.length > limit;
     if (hasMore) messages.pop();
     const result = messages.reverse();
     const nextCursor = hasMore ? result[0]._id.toString() : null;
     return {
-      messages:result,
+      messages: result,
       hasMore,
-      nextCursor
+      nextCursor,
     };
-  };
+  }
 
   async createTextMessage(data: {
     chatId: string;
@@ -47,10 +47,9 @@ export class MessageRepository extends BaseRepository<IMessage> implements IMess
   }): Promise<IMessage> {
     return this.create({
       ...data,
-      chatId: new Types.ObjectId(data.chatId)
+      chatId: new Types.ObjectId(data.chatId),
     });
   }
-
 
   async getLastMessage(chatId: string): Promise<IMessage | null> {
     return this.model.findOne({ chatId }).sort({ createdAt: -1 }).lean();
@@ -61,7 +60,11 @@ export class MessageRepository extends BaseRepository<IMessage> implements IMess
     return result.deletedCount === 1;
   }
 
-  async getMessageUnreadCount(chatId: string , senderRole : 'user' | 'vendor' , lastReadAt : Date) : Promise<number> {
+  async getMessageUnreadCount(
+    chatId: string,
+    senderRole: 'user' | 'vendor',
+    lastReadAt: Date,
+  ): Promise<number> {
     return await this.countDocuments({
       chatId,
       senderRole,

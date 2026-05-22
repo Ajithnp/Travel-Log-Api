@@ -1,23 +1,45 @@
 import { inject, injectable } from 'tsyringe';
-import { DetailedCancellationRequestResponseDTO, IAdminUserService } from '../../interfaces/service_interfaces/admin/IAdminUserService';
+import {
+  DetailedCancellationRequestResponseDTO,
+  IAdminUserService,
+} from '../../interfaces/service_interfaces/admin/IAdminUserService';
 import { IUser } from '../../types/entities/user.entity';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { AppError } from '../../errors/AppError';
-import { ERROR_MESSAGES, NOTIFICATION_MESSAGES, NOTIFICATION_TITLES, REDIRECT_URL } from '../../shared/constants/messages';
+import {
+  ERROR_MESSAGES,
+  NOTIFICATION_MESSAGES,
+  NOTIFICATION_TITLES,
+  REDIRECT_URL,
+} from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ITokenService } from '../../interfaces/service_interfaces/ITokenService';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
 import mongoose, { FilterQuery, Types } from 'mongoose';
 import { UserProfileResponseDTO } from '../../types/dtos/user/response.dtos';
 import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
-import { PopulatedCancellationRequest } from '../../types/entities/booking.entity';
+import {
+  PopulatedCancellationRequest,
+  IBookingPopulated,
+} from '../../types/entities/booking.entity';
 import { computeRefundBreakdown } from '../../shared/utils/cancellation-policy/policy-refund-calculator';
 import { BookingMapper } from '../../shared/mappers/booking.mapper';
 import { BOOKING_STATUS, CANCELATION_STATUS } from '../../shared/constants/booking';
 import { INotificationService } from '../../interfaces/service_interfaces/INotificationService';
 import { USER_ROLES } from '../../shared/constants/roles';
-import { AdminNotificationType } from '../../types/entities/notification.entity';
+import {
+  AdminNotificationType,
+  UserNotificationType,
+} from '../../types/entities/notification.entity';
 import logger from '../../config/logger';
+import { IWalletRepository } from '../../interfaces/repository_interfaces/IWalletRepository';
+import { IWalletTransactionRepository } from '../../interfaces/repository_interfaces/IWalletTransactionRepository';
+import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
+import { IWalletTransaction } from '../../types/entities/wallet.transaction.entity';
+import { TRANSACTION_STATUS, TRANSACTION_TYPE } from '../../shared/constants/wallet';
+import { IChatRepository } from '../../interfaces/repository_interfaces/IChatRepository';
+import { IChat } from '../../types/entities/chat.entity';
+import { chatEmitter } from '../../infrastructure/socket/namespaces/chat-emitter';
 
 @injectable()
 export class AdminUserService implements IAdminUserService {
@@ -30,7 +52,15 @@ export class AdminUserService implements IAdminUserService {
     private _bookingRepository: IBookingRepository,
     @inject('INotificationService')
     private _notificationService: INotificationService,
-  ) { }
+    @inject('IWalletRepository')
+    private _walletRepository: IWalletRepository,
+    @inject('IWalletTransactionRepository')
+    private _walletTransactionRepository: IWalletTransactionRepository,
+    @inject('ISchedulePackageRepository')
+    private _schedulePackageRepository: ISchedulePackageRepository,
+    @inject('IChatRepository')
+    private _chatRepository: IChatRepository,
+  ) {}
 
   async fetchUsers(
     page: number,
@@ -70,7 +100,6 @@ export class AdminUserService implements IAdminUserService {
     };
   }
 
-
   async updateUserAccess(
     id: string,
     block: boolean,
@@ -101,7 +130,6 @@ export class AdminUserService implements IAdminUserService {
     limit: number,
     status?: string,
   ): Promise<PaginatedData<PopulatedCancellationRequest>> {
-
     const result = await this._bookingRepository.getCancellationRequests(page, limit, status);
 
     return {
@@ -115,7 +143,9 @@ export class AdminUserService implements IAdminUserService {
     };
   }
 
-  async getCancellationRequestDetails(bookingId: string): Promise<DetailedCancellationRequestResponseDTO> {
+  async getCancellationRequestDetails(
+    bookingId: string,
+  ): Promise<DetailedCancellationRequestResponseDTO> {
     const booking = await this._bookingRepository.getCancellationRequestById(bookingId);
     if (!booking) {
       throw new AppError(ERROR_MESSAGES.CANCELLATION_REQUEST_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
@@ -130,13 +160,13 @@ export class AdminUserService implements IAdminUserService {
         mapped.finalAmount,
         policy,
         new Date(mapped.startDate),
-        mapped.cancelledAt || new Date()
+        mapped.cancelledAt || new Date(),
       );
     }
 
     return {
       bookingId: mapped.bookingId,
-      bookingCode:mapped.bookingCode,
+      bookingCode: mapped.bookingCode,
       userName: mapped.userName,
       email: mapped.email,
       phoneNo: mapped.phoneNo,
@@ -157,7 +187,11 @@ export class AdminUserService implements IAdminUserService {
     };
   }
 
-  async rejectCancellationRequest(bookingId: string, userId: string, rejectedReason: string): Promise<void> {
+  async rejectCancellationRequest(
+    bookingId: string,
+    userId: string,
+    rejectedReason: string,
+  ): Promise<void> {
     const booking = await this._bookingRepository.getCancellationRequestById(bookingId);
 
     if (!booking) {
@@ -165,10 +199,16 @@ export class AdminUserService implements IAdminUserService {
     }
 
     if (booking.cancellationStatus !== CANCELATION_STATUS.PENDING) {
-      throw new AppError(ERROR_MESSAGES.CANCELLATION_REQUEST_ALREADY_PROCESSED, HTTP_STATUS.BAD_REQUEST);
+      throw new AppError(
+        ERROR_MESSAGES.CANCELLATION_REQUEST_ALREADY_PROCESSED,
+        HTTP_STATUS.BAD_REQUEST,
+      );
     }
 
-    const updatedBooking = await this._bookingRepository.findOneAndUpdateReject(bookingId,rejectedReason)
+    const updatedBooking = await this._bookingRepository.findOneAndUpdateReject(
+      bookingId,
+      rejectedReason,
+    );
 
     if (!updatedBooking) {
       throw new AppError(ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
@@ -177,31 +217,37 @@ export class AdminUserService implements IAdminUserService {
     try {
       await Promise.all([
         this._notificationService.createNotification({
-          recipientId: booking.userId.toString(),
+          recipientId: booking.userId._id.toString(),
           recipientRole: USER_ROLES.USER,
           senderId: userId.toString(),
           notificationType: AdminNotificationType.RejectedCancellation,
           title: NOTIFICATION_TITLES.CANCELLATION_REJECETD,
-          message: NOTIFICATION_MESSAGES.CANCELLATION_REJECTED(booking.packageId.title,rejectedReason),
+          message: NOTIFICATION_MESSAGES.CANCELLATION_REJECTED(
+            booking.packageId.title,
+            rejectedReason,
+          ),
           data: {
             bookingUId: booking._id.toString(),
             bookingId: booking.bookingCode,
             packageName: booking.packageId.title,
           },
-          redirectUrl:REDIRECT_URL.USER_BOOKING_DETAILS(booking._id.toString()),
+          redirectUrl: REDIRECT_URL.USER_BOOKING_DETAILS(booking._id.toString()),
         }),
 
         this._notificationService.createNotification({
-          recipientId: booking.vendorId.toString(),
+          recipientId: booking.vendorId._id.toString(),
           recipientRole: USER_ROLES.VENDOR,
           senderId: userId.toString(),
           notificationType: AdminNotificationType.RejectedCancellation,
           title: NOTIFICATION_TITLES.USER_CANCELLELATION_REJECETED,
-          message: NOTIFICATION_MESSAGES.USER_CANCELLATION_REJECTED(booking.packageId.title,rejectedReason),
+          message: NOTIFICATION_MESSAGES.USER_CANCELLATION_REJECTED(
+            booking.packageId.title,
+            rejectedReason,
+          ),
           data: {
             bookingUId: booking._id.toString(),
             bookingId: booking.bookingCode,
-            scheduleId: booking.scheduleId.toString(),
+            scheduleId: booking.scheduleId._id.toString(),
             packageName: booking.packageId.title,
           },
           redirectUrl: REDIRECT_URL.USER_BOOKING_DETAILS(booking._id.toString()),
@@ -212,43 +258,135 @@ export class AdminUserService implements IAdminUserService {
         error,
       });
     }
-
   }
 
   async approveCancellationRequest(bookingId: string): Promise<void> {
-
     const session = await mongoose.startSession();
     session.startTransaction();
-  
-    try{
-    const booking = await this._bookingRepository.findBookingWithSession(bookingId, session);
 
-    if (!booking) {
-      throw new AppError(ERROR_MESSAGES.CANCELLATION_REQUEST_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
-    }
+    let chatRoom: IChat | null = null;
 
-    if (booking.cancellationStatus !== CANCELATION_STATUS.PENDING && booking.bookingStatus !== BOOKING_STATUS.CONFIRMED) {
-      throw new AppError(ERROR_MESSAGES.CANCELLATION_REQUEST_ALREADY_PROCESSED, HTTP_STATUS.BAD_REQUEST);
-    }
+    try {
+      const booking = await this._bookingRepository.findBookingWithSession(bookingId, session);
 
-    const updated = await this._bookingRepository.updateBookingWithSession(bookingId, {
-      cancellationStatus: CANCELATION_STATUS.APPROVED,
-      bookingStatus: BOOKING_STATUS.CANCELLED_BY_USER,
-    }, session);
+      if (!booking) {
+        throw new AppError(ERROR_MESSAGES.CANCELLATION_REQUEST_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+      }
 
-    if (!updated) {
+      if (
+        booking.cancellationStatus !== CANCELATION_STATUS.PENDING &&
+        booking.bookingStatus !== BOOKING_STATUS.CONFIRMED
+      ) {
+        throw new AppError(
+          ERROR_MESSAGES.CANCELLATION_REQUEST_ALREADY_PROCESSED,
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
+
+      const updated = await this._bookingRepository.updateBookingWithSession(
+        bookingId,
+        {
+          cancellationStatus: CANCELATION_STATUS.APPROVED,
+          bookingStatus: BOOKING_STATUS.CANCELLED_BY_USER,
+        },
+        session,
+      );
+
+      if (!updated) {
+        throw new AppError(
+          ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR,
+          HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      const refundAmount = booking.cancelationRefundAmount || 0;
+      if (refundAmount > 0) {
+        let wallet = await this._walletRepository.findWalletByUserId(
+          booking.userId.toString(),
+          session,
+        );
+        if (!wallet) {
+          wallet = await this._walletRepository.createWallet(booking.userId.toString(), session);
+        }
+
+        await this._walletRepository.incrementBalance(
+          booking.userId.toString(),
+          refundAmount,
+          session,
+        );
+
+        const transactionData: Partial<IWalletTransaction> = {
+          walletId: wallet._id,
+          userId: booking.userId,
+          bookingId: booking._id,
+          type: TRANSACTION_TYPE.CREDIT,
+          amount: refundAmount,
+          status: TRANSACTION_STATUS.SUCCESS,
+          description: `Refund for cancelled booking ${booking.bookingCode}`,
+        };
+        await this._walletTransactionRepository.createTransaction(transactionData, session);
+      }
+
+      await this._schedulePackageRepository.cancelSeats(
+        booking.scheduleId.toString(),
+        booking.travelerCount,
+        session,
+      );
+      chatRoom = await this._chatRepository.findChatRoomByScheduleId(
+        booking.scheduleId as Types.ObjectId,
+        session,
+      );
+      if (chatRoom) {
+        await this._chatRepository.deactivateMember(
+          chatRoom._id.toString(),
+          booking.userId.toString(),
+          session,
+        );
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      if (chatRoom) {
+        try {
+          chatEmitter.sendRoomUpdated(chatRoom._id.toString(), {
+            chatId: chatRoom._id.toString(),
+            blockedUserId: booking.userId.toString(),
+          });
+        } catch (emitError) {
+          logger.error({ error: emitError });
+        }
+      }
+
+      try {
+        await this._notificationService.createNotification({
+          recipientId: booking.userId.toString(),
+          recipientRole: USER_ROLES.USER,
+          senderId: null,
+          notificationType: UserNotificationType.RefundProcessed,
+          title: NOTIFICATION_TITLES.CANCELLATION_REQUEST_APPROVED,
+          message: NOTIFICATION_MESSAGES.CANCELLATION_REQUEST_APPROVED(
+            booking.packageId.title,
+            refundAmount,
+          ),
+          data: {
+            bookingUId: booking._id.toString(),
+            bookingId: booking.bookingCode,
+            packageName: booking.packageId.title,
+            refundAmount: String(refundAmount),
+          },
+          redirectUrl: REDIRECT_URL.USER_BOOKING_DETAILS(booking._id.toString()),
+        });
+      } catch (notificationError) {
+        logger.error({ error: notificationError });
+      }
+    } catch (error) {
+      logger.error({ error });
       await session.abortTransaction();
       session.endSession();
-      throw new AppError(ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
-    }
-
-
-    }catch(error){
-      logger.error({
-        error,
-      });
-      await session.abortTransaction();
-      session.endSession();
+      if (error instanceof AppError) {
+        throw error;
+      }
       throw new AppError(ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }

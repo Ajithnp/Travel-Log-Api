@@ -36,13 +36,11 @@ export function registerChatHandlers(
     }
   });
 
-
   socket.on(CHAT_EVENTS.LEAVE_ROOM, async ({ chatId }: { chatId: string }) => {
     const room = SocketRooms.forChat(chatId);
     await socket.leave(room);
     logger.info(`[Chat Socket] userId=${userId} left room=${room}`);
   });
-
 
   socket.on('disconnect', (reason) => {
     logger.info(

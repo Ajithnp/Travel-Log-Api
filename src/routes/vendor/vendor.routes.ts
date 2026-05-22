@@ -230,6 +230,5 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       this._chatController.markChatAsReadForVendor.bind(this._chatController),
     );
-
   }
 }

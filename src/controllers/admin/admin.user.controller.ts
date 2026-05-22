@@ -37,7 +37,6 @@ export class AdminUserController implements IAdminUserController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
- 
   blockOrUnblockUser = asyncHandler(async (req, res) => {
     const { userId } = req.params;
     const { blockUser, reason } = req.body;
@@ -60,7 +59,6 @@ export class AdminUserController implements IAdminUserController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
- 
   getCancellationRequests = asyncHandler(async (req, res) => {
     const { page, limit } = getPaginationOptions(req);
     const { status } = req.query as { status: CancelationStatus };
@@ -77,7 +75,7 @@ export class AdminUserController implements IAdminUserController {
   });
 
   getCancellationRequestDetails = asyncHandler(async (req, res) => {
-    const { bookingId } = req.params as {bookingId: string};
+    const { bookingId } = req.params as { bookingId: string };
 
     const requestDetails = await this._adminUserService.getCancellationRequestDetails(bookingId);
 
@@ -91,11 +89,11 @@ export class AdminUserController implements IAdminUserController {
   });
 
   rejectCancellationRequest = asyncHandler(async (req, res) => {
-    const { bookingId } = req.params as {bookingId: string};
+    const { bookingId } = req.params as { bookingId: string };
     const adminId = req.user.id;
-    const { reason } = req.body as {reason: string};
-    
-    await this._adminUserService.rejectCancellationRequest(bookingId,adminId,reason);
+    const { reason } = req.body as { reason: string };
+
+    await this._adminUserService.rejectCancellationRequest(bookingId, adminId, reason);
 
     const successResponse: IApiResponse = {
       success: SUCCESS_STATUS.SUCCESS,

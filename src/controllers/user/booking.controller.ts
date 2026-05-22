@@ -3,6 +3,8 @@ import { IBookingController } from '../../interfaces/controller_interfaces/user/
 import {
   CancelBookingDTO,
   CancelBookingResponseDTO,
+  ConfirmBookingDTO,
+  ConfirmBookingResponseDTO,
   GetBookingsDTO,
   IBookingService,
   InitiateBookingDTO,
@@ -23,8 +25,9 @@ export class BookingController implements IBookingController {
   ) {}
 
   initiateBooking = expressAsyncHandler(async (req, res) => {
-    const userId = req.user!.id;
-    const { packageId, scheduleId, tierType, seatsCount, travelers, amountInPaise } = req.body;
+    const userId = req.user?.id;
+    const { packageId, scheduleId, tierType, seatsCount, travelers, useWallet, amountInPaise } =
+      req.body;
 
     const payload: InitiateBookingDTO = {
       userId,
@@ -32,6 +35,7 @@ export class BookingController implements IBookingController {
       scheduleId,
       tierType,
       seatsCount,
+      useWallet,
       travelers,
       amountInPaise,
     };
@@ -45,6 +49,25 @@ export class BookingController implements IBookingController {
     };
 
     res.status(HTTP_STATUS.CREATED).json(response);
+  });
+
+  confirmBookingWallet = expressAsyncHandler(async (req, res) => {
+    const userId = req.user?.id;
+    const { bookingId } = req.params as { bookingId: string };
+
+    const payload: ConfirmBookingDTO = {
+      userId,
+      bookingId,
+    };
+
+    const result = await this._bookingService.confirmBooking(payload);
+
+    const response: IApiResponse<ConfirmBookingResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.BOOKING_CONFIRMED,
+      data: result,
+    };
+    res.status(HTTP_STATUS.OK).json(response);
   });
 
   verifyPayment = expressAsyncHandler(async (req, res) => {

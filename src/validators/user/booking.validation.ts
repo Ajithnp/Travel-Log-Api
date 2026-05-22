@@ -85,6 +85,8 @@ export const initiateBookingSchema = z
       .min(1, 'Minimum seatsCount is 1')
       .max(20, 'Maximum seatsCount exceeded'),
 
+    useWallet: z.boolean().default(false).optional(),
+
     travelers: z
       .array(travelerSchema, {
         required_error: 'travelers is required',
@@ -100,9 +102,7 @@ export const initiateBookingSchema = z
       .positive('amountInPaise must be greater than 0'),
   })
 
-
   .superRefine((data, ctx) => {
-
     if (data.seatsCount !== data.travelers.length) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -183,11 +183,7 @@ export const cancelBookingSchema = z.object({
     .min(3, 'Reason must be at least 3 characters')
     .max(200, 'Reason must not exceed 200 characters'),
 
-  details: z
-    .string()
-    .trim()
-    .max(500, 'Details must not exceed 500 characters')
-    .optional(),
+  details: z.string().trim().max(500, 'Details must not exceed 500 characters').optional(),
 });
 
 export const CancelBookingRequestSchema = z.object({

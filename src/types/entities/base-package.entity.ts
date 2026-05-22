@@ -47,7 +47,8 @@ export interface IBasePackageEntity extends Document {
   updatedAt: Date;
 }
 
-export interface IBasePackagePopulated extends Omit<IBasePackageEntity, 'categoryId' | 'cancellationPolicy'> {
+export interface IBasePackagePopulated
+  extends Omit<IBasePackageEntity, 'categoryId' | 'cancellationPolicy'> {
   categoryId: { name: string };
   cancellationPolicy: { label: string; key: string; _id: string };
 }
@@ -63,7 +64,7 @@ interface PopulatedCategory {
   name: string;
   slug?: string;
 }
-  interface PopulatedCancellationPolicy {
+interface PopulatedCancellationPolicy {
   _id: string;
   label: string;
   key: string;
