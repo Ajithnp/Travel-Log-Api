@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
-import { CancelationStatus, ICancellationRequestPopulatedBooking } from '../../types/entities/booking.entity';
+import {
+  CancelationStatus,
+  ICancellationRequestPopulatedBooking,
+} from '../../types/entities/booking.entity';
 
 export interface CancellationRequestDetails {
   bookingId: string;
-  bookingCode:string;
+  bookingCode: string;
   userName: string;
   email: string;
   phoneNo: string;
@@ -102,8 +105,6 @@ export class BookingMapper {
             name: (rawCategory as RawCategory).name ?? '',
           }
         : null;
-
-    // cancellation policy
 
     const rawPolicy = pkg?.cancellationPolicy;
 
@@ -219,14 +220,13 @@ export class BookingMapper {
       attendedAt: booking.attendedAt?.toISOString?.() ?? null,
       hasReviewed: booking.hasReviewed ?? false,
       ticketUrl: booking.ticketUrl ?? null,
+      chatId: null,
 
       createdAt: booking.createdAt?.toISOString?.() ?? '',
       updatedAt: booking.updatedAt?.toISOString?.() ?? '',
     };
   }
 }
-
-
 
 interface RawActivity {
   startTime?: string | null;
@@ -454,7 +454,7 @@ export interface BookingDetailDTO {
   attendedAt: string | null;
   hasReviewed: boolean;
   ticketUrl: string | null;
-  chatId?: string;
+  chatId: string | null;
 
   createdAt: string;
   updatedAt: string;

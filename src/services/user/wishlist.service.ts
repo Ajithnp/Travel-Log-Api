@@ -32,7 +32,6 @@ export class WishlistService implements IWishlistService {
     await this._cacheService.clearPrefix(`wishlist:count:${userId}`);
   }
 
-  // ─── Toggle (Add / Remove)
   async toggleWishlist(userId: string, packageId: string): Promise<IWishlistToggleResponse> {
     const pkg = await this._packageRepository.findById(packageId);
     if (!pkg) {
@@ -54,7 +53,6 @@ export class WishlistService implements IWishlistService {
     await this.invalidateUserWishlistCache(userId);
     return { wishlisted: !alreadyWishlisted, packageId };
   }
-  //====================================================
 
   async getWishlistedIds(userId: string): Promise<IWishlistIdsResponse> {
     const cacheKey = CACHE_KEYS.wishlistedIds(userId);
@@ -70,7 +68,6 @@ export class WishlistService implements IWishlistService {
     return { wishlistedPackageIds: ids };
   }
 
-  //=======================================================
   async getWishlist(userId: string, page: number, limit: number): Promise<IWishlistResponse> {
     const cacheKey = CACHE_KEYS.wishlistFull(userId, page);
 
@@ -79,7 +76,6 @@ export class WishlistService implements IWishlistService {
 
     const doc = await this._wishlistRepository.findWithPopulatedPackages(userId, page, limit);
 
-    // No wishlist document yet — user never wishlisted anything
     if (!doc || !doc.packages || doc.packages.length === 0) {
       return {
         data: [],
@@ -103,7 +99,6 @@ export class WishlistService implements IWishlistService {
     return result;
   }
 
-  //=======================================================
   async getWishlistCount(userId: string): Promise<number> {
     const cacheKey = CACHE_KEYS.wishlistCount(userId);
 

@@ -44,9 +44,8 @@ export const SUCCESS_MESSAGES = {
   PAYMENT_VERIFICATION_FAILED: 'Payment verification failed.',
 
   // cancellation
-  CANCELLATION_REQUEST_REJECETED :'Cancellation request rejected successfully',
-  CANCELLATION_REQUEST_APPROVED : 'Cancellation request approved successfully'
-
+  CANCELLATION_REQUEST_REJECETED: 'Cancellation request rejected successfully',
+  CANCELLATION_REQUEST_APPROVED: 'Cancellation request approved successfully',
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -152,7 +151,7 @@ export const ERROR_MESSAGES = {
   INVALID_PAYMENT_INTENT_ID: 'Invalid payment intent ID.',
 
   TRAVELER_INFO_INCOMPLETE: 'Lead traveler must provide email and phone number.',
-
+  PACKAGE_CANNOT_BOOKED: 'Package can not be booked because the trip date has been passed',
   //cancellation
   CANCELLATION_POLICY_NOT_APPLICABLE: 'Cancellation is no longer possible for this booking.',
   CANCELLATION_REQUEST_NOT_FOUND: 'Cancellation request not found',
@@ -168,27 +167,31 @@ export const ERROR_MESSAGES = {
   // cancellation policy
   CANCELLATION_POLICY_NOT_FOUND: 'Cancellation policy not found',
   FAILED_TO_UPDATE_CANCELLATION_POLICY_STATUS: 'Failed to update cancellation policy status',
+
+  // wallet
+  WALLET_NOT_FOUND: 'Wallet not found',
+  INSUFFICIENT_WALLET_BALANCE: 'Insufficient wallet balance',
 } as const;
 
-
 export const NOTIFICATION_MESSAGES = {
+  CANCELLATION_REJECTED: (packageName: string, rejectedReason: string) =>
+    `Your cancellation request for "${packageName}" has been rejected. admin noted : ${rejectedReason}`,
+  CANCELLATION_REQUEST_APPROVED: (packageName: string, refundAmount: number) =>
+    `Your cancellation request for "${packageName}" has been approved. ₹${refundAmount} has been refunded to your wallet.`,
 
-  CANCELLATION_REJECTED:(packageName:string,rejectedReason:string)=>`Your cancellation request for "${packageName}" has been rejected. admin noted : ${rejectedReason}`,
-
-  USER_CANCELLATION_REJECTED:(packageName:string,rejectedReason:string)=>`User booking for "${packageName}" has been rejected. admin noted : ${rejectedReason}`,
+  USER_CANCELLATION_REJECTED: (packageName: string, rejectedReason: string) =>
+    `User booking for "${packageName}" has been rejected. admin noted : ${rejectedReason}`,
 } as const;
 
 export const NOTIFICATION_TITLES = {
- 
   CANCELLATION_REJECETD: 'Cancellation Request Rejected',
+  CANCELLATION_REQUEST_APPROVED: 'Cancellation Request Approved',
 
   // VENDOR
-  USER_CANCELLELATION_REJECETED: 'User Cancellation Request Rejected'
-
+  USER_CANCELLELATION_REJECETED: 'User Cancellation Request Rejected',
 } as const;
 
 export const REDIRECT_URL = {
   // user
-  USER_BOOKING_DETAILS: (bookingId:string)=>`/bookings/${bookingId}`,
-  
-}
+  USER_BOOKING_DETAILS: (bookingId: string) => `/bookings/${bookingId}`,
+};

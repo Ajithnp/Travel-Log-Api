@@ -1,6 +1,9 @@
 import { PaginatedData } from '../../../types/common/IPaginationResponse';
 import { UserProfileResponseDTO } from 'types/dtos/user/response.dtos';
-import { CancelationStatus, PopulatedCancellationRequest } from '../../../types/entities/booking.entity';
+import {
+  CancelationStatus,
+  PopulatedCancellationRequest,
+} from '../../../types/entities/booking.entity';
 import { RefundBreakdown } from '../../../shared/utils/cancellation-policy/policy-refund-calculator';
 
 export interface IAdminUserService {
@@ -22,14 +25,18 @@ export interface IAdminUserService {
 
   getCancellationRequestDetails(bookingId: string): Promise<DetailedCancellationRequestResponseDTO>;
 
-  rejectCancellationRequest(bookingId: string, userId: string, rejectedReason: string): Promise<void>;
+  rejectCancellationRequest(
+    bookingId: string,
+    userId: string,
+    rejectedReason: string,
+  ): Promise<void>;
 
   approveCancellationRequest(bookingId: string): Promise<void>;
 }
 
 export interface DetailedCancellationRequestResponseDTO {
   bookingId: string;
-  bookingCode:string;
+  bookingCode: string;
   userName: string;
   email: string;
   phoneNo: string;
@@ -46,5 +53,5 @@ export interface DetailedCancellationRequestResponseDTO {
   finalAmount: number;
   cancellationRefundAmount: number | null;
   cancellationRejectedReason: string | null;
-  calculation: RefundBreakdown | null; 
+  calculation: RefundBreakdown | null;
 }

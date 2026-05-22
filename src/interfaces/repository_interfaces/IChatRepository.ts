@@ -1,13 +1,16 @@
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
 import { IChat, IChatWithMembersPopulated } from '../../types/entities/chat.entity';
 import { IBaseRepository } from './IBaseRepository';
 
 export interface IChatRepository extends IBaseRepository<IChat> {
-  findChatRoomByScheduleId(scheduleId: Types.ObjectId): Promise<IChat | null>;
+  findChatRoomByScheduleId(
+    scheduleId: Types.ObjectId,
+    session?: ClientSession,
+  ): Promise<IChat | null>;
 
   findRoomById(chatId: string): Promise<IChat | null>;
 
-  findRoomByMemberId(chatId: string,userId:string): Promise<IChat | null>;
+  findRoomByMemberId(chatId: string, userId: string): Promise<IChat | null>;
 
   findRoomsByUserId(userId: string): Promise<IChat[]>;
 
@@ -23,13 +26,17 @@ export interface IChatRepository extends IBaseRepository<IChat> {
 
   addMember(chatId: string, userId: string): Promise<IChat | null>;
 
-  findRoomsByVendorId(vendorId: string, status?: 'active' | 'archived', search?: string): Promise<IChat[]>;
+  findRoomsByVendorId(
+    vendorId: string,
+    status?: 'active' | 'archived',
+    search?: string,
+  ): Promise<IChat[]>;
 
   isActiveMember(chatId: string, userId: string): Promise<boolean>;
 
   pinMessage(chatId: string, message: string): Promise<IChat | null>;
 
-  deactivateMember(chatId: string, userId: string): Promise<IChat | null>;
+  deactivateMember(chatId: string, userId: string, session?: ClientSession): Promise<IChat | null>;
 
   archiveRoom(chatId: string): Promise<IChat | null>;
 

@@ -2,7 +2,6 @@ import { Schema, model } from 'mongoose';
 import { IBasePackageEntity } from '../types/entities/base-package.entity';
 import { PACKAGE_STATUS } from '../shared/constants/constants';
 
-
 const FileSchema = new Schema(
   {
     key: { type: String },
@@ -31,8 +30,6 @@ const itineraryDaySchema = new Schema(
   },
   { _id: false },
 );
-
-
 
 const packageSchema = new Schema<IBasePackageEntity>(
   {

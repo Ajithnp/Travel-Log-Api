@@ -49,6 +49,8 @@ import { INotificationService } from '../interfaces/service_interfaces/INotifica
 import { NotificationService } from '../services/notification.service';
 import { IChatService } from '../interfaces/service_interfaces/IChatService';
 import { ChatService } from '../services/chat.service';
+import { IWalletService } from '../interfaces/service_interfaces/user/IWalletService';
+import { WalletService } from '../services/user/wallet.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -150,6 +152,10 @@ export class ServiceRegistry {
 
     container.register<IBookingService>('IBookingService', {
       useClass: BookingService,
+    });
+
+    container.register<IWalletService>('IWalletService', {
+      useClass: WalletService,
     });
   } // Register other services here
 }

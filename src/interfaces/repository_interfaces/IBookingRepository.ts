@@ -29,7 +29,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   confirmBooking(
     userId: string,
     bookingId: string,
-    sripePaymentIntentId: string,
+    sripePaymentIntentId?: string,
     session?: mongoose.ClientSession,
   ): Promise<IBooking | null>;
 
@@ -48,15 +48,28 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   findBookings(filters: BookingFilters): Promise<BookingListResult>;
 
-  getCancellationRequests(page: number, limit: number, status?: string): Promise<CancellationRequestResult>;
+  getCancellationRequests(
+    page: number,
+    limit: number,
+    status?: string,
+  ): Promise<CancellationRequestResult>;
 
-  getCancellationRequestById(bookingId: string): Promise<ICancellationRequestPopulatedBooking | null>;
+  getCancellationRequestById(
+    bookingId: string,
+  ): Promise<ICancellationRequestPopulatedBooking | null>;
 
   findOneAndUpdateReject(bookingId: string, rejectedReason: string): Promise<IBooking | null>;
 
-  findBookingWithSession(bookingId: string, session: ClientSession): Promise<IBooking | null>;
+  findBookingWithSession(
+    bookingId: string,
+    session: ClientSession,
+  ): Promise<IBookingPopulated | null>;
 
-  updateBookingWithSession(bookingId: string, update: Partial<IBooking>, session: ClientSession): Promise<IBooking | null>;
+  updateBookingWithSession(
+    bookingId: string,
+    update: Partial<IBooking>,
+    session: ClientSession,
+  ): Promise<IBooking | null>;
 }
 
 export interface BookingFilters {

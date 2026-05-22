@@ -21,6 +21,10 @@ import { IChatRepository } from '../interfaces/repository_interfaces/IChatReposi
 import { ChatRepository } from '../repositories/chat.repository';
 import { IMessageRepository } from '../interfaces/repository_interfaces/IMessage.repository';
 import { MessageRepository } from '../repositories/message.repository';
+import { IWalletRepository } from '../interfaces/repository_interfaces/IWalletRepository';
+import { WalletRepository } from '../repositories/wallet.repository';
+import { IWalletTransactionRepository } from '../interfaces/repository_interfaces/IWalletTransactionRepository';
+import { WalletTransactionRepository } from '../repositories/wallet-transaction.repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -56,6 +60,14 @@ export class RepositoryRegistry {
 
     container.register<IUserRepository>('IUserRepository', {
       useClass: UserRepository,
+    });
+
+    container.register<IWalletRepository>('IWalletRepository', {
+      useClass: WalletRepository,
+    });
+
+    container.register<IWalletTransactionRepository>('IWalletTransactionRepository', {
+      useClass: WalletTransactionRepository,
     });
 
     container.register<ICancellationPolicyRepository>('ICancellationPolicyRepository', {

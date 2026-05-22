@@ -7,7 +7,7 @@ import {
 } from '../types/entities/chat.entity';
 import { ChatModel } from '../models/chat.model';
 import { IChatRepository } from '../interfaces/repository_interfaces/IChatRepository';
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
 
 @injectable()
 export class ChatRepository extends BaseRepository<IChat> implements IChatRepository {
@@ -15,16 +15,19 @@ export class ChatRepository extends BaseRepository<IChat> implements IChatReposi
     super(ChatModel);
   }
 
-  async findChatRoomByScheduleId(scheduleId: Types.ObjectId): Promise<IChat | null> {
-    return await this.findOne({ scheduleId });
+  async findChatRoomByScheduleId(
+    scheduleId: Types.ObjectId,
+    session?: ClientSession,
+  ): Promise<IChat | null> {
+    return await this.model.findOne({ scheduleId }).session(session || null);
   }
 
   async findRoomById(chatId: string): Promise<IChat | null> {
     return await this.model.findById(chatId).lean();
   }
 
-  async findRoomByMemberId(chatId: string, userId:string): Promise<IChat | null> {
-    return await this.model.findOne({_id:chatId,'members.userId':userId}).lean();
+  async findRoomByMemberId(chatId: string, userId: string): Promise<IChat | null> {
+    return await this.model.findOne({ _id: chatId, 'members.userId': userId }).lean();
   }
 
   async createRoom(data: {
@@ -74,7 +77,11 @@ export class ChatRepository extends BaseRepository<IChat> implements IChatReposi
       .lean();
   }
 
-  async findRoomsByVendorId(vendorId: string, status?: 'active' | 'archived', search?: string): Promise<IChat[]> {
+  async findRoomsByVendorId(
+    vendorId: string,
+    status?: 'active' | 'archived',
+    search?: string,
+  ): Promise<IChat[]> {
     const query: Record<string, unknown> = { vendorId };
     if (status) query.status = status;
     if (search) query.chatName = { $regex: search, $options: 'i' };
@@ -104,12 +111,16 @@ export class ChatRepository extends BaseRepository<IChat> implements IChatReposi
       .lean();
   }
 
-  async deactivateMember(chatId: string, userId: string): Promise<IChat | null> {
+  async deactivateMember(
+    chatId: string,
+    userId: string,
+    session?: ClientSession,
+  ): Promise<IChat | null> {
     return await this.model
       .findOneAndUpdate(
         { _id: chatId, 'members.userId': userId },
         { $set: { 'members.$.isActive': false } },
-        { new: true },
+        { new: true, session },
       )
       .lean();
   }

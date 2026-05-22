@@ -29,6 +29,13 @@ export class BookingRoutes extends BaseRoute {
       this._bookingController.initiateBooking.bind(this._bookingController),
     );
 
+    this._router.post(
+      '/:bookingId/confirm-wallet',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._bookingController.confirmBookingWallet.bind(this._bookingController),
+    );
+
     this._router.get(
       '/verify-payment',
       isAuthenticated,

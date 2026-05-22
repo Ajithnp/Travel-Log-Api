@@ -1,9 +1,7 @@
-import { BookingListResult } from 'types/entities/booking.entity';
+import { BookingListResult, PaymentMethod } from 'types/entities/booking.entity';
 import { PricingType } from '../../../types/entities/schedule.entity';
 import { BookingFilters } from '../../../interfaces/repository_interfaces/IBookingRepository';
 import { BookingDetailDTO } from '../../../shared/mappers/booking.mapper';
-
-// ─── Request DTOs ───────
 
 export interface InitiateBookingDTO {
   userId: string;
@@ -11,6 +9,7 @@ export interface InitiateBookingDTO {
   scheduleId: string;
   tierType: PricingType;
   seatsCount: number;
+  useWallet: boolean;
   travelers: Array<{
     fullName: string;
     idType: string;
@@ -27,7 +26,7 @@ export interface InitiateBookingDTO {
 export interface ConfirmBookingDTO {
   userId: string;
   bookingId: string;
-  stripePaymentIntentId: string;
+  stripePaymentIntentId?: string;
 }
 
 export type GetBookingsDTO = Omit<BookingFilters, 'userId'>;
@@ -36,12 +35,17 @@ export type GetBookingsDTO = Omit<BookingFilters, 'userId'>;
 
 export interface InitiateBookingResponseDTO {
   bookingId: string;
-  clientSecret: string;
-  checkoutUrl: string | null;
+  paymentMethod: PaymentMethod;
+  clientSecret?: string;
+  checkoutUrl?: string;
+  walletAmountUsed?: number;
+  stripeAmount?: number;
 }
 
 export interface ConfirmBookingResponseDTO {
   bookingId: string;
+  bookingCode?: string;
+  amount: number;
   message: string;
 }
 

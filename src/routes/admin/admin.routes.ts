@@ -6,7 +6,10 @@ import { isAuthenticated } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
 import { validateDTO } from '../../middlewares/validate.dto.middleware';
-import { BlockOrUnblockUserSchema, CancellationRejectSchema } from '../../types/dtos/admin/user/request.dtos';
+import {
+  BlockOrUnblockUserSchema,
+  CancellationRejectSchema,
+} from '../../types/dtos/admin/user/request.dtos';
 import { UpdateVendorVerificationSchema } from '../../types/dtos/admin/vendor/request.dtos';
 import { IAdminCategoryController } from '../../interfaces/controller_interfaces/admin/IAdminCategoryController';
 import { IAdminCancellationPolicyController } from '../../interfaces/controller_interfaces/admin/IAdminCancellationPolicyController';
@@ -175,9 +178,9 @@ export class AdminRoutes extends BaseRoute {
     this._router.get(
       '/cancellation-policies',
       isAuthenticated,
-      authorize([USER_ROLES.ADMIN,USER_ROLES.VENDOR]),
+      authorize([USER_ROLES.ADMIN, USER_ROLES.VENDOR]),
       this._adminCancellationPolicyController.getPolicies.bind(
-      this._adminCancellationPolicyController,
+        this._adminCancellationPolicyController,
       ),
     );
 

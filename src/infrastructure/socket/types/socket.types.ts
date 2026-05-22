@@ -51,8 +51,6 @@ export interface SocketData {
   role: UserRole;
 }
 
-
-
 export interface NotificationPayload {
   _id: string;
   recipientId: string;
@@ -69,7 +67,7 @@ export interface NotificationPayload {
 export interface ChatMessagePayload {
   id: string;
   chatId: string;
-  senderId:string;
+  senderId: string;
   senderRole: UserRole;
   senderName: string;
   content: string;
@@ -83,11 +81,8 @@ export interface ChatRoomUpdatedPayload {
   status?: 'active' | 'archived';
 }
 
-
 export type EmitTarget =
   | { type: 'user'; userId: string } // one specific person
   | { type: 'role'; role: UserRole }; // everyone in a role
-
-
 
 export type TypedIOServer = Server<ClientToServerEvents, ServerToClientEvents, SocketData>;

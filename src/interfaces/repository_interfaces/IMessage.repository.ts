@@ -6,7 +6,7 @@ export interface IMessageRepository extends IBaseRepository<IMessage> {
     chatId: string,
     cursor: string | undefined,
     limit: number,
-  ): Promise<{ messages: IMessage[]; hasMore: boolean ,nextCursor: string | null }>;
+  ): Promise<{ messages: IMessage[]; hasMore: boolean; nextCursor: string | null }>;
 
   createTextMessage(data: {
     chatId: string;
@@ -20,6 +20,9 @@ export interface IMessageRepository extends IBaseRepository<IMessage> {
 
   deleteMessage(messageId: string): Promise<boolean>;
 
-  getMessageUnreadCount(chatId: string , senderRole : 'user' | 'vendor' , lastReadAt : Date) : Promise<number>;
-
+  getMessageUnreadCount(
+    chatId: string,
+    senderRole: 'user' | 'vendor',
+    lastReadAt: Date,
+  ): Promise<number>;
 }

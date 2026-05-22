@@ -23,7 +23,12 @@ export const BOOKING_STATUS = {
   CANCELLED_BY_USER: 'cancelled_by_user',
   COMPLETED: 'completed',
   PAYMENT_FAILED: 'payment_failed',
+} as const;
 
+export const PAYMENT_METHOD = {
+  WALLET: 'wallet',
+  STRIPE: 'stripe',
+  COMBINED: 'combined',
 } as const;
 
 export const CANCELATION_STATUS = {
@@ -37,5 +42,3 @@ export const CANCELLED_BY = {
   VENDOR: 'vendor',
   ADMIN: 'admin',
 } as const;
-
-

@@ -31,7 +31,7 @@ export interface IChatService {
   getVendorChats(
     vendorId: string,
     status?: 'active' | 'archived',
-    search?: string
+    search?: string,
   ): Promise<ChatRoomWithPreviewDTO[]>;
 
   getVendorChatMessages(
@@ -59,16 +59,13 @@ export interface IChatService {
   markChatAsReadForVendor(chatId: string, vendorId: string): Promise<void>;
 }
 
-
 export type SenderRole = 'user' | 'vendor';
 export type RoomStatus = 'active' | 'archived';
-
-
 
 export interface MessageDTO {
   id: string;
   chatId: string;
-  senderId:string;
+  senderId: string;
   senderRole: SenderRole;
   senderName: string;
   content: string;

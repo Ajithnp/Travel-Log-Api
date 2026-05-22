@@ -36,7 +36,7 @@ export class ChatController implements IChatController {
     const limit = parseInt(req.query.limit as string) || 10;
 
     const result = await this._chatService.getUserChatMessages(chatId, userId, cursor, limit);
-    
+
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
@@ -51,12 +51,7 @@ export class ChatController implements IChatController {
     const { content } = req.body;
     const senderName = req.user!.name;
 
-    const message = await this._chatService.sendUserMessage(
-      chatId,
-      userId,
-      senderName,
-      content,
-    );
+    const message = await this._chatService.sendUserMessage(chatId, userId, senderName, content);
 
     const successResponse: IApiResponse<typeof message> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -107,7 +102,7 @@ export class ChatController implements IChatController {
   sendVendorMessage = expressAsyncHandler(async (req, res) => {
     const vendorId = req.user.id;
     const chatId = req.params.chatId;
-    const {content } = req.body;
+    const { content } = req.body;
     const senderName = req.user!.name;
 
     const message = await this._chatService.sendVendorMessage(

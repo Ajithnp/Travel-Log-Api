@@ -27,7 +27,6 @@ export class SchedulePackageRepository
     const query: mongoose.FilterQuery<ISchedule> = {
       packageId: new mongoose.Types.ObjectId(packageId),
       status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.ONGOING] },
-      // Overlap condition: existing.start <= newEnd AND existing.end >= newStart
       startDate: { $lte: endDate },
       endDate: { $gte: startDate },
     };
