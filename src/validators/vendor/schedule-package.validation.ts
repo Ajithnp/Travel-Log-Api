@@ -1,3 +1,4 @@
+import { SCHEDULE_STATUS } from '../../shared/constants/constants';
 import { z } from 'zod';
 
 const HHmm = z
@@ -64,4 +65,12 @@ export const createScheduleBodySchema = z
 export const createScheduleSchema = z.object({
   params: z.object({ packageId: z.string() }),
   body: createScheduleBodySchema,
+});
+
+
+export const updateScheduleStatusSchema = z.object({
+  body: z.object({
+  status: z.enum([ SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.COMPLETED]),
+  }),
+  params: z.object({ scheduleId: z.string() }),
 });

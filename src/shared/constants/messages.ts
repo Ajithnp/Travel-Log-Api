@@ -33,6 +33,7 @@ export const SUCCESS_MESSAGES = {
 
   // schedule
   SCHEDULE_CREATED_SUCCESSFULLY: 'Schedule created successfully',
+  SCHEDULE_STATUS_UPDATED_SUCCESSFULLY: 'Schedule status updated successfully',
 
   // booking
   SEATS_HELD_SUCCESS: 'Seats held successfully. Complete payment within 10 minutes.',
@@ -127,6 +128,7 @@ export const ERROR_MESSAGES = {
   SCHEDULE_NOT_FOUND: 'Schedule not found',
   SCHEDULE_NOT_AVAILABLE_FOR_BOOKING: 'This schedule is not available for booking.',
   INVALID_TIER_TYPE: 'Invalid tier type for this schedule',
+  FAILED_TO_UPDATE_SCHEDULE_STATUS: 'Failed to update schedule status',
 
   // wishlist
   PACKAGE_NOT_AVAILABLE: 'This package is not available for wishlisting',

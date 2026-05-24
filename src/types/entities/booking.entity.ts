@@ -143,3 +143,40 @@ export interface ICancellationRequestPopulatedBooking
     startDate: Date;
   };
 }
+
+
+export interface IVendorScheduleBookingSummary {
+  totalConfirmedBookings: number;
+  totalCancelledBookings: number;
+  totalConfirmedAmount: number;
+  totalCancelledAmount: number;
+  totalVendorEarning: number;
+  totalPlatformCommission: number;
+
+}
+
+export interface IScheduleBookingPopulated {
+  _id: mongoose.Types.ObjectId;
+  bookingCode: string;
+  userId: {
+    name: string;
+  };
+  groupType: GroupType;
+  travelerCount:number;
+  finalAmount: number;
+  paymentStatus: PaymentStatus;
+  bookingStatus: BookingStatus;
+  createdAt:Date;
+}
+
+export interface ScheduleBookingListResult {
+  bookings: IScheduleBookingPopulated[];
+  total: number;
+}
+
+export interface IScheduleBookingSinglePopulated extends Omit<IBooking, 'userId'> {
+  userId: {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+  };
+}

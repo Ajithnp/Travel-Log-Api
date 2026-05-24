@@ -17,7 +17,7 @@ export interface ISchedule extends Document {
   vendorId: mongoose.Types.ObjectId;
   startDate: Date;
   endDate: Date;
-  reportingTime: string; // "05:00" — stored as HH:mm string
+  reportingTime: string;
   reportingLocation: string;
   pricing: IPricingTier[];
   totalSeats: number;
@@ -26,8 +26,8 @@ export interface ISchedule extends Document {
   status: ScheduleStatus;
   cancellationReason?: string;
   cancelledAt?: Date;
-  cancelledBookings?: number; // how many bookings were refunded
-  totalRefunded?: number; // total ₹ refunded
+  cancelledBookings?: number; 
+  totalRefunded?: number;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -41,3 +41,13 @@ export interface ISchedulePopulated extends Omit<ISchedule, 'packageId'> {
     difficultyLevel?: string;
   };
 }
+
+export interface ISchedulePopulatedPacakge extends Omit<ISchedule, 'packageId'> {
+  packageId: {
+    _id: Types.ObjectId;
+    title: string;
+    location:string;
+    state:string;
+    basePrice:string;
+  };
+};

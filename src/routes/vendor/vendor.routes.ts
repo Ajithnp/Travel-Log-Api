@@ -11,7 +11,7 @@ import { IVendorCategoryController } from '../../interfaces/controller_interface
 import { getRequestedCategorySchema } from '../../validators/vendor/category.validation';
 import { requestCategorySchema } from '../../validators/category.validation';
 import { ISchedulePackageController } from '../../interfaces/controller_interfaces/vendor/IShedulePackageController';
-import { createScheduleSchema } from '../../validators/vendor/schedule-package.validation';
+import { createScheduleSchema, updateScheduleStatusSchema } from '../../validators/vendor/schedule-package.validation';
 import { UpdateProfileLogoRequestSchema } from '../../validators/vendor/profile.validation';
 import { VendorVerificationSchema } from '../../validators/vendor/vendor-verification';
 import { IChatController } from '../../interfaces/controller_interfaces/IChatController';
@@ -174,6 +174,36 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       this._schedulePackageController.getSchedule.bind(this._schedulePackageController),
     );
+
+    this._router.get(
+      '/schedules/:scheduleId/booking-summary',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._schedulePackageController.getVendorScheduleBookingSummary.bind(this._schedulePackageController),
+    );
+
+    this._router.get(
+      '/schedules/:scheduleId/bookings',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._schedulePackageController.getScheduleBookings.bind(this._schedulePackageController),
+    );
+
+    this._router.get(
+      '/schedules/:scheduleId/bookings/:bookingId',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._schedulePackageController.getScheduleBookingDetails.bind(this._schedulePackageController),
+    );
+
+    this._router.patch(
+      '/schedules/:scheduleId/status',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(updateScheduleStatusSchema),
+      this._schedulePackageController.updateScheduleStatus.bind(this._schedulePackageController),
+    );
+    
     //===chat
     this._router.get(
       '/chats',
