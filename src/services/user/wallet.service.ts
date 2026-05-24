@@ -11,9 +11,9 @@ import {
 import { TRANSACTION_TYPE } from '../../shared/constants/wallet';
 import { WalletMapper } from '../../shared/mappers/wallet.mapper';
 import { ClientSession } from 'mongoose';
-import { AppError } from 'errors/AppError';
-import { ERROR_MESSAGES } from 'shared/constants/messages';
-import { HTTP_STATUS } from 'shared/constants/http_status_code';
+import { AppError } from '../../errors/AppError';
+import { ERROR_MESSAGES } from '../../shared/constants/messages';
+import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 
 @injectable()
 export class WalletService implements IWalletService {

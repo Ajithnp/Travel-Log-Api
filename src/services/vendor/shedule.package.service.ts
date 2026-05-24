@@ -7,13 +7,15 @@ import { toObjectId } from '../../shared/utils/database/objectId.helper';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
-import { PACKAGE_STATUS } from '../../shared/constants/constants';
-import { IPricingTier } from '../../types/entities/schedule.entity';
+import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../../shared/constants/constants';
+import { IPricingTier, ISchedulePopulatedPacakge, ScheduleStatus } from '../../types/entities/schedule.entity';
 import { FilterType } from '../../types/db';
 import { ScheduleMapper } from '../../shared/mappers/schedule.mapper';
-import { ScheduleListResponseDTO } from '../../types/common/IPaginationResponse';
+import { ScheduleListResponseDTO, PaginatedData } from '../../types/common/IPaginationResponse';
 import mongoose from 'mongoose';
-import { ScheduleResponse } from '../../types/dtos/vendor/response.dtos';
+import { ScheduleResponse, VendorScheduleBookingSummaryDTO, ScheduleBookingDetailDTO, ScheduleBookingSingleDetailDTO, ScheduleStatusResponseDTO } from '../../types/dtos/vendor/response.dtos';
+import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
+
 @injectable()
 export class SchedulePackageService implements ISchedulePackageService {
   constructor(
@@ -21,6 +23,8 @@ export class SchedulePackageService implements ISchedulePackageService {
     private _schedulePackageRepository: ISchedulePackageRepository,
     @inject('IBasePackageRepository')
     private _basePackageRepository: IBasePackageRepository,
+    @inject('IBookingRepository')
+    private _bookingRepo: IBookingRepository,
   ) {}
 
   private validateDateRange(startDate: Date, endDate: Date, packageDurationDays: number): void {
@@ -145,7 +149,7 @@ export class SchedulePackageService implements ISchedulePackageService {
     });
   }
 
-  //==========================================================
+
   async fetchVendorSchedules(
     vendorId: string,
     filters: FilterType,
@@ -164,7 +168,7 @@ export class SchedulePackageService implements ISchedulePackageService {
     );
   }
 
-  //=====================================================
+ 
   async getSchedule(scheduleId: string, vendorId: string): Promise<ScheduleResponse> {
     const schedule = await this._schedulePackageRepository.findOne({
       _id: new mongoose.Types.ObjectId(scheduleId),
@@ -174,5 +178,56 @@ export class SchedulePackageService implements ISchedulePackageService {
       throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
     return ScheduleMapper.toResponse(schedule);
+  }
+
+  async getVendorScheduleBookingSummary(scheduleId: string, vendorId: string): Promise<VendorScheduleBookingSummaryDTO> {
+    
+    const schedule = await this._schedulePackageRepository.findOnePopulated<ISchedulePopulatedPacakge>(
+      {
+        _id: toObjectId(scheduleId),
+        vendorId: toObjectId(vendorId),
+      },
+      { path: 'packageId', select: 'title location state basePrice' }
+    );
+    if (!schedule) {
+      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+    const summary = await this._bookingRepo.getVendorScheduleBookingSummary(scheduleId, vendorId);
+    if (!summary) {
+      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+  return ScheduleMapper.toBookingSummaryResponse(schedule,summary);
+  }
+
+  async getScheduleBookings(scheduleId: string, vendorId: string, page: number, limit: number, search?: string, filter?: string): Promise<PaginatedData<ScheduleBookingDetailDTO>> {
+    const result = await this._bookingRepo.findBookingsBySchedule(scheduleId, vendorId, page, limit, search, filter);
+    return ScheduleMapper.toScheduleBookingListResponse(result, page, limit);
+  }
+
+  async getScheduleBookingDetails(scheduleId: string, bookingId: string, vendorId: string): Promise<ScheduleBookingSingleDetailDTO> {
+    const booking = await this._bookingRepo.getVendorBookingDetails(bookingId, scheduleId, vendorId);
+    if (!booking) {
+      throw new AppError(ERROR_MESSAGES.BOOKING_NOT_FOUND , HTTP_STATUS.NOT_FOUND);
+    }
+    return ScheduleMapper.toScheduleBookingSingleDetail(booking);
+  }
+
+  async updateScheduleStatus(scheduleId: string, vendorId: string, status: ScheduleStatus): Promise<ScheduleStatusResponseDTO> {
+    const schedule = await this._schedulePackageRepository.findById(scheduleId);
+    
+    if (!schedule) {
+      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+    
+    if (schedule.vendorId.toString() !== vendorId) {
+      throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_ACCESS, HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    const updated = await this._schedulePackageRepository.findByIdAndUpdate(scheduleId, { status: status as ScheduleStatus }, { new: true });
+    
+    if (!updated) {
+       throw new AppError(ERROR_MESSAGES.FAILED_TO_UPDATE_SCHEDULE_STATUS, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+    return { status: updated.status };
   }
 }

@@ -5,6 +5,10 @@ import {
   IBookingPopulated,
   ICancellationRequestPopulatedBooking,
   PopulatedBooking,
+  IVendorScheduleBookingSummary,
+  ScheduleBookingListResult,
+  IScheduleBookingPopulated,
+  IScheduleBookingSinglePopulated,
 } from '../types/entities/booking.entity';
 import { BaseRepository } from './base.repository';
 import {
@@ -420,5 +424,164 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         session,
       })
       .lean() as Promise<IBooking | null>;
+  }
+
+  async getVendorScheduleBookingSummary(
+    scheduleId: string,
+    vendorId: string,
+  ): Promise<IVendorScheduleBookingSummary | null> {
+
+    const stats = await this.model.aggregate([
+      {
+        $match: {
+          scheduleId: new mongoose.Types.ObjectId(scheduleId),
+          vendorId: new mongoose.Types.ObjectId(vendorId),
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalConfirmedBookings: {
+            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$travelerCount', 0] },
+          },
+          totalCancelledBookings: {
+            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, '$travelerCount', 0] },
+          },
+          totalConfirmedAmount: {
+            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$finalAmount', 0] },
+          },
+          totalCancelledAmount: {
+            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, '$finalAmount', 0] },
+          },
+          totalVendorEarning: {
+            $sum: {
+              $add: [
+                {
+                  $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$vendorEarning', 0]
+                },
+                {
+                  $cond: [
+                    { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                    { $subtract: [{ $ifNull: ['$finalAmount', 0] }, { $ifNull: ['$cancelationRefundAmount', 0] }] },
+                    0
+                  ]
+                }
+              ]
+            },
+          },
+          totalPlatformCommission: {
+            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$platformCommission', 0] },
+          },
+        },
+      },
+    ]);
+
+    const stat = stats[0] || {
+      totalConfirmedBookings: 0,
+      totalCancelledBookings: 0,
+      totalConfirmedAmount: 0,
+      totalCancelledAmount: 0,
+      totalVendorEarning: 0,
+      totalPlatformCommission: 0,
+    };
+
+    return {
+      totalConfirmedBookings: stat.totalConfirmedBookings || 0,
+      totalCancelledBookings: stat.totalCancelledBookings || 0,
+      totalConfirmedAmount: stat.totalConfirmedAmount || 0,
+      totalCancelledAmount: stat.totalCancelledAmount || 0,
+      totalVendorEarning: stat.totalVendorEarning || 0,
+      totalPlatformCommission: stat.totalPlatformCommission || 0,
+    };
+  }
+
+  async findBookingsBySchedule(
+    scheduleId: string,
+    vendorId: string,
+    page: number,
+    limit: number,
+    search?:string,
+    filter?:string
+  ): Promise<ScheduleBookingListResult> {
+    const matchStage: mongoose.FilterQuery<IBooking> = {
+      scheduleId: new mongoose.Types.ObjectId(scheduleId),
+      vendorId: new mongoose.Types.ObjectId(vendorId),
+    };
+
+    if (filter) {
+      matchStage.bookingStatus = filter;
+    }
+
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: matchStage,
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      ...(search
+        ? [
+            {
+              $match: {
+                $or: [
+                  { 'user.name': { $regex: search, $options: 'i' } },
+                  { bookingCode: { $regex: search, $options: 'i' } },
+                ],
+              },
+            },
+          ]
+        : []),
+      { $sort: { createdAt: -1 } },
+      {
+        $facet: {
+          bookings: [
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                _id: 1,
+                bookingCode: 1,
+                groupType: 1,
+                travelerCount: 1,
+                finalAmount: 1,
+                paymentStatus: 1,
+                bookingStatus: 1,
+                createdAt:1,
+                userId: { name: '$user.name' },
+              },
+            },
+          ],
+          totalCount: [{ $count: 'count' }],
+        },
+      },
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+    const bookings = result.bookings as IScheduleBookingPopulated[];
+    const totalCount = result.totalCount[0] ? result.totalCount[0].count : 0;
+
+    return { bookings, total: totalCount };
+  }
+
+  async getVendorBookingDetails(
+    bookingId: string,
+    scheduleId: string,
+    vendorId: string,
+  ): Promise<IScheduleBookingSinglePopulated | null> {
+    const booking = await this.model
+      .findOne({
+        _id: new mongoose.Types.ObjectId(bookingId),
+        scheduleId: new mongoose.Types.ObjectId(scheduleId),
+        vendorId: new mongoose.Types.ObjectId(vendorId),
+      })
+      .populate('userId', 'name')
+      .lean();
+    return booking as IScheduleBookingSinglePopulated | null;
   }
 }

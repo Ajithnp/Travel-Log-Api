@@ -1,12 +1,19 @@
-import { ISchedulePopulated, IPricingTier, ISchedule } from '../../types/entities/schedule.entity';
+import { ISchedulePopulated, IPricingTier, ISchedule, ISchedulePopulatedPacakge } from '../../types/entities/schedule.entity';
 import {
   ScheduleListItemDTO,
   PricingTierDTO,
   ScheduleResponse,
+  VendorScheduleBookingSummaryDTO,
 } from '../../types/dtos/vendor/response.dtos';
 import { SCHEDULE_STATUS } from '../../shared/constants/constants';
 import { ScheduleListResponseDTO } from '../../types/common/IPaginationResponse';
 import { PublicScheduleDTO } from '../../types/dtos/user/response.dtos';
+import { IVendorScheduleBookingSummary, IScheduleBookingPopulated, ScheduleBookingListResult, IScheduleBookingSinglePopulated } from 'types/entities/booking.entity';
+import { ScheduleBookingDetailDTO, ScheduleBookingSingleDetailDTO } from '../../types/dtos/vendor/response.dtos';
+import { PaginatedData } from '../../types/common/IPaginationResponse';
+import { TravelerDTO } from './booking.mapper';
+
+
 
 export class ScheduleMapper {
   static mapPricing = (tier: IPricingTier): PricingTierDTO => ({
@@ -94,6 +101,89 @@ export class ScheduleMapper {
         peopleCount: tier.peopleCount,
         price: tier.price,
       })),
+    };
+  }
+
+  static toBookingSummaryResponse(
+    schedule: ISchedulePopulatedPacakge,
+    stats:IVendorScheduleBookingSummary
+  ):VendorScheduleBookingSummaryDTO {
+    return {
+      scheduleId: schedule._id.toString(),
+      packageTitle: schedule.packageId.title,
+      packageLocation: schedule.packageId.location,
+      packageState: schedule.packageId.state,
+      basePrice:schedule.packageId.basePrice,
+      startDate:schedule.startDate.toISOString(),
+      endDate:schedule.endDate.toISOString(),
+      reportingTime:schedule.reportingTime,
+      reportingLocation:schedule.reportingLocation,
+      totalSeats:schedule.totalSeats,
+      scheduleStatus:schedule.status,
+      totalConfirmedBookings: stats.totalConfirmedBookings,
+      totalCancelledBookings: stats.totalCancelledBookings,
+      totalConfirmedAmount: stats.totalConfirmedAmount,
+      totalCancelledAmount: stats.totalCancelledAmount,
+      totalVendorEarning: stats.totalVendorEarning,
+      totalPlatformCommission: stats.totalPlatformCommission
+    };
+  }
+
+  static toScheduleBookingDetail(booking: IScheduleBookingPopulated): ScheduleBookingDetailDTO {
+    return {
+      id: booking._id.toString(),
+      username: booking.userId?.name ?? '',
+      bookingCode: booking.bookingCode,
+      groupType: booking.groupType,
+      travallersCount:booking.travelerCount,
+      finalAmount: booking.finalAmount,
+      paymentStatus: booking.paymentStatus,
+      bookingStatus: booking.bookingStatus,
+      bookedOn:booking.createdAt.toISOString()
+    };
+  }
+
+  static toScheduleBookingListResponse(
+    result: ScheduleBookingListResult,
+    page: number,
+    limit: number,
+  ): PaginatedData<ScheduleBookingDetailDTO> {
+    return {
+      data: result.bookings.map(ScheduleMapper.toScheduleBookingDetail),
+      totalDocs: result.total,
+      currentPage: page,
+      totalPages: Math.ceil(result.total / limit),
+    };
+  }
+
+  static toScheduleBookingSingleDetail(booking: IScheduleBookingSinglePopulated): ScheduleBookingSingleDetailDTO {
+    const travelers: TravelerDTO[] = (booking.travelers ?? [])
+      .slice()
+      .sort((a, b) => (b.isLead ? 1 : 0) - (a.isLead ? 1 : 0))
+      .map(
+        (t): TravelerDTO => ({
+          fullName: t.fullName ?? '',
+          idType: t.idType ?? '',
+          idNumber: t.idNumber ?? '',
+          isLead: t.isLead ?? false,
+          phoneNumber: t.phoneNumber || null,
+          emailAddress: t.emailAddress || null,
+          emergencyContact: t.emergencyContact || null,
+          relation: t.relation || null,
+        }),
+      );
+
+    return {
+      id: booking._id.toString(),
+      username: booking.userId?.name ?? '',
+      bookingCode: booking.bookingCode,
+      groupType: booking.groupType,
+      paymentMethod: booking.paymentMethod ?? null,
+      bookedOn: booking.createdAt?.toISOString?.() ?? String(booking.createdAt),
+      finalAmount: booking.finalAmount,
+      paymentStatus: booking.paymentStatus,
+      bookingStatus: booking.bookingStatus,
+      travelers,
     };
   }
 }

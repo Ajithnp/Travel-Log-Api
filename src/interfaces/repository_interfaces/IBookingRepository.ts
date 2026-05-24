@@ -5,6 +5,9 @@ import {
   IBooking,
   IBookingPopulated,
   ICancellationRequestPopulatedBooking,
+  IVendorScheduleBookingSummary,
+  ScheduleBookingListResult,
+  IScheduleBookingSinglePopulated,
 } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose, { ClientSession } from 'mongoose';
@@ -70,6 +73,26 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     update: Partial<IBooking>,
     session: ClientSession,
   ): Promise<IBooking | null>;
+
+  getVendorScheduleBookingSummary(
+    scheduleId: string,
+    vendorId: string,
+  ): Promise<IVendorScheduleBookingSummary | null>;
+
+  findBookingsBySchedule(
+    scheduleId: string,
+    vendorId: string,
+    page: number,
+    limit: number,
+    search?: string,
+    filter?:string
+  ): Promise<ScheduleBookingListResult>;
+
+  getVendorBookingDetails(
+    bookingId: string,
+    scheduleId: string,
+    vendorId: string,
+  ): Promise<IScheduleBookingSinglePopulated | null>;
 }
 
 export interface BookingFilters {
