@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import {
   CancelationStatus,
   ICancellationRequestPopulatedBooking,
-  IVendorScheduleBookingSummary,
 } from '../../types/entities/booking.entity';
 
 export interface CancellationRequestDetails {
@@ -227,7 +226,6 @@ export class BookingMapper {
       updatedAt: booking.updatedAt?.toISOString?.() ?? '',
     };
   }
-
 }
 
 interface RawActivity {
@@ -461,6 +459,3 @@ export interface BookingDetailDTO {
   createdAt: string;
   updatedAt: string;
 }
-
-
-

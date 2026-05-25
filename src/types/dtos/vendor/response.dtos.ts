@@ -88,7 +88,7 @@ export interface ScheduleResponse {
 }
 
 export interface VendorScheduleBookingSummaryDTO {
-  scheduleId:string;
+  scheduleId: string;
   packageTitle: string;
   packageLocation: string;
   packageState: string;
@@ -113,11 +113,11 @@ export interface ScheduleBookingDetailDTO {
   username: string;
   bookingCode: string;
   groupType: string;
-  travallersCount:number;
+  travallersCount: number;
   finalAmount: number;
   paymentStatus: string;
   bookingStatus: string;
-  bookedOn:string;
+  bookedOn: string;
 }
 
 export interface ScheduleBookingSingleDetailDTO {

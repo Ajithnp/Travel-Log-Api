@@ -1,5 +1,5 @@
 import { VendorInformationModel } from '../models/vendor.info.model';
-import { FilterQuery, PipelineStage, Types } from 'mongoose';
+import { FilterQuery, PipelineStage } from 'mongoose';
 import { IVendorInfoRepository } from 'interfaces/repository_interfaces/IVendorInfoRepository';
 import { BaseRepository } from './base.repository';
 import { injectable } from 'tsyringe';
@@ -10,8 +10,7 @@ import {
 } from '../types/entities/vendor.info.entity';
 import { CustomQueryOptions } from '../types/common/IQueryOptions';
 import { IUser } from '../types/entities/user.entity';
-import { VendorVerificationUpdateDTO } from 'types/dtos/admin/request.dtos';
-import { VENDOR_VERIFICATION_STATUS } from 'types/enum/vendor-verfication-status.enum';
+
 @injectable()
 export class VendorInfoRepository
   extends BaseRepository<IVendorInfo>

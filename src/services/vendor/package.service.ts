@@ -21,8 +21,8 @@ import { ICategoryRepository } from '../../interfaces/repository_interfaces/ICat
 import { FilterType } from '../../types/db';
 import { PackageMapper } from '../../shared/mappers/package.mapper';
 import { IBasePackagePopulated, IFile } from '../../types/entities/base-package.entity';
-import logger from '../../config/logger';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
+
 @injectable()
 export class PackageService implements IPackageService {
   constructor(
@@ -47,7 +47,7 @@ export class PackageService implements IPackageService {
     }
     return uploaded.map((img) => ({ key: img.key }));
   }
-  //=======================================
+
   async fetchPackages(
     vendorId: string,
     filters: FilterType,
@@ -61,7 +61,6 @@ export class PackageService implements IPackageService {
     };
     return response;
   }
-  //====================================================================
 
   async fetchPackagesWithId(vendorId: string, packageId: string): Promise<PackageDetailDTO> {
     const vendorObjectId = toObjectId(vendorId);
@@ -85,7 +84,6 @@ export class PackageService implements IPackageService {
     return PackageMapper.toDetailResponse(packageExist);
   }
 
-  //==================================================================
   async createPackage(
     vendorId: string,
     payload: CreateBasePackageDTO,
@@ -142,7 +140,7 @@ export class PackageService implements IPackageService {
 
     return { packageId: newPackage._id.toString() };
   }
-  //==========================================================
+
   async updatePackage(vendorId: string, packageId: string, payload: CreateBasePackageDTO) {
     const vendorObjectId = toObjectId(vendorId);
     const packageObjectId = toObjectId(packageId);
@@ -157,7 +155,7 @@ export class PackageService implements IPackageService {
     }
 
     if (
-      existingPackage.status === PACKAGE_STATUS.SOFT_DELETED ||
+      existingPackage.status === PACKAGE_STATUS.DELETED ||
       existingPackage.status === PACKAGE_STATUS.PUBLISHED
     ) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_CANNOT_EDIT, HTTP_STATUS.BAD_REQUEST);
@@ -198,7 +196,7 @@ export class PackageService implements IPackageService {
       },
     );
   }
-  //========================================================================
+
   async fetchPackageScheduleContext(
     vendorId: string,
     packageId: string,
@@ -228,7 +226,6 @@ export class PackageService implements IPackageService {
     return PackageMapper.toScheduleContext(pkg);
   }
 
-  // delete
   async deletePackage(packageId: string, vendorId: string): Promise<void> {
     const packageObjectId = toObjectId(packageId);
 
@@ -238,11 +235,14 @@ export class PackageService implements IPackageService {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
+    if (isPackageExist.isDeleted) {
+      throw new AppError(ERROR_MESSAGES.PACKAGE_ALREADY_DELETED, HTTP_STATUS.BAD_REQUEST);
+    }
+
     const isScheduleExists = await this._scheduleRepository.findOne({
       packageId: packageObjectId,
       status: SCHEDULE_STATUS.UPCOMING,
     });
-
     if (isScheduleExists) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_HAS_ACTIVE_SCHEDULE, HTTP_STATUS.BAD_REQUEST);
     }

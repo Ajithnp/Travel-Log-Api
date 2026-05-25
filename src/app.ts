@@ -1,7 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
 import { config } from './config/env';
 import { DependencyInjection } from './di/index';
 import { AuthRoutes } from './routes/auth/auth.routes';

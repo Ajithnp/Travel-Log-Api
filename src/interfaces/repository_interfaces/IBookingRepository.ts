@@ -85,7 +85,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     page: number,
     limit: number,
     search?: string,
-    filter?:string
+    filter?: string,
   ): Promise<ScheduleBookingListResult>;
 
   getVendorBookingDetails(

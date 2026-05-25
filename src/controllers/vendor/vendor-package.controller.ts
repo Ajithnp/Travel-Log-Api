@@ -66,9 +66,9 @@ export class VendorPackageController implements IVendorPackageController {
 
   fetPackagesWithId = asyncHandler(async (req, res) => {
     const vendorId = req.user.id;
-    const { id } = req.params;
+    const { packageId } = req.params as { packageId: string };
 
-    const packages = await this._packageService.fetchPackagesWithId(vendorId, id);
+    const packages = await this._packageService.fetchPackagesWithId(vendorId, packageId);
 
     const successResponse: IApiResponse<typeof packages> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -80,9 +80,9 @@ export class VendorPackageController implements IVendorPackageController {
 
   getPackageScheduleContext = asyncHandler(async (req, res) => {
     const vendorId = req.user.id;
-    const { id } = req.params;
+    const { packageId } = req.params as { packageId: string };
 
-    const pkg = await this._packageService.fetchPackageScheduleContext(vendorId, id);
+    const pkg = await this._packageService.fetchPackageScheduleContext(vendorId, packageId);
 
     const successResponse: IApiResponse<typeof pkg> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -96,7 +96,7 @@ export class VendorPackageController implements IVendorPackageController {
   deletePackage = expressAsyncHandler(async (req, res) => {
     const vendorId = req.user!.id;
 
-    const packageId = req.params.packageId;
+    const packageId = req.params.packageId as string;
     await this._packageService.deletePackage(packageId, vendorId);
 
     const successResponse: IApiResponse = {

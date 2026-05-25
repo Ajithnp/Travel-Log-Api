@@ -18,10 +18,7 @@ import { PaginatedData } from '../../types/common/IPaginationResponse';
 import mongoose, { FilterQuery, Types } from 'mongoose';
 import { UserProfileResponseDTO } from '../../types/dtos/user/response.dtos';
 import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
-import {
-  PopulatedCancellationRequest,
-  IBookingPopulated,
-} from '../../types/entities/booking.entity';
+import { PopulatedCancellationRequest } from '../../types/entities/booking.entity';
 import { computeRefundBreakdown } from '../../shared/utils/cancellation-policy/policy-refund-calculator';
 import { BookingMapper } from '../../shared/mappers/booking.mapper';
 import { BOOKING_STATUS, CANCELATION_STATUS } from '../../shared/constants/booking';

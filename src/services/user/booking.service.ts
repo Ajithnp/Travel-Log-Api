@@ -25,7 +25,6 @@ import mongoose from 'mongoose';
 import {
   BOOKING_STATUS,
   CANCELATION_STATUS,
-  CANCELLED_BY,
   PAYMENT_METHOD,
   PAYMENT_STATUS,
   VERIFY_PAYMENT_STATUS,

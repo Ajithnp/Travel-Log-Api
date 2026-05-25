@@ -8,7 +8,6 @@ import { SUCCESS_MESSAGES } from '../shared/constants/messages';
 import { UserRole } from '../types/entities/user.entity';
 import { getPaginationOptions } from '../shared/utils/pagination.helper';
 import { GetNotificationsQuery } from '../interfaces/repository_interfaces/INotificationRepository';
-import { NotificationType } from '../types/entities/notification.entity';
 
 @injectable()
 export class NotificationController implements INotificationController {
