@@ -1,4 +1,4 @@
-import { CancellationPolicies, DifficultyLevel } from 'types/entities/base-package.entity';
+import { DifficultyLevel } from 'types/entities/base-package.entity';
 import { PublicPackageSummary } from '../../../types/user/types';
 import { PackageStatus } from '../../../types/type';
 import { PricingType } from '../../../types/entities/schedule.entity';

@@ -1,6 +1,21 @@
 import { SCHEDULE_STATUS } from '../../shared/constants/constants';
 import { z } from 'zod';
 
+export const MIN_TRIP_DAYS = 10;
+
+const toDateOnly = (dateStr: string) => {
+  const d = new Date(dateStr);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const tomorrow = () => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 1);
+  return d;
+};
+
 const HHmm = z
   .string()
   .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Time must be in HH:mm format (e.g. 05:00)');
@@ -25,7 +40,18 @@ export const createScheduleBodySchema = z
   .object({
     startDate: z
       .string({ required_error: 'Start date is required' })
-      .datetime({ message: 'Invalid start date format' }),
+      .min(1, 'Start date is required')
+      .refine(
+        (val) => toDateOnly(val) >= tomorrow(),
+        'Start date must be at least 1 day in the future',
+      )
+      .refine((val) => {
+        if (!val) return true;
+        const minStart = new Date();
+        minStart.setHours(0, 0, 0, 0);
+        minStart.setDate(minStart.getDate() + MIN_TRIP_DAYS);
+        return toDateOnly(val) >= minStart;
+      }, `Schedule must be created at least ${MIN_TRIP_DAYS} days in advance for better organization`),
     endDate: z
       .string({ required_error: 'End date is required' })
       .datetime({ message: 'Invalid end date format' }),
@@ -57,9 +83,23 @@ export const createScheduleBodySchema = z
       .max(300, 'notescannot exceed 300 characters')
       .optional(),
   })
-  .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
-    message: 'End date must be after start date',
-    path: ['endDate'],
+  .refine(
+    ({ startDate, endDate }) =>
+      !startDate || !endDate || toDateOnly(endDate) >= toDateOnly(startDate),
+    {
+      message: 'End date cannot be before start date',
+      path: ['endDate'],
+    },
+  )
+
+  .refine(({ pricing }) => !pricing.duo || pricing.duo <= pricing.solo * 2, {
+    message: 'Duo price should not exceed 2× the solo price',
+    path: ['pricing', 'duo'],
+  })
+
+  .refine(({ pricing }) => !pricing.group || pricing.group <= pricing.solo * 4, {
+    message: 'Group price should not exceed 4× the solo price',
+    path: ['pricing', 'group'],
   });
 
 export const createScheduleSchema = z.object({
@@ -67,10 +107,9 @@ export const createScheduleSchema = z.object({
   body: createScheduleBodySchema,
 });
 
-
 export const updateScheduleStatusSchema = z.object({
   body: z.object({
-  status: z.enum([ SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.COMPLETED]),
+    status: z.enum([SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.COMPLETED]),
   }),
   params: z.object({ scheduleId: z.string() }),
 });

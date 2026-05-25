@@ -2,7 +2,6 @@ import { UserRole } from 'types/entities/user.entity';
 import type {
   INotification,
   NotificationListResult,
-  NotificationType,
 } from '../../types/entities/notification.entity';
 import { IBaseRepository } from './IBaseRepository';
 

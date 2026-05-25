@@ -1,7 +1,7 @@
 export const PACKAGE_STATUS = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
-  SOFT_DELETED: 'SOFT_DELETED',
+  DELETED: 'DELETED',
 } as const;
 
 export type PackageStatus = (typeof PACKAGE_STATUS)[keyof typeof PACKAGE_STATUS];

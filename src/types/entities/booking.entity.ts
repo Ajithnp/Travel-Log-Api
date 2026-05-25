@@ -144,7 +144,6 @@ export interface ICancellationRequestPopulatedBooking
   };
 }
 
-
 export interface IVendorScheduleBookingSummary {
   totalConfirmedBookings: number;
   totalCancelledBookings: number;
@@ -152,7 +151,6 @@ export interface IVendorScheduleBookingSummary {
   totalCancelledAmount: number;
   totalVendorEarning: number;
   totalPlatformCommission: number;
-
 }
 
 export interface IScheduleBookingPopulated {
@@ -162,11 +160,11 @@ export interface IScheduleBookingPopulated {
     name: string;
   };
   groupType: GroupType;
-  travelerCount:number;
+  travelerCount: number;
   finalAmount: number;
   paymentStatus: PaymentStatus;
   bookingStatus: BookingStatus;
-  createdAt:Date;
+  createdAt: Date;
 }
 
 export interface ScheduleBookingListResult {

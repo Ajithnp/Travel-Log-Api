@@ -1,4 +1,3 @@
-import { IVendorVerificationResponseDTO } from '../../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { VendorProfileResponseDTO } from '../../../types/dtos/vendor/response.dtos';
 import { UpdateProfileLogoRequestDTO } from '../../../types/dtos/vendor/request.dtos';
 export interface IVendorService {

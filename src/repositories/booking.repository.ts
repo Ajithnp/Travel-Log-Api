@@ -430,7 +430,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     scheduleId: string,
     vendorId: string,
   ): Promise<IVendorScheduleBookingSummary | null> {
-
     const stats = await this.model.aggregate([
       {
         $match: {
@@ -442,35 +441,66 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         $group: {
           _id: null,
           totalConfirmedBookings: {
-            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$travelerCount', 0] },
+            $sum: {
+              $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$travelerCount', 0],
+            },
           },
           totalCancelledBookings: {
-            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, '$travelerCount', 0] },
+            $sum: {
+              $cond: [
+                { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                '$travelerCount',
+                0,
+              ],
+            },
           },
           totalConfirmedAmount: {
-            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$finalAmount', 0] },
+            $sum: {
+              $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$finalAmount', 0],
+            },
           },
           totalCancelledAmount: {
-            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, '$finalAmount', 0] },
+            $sum: {
+              $cond: [
+                { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                '$finalAmount',
+                0,
+              ],
+            },
           },
           totalVendorEarning: {
             $sum: {
               $add: [
                 {
-                  $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$vendorEarning', 0]
+                  $cond: [
+                    { $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] },
+                    '$vendorEarning',
+                    0,
+                  ],
                 },
                 {
                   $cond: [
                     { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
-                    { $subtract: [{ $ifNull: ['$finalAmount', 0] }, { $ifNull: ['$cancelationRefundAmount', 0] }] },
-                    0
-                  ]
-                }
-              ]
+                    {
+                      $subtract: [
+                        { $ifNull: ['$finalAmount', 0] },
+                        { $ifNull: ['$cancelationRefundAmount', 0] },
+                      ],
+                    },
+                    0,
+                  ],
+                },
+              ],
             },
           },
           totalPlatformCommission: {
-            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] }, '$platformCommission', 0] },
+            $sum: {
+              $cond: [
+                { $eq: ['$bookingStatus', BOOKING_STATUS.CONFIRMED] },
+                '$platformCommission',
+                0,
+              ],
+            },
           },
         },
       },
@@ -500,8 +530,8 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     vendorId: string,
     page: number,
     limit: number,
-    search?:string,
-    filter?:string
+    search?: string,
+    filter?: string,
   ): Promise<ScheduleBookingListResult> {
     const matchStage: mongoose.FilterQuery<IBooking> = {
       scheduleId: new mongoose.Types.ObjectId(scheduleId),
@@ -552,7 +582,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
                 finalAmount: 1,
                 paymentStatus: 1,
                 bookingStatus: 1,
-                createdAt:1,
+                createdAt: 1,
                 userId: { name: '$user.name' },
               },
             },

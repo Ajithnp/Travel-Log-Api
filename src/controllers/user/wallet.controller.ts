@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from 'express';
+import { RequestHandler } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { IWalletController } from '../../interfaces/controller_interfaces/user/IWalletController';
 import {

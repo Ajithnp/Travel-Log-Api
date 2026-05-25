@@ -14,6 +14,7 @@ import { ClientSession } from 'mongoose';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
+import { toObjectId } from '../../shared/utils/database/objectId.helper';
 
 @injectable()
 export class WalletService implements IWalletService {
@@ -81,8 +82,8 @@ export class WalletService implements IWalletService {
     await this._walletRepository.decrementBalance(userId, amount, session);
     await this._walletTransactionRepository.createTransaction(
       {
-        walletId: wallet._id as any,
-        userId: userId as any,
+        walletId: wallet._id,
+        userId: toObjectId(userId),
         type: TRANSACTION_TYPE.DEBIT,
         amount,
         description,

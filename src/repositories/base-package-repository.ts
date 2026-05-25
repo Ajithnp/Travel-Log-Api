@@ -366,7 +366,6 @@ export class BasePackageRepository
     return { packages, total };
   }
 
-  // ─── Vendor Public Profile — packages by a single vendor ─────────────────
   async findVendorPublicPackages(
     vendorId: string,
     page: number,
@@ -375,7 +374,6 @@ export class BasePackageRepository
     const vendorObjectId = new mongoose.Types.ObjectId(vendorId);
 
     const pipeline: mongoose.PipelineStage[] = [
-      // ── Stage 1: Match this vendor's published + active packages ──────────
       {
         $match: {
           vendorId: vendorObjectId,
@@ -384,7 +382,6 @@ export class BasePackageRepository
         },
       },
 
-      // ── Stage 2: Category lookup ────────────────
       {
         $lookup: {
           from: 'categories',
@@ -399,7 +396,7 @@ export class BasePackageRepository
         },
       },
 
-      // ── Stage 3: Join active schedules ───────────────────
+      //  Join active schedules
       {
         $lookup: {
           from: 'schedulepackages',
@@ -422,10 +419,9 @@ export class BasePackageRepository
         },
       },
 
-      // ── Stage 4: Drop packages with no active schedules ───────────────────
+      //  Drop packages with no active schedules
       { $match: { 'activeSchedules.0': { $exists: true } } },
 
-      // ── Stage 5: Compute derived price / date / status fields ─────────────
       {
         $addFields: {
           startingFromPrice: {
@@ -521,7 +517,6 @@ export class BasePackageRepository
         },
       },
 
-      // ── Stage 6: Vendor lookup (needed for package card vendor.name) ──────
       {
         $lookup: {
           from: 'users',
@@ -537,7 +532,6 @@ export class BasePackageRepository
         },
       },
 
-      // ── Stage 7: Facet — count + sort (newest) + paginate + project ───────
       {
         $facet: {
           metadata: [{ $count: 'total' }],
@@ -587,9 +581,8 @@ export class BasePackageRepository
         {
           _id: id,
           vendorId: toObjectId(vendorId),
-          isDeleted: false,
         },
-        { isDeleted: true, deletedAt: new Date() },
+        { isDeleted: true, status: PACKAGE_STATUS.DELETED },
         { new: true },
       )
       .exec();

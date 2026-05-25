@@ -26,7 +26,7 @@ export interface ISchedule extends Document {
   status: ScheduleStatus;
   cancellationReason?: string;
   cancelledAt?: Date;
-  cancelledBookings?: number; 
+  cancelledBookings?: number;
   totalRefunded?: number;
   notes?: string;
   createdAt: Date;
@@ -46,8 +46,8 @@ export interface ISchedulePopulatedPacakge extends Omit<ISchedule, 'packageId'> 
   packageId: {
     _id: Types.ObjectId;
     title: string;
-    location:string;
-    state:string;
-    basePrice:string;
+    location: string;
+    state: string;
+    basePrice: string;
   };
-};
+}

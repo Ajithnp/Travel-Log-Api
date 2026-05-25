@@ -1,4 +1,4 @@
-import { injectable, inject } from 'tsyringe';
+import { injectable } from 'tsyringe';
 import {
   GetNotificationsQuery,
   INotificationRepository,
