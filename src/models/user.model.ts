@@ -42,6 +42,10 @@ const userSchema = new Schema<IUser>(
       enum: ['admin', 'user', 'vendor'],
       default: 'user',
     },
+    unreadTabs: {
+      type: [String],
+      default: [],
+    },
     isBlocked: {
       type: Boolean,
       default: false,

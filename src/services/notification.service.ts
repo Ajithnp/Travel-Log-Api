@@ -14,24 +14,25 @@ import { toObjectId } from '../shared/utils/database/objectId.helper';
 import { NotificationMapper } from '../shared/mappers/notification.mapper';
 import { UserRole } from '../types/entities/user.entity';
 
-// is fire-and-forget intentionally:
-//   - If the user is offline, the socket emit does nothing (no room member).
-//   - The notification is already in the DB, so they'll see it on next load.
-//   - We never want a socket failure to break the HTTP response.
-
 import { EmitTarget } from '../infrastructure/socket/types/socket.types';
 import { notificationEmitter } from '../infrastructure/socket/namespaces/notification-emitter';
 import logger from '../config/logger';
+import { VendorTabs } from '../shared/constants/constants';
+import { HTTP_STATUS } from '../shared/constants/http_status_code';
+import { AppError } from '../errors/AppError';
+import { ERROR_MESSAGES } from '../shared/constants/messages';
+import { IUserRepository } from '../interfaces/repository_interfaces/IUserRepository';
 
 @injectable()
 export class NotificationService implements INotificationService {
   constructor(
     @inject('INotificationRepository')
     private _notificationRepo: INotificationRepository,
+    @inject('IUserRepository')
+    private _userRepository: IUserRepository,
   ) {}
 
   async createNotification(payload: CreateNotificationDTO): Promise<NotificationResponseDTO> {
-    // ── 1. Persist to DB
     const notification = await this._notificationRepo.create({
       recipientId: toObjectId(payload.recipientId as string),
       recipientRole: payload.recipientRole,
@@ -44,17 +45,12 @@ export class NotificationService implements INotificationService {
     });
 
     const response = NotificationMapper.toNotification(notification);
-    // ── 2. Resolve emit target
-
-    // recipientId present → send to that specific user's private room
-    // recipientRole only  → send to everyone in that role
-    // (broadcast use case is handled by createBroadcastNotification below)
 
     const target: EmitTarget = payload.recipientId
       ? { type: 'user', userId: payload.recipientId.toString() }
       : { type: 'role', role: payload.recipientRole };
 
-    // ── 3. Emit via socket (fire-and-forget, never throws)
+    // . Emit via socket (fire-and-forget, never throws)
 
     try {
       notificationEmitter.send(target, {
@@ -99,8 +95,6 @@ export class NotificationService implements INotificationService {
     return { unreadCount: count };
   }
 
-  // ── After mark-all-read: zero out the badge on all tabs
-
   async markAllRead(payload: {
     recipientId: string;
     recipientRole: UserRole;
@@ -113,7 +107,6 @@ export class NotificationService implements INotificationService {
     return { modifiedCount: count };
   }
 
-  //  After mark-as-read: push count update + sync other tabs
   async markAsRead(
     notificationId: string,
     recipientId: string,
@@ -125,7 +118,6 @@ export class NotificationService implements INotificationService {
       recipientRole,
     );
 
-    // Sync other open tabs of the same user
     notificationEmitter.sendReadSync(recipientId, notificationId);
 
     const count = await this._notificationRepo.getUnreadCount({ recipientId, recipientRole });
@@ -148,5 +140,14 @@ export class NotificationService implements INotificationService {
     });
 
     notificationEmitter.sendUnreadCount(recipientId, 1);
+  }
+
+  async markTabsAsRead(userId: string, tab: VendorTabs): Promise<void> {
+    const userDoc = await this._userRepository.findById(userId);
+    if (!userDoc) {
+      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    await this._userRepository.findByIdAndRemoveUnreadTabs(userId, tab);
   }
 }

@@ -50,5 +50,12 @@ export class NotificationRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR, USER_ROLES.USER, USER_ROLES.ADMIN]),
       this._notificationController.deleteNotification.bind(this._notificationController),
     );
+
+    this._router.patch(
+      '/mark-tabs-read',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR, USER_ROLES.ADMIN]),
+      this._notificationController.markTabsAsRead.bind(this._notificationController),
+    );
   }
 }

@@ -13,6 +13,7 @@ import {
   IVendorVerificationResponse,
   IVendorVerificationService,
 } from '../../interfaces/service_interfaces/vendor/IvendorVerificationService';
+
 @injectable()
 export class VendorController implements IVendorController {
   constructor(

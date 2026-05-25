@@ -13,16 +13,21 @@ import { VendorverificationMapper } from '../../shared/mappers/vendor-verificati
 import { IVendorVerificationResponseDTO } from '../../types/dtos/vendor/vendorVerificationResponse.dtos';
 import { VendorVerificationRequestDTO } from '../../types/dtos/vendor/request.dtos';
 import { IDocuments, IVendorInfo } from '../../types/entities/vendor.info.entity';
+import logger from '../../config/logger';
+import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
+import { USER_ROLES } from '../../shared/constants/roles';
+import { ADMIN_TABS, VENDOR_TABS } from '../../shared/constants/constants';
+import { notificationEmitter } from '../../infrastructure/socket/namespaces/notification-emitter';
 
 @injectable()
 export class VendorVerificationService implements IVendorVerificationService {
   constructor(
     @inject('IVendorInfoRepository')
     private _vendorInfoRepository: IVendorInfoRepository,
+    @inject('IUserRepository')
+    private _userRepository: IUserRepository,
   ) {}
 
-  async getVerificationData(vendorId: string): Promise<void> {}
-  //==============================================
   async vendorVerificationSubmit(
     vendorId: string,
     verificationData: VendorVerificationRequestDTO,
@@ -69,11 +74,28 @@ export class VendorVerificationService implements IVendorVerificationService {
     };
 
     const vendorDoc = await this._vendorInfoRepository.create(payload);
+
+    const admin = await this._userRepository.findOne({ role: USER_ROLES.ADMIN });
+
+    if (!admin) {
+      throw new AppError(ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+
+    await this._userRepository.findByIdAndAddUnreadTabs(
+      admin._id.toString(),
+      ADMIN_TABS.VENDOR_VERIFICATION,
+    );
+
+    try {
+      notificationEmitter.setUnreadTabs(admin._id.toString(), ADMIN_TABS.VENDOR_VERIFICATION);
+    } catch (error) {
+      logger.error('[VendorVerificationService] Error notifying admin:', error);
+    }
+
     return {
       isProfileVerified: vendorDoc.isProfileVerified,
     };
   }
-  //===================================================
 
   async getRejectedVendor(vendorId: string): Promise<IVendorVerificationResponse> {
     const vendor = await this._vendorInfoRepository.findOne({
@@ -87,7 +109,7 @@ export class VendorVerificationService implements IVendorVerificationService {
 
     return VendorverificationMapper.toVendorRejectedResponse(vendor);
   }
-  //====================================
+
   async vendorVerificationReapply(
     vendorId: string,
     vendorInfoId: string,
@@ -103,19 +125,12 @@ export class VendorVerificationService implements IVendorVerificationService {
     }
 
     if (existingDoc.status !== VENDOR_VERIFICATION_STATUS.REJECTED) {
-      throw new AppError(
-        ERROR_MESSAGES.VENDOR_REAPPLY_NOT_ALLOWED, // add this message
-        HTTP_STATUS.BAD_REQUEST,
-      );
+      throw new AppError(ERROR_MESSAGES.VENDOR_REAPPLY_NOT_ALLOWED, HTTP_STATUS.BAD_REQUEST);
     }
-
-    // Merge: existing DB documents + and the replaced files from request
-    // Files not replaced by the vendor stay exactly as they were in DB
-
     const replacedDocuments = this._mapFilesToDocuments(verificationData.files);
 
     const mergedDocuments: IDocuments = {
-      ...existingDoc.documents, // existing keys
+      ...existingDoc.documents,
       ...replacedDocuments,
     };
 
@@ -142,7 +157,7 @@ export class VendorVerificationService implements IVendorVerificationService {
 
     return { isProfileVerified: existingDoc.isProfileVerified };
   }
-  //====================================
+
   private _mapFilesToDocuments(files: VendorVerificationRequestDTO['files']): Partial<IDocuments> {
     const fieldMap: Record<string, keyof IDocuments> = {
       businessLicence: 'businessLicence',

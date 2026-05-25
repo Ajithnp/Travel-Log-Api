@@ -1,4 +1,9 @@
 import { IUser } from '../../types/entities/user.entity';
 import { IBaseRepository } from './IBaseRepository';
+import { AdminTabs, VendorTabs } from '../../shared/constants/constants';
 
-export interface IUserRepository extends IBaseRepository<IUser> {}
+export interface IUserRepository extends IBaseRepository<IUser> {
+  findByIdAndRemoveUnreadTabs(userId: string, tab: VendorTabs | AdminTabs): Promise<void>;
+  findByIdAndAddUnreadTabs(userId: string, tab: VendorTabs | AdminTabs): Promise<void>;
+  getUserUnreadTabs(userId: string): Promise<string[]>;
+}

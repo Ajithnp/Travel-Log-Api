@@ -2,6 +2,7 @@ import { Socket, Server } from 'socket.io';
 import { UserRole } from '../../../types/entities/user.entity';
 import { NotificationType } from '../../../types/entities/notification.entity';
 import { createBroadcastNotification } from '../../../interfaces/service_interfaces/INotificationService';
+import { AdminTabs, VendorTabs } from 'shared/constants/constants';
 
 // ─── Authenticated Socket
 export interface AuthenticatedSocket extends Socket {
@@ -30,6 +31,8 @@ export interface ServerToClientEvents {
   notification_read: (payload: { notificationId: string }) => void;
   notification_read_all: () => void;
   notification_unread_count: (payload: { count: number }) => void;
+  tab_read: (payload: { tab: VendorTabs | AdminTabs }) => void;
+  tab_new: (payload: { tab: VendorTabs | AdminTabs }) => void;
 
   // ── Chat events
   'chat:message_new': (payload: ChatMessagePayload) => void;

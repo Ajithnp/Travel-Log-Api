@@ -1,6 +1,8 @@
 import { createBroadcastNotification } from 'interfaces/service_interfaces/INotificationService';
 import logger from '../../../config/logger';
 import { EmitTarget, NotificationPayload, SocketRooms, TypedIOServer } from '../types/socket.types';
+import { AdminTabs, VendorTabs } from '../../../shared/constants/constants';
+import { NOTIFICATION_EVENTS } from '../types/socket.event';
 
 export class NotificationEmitter {
   private static instance: NotificationEmitter;
@@ -34,7 +36,11 @@ export class NotificationEmitter {
     );
 
     this.io.to(room).emit('notification_new', payload);
-    console.log('notification_new==================');
+  }
+
+  setUnreadTabs(userId: string, tab: AdminTabs | VendorTabs): void {
+    if (!this.io) return;
+    this.io.to(SocketRooms.forUser(userId)).emit(NOTIFICATION_EVENTS.TAB_NEW, { tab });
   }
 
   // ── Emit unread count update to a specific user
@@ -64,16 +70,12 @@ export class NotificationEmitter {
     }
   }
 
-  // ── Health check
-
   isReady(): boolean {
     return this.io !== null;
   }
 
-  /**
+  /*
    * Get count of sockets currently in a user's private room.
-   * Useful for knowing if the user is online before deciding to
-   * send a push notification fallback.
    */
 
   async getSocketCountForUser(userId: string): Promise<number> {

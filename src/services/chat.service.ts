@@ -18,6 +18,9 @@ import { HTTP_STATUS } from '../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../shared/constants/messages';
 import { AppError } from '../errors/AppError';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
+import { notificationEmitter } from '../infrastructure/socket/namespaces/notification-emitter';
+import { VENDOR_TABS } from '../shared/constants/constants';
+import { IUserRepository } from '../interfaces/repository_interfaces/IUserRepository';
 
 @injectable()
 export class ChatService implements IChatService {
@@ -26,6 +29,8 @@ export class ChatService implements IChatService {
     private _chatRepo: IChatRepository,
     @inject('IMessageRepository')
     private _messageRepo: IMessageRepository,
+    @inject('IUserRepository')
+    private _userRepo: IUserRepository,
   ) {}
 
   async ensureRoomExists(
@@ -101,7 +106,11 @@ export class ChatService implements IChatService {
       content,
     });
 
+    await this._userRepo.findByIdAndAddUnreadTabs(room.vendorId.toString(), VENDOR_TABS.CHAT);
+
     try {
+      notificationEmitter.setUnreadTabs(room.vendorId.toString(), VENDOR_TABS.CHAT);
+
       chatEmitter.sendMessageUser(chatId.toString(), room.vendorId.toString(), {
         id: message._id.toString(),
         chatId: chatId.toString(),

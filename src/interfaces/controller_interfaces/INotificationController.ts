@@ -7,4 +7,5 @@ export interface INotificationController {
   markAllRead: RequestHandler;
   markAsRead: RequestHandler;
   deleteNotification: RequestHandler;
+  markTabsAsRead: RequestHandler;
 }

@@ -12,13 +12,13 @@ export function registerChatHandlers(
 
   logger.info(`[Chat Socket] Registered handlers: userId=${userId} role=${role}`);
 
-  // ── Client joins a specific chat room ────────────────────────────────────────
+  // ── Client joins a specific chat room
   // Called when user/vendor opens a chat window
   // Client emits: socket.emit("chat:join", { chatId })
 
   socket.on(CHAT_EVENTS.JOIN_ROOM, async ({ chatId }: { chatId: string }) => {
     try {
-      // Guard: verify the user is actually a member of this chat
+      // Guard
       const isAllowed = await chatRepository.canAccessRoom(chatId, userId, role);
 
       if (!isAllowed) {

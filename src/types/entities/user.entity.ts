@@ -17,6 +17,7 @@ export interface IUser extends Document {
   isBlocked: boolean;
   blockedReason: string;
   role: UserRole;
+  unreadTabs: string[];
   createdAt: Date;
   updatedAt: Date;
 }
