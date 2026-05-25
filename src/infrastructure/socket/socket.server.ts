@@ -12,6 +12,7 @@ import { notificationEmitter } from './namespaces/notification-emitter';
 import { IChatRepository } from '../../interfaces/repository_interfaces/IChatRepository';
 import { registerChatHandlers } from './handlers/chat-handler';
 import { chatEmitter } from './namespaces/chat-emitter';
+import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 
 export function initSocketServer(httpServer: HttpServer): TypedIOServer {
   const io = new SocketIOServer(httpServer, {
@@ -33,12 +34,18 @@ export function initSocketServer(httpServer: HttpServer): TypedIOServer {
   const notificationRepository = container.resolve<INotificationRepository>(
     REPOSITORY_TOKENS.NOTIFICATION_REPOSITORY,
   );
+  const userRepository = container.resolve<IUserRepository>(REPOSITORY_TOKENS.USER_REPOSITORY);
 
   const chatRepository = container.resolve<IChatRepository>(REPOSITORY_TOKENS.CHAT_REPOSITORY);
 
   // ── Connection handler(fires every time a new user connects)
   io.on('connection', (socket) => {
-    registerNotificationHandlers(io, socket as AuthenticatedSocket, notificationRepository);
+    registerNotificationHandlers(
+      io,
+      socket as AuthenticatedSocket,
+      notificationRepository,
+      userRepository,
+    );
     registerChatHandlers(io, socket as AuthenticatedSocket, chatRepository);
   });
 

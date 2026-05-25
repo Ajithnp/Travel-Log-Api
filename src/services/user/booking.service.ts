@@ -14,7 +14,7 @@ import {
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
-import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../../shared/constants/constants';
+import { ADMIN_TABS, PACKAGE_STATUS, SCHEDULE_STATUS } from '../../shared/constants/constants';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { statusMessages } from '../../shared/constants/schedule-status';
 import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
@@ -52,6 +52,8 @@ import { getApplicableCancellationWindow } from '../../shared/utils/cancellation
 import { IWalletService } from '../../interfaces/service_interfaces/user/IWalletService';
 import { calculatePaymentSplit } from '../../shared/utils/booking/payment-split-calculator';
 import { BookingValidator } from '../../shared/utils/booking/validate-booking-date';
+import logger from '../../config/logger';
+import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -74,6 +76,8 @@ export class BookingService implements IBookingService {
     private _walletService: IWalletService,
     @inject('ICancellationPolicyRepository')
     private _cancellationPolicyRepo: ICancellationPolicyRepository,
+    @inject('IUserRepository')
+    private _userRepository: IUserRepository,
   ) {}
 
   async initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO> {
@@ -149,8 +153,8 @@ export class BookingService implements IBookingService {
         throw new AppError(ERROR_MESSAGES.ALREADY_HAVE_ACTIVE_BOOKING, HTTP_STATUS.CONFLICT);
       }
 
-      // 6. Financial calculation
-      // ──────────────────────────────────────
+      //  Financial calculation
+
       const discountAmount = 0;
       const walletBalance = payload.useWallet
         ? (await this._walletService.getWalletBalance(payload.userId)).balance
@@ -168,7 +172,6 @@ export class BookingService implements IBookingService {
       session = await mongoose.startSession();
       session.startTransaction();
 
-      // Create booking
       const booking = await this._bookingRepo.createBooking(
         {
           userId: new mongoose.Types.ObjectId(payload.userId),
@@ -254,7 +257,9 @@ export class BookingService implements IBookingService {
       if (session) {
         try {
           await session.abortTransaction();
-        } catch (_) {}
+        } catch (_) {
+          logger.error('rolling back transaction in booking.service.ts');
+        }
 
         await session.endSession();
       }
@@ -514,6 +519,18 @@ export class BookingService implements IBookingService {
       if (!updatedBooking) {
         throw new AppError(ERROR_MESSAGES.BOOKING_CANCELLATION_FAILED, HTTP_STATUS.BAD_REQUEST);
       }
+
+      const admin = await this._userRepository.findOne({ role: USER_ROLES.ADMIN });
+      if (!admin) {
+        throw new AppError(
+          ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR,
+          HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        );
+      }
+      await this._userRepository.findByIdAndAddUnreadTabs(
+        admin._id.toString(),
+        ADMIN_TABS.CANCEL_BOOKINGS,
+      );
 
       await this._notificationService.createNotification({
         recipientId: booking.vendorId._id.toString(),

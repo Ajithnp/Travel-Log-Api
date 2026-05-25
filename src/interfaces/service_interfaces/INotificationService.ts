@@ -24,6 +24,8 @@ export interface INotificationService {
     recipientId: string,
     recipientRole: UserRole,
   ): Promise<void>;
+
+  markTabsAsRead(userId: string, tab: string): Promise<void>;
 }
 
 export interface CreateNotificationDTO {
@@ -49,7 +51,7 @@ export interface createBroadcastNotification {
   isRead?: boolean;
 }
 
-// ─── Response shapes ─────────
+// ─── Response shapes
 
 export interface NotificationResponseDTO {
   _id: string;
@@ -75,19 +77,15 @@ export interface PaginatedNotificationsDTO {
   totalPages: number;
 }
 
-// ─── Mark Read ────
-
 export interface MarkReadDTO {
   notificationId: string;
-  recipientId: string; // ownership check — only owner can mark their own notification
+  recipientId: string;
 }
 
 export interface MarkAllReadDTO {
   recipientId: string;
   recipientRole: UserRole;
 }
-
-// ─── Delete ───────────────────────────────────────────────────────────────────
 
 export interface DeleteNotificationDTO {
   notificationId: string;

@@ -32,3 +32,31 @@ export const SCHEDULE_STATUS = {
 } as const;
 
 export type ScheduleStatus = (typeof SCHEDULE_STATUS)[keyof typeof SCHEDULE_STATUS];
+
+export const VENDOR_TABS = {
+  CONTACT_INFO: 'contactInfo',
+  BUSINESS_INFO: 'businessInfo',
+  DOCUMENT_INFO: 'documentInfo',
+  CHAT: 'Chats',
+  PACKAGE: 'package',
+  SCHEDULE: 'schedule',
+  BOOKING: 'booking',
+  NOTIFICATION: 'notification',
+} as const;
+
+export type VendorTabs = (typeof VENDOR_TABS)[keyof typeof VENDOR_TABS];
+
+export const ADMIN_TABS = {
+  DASHBOARD: 'dashboard',
+  CANCEL_BOOKINGS: 'Cancel Bookings',
+  VENDOR_VERIFICATION: 'Vendors Verification Requests',
+  USERS: 'users',
+  VENDOR: 'vendor',
+  PACKAGES: 'packages',
+  SCHEDULES: 'schedules',
+  BOOKINGS: 'bookings',
+  REVENUE: 'revenue',
+  NOTIFICATION: 'notification',
+} as const;
+
+export type AdminTabs = (typeof ADMIN_TABS)[keyof typeof ADMIN_TABS];

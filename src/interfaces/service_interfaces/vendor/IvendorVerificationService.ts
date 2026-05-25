@@ -3,7 +3,6 @@ import { IFiles, VendorStatus } from '../../../types/entities/vendor.info.entity
 import { IVendorVerificationResponseDTO } from 'types/dtos/vendor/vendorVerificationResponse.dtos';
 
 export interface IVendorVerificationService {
-  getVerificationData(vendorId: string): Promise<void>;
   getRejectedVendor(vendorId: string): Promise<IVendorVerificationResponse>;
   vendorVerificationSubmit(
     vendorId: string,

@@ -15,6 +15,8 @@ export const NOTIFICATION_EVENTS = {
   UNREAD_COUNT: 'notification_unread_count',
   REQUEST_COUNT: 'notification_request_count',
   READ_SYNC: 'notification_read_sync',
+  TAB_READ: 'tab_read',
+  TAB_NEW: 'tab_new',
 } as const;
 
 export const CHAT_EVENTS = {

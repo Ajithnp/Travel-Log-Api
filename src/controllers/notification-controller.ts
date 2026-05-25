@@ -8,6 +8,7 @@ import { SUCCESS_MESSAGES } from '../shared/constants/messages';
 import { UserRole } from '../types/entities/user.entity';
 import { getPaginationOptions } from '../shared/utils/pagination.helper';
 import { GetNotificationsQuery } from '../interfaces/repository_interfaces/INotificationRepository';
+import { VendorTabs } from 'shared/constants/constants';
 
 @injectable()
 export class NotificationController implements INotificationController {
@@ -106,6 +107,19 @@ export class NotificationController implements INotificationController {
       message: SUCCESS_MESSAGES.OK,
     };
 
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  markTabsAsRead = expressAsyncHandler(async (req, res): Promise<void> => {
+    const { tab } = req.body as { tab: VendorTabs };
+    const userId = req.user!.id;
+
+    await this._notificationService.markTabsAsRead(userId, tab);
+
+    const successResponse: IApiResponse<void> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+    };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 }

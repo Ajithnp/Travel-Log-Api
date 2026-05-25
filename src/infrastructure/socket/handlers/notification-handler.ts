@@ -4,11 +4,15 @@ import { INotificationRepository } from '../../../interfaces/repository_interfac
 import logger from '../../../config/logger';
 import { notificationEmitter } from '../namespaces/notification-emitter';
 import { NOTIFICATION_EVENTS } from '../types/socket.event';
+import { IUserRepository } from '../../../interfaces/repository_interfaces/IUserRepository';
+import { AdminTabs, VendorTabs } from 'shared/constants/constants';
+import { Types } from 'mongoose';
 
 export function registerNotificationHandlers(
   io: TypedIOServer,
   socket: AuthenticatedSocket,
   notificationRepository: INotificationRepository,
+  userRepository: IUserRepository,
 ): void {
   const { userId, role } = socket.data;
 
@@ -26,7 +30,7 @@ export function registerNotificationHandlers(
       `socketId=${socket.id}`,
   );
 
-  // ── 2. Send current unread count on connect(when connection establishes)
+  // Send current unread count on connect(when connection establishes)
 
   notificationRepository
     .getUnreadCount({ recipientId: userId, recipientRole: role as UserRole })
@@ -40,7 +44,18 @@ export function registerNotificationHandlers(
   socket.on(NOTIFICATION_EVENTS.MARK_READ, ({ notificationId }) => {
     notificationEmitter.sendReadSync(userId, notificationId);
   });
-  // ── 4. Client event: request fresh unread count
+
+  //Unread
+  userRepository
+    .getUserUnreadTabs(userId)
+    .then((tabs) => {
+      socket.emit(NOTIFICATION_EVENTS.TAB_READ, { tabs });
+    })
+    .catch((err) => {
+      logger.error(`[Socket] tab_read error for ${userId}:`, err);
+    });
+
+  // Client event: request fresh unread count
   socket.on(NOTIFICATION_EVENTS.REQUEST_COUNT, async () => {
     try {
       const count = await notificationRepository.getUnreadCount({
@@ -53,16 +68,13 @@ export function registerNotificationHandlers(
     }
   });
 
-  // ── 5. Disconnect cleanup
-
-  // Socket.IO automatically removes the socket from all rooms on disconnect.
-  // If we use Redis presence tracking, clear it here.
+  // Disconnect cleanup
 
   socket.on('disconnect', (reason) => {
     console.log(`[Socket] Disconnected: userId=${userId} socketId=${socket.id} reason=${reason}`);
   });
 
-  // ── 6. Handle unexpected errors on this socket
+  //. Handle unexpected errors on this socket
 
   socket.on('error', (err) => {
     console.error(`[Socket] Socket error for userId=${userId}:`, err.message);

@@ -10,6 +10,7 @@ import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-
 import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos';
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { UpdateProfileLogoRequestDTO } from '../../validators/vendor/profile.validation';
+
 @injectable()
 export class VendorService implements IVendorService {
   constructor(
