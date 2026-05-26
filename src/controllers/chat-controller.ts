@@ -14,7 +14,7 @@ export class ChatController implements IChatController {
     private _chatService: IChatService,
   ) {}
 
-  // ─── USER 
+  // ─── USER
 
   getUserChat = expressAsyncHandler(async (req, res) => {
     const userId = req.user!.id;
@@ -61,7 +61,7 @@ export class ChatController implements IChatController {
     res.status(HTTP_STATUS.CREATED).json(successResponse);
   });
 
-  // ─── VENDOR 
+  // ─── VENDOR
 
   getVendorChats = expressAsyncHandler(async (req, res) => {
     const vendorId = req.user!.id;

@@ -1,8 +1,7 @@
-import { RequestHandler } from "express";
-import { IApiResponse } from "../../types/common/IApiResponse";
-
+import { RequestHandler } from 'express';
 
 export interface IDocumentController {
- getBookingTicket:RequestHandler
-  
+  getBookingTicket: RequestHandler;
+
+  getScheduleBookingsCSV: RequestHandler;
 }

@@ -5,8 +5,6 @@ import logger from '../../../config/logger';
 import { notificationEmitter } from '../namespaces/notification-emitter';
 import { NOTIFICATION_EVENTS } from '../types/socket.event';
 import { IUserRepository } from '../../../interfaces/repository_interfaces/IUserRepository';
-import { AdminTabs, VendorTabs } from 'shared/constants/constants';
-import { Types } from 'mongoose';
 
 export function registerNotificationHandlers(
   io: TypedIOServer,
