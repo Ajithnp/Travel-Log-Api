@@ -33,6 +33,8 @@ import { IChatController } from '../interfaces/controller_interfaces/IChatContro
 import { ChatController } from '../controllers/chat-controller';
 import { IWalletController } from '../interfaces/controller_interfaces/user/IWalletController';
 import { WalletController } from '../controllers/user/wallet.controller';
+import { IDocumentController } from '../interfaces/controller_interfaces/IDocumentController';
+import { DocumentController } from '../controllers/document.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -54,6 +56,10 @@ export class ControllerRegistry {
 
     container.register<IChatController>('IChatController', {
       useClass: ChatController,
+    });
+
+    container.register<IDocumentController>('IDocumentController', {
+      useClass: DocumentController,
     });
 
     //vendor controllers

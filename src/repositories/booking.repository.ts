@@ -9,6 +9,7 @@ import {
   ScheduleBookingListResult,
   IScheduleBookingPopulated,
   IScheduleBookingSinglePopulated,
+  ITicketPopulatedBooking,
 } from '../types/entities/booking.entity';
 import { BaseRepository } from './base.repository';
 import {
@@ -108,6 +109,28 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       })
       .populate('packageId', 'title')
       .lean() as Promise<IBookingPopulated | null>;
+  }
+
+  async findOneAndPopulate(bookingId: string): Promise<ITicketPopulatedBooking | null> {
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) return null;
+
+    const booking = await this.model
+      .findById(bookingId)
+      .populate({
+        path: 'packageId',
+        select: 'title location state difficultyLevel days nights inclusions',
+      })
+      .populate({
+        path: 'scheduleId',
+        select: 'startDate endDate reportingTime reportingLocation',
+      })
+      .populate({
+        path: 'vendorId',
+        select: 'name',
+      })
+      .lean();
+
+    return booking as ITicketPopulatedBooking | null;
   }
 
   async findBookings(filters: BookingFilters): Promise<BookingListResult> {
