@@ -9,12 +9,15 @@ import {
   CancelBookingRequestSchema,
   InitiateBookingRequestSchema,
 } from '../../validators/user/booking.validation';
+import { IDocumentController } from '../../interfaces/controller_interfaces/IDocumentController';
 
 @injectable()
 export class BookingRoutes extends BaseRoute {
   constructor(
     @inject('IBookingController')
     private _bookingController: IBookingController,
+    @inject('IDocumentController')
+    private _documentController: IDocumentController,
   ) {
     super();
     this.initializeRoutes();
@@ -69,6 +72,13 @@ export class BookingRoutes extends BaseRoute {
       authorize([USER_ROLES.USER]),
       validateDTO(CancelBookingRequestSchema),
       this._bookingController.cancelBookingRequest.bind(this._bookingController),
+    );
+
+    this._router.get(
+      '/:bookingId/ticket',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._documentController.getBookingTicket.bind(this._documentController),
     );
   }
 }

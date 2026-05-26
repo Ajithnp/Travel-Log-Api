@@ -8,12 +8,15 @@ import {
   IVendorScheduleBookingSummary,
   ScheduleBookingListResult,
   IScheduleBookingSinglePopulated,
+  ITicketPopulatedBooking,
 } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose, { ClientSession } from 'mongoose';
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
   createBooking(data: Partial<IBooking>, session?: mongoose.ClientSession): Promise<IBooking>;
+
+  findOneAndPopulate(bookingId: string): Promise<ITicketPopulatedBooking | null>;
 
   findById(id: string): Promise<IBooking | null>;
 

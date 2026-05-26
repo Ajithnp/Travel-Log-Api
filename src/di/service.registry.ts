@@ -51,6 +51,8 @@ import { IChatService } from '../interfaces/service_interfaces/IChatService';
 import { ChatService } from '../services/chat.service';
 import { IWalletService } from '../interfaces/service_interfaces/user/IWalletService';
 import { WalletService } from '../services/user/wallet.service';
+import { IDocumentService } from '../interfaces/service_interfaces/IDocumentService';
+import { DocumentService } from '../services/document.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -96,6 +98,10 @@ export class ServiceRegistry {
 
     container.register<IChatService>('IChatService', {
       useClass: ChatService,
+    });
+
+    container.register<IDocumentService>('IDocumentService', {
+      useClass: DocumentService,
     });
 
     //vendor-services

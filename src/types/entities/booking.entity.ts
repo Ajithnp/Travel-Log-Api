@@ -186,3 +186,27 @@ export interface IScheduleBookingSinglePopulated extends Omit<IBooking, 'userId'
     name: string;
   };
 }
+
+export interface ITicketPopulatedBooking extends Omit<IBooking, 'packageId' | 'scheduleId' | 'vendorId'> {
+  packageId: {
+    _id: mongoose.Types.ObjectId;
+    title: string;
+    location: string;
+    state: string;
+    difficultyLevel: string;
+    days: number;
+    nights: number;
+    inclusions: string[];
+  } | null;
+  scheduleId: {
+    _id: mongoose.Types.ObjectId;
+    startDate: Date;
+    endDate: Date;
+    reportingTime: string;
+    reportingLocation: string;
+  } | null;
+  vendorId: {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+  } | null;
+}
