@@ -187,7 +187,8 @@ export interface IScheduleBookingSinglePopulated extends Omit<IBooking, 'userId'
   };
 }
 
-export interface ITicketPopulatedBooking extends Omit<IBooking, 'packageId' | 'scheduleId' | 'vendorId'> {
+export interface ITicketPopulatedBooking
+  extends Omit<IBooking, 'packageId' | 'scheduleId' | 'vendorId'> {
   packageId: {
     _id: mongoose.Types.ObjectId;
     title: string;

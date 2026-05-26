@@ -1,13 +1,8 @@
 import { inject, injectable } from 'tsyringe';
 import { IDocumentService } from '../interfaces/service_interfaces/IDocumentService';
-import { IApiResponse } from '../types/common/IApiResponse';
-import { HTTP_STATUS, SUCCESS_STATUS } from '../shared/constants/http_status_code';
-import { SUCCESS_MESSAGES } from '../shared/constants/messages';
+import { HTTP_STATUS } from '../shared/constants/http_status_code';
 import expressAsyncHandler from 'express-async-handler';
 import { IDocumentController } from '../interfaces/controller_interfaces/IDocumentController';
-import { AppError } from '../errors/AppError';
-
-
 
 @injectable()
 export class DocumentController implements IDocumentController {
@@ -16,10 +11,10 @@ export class DocumentController implements IDocumentController {
     private _documentService: IDocumentService,
   ) {}
 
-   getBookingTicket = expressAsyncHandler(async (req, res) => {
+  getBookingTicket = expressAsyncHandler(async (req, res) => {
     const userId = req.user?.id;
-    const { bookingId } = req.params as {bookingId:string};
-    
+    const { bookingId } = req.params as { bookingId: string };
+
     const { buffer, filename } = await this._documentService.getBookingTicket(bookingId, userId);
 
     res.setHeader('Content-Type', 'application/pdf');
@@ -27,4 +22,17 @@ export class DocumentController implements IDocumentController {
     res.status(HTTP_STATUS.OK).send(buffer);
   });
 
+  getScheduleBookingsCSV = expressAsyncHandler(async (req, res) => {
+    const { scheduleId } = req.params as { scheduleId: string };
+    const userId = req.user?.id;
+
+    const { buffer, filename } = await this._documentService.getScheduleBookingsCSV(
+      scheduleId,
+      userId,
+    );
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.status(HTTP_STATUS.OK).send(buffer);
+  });
 }

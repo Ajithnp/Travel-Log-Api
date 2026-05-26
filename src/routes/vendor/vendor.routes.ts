@@ -18,6 +18,7 @@ import {
 import { UpdateProfileLogoRequestSchema } from '../../validators/vendor/profile.validation';
 import { VendorVerificationSchema } from '../../validators/vendor/vendor-verification';
 import { IChatController } from '../../interfaces/controller_interfaces/IChatController';
+import { IDocumentController } from '../../interfaces/controller_interfaces/IDocumentController';
 
 @injectable()
 export class VendorRoutes extends BaseRoute {
@@ -32,6 +33,8 @@ export class VendorRoutes extends BaseRoute {
     private _schedulePackageController: ISchedulePackageController,
     @inject('IChatController')
     private _chatController: IChatController,
+    @inject('IDocumentController')
+    private _documentController: IDocumentController,
   ) {
     super();
     this.initializeRoutes();
@@ -127,7 +130,7 @@ export class VendorRoutes extends BaseRoute {
       this._vendorPackageController.getPackageScheduleContext.bind(this._vendorPackageController),
     );
 
-    //======================category mgnt===================
+    //======================category
 
     this._router.get(
       '/categories/request',
@@ -209,6 +212,13 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       validateDTO(updateScheduleStatusSchema),
       this._schedulePackageController.updateScheduleStatus.bind(this._schedulePackageController),
+    );
+
+    this._router.get(
+      '/schedules/:scheduleId/bookings/export/csv',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._documentController.getScheduleBookingsCSV.bind(this._documentController),
     );
 
     //===chat
