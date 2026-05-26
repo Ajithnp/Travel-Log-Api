@@ -152,6 +152,10 @@ export const ERROR_MESSAGES = {
   PAYMENT_CONFIRMATION_FAILED:
     'Payment initiation failed. Your booking has been cancelled and seats have been released. Please try again.',
   INVALID_PAYMENT_INTENT_ID: 'Invalid payment intent ID.',
+  BOOKING_NOT_ELGIBLE_FOR_RETRY: 'Booking not eligible for retry.',
+  RETRY_WINDOW_EXPIRED: 'Retry window has expired. Please make a new booking.',
+  NO_SEATS_AVAILABLE: 'No seats available for this booking. Please make a new booking.',
+  SEATS_NOT_AVAILABLE_FOR_RETRY: 'No seats available for this booking. Please make a new booking.',
 
   TRAVELER_INFO_INCOMPLETE: 'Lead traveler must provide email and phone number.',
   PACKAGE_CANNOT_BOOKED: 'Package can not be booked because the trip date has been passed',

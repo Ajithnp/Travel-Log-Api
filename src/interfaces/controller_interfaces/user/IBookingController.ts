@@ -3,6 +3,7 @@ import { RequestHandler } from 'express';
 export interface IBookingController {
   initiateBooking: RequestHandler;
   confirmBookingWallet: RequestHandler;
+  retryBookingPayment: RequestHandler;
   verifyPayment: RequestHandler;
   getBookings: RequestHandler;
   getBookingDetails: RequestHandler;

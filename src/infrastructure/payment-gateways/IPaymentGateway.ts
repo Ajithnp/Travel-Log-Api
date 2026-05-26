@@ -7,6 +7,7 @@ export interface CreatePaymentIntentDTO {
   amount: number;
   currency: string;
   bookingId: string;
+  bookingCode: string;
   metadata?: Record<string, string>;
 }
 
@@ -20,4 +21,5 @@ export interface IPaymentGateway {
   createPaymentIntent(data: CreatePaymentIntentDTO): Promise<PaymentIntentResult>;
   verifyWebhookEvent(rawBody: Buffer, signature: string): StripeWebhookEvent;
   verifyStripeSession(stripeSessionId: string): Promise<StripeCheckoutSession>;
+  retrieveSession(sessionId: string): Promise<StripeCheckoutSession>;
 }

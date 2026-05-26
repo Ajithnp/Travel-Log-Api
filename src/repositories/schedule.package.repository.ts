@@ -4,8 +4,8 @@ import { ISchedule, ISchedulePopulated } from '../types/entities/schedule.entity
 import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
 import SchedulePackageModel from '../models/schedule.model';
 import mongoose, { Types } from 'mongoose';
-import { SCHEDULE_STATUS } from '../shared/constants/constants';
-import { FilterType } from 'types/db';
+import { SCHEDULE_STATUS, ScheduleStatus } from '../shared/constants/constants';
+import { FilterType } from '../types/db';
 import { FilterQuery, UpdateResult } from 'mongoose';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
 
@@ -112,13 +112,13 @@ export class SchedulePackageRepository
     scheduleId: string,
     seatsCount: number,
     session?: mongoose.ClientSession,
-  ): Promise<UpdateResult> {
-    return this.model.updateOne(
+  ): Promise<ISchedule | null> {
+    return this.model.findOneAndUpdate(
       {
         _id: new Types.ObjectId(scheduleId),
       },
       { $inc: { seatsBooked: seatsCount } },
-      { session },
+      { new: true, session },
     );
   }
 
@@ -132,6 +132,20 @@ export class SchedulePackageRepository
         _id: new Types.ObjectId(scheduleId),
       },
       { $inc: { seatsBooked: -seatsCount } },
+      { session },
+    );
+  }
+
+  async updateScheduleStatus(
+    scheduleId: string,
+    status: ScheduleStatus,
+    session?: mongoose.ClientSession,
+  ): Promise<UpdateResult> {
+    return this.model.updateOne(
+      {
+        _id: new Types.ObjectId(scheduleId),
+      },
+      { $set: { status } },
       { session },
     );
   }

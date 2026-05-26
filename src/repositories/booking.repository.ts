@@ -17,7 +17,7 @@ import {
 } from '../interfaces/repository_interfaces/IBookingRepository';
 import BookingModel from '../models/booking.model';
 import mongoose, { ClientSession } from 'mongoose';
-import { BOOKING_STATUS, CANCELATION_STATUS } from '../shared/constants/booking';
+import { BOOKING_STATUS, CANCELATION_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
 import { FilterQuery } from 'mongoose';
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
@@ -82,7 +82,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         },
         {
           bookingStatus: BOOKING_STATUS.CONFIRMED,
-          paymentStatus: BOOKING_STATUS.CONFIRMED,
+          paymentStatus: PAYMENT_STATUS.PAID,
           transactionId: stripePaymentIntentId ? stripePaymentIntentId : null,
         },
         { new: true, session },
@@ -173,6 +173,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
               'scheduleId.endDate': 1,
               'scheduleId.reportingLocation': 1,
               bookingStatus: 1,
+              paymentStatus: 1,
               createdAt: 1,
               travelerCount: 1,
               grossAmount: 1,

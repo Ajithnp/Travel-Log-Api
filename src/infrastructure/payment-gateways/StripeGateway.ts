@@ -55,6 +55,7 @@ export class StripeGateway implements IPaymentGateway {
 
         metadata: {
           bookingId: data.bookingId,
+          bookingCode: data.bookingCode,
           userId: data.metadata?.userId ?? '',
           scheduleId: data.metadata?.scheduleId ?? '',
           tierType: data.metadata?.tierType ?? '',
@@ -108,6 +109,17 @@ export class StripeGateway implements IPaymentGateway {
   async verifyStripeSession(stripeSessionId: string): Promise<StripeCheckoutSession> {
     try {
       return await this.stripe.checkout.sessions.retrieve(stripeSessionId);
+    } catch (err) {
+      throw new AppError(
+        `Failed to retrieve Stripe session: ${(err as Error).message}`,
+        HTTP_STATUS.BAD_GATEWAY,
+      );
+    }
+  }
+
+  async retrieveSession(sessionId: string): Promise<StripeCheckoutSession> {
+    try {
+      return await this.stripe.checkout.sessions.retrieve(sessionId);
     } catch (err) {
       throw new AppError(
         `Failed to retrieve Stripe session: ${(err as Error).message}`,

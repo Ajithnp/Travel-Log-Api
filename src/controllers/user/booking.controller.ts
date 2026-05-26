@@ -9,6 +9,7 @@ import {
   IBookingService,
   InitiateBookingDTO,
   InitiateBookingResponseDTO,
+  RetryBookingPaymentDTO,
   VerifyPaymentResponseDTO,
 } from '../../interfaces/service_interfaces/user/IBookingService';
 import expressAsyncHandler from 'express-async-handler';
@@ -86,6 +87,25 @@ export class BookingController implements IBookingController {
     res.status(HTTP_STATUS.OK).json(response);
   });
 
+  retryBookingPayment = expressAsyncHandler(async (req, res) => {
+    const userId = req.user?.id;
+    const { bookingId } = req.params as { bookingId: string };
+
+    const payload: RetryBookingPaymentDTO = {
+      userId,
+      bookingId,
+    };
+
+    const result = await this._bookingService.retryBookingPayment(payload);
+
+    const response: IApiResponse<InitiateBookingResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.BOOKING_CONFIRMED,
+      data: result,
+    };
+    res.status(HTTP_STATUS.OK).json(response);
+  });
+
   getBookings = expressAsyncHandler(async (req, res) => {
     const userId = req.user!.id;
 
@@ -98,7 +118,6 @@ export class BookingController implements IBookingController {
     };
 
     const result = await this._bookingService.getBookings(userId, payload);
-
     const response: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
