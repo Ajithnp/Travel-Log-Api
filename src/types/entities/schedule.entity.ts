@@ -22,7 +22,6 @@ export interface ISchedule extends Document {
   pricing: IPricingTier[];
   totalSeats: number;
   seatsBooked: number;
-  seatsHeld: number;
   status: ScheduleStatus;
   cancellationReason?: string;
   cancelledAt?: Date;

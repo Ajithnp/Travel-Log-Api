@@ -27,8 +27,8 @@ export class PaymentWebhookService implements IPaymentWebhookService {
 
       case 'checkout.session.expired':
         await this.handleSessionExpired(event.data.object as StripeCheckoutSession);
-
         break;
+
       default:
         break;
     }
@@ -55,10 +55,10 @@ export class PaymentWebhookService implements IPaymentWebhookService {
     const bookingId = session.metadata?.bookingId;
     if (!bookingId) return;
 
-    await this._bookingService.confirmBooking({
-      userId: session.metadata!.userId,
-      bookingId: bookingId,
-      stripePaymentIntentId: session.payment_intent as string,
-    });
+    await this._bookingService.failedBooking(
+      bookingId,
+      session.metadata!.userId,
+      session.payment_intent as string,
+    );
   }
 }

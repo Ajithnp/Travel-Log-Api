@@ -75,7 +75,15 @@ export interface IPopulatedPackage {
 
 export interface IPopulatedSchedule {
   _id: mongoose.Types.ObjectId;
-  startDate: string;
+  startDate: Date;
+  endDate: Date;
+  totalSeats: number;
+  seatsBooked: number;
+}
+
+export interface IScheduleStartDatePopulated extends Omit<IBooking, 'scheduleId' | 'packageId'> {
+  scheduleId: IPopulatedSchedule;
+  packageId: IPopulatedPackage;
 }
 
 export interface IBookingPopulated extends Omit<IBooking, 'packageId'> {

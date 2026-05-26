@@ -31,6 +31,11 @@ export interface ConfirmBookingDTO {
 
 export type GetBookingsDTO = Omit<BookingFilters, 'userId'>;
 
+export interface RetryBookingPaymentDTO {
+  userId: string;
+  bookingId: string;
+}
+
 // ─── Response DTOs ───
 
 export interface InitiateBookingResponseDTO {
@@ -52,12 +57,17 @@ export interface ConfirmBookingResponseDTO {
 export type VerifyPaymentResponseDTO =
   | {
       status: 'success';
+      bookingCode: string;
       bookingId: string;
       amount: number;
     }
   | {
       status: 'failure';
+      bookingCode: string;
+      bookingId: string;
+      amount: number;
     };
+
 export interface PaginatedBookingResponse {
   bookings: BookingListResult['bookings'];
   total: number;
@@ -81,6 +91,8 @@ export interface CancelBookingResponseDTO {
 export interface IBookingService {
   initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO>;
   confirmBooking(payload: ConfirmBookingDTO): Promise<ConfirmBookingResponseDTO>;
+  failedBooking(bookingId: string, userId: string, paymentIntentId: string): Promise<void>;
+  retryBookingPayment(payload: RetryBookingPaymentDTO): Promise<InitiateBookingResponseDTO>;
   verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO>;
   getBookings(userId: string, filters: GetBookingsDTO): Promise<PaginatedBookingResponse>;
   getBookingDetails(userId: string, bookingId: string): Promise<BookingDetailDTO>;

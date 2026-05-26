@@ -78,12 +78,6 @@ const ScheduleSchema = new Schema<ISchedule>(
       min: [0, 'Seats booked cannot be negative'],
     },
 
-    seatsHeld: {
-      type: Number,
-      default: 0,
-      min: [0, 'Seats held cannot be negative'],
-    },
-
     status: {
       type: String,
       enum: Object.values(SCHEDULE_STATUS),
@@ -91,7 +85,6 @@ const ScheduleSchema = new Schema<ISchedule>(
     },
     notes: { type: String, trim: true, default: null },
 
-    // Cancellation metadata
     cancellationReason: { type: String, trim: true, default: null },
     cancelledAt: { type: Date, default: null },
     cancelledBookings: { type: Number, default: null },
@@ -106,7 +99,7 @@ const ScheduleSchema = new Schema<ISchedule>(
 ScheduleSchema.index({ packageId: 1, status: 1 });
 ScheduleSchema.index({ vendorId: 1, status: 1, startDate: -1 });
 
-ScheduleSchema.index({ status: 1, startDate: 1 }); // cron works
+ScheduleSchema.index({ status: 1, startDate: 1 });
 ScheduleSchema.index({ status: 1, endDate: 1 });
 
 const SchedulePackageModel = mongoose.model<ISchedule>('SchedulePackage', ScheduleSchema);

@@ -1,7 +1,8 @@
-import { ISchedule, ISchedulePopulated } from 'types/entities/schedule.entity';
+import { ISchedule, ISchedulePopulated } from '../../types/entities/schedule.entity';
 import { IBaseRepository } from './IBaseRepository';
-import { FilterType } from 'types/db';
+import { FilterType } from '../../types/db';
 import mongoose, { UpdateResult } from 'mongoose';
+import { ScheduleStatus } from '../../shared/constants/constants';
 
 export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
   findOverlapping(
@@ -26,11 +27,17 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     scheduleId: string,
     seatsCount: number,
     session?: mongoose.ClientSession,
-  ): Promise<UpdateResult>;
+  ): Promise<ISchedule | null>;
 
   cancelSeats(
     scheduleId: string,
     seatsCount: number,
+    session?: mongoose.ClientSession,
+  ): Promise<UpdateResult>;
+
+  updateScheduleStatus(
+    scheduleId: string,
+    status: ScheduleStatus,
     session?: mongoose.ClientSession,
   ): Promise<UpdateResult>;
 }

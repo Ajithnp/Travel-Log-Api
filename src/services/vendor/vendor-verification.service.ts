@@ -16,7 +16,7 @@ import { IDocuments, IVendorInfo } from '../../types/entities/vendor.info.entity
 import logger from '../../config/logger';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { USER_ROLES } from '../../shared/constants/roles';
-import { ADMIN_TABS, VENDOR_TABS } from '../../shared/constants/constants';
+import { ADMIN_TABS } from '../../shared/constants/constants';
 import { notificationEmitter } from '../../infrastructure/socket/namespaces/notification-emitter';
 
 @injectable()

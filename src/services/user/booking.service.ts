@@ -9,6 +9,7 @@ import {
   InitiateBookingDTO,
   InitiateBookingResponseDTO,
   PaginatedBookingResponse,
+  RetryBookingPaymentDTO,
   VerifyPaymentResponseDTO,
 } from '../../interfaces/service_interfaces/user/IBookingService';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
@@ -54,6 +55,8 @@ import { calculatePaymentSplit } from '../../shared/utils/booking/payment-split-
 import { BookingValidator } from '../../shared/utils/booking/validate-booking-date';
 import logger from '../../config/logger';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
+import { isRetryWindowOpen } from '../../shared/utils/booking/retry-payment-validate';
+import { IScheduleStartDatePopulated } from '../../types/entities/booking.entity';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -92,6 +95,8 @@ export class BookingService implements IBookingService {
         throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
       }
 
+      BookingValidator.validateTripBookingDate(schedule.startDate);
+
       if (schedule.status !== SCHEDULE_STATUS.UPCOMING) {
         throw new AppError(
           statusMessages[schedule.status] ?? ERROR_MESSAGES.SCHEDULE_NOT_AVAILABLE_FOR_BOOKING,
@@ -99,7 +104,10 @@ export class BookingService implements IBookingService {
         );
       }
 
-      BookingValidator.validateTripBookingDate(schedule.startDate);
+      const seatsAvailability = schedule.totalSeats - schedule.seatsBooked;
+      if (seatsAvailability < payload.seatsCount) {
+        throw new AppError(ERROR_MESSAGES.SEATS_NOT_AVAILABLE, HTTP_STATUS.BAD_REQUEST);
+      }
 
       const pkg = await this._packageRepo.findOne({ _id: schedule.packageId });
 
@@ -168,7 +176,6 @@ export class BookingService implements IBookingService {
 
       const vendorEarning = Math.round((priceTier.price - platformCommission) * 100) / 100;
 
-      //  Start transaction
       session = await mongoose.startSession();
       session.startTransaction();
 
@@ -220,6 +227,7 @@ export class BookingService implements IBookingService {
           amount: priceTier.price,
           currency: 'inr',
           bookingId: booking._id.toString(),
+          bookingCode: booking.bookingCode,
           metadata: {
             userId: payload.userId,
             scheduleId: payload.scheduleId,
@@ -282,6 +290,16 @@ export class BookingService implements IBookingService {
       };
     }
 
+    const schedule = await this._schedulePackageRepo.findById(booking.scheduleId.toString());
+    if (!schedule) {
+      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    const seatsAvailability = schedule.totalSeats - schedule.seatsBooked;
+    if (seatsAvailability < booking.travelerCount) {
+      throw new AppError(ERROR_MESSAGES.SEATS_NOT_AVAILABLE, HTTP_STATUS.BAD_REQUEST);
+    }
+
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -303,11 +321,22 @@ export class BookingService implements IBookingService {
         session,
       );
 
-      await this._schedulePackageRepo.confirmSeats(
+      const updatedSchedule = await this._schedulePackageRepo.confirmSeats(
         booking.scheduleId.toString(),
         booking.travelerCount,
         session,
       );
+      if (!updatedSchedule) {
+        throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+      }
+
+      if (updatedSchedule.totalSeats - updatedSchedule.seatsBooked === 0) {
+        await this._schedulePackageRepo.updateScheduleStatus(
+          updatedSchedule._id.toString(),
+          SCHEDULE_STATUS.SOLD_OUT,
+          session,
+        );
+      }
 
       await session.commitTransaction();
       session.endSession();
@@ -372,30 +401,174 @@ export class BookingService implements IBookingService {
     }
   }
 
-  async verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO> {
-    const session = await this.paymentGateway.verifyStripeSession(stripeSessionId);
+  async failedBooking(bookingId: string, userId: string, paymentIntentId: string): Promise<void> {
+    const booking = await this._bookingRepo.findOne({
+      _id: toObjectId(bookingId),
+      userId: toObjectId(userId),
+    });
 
-    const bookingId = session.metadata?.bookingId;
-
-    if (!bookingId) {
-      return { status: VERIFY_PAYMENT_STATUS.FAILURE };
+    if (!booking) {
+      throw new AppError(ERROR_MESSAGES.BOOKING_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
-    if (session.payment_status !== 'paid') {
-      return { status: VERIFY_PAYMENT_STATUS.FAILURE };
+    if (booking.paymentStatus === PAYMENT_STATUS.PENDING) {
+      await this._bookingRepo.findOneAndUpdate(
+        { _id: toObjectId(bookingId), userId: toObjectId(userId) },
+        {
+          paymentStatus: PAYMENT_STATUS.FAILED,
+          bookingStatus: BOOKING_STATUS.PAYMENT_FAILED,
+          transactionId: paymentIntentId,
+        },
+      );
+    }
+  }
+
+  async retryBookingPayment(payload: RetryBookingPaymentDTO): Promise<InitiateBookingResponseDTO> {
+    const booking = await this._bookingRepo.findOnePopulatedMany<IScheduleStartDatePopulated>(
+      { _id: toObjectId(payload.bookingId), userId: toObjectId(payload.userId) },
+      [
+        { path: 'scheduleId', select: 'startDate totalSeats seatsBooked' },
+        { path: 'packageId', select: 'title' },
+      ],
+    );
+
+    if (!booking) {
+      throw new AppError(ERROR_MESSAGES.BOOKING_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    if (
+      booking.paymentStatus !== PAYMENT_STATUS.PENDING ||
+      booking.bookingStatus !== BOOKING_STATUS.PENDING
+    ) {
+      throw new AppError(ERROR_MESSAGES.BOOKING_NOT_ELGIBLE_FOR_RETRY, HTTP_STATUS.CONFLICT);
+    }
+    //retry deadline check
+    const scheduleStartDate = booking.scheduleId.startDate;
+
+    if (!isRetryWindowOpen(booking.createdAt, scheduleStartDate)) {
+      await this._bookingRepo.findOneAndUpdate(
+        { _id: toObjectId(payload.bookingId), userId: toObjectId(payload.userId) },
+        {
+          bookingStatus: BOOKING_STATUS.PAYMENT_FAILED,
+          paymentStatus: PAYMENT_STATUS.FAILED,
+        },
+      );
+      throw new AppError(ERROR_MESSAGES.RETRY_WINDOW_EXPIRED, HTTP_STATUS.BAD_REQUEST);
+    }
+
+    const scheduleAvailableSeats = booking.scheduleId.totalSeats - booking.scheduleId.seatsBooked;
+    if (scheduleAvailableSeats < booking.travelerCount) {
+      await this._bookingRepo.findOneAndUpdate(
+        { _id: toObjectId(payload.bookingId), userId: toObjectId(payload.userId) },
+        {
+          bookingStatus: BOOKING_STATUS.PAYMENT_FAILED,
+          paymentStatus: PAYMENT_STATUS.FAILED,
+        },
+      );
+      throw new AppError(ERROR_MESSAGES.SEATS_NOT_AVAILABLE_FOR_RETRY, HTTP_STATUS.BAD_REQUEST);
+    }
+
+    // Retrieve existing PaymentIntent from Stripe
+    const existingSession = this.paymentGateway.retrieveSession(booking.transactionId!);
+
+    if ((await existingSession).payment_status === 'paid') {
+      // webhook might have been delayed
+      await this._bookingRepo.findOneAndUpdate(
+        { _id: toObjectId(payload.bookingId), userId: toObjectId(payload.userId) },
+        {
+          bookingStatus: BOOKING_STATUS.CONFIRMED,
+          paymentStatus: PAYMENT_STATUS.PAID,
+        },
+      );
+      throw new AppError(
+        'Payment already completed.Please check your bookings',
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
+    //  Create a new checkout session
+    const newSession = await this.paymentGateway.createPaymentIntent({
+      amount: booking.finalAmount,
+      currency: 'inr',
+      bookingId: booking._id.toString(),
+      bookingCode: booking.bookingCode,
+      metadata: {
+        userId: booking.userId.toString(),
+        scheduleId: booking.scheduleId._id.toString(),
+        tierType: booking.groupType,
+        walletAmountUsed: String(booking.walletAmountUsed),
+        seatsCount: String(booking.travelerCount),
+        startDate: booking.scheduleId.startDate?.toISOString().split('T')[0] ?? '',
+        endDate: booking.scheduleId.endDate?.toISOString().split('T')[0] ?? '',
+        packageName: booking.packageId.title,
+      },
+    });
+
+    await this._bookingRepo.findOneAndUpdate(
+      { _id: toObjectId(payload.bookingId), userId: toObjectId(payload.userId) },
+      {
+        transactionId: newSession.gatewayPaymentId,
+      },
+    );
+
+    return {
+      clientSecret: newSession.clientSecret,
+      bookingId: booking._id.toString(),
+      paymentMethod: booking.paymentMethod!,
+      walletAmountUsed: booking.walletAmountUsed,
+      stripeAmount:
+        booking.walletAmountUsed > 0
+          ? booking.finalAmount - booking.walletAmountUsed
+          : booking.finalAmount,
+      checkoutUrl: newSession.url || undefined,
+    };
+  }
+
+  async verifyPayment(stripeSessionId: string): Promise<VerifyPaymentResponseDTO> {
+    const session = await this.paymentGateway.verifyStripeSession(stripeSessionId);
+    const bookingId = session.metadata?.bookingId;
+    const bookingCode = session.metadata?.bookingCode;
+
+    if (!bookingId) {
+      return {
+        status: VERIFY_PAYMENT_STATUS.FAILURE,
+        bookingCode: bookingCode!,
+        bookingId: bookingId!,
+        amount: Number(session.metadata),
+      };
+    }
+
+    if (session.payment_status !== PAYMENT_STATUS.PAID) {
+      return {
+        status: VERIFY_PAYMENT_STATUS.FAILURE,
+        bookingCode: bookingCode!,
+        bookingId: bookingId!,
+        amount: Number(session.metadata),
+      };
     }
 
     const booking = await this._bookingRepo.findById(bookingId);
     if (!booking) {
-      return { status: VERIFY_PAYMENT_STATUS.FAILURE };
+      return {
+        status: VERIFY_PAYMENT_STATUS.FAILURE,
+        bookingCode: bookingCode!,
+        bookingId: bookingId!,
+        amount: Number(session.metadata),
+      };
     }
+
+    await this.confirmBooking({
+      bookingId: bookingId,
+      userId: booking.userId.toString(),
+      stripePaymentIntentId: session.payment_intent as string,
+    });
+    const updatedBooking = await this._bookingRepo.findById(bookingId);
+
     return {
-      status:
-        booking.bookingStatus === BOOKING_STATUS.CONFIRMED
-          ? VERIFY_PAYMENT_STATUS.SUCCESS
-          : VERIFY_PAYMENT_STATUS.FAILURE,
-      bookingId: booking.bookingCode,
-      amount: booking.grossAmount,
+      status: VERIFY_PAYMENT_STATUS.SUCCESS,
+      bookingCode: updatedBooking!.bookingCode,
+      bookingId: bookingId!,
+      amount: updatedBooking?.finalAmount!,
     };
   }
 
