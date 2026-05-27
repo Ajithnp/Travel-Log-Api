@@ -638,4 +638,21 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       .lean();
     return booking as IScheduleBookingSinglePopulated | null;
   }
+
+  async getTotalRevanueByVendorId(vendorId: string): Promise<{ totalRevenue: number } | null> {
+    const result = await this.model.aggregate<{
+      _id: mongoose.Types.ObjectId;
+      totalRevenue: number;
+    }>([
+      {
+        $match: {
+          vendorId: new mongoose.Types.ObjectId(vendorId),
+          bookingStatus: BOOKING_STATUS.COMPLETED,
+        },
+      },
+      { $group: { _id: '$vendorId', totalRevenue: { $sum: '$vendorEarning' } } },
+    ]);
+
+    return result.length > 0 ? { totalRevenue: result[0].totalRevenue } : null;
+  }
 }

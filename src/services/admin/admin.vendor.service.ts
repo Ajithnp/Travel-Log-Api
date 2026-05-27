@@ -1,6 +1,10 @@
 import { inject, injectable } from 'tsyringe';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
-import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/IAdminVendorService';
+import {
+  IAdminVendorService,
+  VendorProfileResponseDTO,
+  VendorProfileStatsDTO,
+} from '../../interfaces/service_interfaces/admin/IAdminVendorService';
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { IUser } from '../../types/entities/user.entity';
@@ -14,6 +18,14 @@ import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRep
 import { FilterQuery, Types } from 'mongoose';
 import { CustomQueryOptions } from '../../types/common/IQueryOptions';
 import { UserResponseDTO } from '../../types/dtos/admin/response.dtos';
+import { AdminMapper } from '../../shared/mappers/admin.mapper';
+import { IVendorInfoPopulated } from '../../types/entities/vendor.info.entity';
+import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
+import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
+import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
+import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../../shared/constants/constants';
+import { toObjectId } from '../../shared/utils/database/objectId.helper';
+
 @injectable()
 export class AdminVendorService implements IAdminVendorService {
   constructor(
@@ -21,6 +33,12 @@ export class AdminVendorService implements IAdminVendorService {
     private _vendorInfoRepository: IVendorInfoRepository,
     @inject('IUserRepository')
     private _userRepository: IUserRepository,
+    @inject('IBasePackageRepository')
+    private _basePackageRepository: IBasePackageRepository,
+    @inject('ISchedulePackageRepository')
+    private _schedulePackageRepository: ISchedulePackageRepository,
+    @inject('IBookingRepository')
+    private _bookingRepository: IBookingRepository,
   ) {}
 
   async vendorVerificationRequests(
@@ -87,7 +105,6 @@ export class AdminVendorService implements IAdminVendorService {
     };
   }
 
-  //=========================verification update=============================
   async updateVendorVerification(
     vendorId: string,
     payload: VendorVerificationUpdateDTO,
@@ -111,7 +128,7 @@ export class AdminVendorService implements IAdminVendorService {
       throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
   }
-  //================================================================================
+
   async getVendors(
     page: number,
     limit: number,
@@ -158,7 +175,7 @@ export class AdminVendorService implements IAdminVendorService {
 
     return response;
   }
-  //=========================================================================
+
   async updateVendorAccess(
     id: string,
     block: boolean,
@@ -183,5 +200,37 @@ export class AdminVendorService implements IAdminVendorService {
     // if (block && accessToken) {
     //   blacklistToken(accessToken);
     // }
+  }
+
+  async getVendorProfile(vendorId: string): Promise<VendorProfileResponseDTO> {
+    const vendor = await this._vendorInfoRepository.findVendorWithUserId(vendorId);
+    if (!vendor) {
+      throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    return AdminMapper.toVendorProfileResponse(vendor as unknown as IVendorInfoPopulated);
+  }
+
+  async getVendorProfileStats(vendorId: string): Promise<VendorProfileStatsDTO> {
+    const [totalPackages, totalScheduleCompleted, earningsResult] = await Promise.all([
+      this._basePackageRepository.countDocuments({
+        vendorId: toObjectId(vendorId),
+        status: PACKAGE_STATUS.PUBLISHED,
+      }),
+      this._schedulePackageRepository.countDocuments({
+        vendorId: toObjectId(vendorId),
+        status: SCHEDULE_STATUS.COMPLETED,
+      }),
+      this._bookingRepository.getTotalRevanueByVendorId(vendorId),
+    ]);
+
+    const totalEarnings = earningsResult?.totalRevenue || 0;
+
+    return {
+      totalPackages,
+      totalScheduleCompleted,
+      totalEarnings,
+      averageRating: 0,
+    };
   }
 }
