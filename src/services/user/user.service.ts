@@ -6,7 +6,10 @@ import {
 } from '../../types/dtos/user/request.dtos';
 import { AppError } from '../../errors/AppError';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
-import { IUserService } from '../../interfaces/service_interfaces/user/IUserService';
+import {
+  IUserService,
+  UserDashboardResponseDTO,
+} from '../../interfaces/service_interfaces/user/IUserService';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import {
@@ -20,26 +23,32 @@ import { Types } from 'mongoose';
 import { IEmailUtils } from '../../interfaces/common_interfaces/IEmailUtils';
 import { ITokenService } from '../../interfaces/service_interfaces/ITokenService';
 import { ITokenBlackListService } from '../../interfaces/service_interfaces/ITokenBlacklistService';
+import { IWalletRepository } from '../../interfaces/repository_interfaces/IWalletRepository';
+import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
+import { BOOKING_STATUS } from '../../shared/constants/booking';
+import { AUTH_PROVIDER } from '../../shared/constants/constants';
+import { ERROR_CODES } from '../../shared/constants/error-code';
+import { toObjectId } from '../../shared/utils/database/objectId.helper';
+
 @injectable()
 export class UserService implements IUserService {
   constructor(
     @inject('IUserRepository')
     private _userRepository: IUserRepository,
-
     @inject('IOtpService')
     private _otpService: IOtpService,
-
     @inject('IBcryptUtils')
     private _bcryptUtils: IBcryptUtils,
-
     @inject('IEmailUtils')
     private _emailUtil: IEmailUtils,
-
     @inject('ITokenService')
     private _tokenService: ITokenService,
-
     @inject('ITokenBlackListService')
     private _tokenBlackListService: ITokenBlackListService,
+    @inject('IWalletRepository')
+    private _walletRepository: IWalletRepository,
+    @inject('IBookingRepository')
+    private _bookingRepository: IBookingRepository,
   ) {}
 
   async profile(id: string): Promise<UserProfileResponseDTO> {
@@ -67,7 +76,7 @@ export class UserService implements IUserService {
     if (!user) throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
 
     if (Object.keys(updateData).length === 0 || Object.values(updateData).length === 0) {
-      throw new AppError('No valid fields provided for update', HTTP_STATUS.BAD_REQUEST);
+      throw new AppError(ERROR_MESSAGES.NO_VALID_FIELDS_TO_UPDATE, HTTP_STATUS.BAD_REQUEST);
     }
 
     const updatedUser = await this._userRepository.findOneAndUpdate({ email }, { ...updateData });
@@ -82,14 +91,14 @@ export class UserService implements IUserService {
     const user = await this._userRepository.findOne({ email });
 
     if (user) {
-      if (user.authProvider === 'google') {
+      if (user.authProvider === AUTH_PROVIDER.GOOGLE) {
         throw new AppError(ERROR_MESSAGES.GOOGLE_USER_CANT_CHANGE_EMAIL, HTTP_STATUS.BAD_REQUEST);
       }
 
       throw new AppError(
         ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
         HTTP_STATUS.BAD_REQUEST,
-        'EMAIL_ALREADY_EXISTS',
+        ERROR_CODES.EMAIL_ALREADY_EXISTS,
       );
     }
 
@@ -115,14 +124,14 @@ export class UserService implements IUserService {
       throw new AppError(
         ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
         HTTP_STATUS.BAD_REQUEST,
-        'EMAIL_ALREADY_EXISTS',
+        ERROR_CODES.EMAIL_ALREADY_EXISTS,
       );
 
     await this._userRepository.findOneAndUpdate(
       { _id: new Types.ObjectId(userId), email: oldEmail },
       { email },
     );
-    // send email notification
+
     this._emailUtil.sendEmail({
       to: oldEmail,
       subject: 'Email Updated',
@@ -149,12 +158,16 @@ export class UserService implements IUserService {
 
     const user = await this._userRepository.findOne({ email });
 
-    if (user?.authProvider === 'google') {
+    if (user?.authProvider === AUTH_PROVIDER.GOOGLE) {
       throw new AppError(ERROR_MESSAGES.GOOGLE_USER_CANT_CHANGE_PASSWORD, HTTP_STATUS.BAD_REQUEST);
     }
 
     if (!user)
-      throw new AppError(ERROR_MESSAGES.EMAIL_NOT_FOUND, HTTP_STATUS.NOT_FOUND, 'USER_NOT_FOUND');
+      throw new AppError(
+        ERROR_MESSAGES.EMAIL_NOT_FOUND,
+        HTTP_STATUS.NOT_FOUND,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
 
     const isMatch = await this._bcryptUtils.comparePassword(oldPassword, user.password);
 
@@ -176,5 +189,31 @@ export class UserService implements IUserService {
     }
 
     await this._tokenBlackListService.blackListToken(token, decoded.exp.toString());
+  }
+
+  async dashboard(userId: string): Promise<UserDashboardResponseDTO> {
+    const user = await this._userRepository.findById(userId);
+    if (!user) throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+
+    const [walletBalance, upcomingTrips, pastTrips] = await Promise.all([
+      this._walletRepository.getBalance(userId),
+      this._bookingRepository.countDocuments({
+        userId: toObjectId(userId),
+        bookingStatus: BOOKING_STATUS.CONFIRMED,
+      }),
+      this._bookingRepository.countDocuments({
+        userId: toObjectId(userId),
+        bookingStatus: BOOKING_STATUS.COMPLETED,
+      }),
+    ]);
+
+    const response = {
+      reviewsCount: 0,
+      walletBalance,
+      upcomingTrips,
+      pastTrips,
+    };
+
+    return response;
   }
 }

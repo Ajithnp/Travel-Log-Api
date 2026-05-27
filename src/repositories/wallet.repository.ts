@@ -9,6 +9,11 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
     super(Wallet);
   }
 
+  async getBalance(userId: string): Promise<number> {
+    const wallet = await this.findOne({ userId });
+    return wallet?.balance || 0;
+  }
+
   async createWallet(userId: string, session?: ClientSession): Promise<IWallet> {
     const [wallet] = await this.model.create([{ userId, balance: 0 }], { session });
     return wallet as IWallet;

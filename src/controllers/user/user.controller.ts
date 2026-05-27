@@ -1,7 +1,10 @@
 import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
 import { IUserController } from '../../interfaces/controller_interfaces/user/IUserController';
-import { IUserService } from '../../interfaces/service_interfaces/user/IUserService';
+import {
+  IUserService,
+  UserDashboardResponseDTO,
+} from '../../interfaces/service_interfaces/user/IUserService';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
@@ -136,6 +139,19 @@ export class UserController implements IUserController {
     const result = await this._publicVendorService.getVendorPublicProfile(vendorId, page, limit);
 
     const successResponse: IApiResponse<VendorPublicProfileResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  dashboard = asyncHandler(async (req, res) => {
+    const userId = req.user?.id;
+
+    const result = await this._userService.dashboard(userId);
+    const successResponse: IApiResponse<UserDashboardResponseDTO> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
       data: result,

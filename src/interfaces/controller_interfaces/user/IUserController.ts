@@ -10,4 +10,5 @@ export interface IUserController {
   getWishlist: RequestHandler;
   getWishlistCount: RequestHandler;
   getVendorPublicProfile: RequestHandler;
+  dashboard: RequestHandler;
 }

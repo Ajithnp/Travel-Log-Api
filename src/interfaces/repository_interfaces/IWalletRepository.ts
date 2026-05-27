@@ -7,4 +7,5 @@ export interface IWalletRepository extends IBaseRepository<IWallet> {
   findWalletByUserId(userId: string, session?: ClientSession): Promise<IWallet | null>;
   incrementBalance(userId: string, amount: number, session: ClientSession): Promise<IWallet | null>;
   decrementBalance(userId: string, amount: number, session: ClientSession): Promise<IWallet | null>;
+  getBalance(userId: string): Promise<number>;
 }
