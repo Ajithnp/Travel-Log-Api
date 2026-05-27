@@ -4,6 +4,11 @@ export const PACKAGE_STATUS = {
   DELETED: 'DELETED',
 } as const;
 
+export const AUTH_PROVIDER = {
+  GOOGLE: 'google',
+  LOCAL: 'local',
+} as const;
+
 export type PackageStatus = (typeof PACKAGE_STATUS)[keyof typeof PACKAGE_STATUS];
 
 export const CATEGORY_STATUS = {

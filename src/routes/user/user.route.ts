@@ -172,5 +172,13 @@ export class UserRoutes extends BaseRoute {
       authorize([USER_ROLES.USER]),
       this._walletController.getWallet.bind(this._walletController),
     );
+
+    //dashboard
+    this._router.get(
+      '/dashboard',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._userController.dashboard.bind(this._userController),
+    );
   }
 }

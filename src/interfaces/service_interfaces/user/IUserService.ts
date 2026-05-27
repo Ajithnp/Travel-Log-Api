@@ -18,4 +18,13 @@ export interface IUserService {
   updateEmail(payload: VerifyEmailRequestDTO): Promise<void>;
 
   resetPassword(payload: ResetPasswordRequestDTO): Promise<void>;
+
+  dashboard(userId: string): Promise<UserDashboardResponseDTO>;
+}
+
+export interface UserDashboardResponseDTO {
+  reviewsCount: number;
+  walletBalance: number;
+  upcomingTrips: number;
+  pastTrips: number;
 }

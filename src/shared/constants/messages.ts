@@ -55,6 +55,8 @@ export const ERROR_MESSAGES = {
   INPUT_VALIDATION_FAILED: 'Input validation failed. Please check your data.',
   EMAIL_ALREADY_EXISTS: 'A user with this email already exists.',
 
+  NO_VALID_FIELDS_TO_UPDATE: 'No valid fields provided for update',
+
   GOOGLE_AUTH_FORGOT_PASSWORD:
     'This email is registered with Google authentication. Please use Google login.',
   GOOGLE_USER_CANT_CHANGE_EMAIL: 'Google users cannot change email',
