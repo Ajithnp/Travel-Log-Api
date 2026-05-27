@@ -35,6 +35,9 @@ import { IWalletController } from '../interfaces/controller_interfaces/user/IWal
 import { WalletController } from '../controllers/user/wallet.controller';
 import { IDocumentController } from '../interfaces/controller_interfaces/IDocumentController';
 import { DocumentController } from '../controllers/document.controller';
+import { IAdminVendorPackageOversightController } from '../interfaces/controller_interfaces/admin/IAdminVendorPackageController';
+import { AdminVendorPackageOversightController } from '../controllers/admin/admin-vendor-package.controller';
+
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -91,6 +94,10 @@ export class ControllerRegistry {
     container.register<IAdminCancellationPolicyController>('IAdminCancellationPolicyController', {
       useClass: AdminCancellationPolicyController,
     });
+    container.register<IAdminVendorPackageOversightController>('IAdminVendorPackageOversightController', {
+      useClass: AdminVendorPackageOversightController,
+    });
+
 
     //user controllers
     container.register<IUserController>('IUserController', {

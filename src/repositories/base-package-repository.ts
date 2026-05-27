@@ -2,6 +2,7 @@ import { injectable } from 'tsyringe';
 import {
   IBasePackageRepository,
   RawPublicPackageDocument,
+  AdminPackageOversightResult,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
 import { IBasePackageEntity, IBasePackagePopulated } from '../types/entities/base-package.entity';
@@ -596,5 +597,91 @@ export class BasePackageRepository
         { new: true },
       )
       .exec();
+  }
+
+  async getAdminPackagesOversight(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{ packages: AdminPackageOversightResult[]; total: number }> {
+    const matchStage: mongoose.FilterQuery<IBasePackageEntity> = {
+      status: PACKAGE_STATUS.PUBLISHED,
+      isDeleted: false,
+    };
+
+    if (search?.trim()) {
+      const regex = { $regex: search.trim(), $options: 'i' };
+      matchStage.$or = [{ title: regex }, { location: regex }, { state: regex }];
+    }
+
+    const pipeline: mongoose.PipelineStage[] = [
+      { $match: matchStage },
+
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendorData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { vendor: { $arrayElemAt: ['$vendorData', 0] } } },
+
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'categoryData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { category: { $arrayElemAt: ['$categoryData', 0] } } },
+
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'schedules',
+          pipeline: [{ $project: { _id: 1 } }],
+        },
+      },
+
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $sort: { createdAt: -1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                _id: 1,
+                packageName: '$title',
+                location: 1,
+                state: 1,
+                totalDays: { $toInt: '$days' },
+                difficultylevel: '$difficultyLevel',
+                vendorName: '$vendor.name',
+                categoryName: '$category.name',
+                scheduleCount: { $size: '$schedules' },
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    const [result] = await this.model.aggregate<{
+      metadata: [{ total: number }?];
+      data: AdminPackageOversightResult[];
+    }>(pipeline);
+
+    const total = result.metadata[0]?.total ?? 0;
+    const packages = result.data ?? [];
+
+    return { packages, total };
   }
 }

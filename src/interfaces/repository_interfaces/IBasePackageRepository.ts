@@ -1,11 +1,12 @@
 import { FilterType, PublicPackageFilters } from 'types/db';
 import {
+  DifficultyLevel,
   IBasePackageEntity,
   IBasePackagePopulated,
 } from '../../types/entities/base-package.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
-import { PublicPackageImageDTO } from 'types/user/types';
+import { PublicPackageImageDTO } from '../../types/user/types';
 import { Types } from 'mongoose';
 
 export interface IBasePackageRepository extends IBaseRepository<IBasePackageEntity> {
@@ -28,8 +29,25 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
   softDelete(id: Types.ObjectId, vendorId: string): Promise<IBasePackageEntity | null>;
 
   restore(id: string, vendorId: string): Promise<IBasePackageEntity | null>;
+
+  getAdminPackagesOversight(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{ packages: AdminPackageOversightResult[]; total: number }>;
 }
 
+export interface AdminPackageOversightResult {
+  _id: string;
+  packageName: string;
+  location: string;
+  state: string;
+  totalDays: number;
+  difficultylevel: DifficultyLevel;
+  vendorName: string;
+  categoryName: string;
+  scheduleCount: number;
+}
 export interface RawPublicPackageDocument {
   _id: mongoose.Types.ObjectId;
   title: string;

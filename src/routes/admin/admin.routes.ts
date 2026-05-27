@@ -13,6 +13,7 @@ import {
 import { UpdateVendorVerificationSchema } from '../../types/dtos/admin/vendor/request.dtos';
 import { IAdminCategoryController } from '../../interfaces/controller_interfaces/admin/IAdminCategoryController';
 import { IAdminCancellationPolicyController } from '../../interfaces/controller_interfaces/admin/IAdminCancellationPolicyController';
+import { IAdminVendorPackageOversightController } from '../../interfaces/controller_interfaces/admin/IAdminVendorPackageController';
 import {
   createCategorySchema,
   reviewCategorySchema,
@@ -35,6 +36,8 @@ export class AdminRoutes extends BaseRoute {
     private _adminCategoryController: IAdminCategoryController,
     @inject('IAdminCancellationPolicyController')
     private _adminCancellationPolicyController: IAdminCancellationPolicyController,
+    @inject('IAdminVendorPackageOversightController')
+    private _adminVendorPackageController: IAdminVendorPackageOversightController,
   ) {
     super();
     this.initializeRoutes();
@@ -122,6 +125,14 @@ export class AdminRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
       this._adminVendorController.getVendorProfileStats.bind(this._adminVendorController),
+    );
+
+    // =================Package oversight===================
+    this._router.get(
+      '/vendor/packages',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminVendorPackageController.getPackages.bind(this._adminVendorPackageController),
     );
 
     // =================Category management===================
