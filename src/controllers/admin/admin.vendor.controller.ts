@@ -1,7 +1,10 @@
 import asyncHandler from 'express-async-handler';
 import { inject, injectable } from 'tsyringe';
 import { IAdminVendorController } from '../../interfaces/controller_interfaces/admin/IAdminVendorController';
-import { IAdminVendorService } from '../../interfaces/service_interfaces/admin/IAdminVendorService';
+import {
+  IAdminVendorService,
+  VendorProfileStatsDTO,
+} from '../../interfaces/service_interfaces/admin/IAdminVendorService';
 import { IApiResponse } from '../../types/common/IApiResponse';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
@@ -36,7 +39,6 @@ export class AdminVendorController implements IAdminVendorController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  //=======================================================================
   updateVendorVerification = asyncHandler(async (req, res) => {
     const { vendorId } = req.params;
     const { status, reasonForReject } = req.body;
@@ -56,7 +58,7 @@ export class AdminVendorController implements IAdminVendorController {
 
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
-  //===================================get vendors=======================================
+
   getVendors = asyncHandler(async (req, res) => {
     const { page, limit, search, selectedFilter } = getPaginationOptions(req);
 
@@ -70,5 +72,32 @@ export class AdminVendorController implements IAdminVendorController {
 
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
-  //===============================================================================
+
+  getVendorProfile = asyncHandler(async (req, res) => {
+    const { vendorId } = req.params as { vendorId: string };
+
+    const vendorProfile = await this._adminVendorService.getVendorProfile(vendorId);
+
+    const successResponse: IApiResponse<typeof vendorProfile> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: vendorProfile,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getVendorProfileStats = asyncHandler(async (req, res) => {
+    const { vendorId } = req.params as { vendorId: string };
+
+    const vendorProfileStats = await this._adminVendorService.getVendorProfileStats(vendorId);
+
+    const successResponse: IApiResponse<VendorProfileStatsDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: vendorProfileStats,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 }

@@ -96,6 +96,8 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
     scheduleId: string,
     vendorId: string,
   ): Promise<IScheduleBookingSinglePopulated | null>;
+
+  getTotalRevanueByVendorId(vendorId: string): Promise<{ totalRevenue: number } | null>;
 }
 
 export interface BookingFilters {

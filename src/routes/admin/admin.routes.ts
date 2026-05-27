@@ -110,6 +110,20 @@ export class AdminRoutes extends BaseRoute {
       this._adminVendorController.getVendors.bind(this._adminVendorController),
     );
 
+    this._router.get(
+      '/vendors/:vendorId',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminVendorController.getVendorProfile.bind(this._adminVendorController),
+    );
+
+    this._router.get(
+      '/vendors/:vendorId/stats',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminVendorController.getVendorProfileStats.bind(this._adminVendorController),
+    );
+
     // =================Category management===================
     this._router.post(
       '/category',
