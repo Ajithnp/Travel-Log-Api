@@ -40,4 +40,21 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     status: ScheduleStatus,
     session?: mongoose.ClientSession,
   ): Promise<UpdateResult>;
+
+  getPackageSchedules(
+    packageId: string,
+    page: number,
+    limit: number,
+  ): Promise<{ schedules: PackageScheduleResult[]; total: number }>;
+}
+
+export interface PackageScheduleResult {
+  _id: string;
+  startDate: Date;
+  endDate: Date;
+  totalSeats: number;
+  totalRevanue: number;
+  bookingsCount: number;
+  soldSeats: number;
+  status: string;
 }

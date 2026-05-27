@@ -135,6 +135,20 @@ export class AdminRoutes extends BaseRoute {
       this._adminVendorPackageController.getPackages.bind(this._adminVendorPackageController),
     );
 
+    this._router.get(
+      '/vendor/packages/:packageId',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminVendorPackageController.getPackageDetails.bind(this._adminVendorPackageController),
+    );
+
+    this._router.get(
+      '/vendor/packages/:packageId/schedules',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminVendorPackageController.getPackageSchedules.bind(this._adminVendorPackageController),
+    );
+
     // =================Category management===================
     this._router.post(
       '/category',

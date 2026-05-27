@@ -8,6 +8,7 @@ import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
 import { PublicPackageImageDTO } from '../../types/user/types';
 import { Types } from 'mongoose';
+import { PackageStatus } from 'shared/constants/constants';
 
 export interface IBasePackageRepository extends IBaseRepository<IBasePackageEntity> {
   findPackages(
@@ -35,6 +36,27 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     limit: number,
     search?: string,
   ): Promise<{ packages: AdminPackageOversightResult[]; total: number }>;
+
+  getPackageDetails(packageId: string): Promise<AdminPackageDetailsResult | null>;
+}
+
+export interface AdminPackageDetailsResult {
+  _id: string;
+  packageName: string;
+  location: string;
+  days: number;
+  nights: number;
+  difficultylevel: DifficultyLevel;
+  vendorName: string;
+  categoryName: string;
+  categoryIsActive: boolean;
+  totalScedule: number;
+  cancellationPolicyLabel: string;
+  status: PackageStatus;
+  pricing: {
+    priceTier: string;
+    price: number;
+  }[];
 }
 
 export interface AdminPackageOversightResult {
