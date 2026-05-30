@@ -2,6 +2,8 @@ import { injectable } from 'tsyringe';
 import {
   IBasePackageRepository,
   RawPublicPackageDocument,
+  AdminPackageOversightResult,
+  AdminPackageDetailsResult,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
 import { IBasePackageEntity, IBasePackagePopulated } from '../types/entities/base-package.entity';
@@ -79,7 +81,7 @@ export class BasePackageRepository
 
     const pipeline: mongoose.PipelineStage[] = [];
 
-    // ── Stage 1: Base match ─────────────────────
+    // ── Stage 1: Base match
     const matchStage: FilterQuery<IBasePackageEntity> = {
       status: PACKAGE_STATUS.PUBLISHED,
       isActive: true,
@@ -111,7 +113,7 @@ export class BasePackageRepository
       pipeline.push({ $match: { daysNum: durationMatch } });
     }
 
-    // ── Stage 2: Category lookup + filter ─────────────
+    // ── Stage 2: Category lookup + filter
     pipeline.push({
       $lookup: {
         from: 'categories',
@@ -140,7 +142,7 @@ export class BasePackageRepository
       });
     }
 
-    // ── Stage 3: Join schedules ───────────────────
+    // ── Stage 3: Join schedules
     pipeline.push({
       $lookup: {
         from: 'schedulepackages',
@@ -174,12 +176,12 @@ export class BasePackageRepository
       },
     });
 
-    // ── Stage 4: Remove packages with no active schedules ───────────────
+    // ── Stage 4: Remove packages with no active schedules
     pipeline.push({
       $match: { 'activeSchedules.0': { $exists: true } },
     });
 
-    // ── Stage 5: Compute derived fields ──────────
+    // ── Stage 5: Compute derived fields
     pipeline.push({
       $addFields: {
         startingFromPrice: {
@@ -285,7 +287,7 @@ export class BasePackageRepository
       },
     });
 
-    // ── Stage 6: Price range filter ─────────────────
+    // ── Stage 6: Price range filter
     const minPrice = filters.minPrice !== undefined ? Number(filters.minPrice) : undefined;
     const maxPrice = filters.maxPrice !== undefined ? Number(filters.maxPrice) : undefined;
 
@@ -299,14 +301,14 @@ export class BasePackageRepository
       pipeline.push({ $match: { startingFromPrice: priceMatch } });
     }
 
-    // ── Stage 7: Rating filter ─────────────────────────
+    // ── Stage 7: Rating filter
     if (filters.minRating !== undefined) {
       pipeline.push({
         $match: { averageRating: { $gte: filters.minRating } },
       });
     }
 
-    // ── Stage 8: Vendor lookup ─────────────────
+    // ── Stage 8: Vendor lookup
     pipeline.push({
       $lookup: {
         from: 'users',
@@ -323,7 +325,7 @@ export class BasePackageRepository
       },
     });
 
-    // ── Stage 9: Facet — count + sort + paginate + project ──────────────
+    // ── Stage 9: Facet — count + sort + paginate + project
     pipeline.push({
       $facet: {
         metadata: [{ $count: 'total' }],
@@ -596,5 +598,188 @@ export class BasePackageRepository
         { new: true },
       )
       .exec();
+  }
+
+  async getPackagesOversight(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{ packages: AdminPackageOversightResult[]; total: number }> {
+    const matchStage: mongoose.FilterQuery<IBasePackageEntity> = {
+      status: PACKAGE_STATUS.PUBLISHED,
+      isDeleted: false,
+    };
+
+    const searchMatchStage: mongoose.PipelineStage[] = search?.trim()
+      ? [
+          {
+            $match: {
+              $or: [
+                { title: { $regex: search.trim(), $options: 'i' } },
+                { location: { $regex: search.trim(), $options: 'i' } },
+                { state: { $regex: search.trim(), $options: 'i' } },
+                { 'vendor.name': { $regex: search.trim(), $options: 'i' } },
+              ],
+            },
+          },
+        ]
+      : [];
+
+    const pipeline: mongoose.PipelineStage[] = [
+      { $match: matchStage },
+
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendorData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { vendor: { $arrayElemAt: ['$vendorData', 0] } } },
+
+      ...searchMatchStage,
+
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'categoryData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { category: { $arrayElemAt: ['$categoryData', 0] } } },
+
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'schedules',
+          pipeline: [{ $project: { _id: 1 } }],
+        },
+      },
+
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $sort: { createdAt: -1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                _id: 1,
+                packageName: '$title',
+                location: 1,
+                state: 1,
+                status: 1,
+                totalDays: { $toInt: '$days' },
+                difficultylevel: '$difficultyLevel',
+                vendorName: '$vendor.name',
+                categoryName: '$category.name',
+                scheduleCount: { $size: '$schedules' },
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    const [result] = await this.model.aggregate<{
+      metadata: [{ total: number }?];
+      data: AdminPackageOversightResult[];
+    }>(pipeline);
+
+    const total = result.metadata[0]?.total ?? 0;
+    const packages = result.data ?? [];
+
+    return { packages, total };
+  }
+
+  async getPackageDetails(packageId: string): Promise<AdminPackageDetailsResult | null> {
+    const pipeline: mongoose.PipelineStage[] = [
+      { $match: { _id: toObjectId(packageId) } },
+
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendorData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { vendor: { $arrayElemAt: ['$vendorData', 0] } } },
+
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'categoryData',
+          pipeline: [{ $project: { name: 1, isActive: 1 } }],
+        },
+      },
+      { $addFields: { category: { $arrayElemAt: ['$categoryData', 0] } } },
+
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'schedules',
+          pipeline: [
+            { $match: { status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT] } } },
+            { $project: { pricing: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: 'cancellationpolicies',
+          localField: 'cancellationPolicy',
+          foreignField: '_id',
+          as: 'policyData',
+          pipeline: [{ $project: { label: 1 } }],
+        },
+      },
+      { $addFields: { policy: { $arrayElemAt: ['$policyData', 0] } } },
+
+      {
+        $project: {
+          _id: 1,
+          packageName: '$title',
+          location: 1,
+          state: 1,
+          days: { $toInt: '$days' },
+          nights: { $toInt: '$nights' },
+          difficultylevel: '$difficultyLevel',
+          vendorName: '$vendor.name',
+          categoryName: '$category.name',
+          categoryIsActive: { $eq: ['$category.isActive', true] },
+          totalScedule: { $size: '$schedules' },
+          cancellationPolicyLabel: '$policy.label',
+          status: 1,
+          pricing: {
+            $map: {
+              input: { $ifNull: [{ $arrayElemAt: ['$schedules.pricing', 0] }, []] },
+              as: 'p',
+              in: {
+                priceTier: '$$p.type',
+                peopleCount: '$$p.peopleCount',
+                price: '$$p.price',
+              },
+            },
+          },
+        },
+      },
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+    return result || null;
   }
 }

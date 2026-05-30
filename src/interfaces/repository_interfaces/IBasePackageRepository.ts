@@ -1,12 +1,14 @@
 import { FilterType, PublicPackageFilters } from 'types/db';
 import {
+  DifficultyLevel,
   IBasePackageEntity,
   IBasePackagePopulated,
 } from '../../types/entities/base-package.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
-import { PublicPackageImageDTO } from 'types/user/types';
+import { PublicPackageImageDTO } from '../../types/user/types';
 import { Types } from 'mongoose';
+import { PackageStatus } from 'shared/constants/constants';
 
 export interface IBasePackageRepository extends IBaseRepository<IBasePackageEntity> {
   findPackages(
@@ -28,8 +30,49 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
   softDelete(id: Types.ObjectId, vendorId: string): Promise<IBasePackageEntity | null>;
 
   restore(id: string, vendorId: string): Promise<IBasePackageEntity | null>;
+
+  getPackagesOversight(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{ packages: AdminPackageOversightResult[]; total: number }>;
+
+  getPackageDetails(packageId: string): Promise<AdminPackageDetailsResult | null>;
 }
 
+export interface AdminPackageDetailsResult {
+  _id: string;
+  packageName: string;
+  location: string;
+  state: string;
+  days: number;
+  nights: number;
+  difficultylevel: DifficultyLevel;
+  vendorName: string;
+  categoryName: string;
+  categoryIsActive: boolean;
+  totalScedule: number;
+  cancellationPolicyLabel: string;
+  status: PackageStatus;
+  pricing: {
+    priceTier: string;
+    peopleCount: number;
+    price: number;
+  }[];
+}
+
+export interface AdminPackageOversightResult {
+  _id: string;
+  packageName: string;
+  location: string;
+  state: string;
+  status: PackageStatus;
+  totalDays: number;
+  difficultylevel: DifficultyLevel;
+  vendorName: string;
+  categoryName: string;
+  scheduleCount: number;
+}
 export interface RawPublicPackageDocument {
   _id: mongoose.Types.ObjectId;
   title: string;

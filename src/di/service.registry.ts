@@ -53,6 +53,8 @@ import { IWalletService } from '../interfaces/service_interfaces/user/IWalletSer
 import { WalletService } from '../services/user/wallet.service';
 import { IDocumentService } from '../interfaces/service_interfaces/IDocumentService';
 import { DocumentService } from '../services/document.service';
+import { IAdminVendorPackageOversightService } from '../interfaces/service_interfaces/admin/IAdminVendorPackageService';
+import { AdminVendorPackageOversightService } from '../services/admin/admin-vendor-package.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -137,6 +139,9 @@ export class ServiceRegistry {
     });
     container.register<ICancellationPolicyService>('ICancellationPolicyService', {
       useClass: CancellationPolicyService,
+    });
+    container.register<IAdminVendorPackageOversightService>('IAdminVendorPackageOversightService', {
+      useClass: AdminVendorPackageOversightService,
     });
 
     //user services
