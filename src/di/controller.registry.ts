@@ -37,6 +37,8 @@ import { IDocumentController } from '../interfaces/controller_interfaces/IDocume
 import { DocumentController } from '../controllers/document.controller';
 import { IAdminVendorPackageOversightController } from '../interfaces/controller_interfaces/admin/IAdminVendorPackageController';
 import { AdminVendorPackageOversightController } from '../controllers/admin/admin-vendor-package.controller';
+import { IReviewController } from '../interfaces/controller_interfaces/IReviewController';
+import { ReviewController } from '../controllers/review.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -62,6 +64,10 @@ export class ControllerRegistry {
 
     container.register<IDocumentController>('IDocumentController', {
       useClass: DocumentController,
+    });
+
+    container.register<IReviewController>('IReviewController', {
+      useClass: ReviewController,
     });
 
     //vendor controllers
