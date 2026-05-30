@@ -15,8 +15,8 @@ export class ReviewController implements IReviewController {
   
     addReview = expressAsyncHandler(async (req, res) => {
       const reviewDto : IReviewRequestDto = req.body;
-    //   const userId = req.user?.id;
-    const userId = '69197554ba5d1de9ba1b38b6'
+      const userId = req.user?.id;
+  
       const result = await this._reviewService.addReview(userId,reviewDto);
   
       const successResponse: IApiResponse<typeof result> = {
@@ -26,5 +26,21 @@ export class ReviewController implements IReviewController {
       };
       res.status(HTTP_STATUS.CREATED).json(successResponse);
     });
+
+    deleteReview = expressAsyncHandler(async (req, res) => {
+      const reviewId = req.params.reviewId;
+      const userId = req.user?.id;
+  
+      const result = await this._reviewService.deleteReview(reviewId,userId);
+  
+      const successResponse: IApiResponse<typeof result> = {
+        success: SUCCESS_STATUS.SUCCESS,
+        message: SUCCESS_MESSAGES.OK,
+        data: result,
+      };
+      res.status(HTTP_STATUS.CREATED).json(successResponse);
+    });
+
+    
 
 }

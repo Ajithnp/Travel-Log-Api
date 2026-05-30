@@ -20,10 +20,17 @@ export class ReviewRoutes extends BaseRoute {
   protected initializeRoutes(): void {
     this._router.post(
       '/',
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.USER]),
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
       validateDTO(createReviewSchema),
       this._reviewController.addReview.bind(this._reviewController),
+    );
+
+    this._router.delete(
+      '/:reviewId',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._reviewController.deleteReview.bind(this._reviewController),
     );
   }
 }

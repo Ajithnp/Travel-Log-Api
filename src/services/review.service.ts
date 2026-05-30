@@ -32,7 +32,7 @@ export class ReviewService implements IReviewService {
     };
 
     const hasReview = await this._reviewRepository.findByPackageId(booking.packageId.toString(),userId);
-    if (hasReview) {
+    if (hasReview && !hasReview.isDeleted) {
       throw new AppError('Review already exists for this booking.', HTTP_STATUS.BAD_REQUEST);
     }
 
@@ -47,15 +47,27 @@ export class ReviewService implements IReviewService {
         text:reviewDto.text,
         images:reviewDto.images,
         userId:toObjectId(userId),
-        
     }
 
     await this._reviewRepository.create(reviewData);
-
     await this._bookingRepository.findOneAndUpdate({_id:toObjectId(reviewDto.bookingId)},{hasReviewed:true});
+  };
 
-    
-  }
+  async deleteReview(reviewId:string,userId:string):Promise<void>{
 
-  
+    const review = await this._reviewRepository.findOne({_id:toObjectId(reviewId), userId:toObjectId(userId)})
+    if (!review) {
+      throw new AppError('Review not found.', HTTP_STATUS.NOT_FOUND)
+    };
+    if(review.userId.toString() !== userId){
+        throw new AppError('You are not authorized to delete this review.', HTTP_STATUS.UNAUTHORIZED)
+    };
+    if(review.isDeleted){
+      throw new AppError('This review has already been deleted.', HTTP_STATUS.BAD_REQUEST)
+    };
+
+    await this._reviewRepository.findOneAndUpdate({_id:toObjectId(reviewId)},{isDeleted:true});
+    await this._bookingRepository.findOneAndUpdate({_id:review.bookingId},{hasReviewed:false});
+  };
+
 }
