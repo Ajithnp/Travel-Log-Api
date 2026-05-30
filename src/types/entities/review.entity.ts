@@ -16,3 +16,12 @@ export interface IReview extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IPopulatedUser {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+}
+
+export interface IReviewUserPopulated extends Omit<IReview, 'userId'> {
+  userId: IPopulatedUser;
+}

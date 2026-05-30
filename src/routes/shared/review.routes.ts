@@ -32,5 +32,16 @@ export class ReviewRoutes extends BaseRoute {
       authorize([USER_ROLES.USER]),
       this._reviewController.deleteReview.bind(this._reviewController),
     );
+
+    this._router.get(
+      '/public/:packageId',
+      this._reviewController.getPackagePublicReviews.bind(this._reviewController),
+    );
+
+    this._router.get(
+      '/stats/:packageId',
+      this._reviewController.getPackageReviewsStats.bind(this._reviewController),
+    );
   }
+
 }

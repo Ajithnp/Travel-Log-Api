@@ -5,6 +5,7 @@ import expressAsyncHandler from "express-async-handler";
 import { IApiResponse } from "../types/common/IApiResponse";
 import { HTTP_STATUS, SUCCESS_STATUS } from "../shared/constants/http_status_code";
 import { SUCCESS_MESSAGES } from "../shared/constants/messages";
+import { getPaginationOptions } from "shared/utils/pagination.helper";
 
 @injectable()
 export class ReviewController implements IReviewController {
@@ -41,6 +42,33 @@ export class ReviewController implements IReviewController {
       res.status(HTTP_STATUS.CREATED).json(successResponse);
     });
 
-    
+    getPackagePublicReviews = expressAsyncHandler(async (req, res) => {
+        const {page, limit} = getPaginationOptions(req);
+      const packageId = req.params.packageId;
+
+      const result = await this._reviewService.getPackagePublicReviews(packageId,page,limit);
+  
+      const successResponse: IApiResponse<typeof result> = {
+        success: SUCCESS_STATUS.SUCCESS,
+        message: SUCCESS_MESSAGES.OK,
+        data: result,
+      };
+      res.status(HTTP_STATUS.CREATED).json(successResponse);
+    });
+
+    getPackageReviewsStats = expressAsyncHandler(async (req, res) => {
+      const packageId = req.params.packageId;
+
+      const result = await this._reviewService.getPackageReviewsStats(packageId);
+  
+      const successResponse: IApiResponse<typeof result> = {
+        success: SUCCESS_STATUS.SUCCESS,
+        message: SUCCESS_MESSAGES.OK,
+        data: result,
+      };
+      res.status(HTTP_STATUS.CREATED).json(successResponse);
+    });
+
+
 
 }

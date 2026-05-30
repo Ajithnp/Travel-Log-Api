@@ -1,6 +1,6 @@
 import { injectable, inject } from "tsyringe";
 import { IReviewRepository } from "../interfaces/repository_interfaces/IReviewRepository";
-import { IReviewRequestDto, IReviewService } from "../interfaces/service_interfaces/IReviewService";
+import { IPackageReviewsResponseDto, IReviewRequestDto, IReviewService, IReviewStatsResponseDto } from "../interfaces/service_interfaces/IReviewService";
 import { IBookingRepository } from "../interfaces/repository_interfaces/IBookingRepository";
 import { AppError } from "../errors/AppError";
 import { HTTP_STATUS } from "../shared/constants/http_status_code";
@@ -8,6 +8,8 @@ import { ERROR_MESSAGES } from "../shared/constants/messages";
 import { BOOKING_STATUS } from "../shared/constants/booking";
 import { IReview } from "../types/entities/review.entity";
 import { toObjectId } from "../shared/utils/database/objectId.helper";
+import { ReviewMapper } from "../shared/mappers/review.mapper";
+import { IBasePackageRepository } from "../interfaces/repository_interfaces/IBasePackageRepository";
 
 @injectable()
 export class ReviewService implements IReviewService {
@@ -16,24 +18,26 @@ export class ReviewService implements IReviewService {
     private _reviewRepository: IReviewRepository,
     @inject('IBookingRepository')
     private _bookingRepository: IBookingRepository,
+    @inject('IPackageRepository')
+    private _packageRepository: IBasePackageRepository,
   ) {}
 
   async addReview(userId:string,reviewDto:IReviewRequestDto):Promise<void>{
    
     const booking = await this._bookingRepository.findOne({_id:toObjectId(reviewDto.bookingId), userId:toObjectId(userId)})
     if (!booking) {
-      throw new AppError('Booking not found.', HTTP_STATUS.NOT_FOUND)
+      throw new AppError(ERROR_MESSAGES.BOOKING_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     };
     if(booking.bookingStatus !== BOOKING_STATUS.COMPLETED){
-      throw new AppError('Booking must be completed to review.', HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(ERROR_MESSAGES.BOOKING_MUST_BE_COMPLETED_TO_REVIEW, HTTP_STATUS.BAD_REQUEST)
     };
     if(booking.hasReviewed){
-        throw new AppError('You have already submitted a review for this booking.', HTTP_STATUS.BAD_REQUEST)
+        throw new AppError(ERROR_MESSAGES.REVIEW_ALREADY_EXIST, HTTP_STATUS.BAD_REQUEST)
     };
 
     const hasReview = await this._reviewRepository.findByPackageId(booking.packageId.toString(),userId);
     if (hasReview && !hasReview.isDeleted) {
-      throw new AppError('Review already exists for this booking.', HTTP_STATUS.BAD_REQUEST);
+      throw new AppError(ERROR_MESSAGES.REVIEW_ALREADY_EXISTS_THIS_PACKAGE, HTTP_STATUS.BAD_REQUEST);
     }
 
     const packageId = booking.packageId?._id?.toString() ?? booking.packageId.toString();
@@ -57,17 +61,48 @@ export class ReviewService implements IReviewService {
 
     const review = await this._reviewRepository.findOne({_id:toObjectId(reviewId), userId:toObjectId(userId)})
     if (!review) {
-      throw new AppError('Review not found.', HTTP_STATUS.NOT_FOUND)
+      throw new AppError(ERROR_MESSAGES.REVIEW_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     };
     if(review.userId.toString() !== userId){
-        throw new AppError('You are not authorized to delete this review.', HTTP_STATUS.UNAUTHORIZED)
+        throw new AppError(ERROR_MESSAGES.UNAUTHORIZED_TO_DELETE_REVIEW, HTTP_STATUS.UNAUTHORIZED)
     };
     if(review.isDeleted){
-      throw new AppError('This review has already been deleted.', HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(ERROR_MESSAGES.REVIEW_ALREADY_DELETED, HTTP_STATUS.BAD_REQUEST)
     };
 
     await this._reviewRepository.findOneAndUpdate({_id:toObjectId(reviewId)},{isDeleted:true});
     await this._bookingRepository.findOneAndUpdate({_id:review.bookingId},{hasReviewed:false});
   };
+
+  async getPackagePublicReviews(packageId:string,page:number,limit:number):Promise<IPackageReviewsResponseDto>{ 
+
+    const packageExists = await this._packageRepository.findOne({_id: toObjectId(packageId)});
+    if(!packageExists){
+        throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
+    }
+
+     const {reviews,total} = await this._reviewRepository.findAllByPackageId({packageId,page,limit})
+     
+     return {
+        data:ReviewMapper.toPublicPackageResponse(reviews),
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalDocs: total,
+     }
+  }
+
+    async getPackageReviewsStats(packageId:string):Promise<IReviewStatsResponseDto>{ 
+
+        const packageExists = await this._packageRepository.findOne({_id: toObjectId(packageId)});
+        if(!packageExists){
+          throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
+        }
+
+     const statsData = await this._reviewRepository.getRatingStats(packageId);
+     
+     return statsData;
+  }
+
+
 
 }
