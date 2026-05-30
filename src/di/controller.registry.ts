@@ -38,7 +38,6 @@ import { DocumentController } from '../controllers/document.controller';
 import { IAdminVendorPackageOversightController } from '../interfaces/controller_interfaces/admin/IAdminVendorPackageController';
 import { AdminVendorPackageOversightController } from '../controllers/admin/admin-vendor-package.controller';
 
-
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
@@ -94,10 +93,12 @@ export class ControllerRegistry {
     container.register<IAdminCancellationPolicyController>('IAdminCancellationPolicyController', {
       useClass: AdminCancellationPolicyController,
     });
-    container.register<IAdminVendorPackageOversightController>('IAdminVendorPackageOversightController', {
-      useClass: AdminVendorPackageOversightController,
-    });
-
+    container.register<IAdminVendorPackageOversightController>(
+      'IAdminVendorPackageOversightController',
+      {
+        useClass: AdminVendorPackageOversightController,
+      },
+    );
 
     //user controllers
     container.register<IUserController>('IUserController', {

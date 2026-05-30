@@ -45,7 +45,29 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     packageId: string,
     page: number,
     limit: number,
+    filter?: ScheduleStatus,
   ): Promise<{ schedules: PackageScheduleResult[]; total: number }>;
+
+  getSchedulesAll(
+    page: number,
+    limit: number,
+    filter?: ScheduleStatus,
+    search?: string,
+  ): Promise<{ schedules: SchedulesResponseResult[]; total: number }>;
+}
+
+export interface SchedulesResponseResult {
+  _id: string;
+  packageTittle: string;
+  packageLocation: string;
+  totalDays: number;
+  vendorName: string;
+  startDate: Date;
+  endDate: Date;
+  totalSeats: number;
+  totalBooked: number;
+  totalRevanue: number;
+  status: ScheduleStatus;
 }
 
 export interface PackageScheduleResult {

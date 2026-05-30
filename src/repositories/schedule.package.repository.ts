@@ -9,7 +9,10 @@ import { FilterType } from '../types/db';
 import { FilterQuery, UpdateResult } from 'mongoose';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
 import { BOOKING_STATUS } from '../shared/constants/booking';
-import { PackageScheduleResult } from '../interfaces/repository_interfaces/ISchedulePackage';
+import {
+  PackageScheduleResult,
+  SchedulesResponseResult,
+} from '../interfaces/repository_interfaces/ISchedulePackage';
 
 @injectable()
 export class SchedulePackageRepository
@@ -156,14 +159,23 @@ export class SchedulePackageRepository
     packageId: string,
     page: number,
     limit: number,
+    filter?: ScheduleStatus,
   ): Promise<{ schedules: PackageScheduleResult[]; total: number }> {
     const pipeline: mongoose.PipelineStage[] = [
       {
         $match: {
           packageId: toObjectId(packageId),
-          status: {
-            $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.COMPLETED],
-          },
+          ...(filter
+            ? { status: filter }
+            : {
+                status: {
+                  $in: [
+                    SCHEDULE_STATUS.UPCOMING,
+                    SCHEDULE_STATUS.SOLD_OUT,
+                    SCHEDULE_STATUS.COMPLETED,
+                  ],
+                },
+              }),
         },
       },
       {
@@ -205,9 +217,117 @@ export class SchedulePackageRepository
       },
     ];
 
-    const [result] = await this.model.aggregate(pipeline);
+    const [result] = await this.model.aggregate<{
+      metadata: [{ total: number }?];
+      data: PackageScheduleResult[];
+    }>(pipeline);
+
     const total = result?.metadata?.[0]?.total ?? 0;
     const schedules = result?.data ?? [];
+
+    return { schedules, total };
+  }
+
+  async getSchedulesAll(
+    page: number,
+    limit: number,
+    filter?: ScheduleStatus,
+    search?: string,
+  ): Promise<{ schedules: SchedulesResponseResult[]; total: number }> {
+    const matchStage: mongoose.FilterQuery<ISchedule> = {};
+
+    if (filter) {
+      matchStage.status = filter;
+    }
+
+    const pipeline: mongoose.PipelineStage[] = [
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'packageId',
+          foreignField: '_id',
+          as: 'packageData',
+          pipeline: [{ $project: { title: 1, location: 1, days: 1 } }],
+        },
+      },
+      { $addFields: { package: { $arrayElemAt: ['$packageData', 0] } } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendorData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { vendor: { $arrayElemAt: ['$vendorData', 0] } } },
+    ];
+
+    if (search?.trim()) {
+      const regex = { $regex: search.trim(), $options: 'i' };
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'package.title': regex },
+            { 'package.location': regex },
+            { 'vendor.name': regex },
+          ],
+        },
+      });
+    }
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'scheduleId',
+          pipeline: [
+            {
+              $match: {
+                bookingStatus: { $ne: BOOKING_STATUS.CANCELLED_BY_USER },
+              },
+            },
+            { $project: { finalAmount: 1 } },
+          ],
+          as: 'bookings',
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $sort: { startDate: -1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                _id: 1,
+                packageTittle: '$package.title',
+                packageLocation: '$package.location',
+                totalDays: { $toInt: '$package.days' },
+                vendorName: '$vendor.name',
+                startDate: 1,
+                endDate: 1,
+                totalSeats: 1,
+                totalBooked: '$seatsBooked',
+                status: 1,
+                totalRevanue: { $sum: '$bookings.finalAmount' },
+              },
+            },
+          ],
+        },
+      },
+    );
+
+    const [result] = await this.model.aggregate<{
+      metadata: [{ total: number }?];
+      data: SchedulesResponseResult[];
+    }>(pipeline);
+
+    const total = result.metadata?.[0]?.total ?? 0;
+    const schedules = result.data ?? [];
 
     return { schedules, total };
   }

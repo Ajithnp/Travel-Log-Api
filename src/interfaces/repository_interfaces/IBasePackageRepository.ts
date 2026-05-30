@@ -31,7 +31,7 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
 
   restore(id: string, vendorId: string): Promise<IBasePackageEntity | null>;
 
-  getAdminPackagesOversight(
+  getPackagesOversight(
     page: number,
     limit: number,
     search?: string,
@@ -44,6 +44,7 @@ export interface AdminPackageDetailsResult {
   _id: string;
   packageName: string;
   location: string;
+  state: string;
   days: number;
   nights: number;
   difficultylevel: DifficultyLevel;
@@ -55,6 +56,7 @@ export interface AdminPackageDetailsResult {
   status: PackageStatus;
   pricing: {
     priceTier: string;
+    peopleCount: number;
     price: number;
   }[];
 }
@@ -64,6 +66,7 @@ export interface AdminPackageOversightResult {
   packageName: string;
   location: string;
   state: string;
+  status: PackageStatus;
   totalDays: number;
   difficultylevel: DifficultyLevel;
   vendorName: string;

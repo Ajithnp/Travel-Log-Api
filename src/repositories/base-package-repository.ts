@@ -113,7 +113,7 @@ export class BasePackageRepository
       pipeline.push({ $match: { daysNum: durationMatch } });
     }
 
-    // ── Stage 2: Category lookup + filter 
+    // ── Stage 2: Category lookup + filter
     pipeline.push({
       $lookup: {
         from: 'categories',
@@ -142,7 +142,7 @@ export class BasePackageRepository
       });
     }
 
-    // ── Stage 3: Join schedules 
+    // ── Stage 3: Join schedules
     pipeline.push({
       $lookup: {
         from: 'schedulepackages',
@@ -176,12 +176,12 @@ export class BasePackageRepository
       },
     });
 
-    // ── Stage 4: Remove packages with no active schedules 
+    // ── Stage 4: Remove packages with no active schedules
     pipeline.push({
       $match: { 'activeSchedules.0': { $exists: true } },
     });
 
-    // ── Stage 5: Compute derived fields 
+    // ── Stage 5: Compute derived fields
     pipeline.push({
       $addFields: {
         startingFromPrice: {
@@ -287,7 +287,7 @@ export class BasePackageRepository
       },
     });
 
-    // ── Stage 6: Price range filter 
+    // ── Stage 6: Price range filter
     const minPrice = filters.minPrice !== undefined ? Number(filters.minPrice) : undefined;
     const maxPrice = filters.maxPrice !== undefined ? Number(filters.maxPrice) : undefined;
 
@@ -301,14 +301,14 @@ export class BasePackageRepository
       pipeline.push({ $match: { startingFromPrice: priceMatch } });
     }
 
-    // ── Stage 7: Rating filter 
+    // ── Stage 7: Rating filter
     if (filters.minRating !== undefined) {
       pipeline.push({
         $match: { averageRating: { $gte: filters.minRating } },
       });
     }
 
-    // ── Stage 8: Vendor lookup 
+    // ── Stage 8: Vendor lookup
     pipeline.push({
       $lookup: {
         from: 'users',
@@ -325,7 +325,7 @@ export class BasePackageRepository
       },
     });
 
-    // ── Stage 9: Facet — count + sort + paginate + project 
+    // ── Stage 9: Facet — count + sort + paginate + project
     pipeline.push({
       $facet: {
         metadata: [{ $count: 'total' }],
@@ -600,7 +600,7 @@ export class BasePackageRepository
       .exec();
   }
 
-  async getAdminPackagesOversight(
+  async getPackagesOversight(
     page: number,
     limit: number,
     search?: string,
@@ -610,10 +610,20 @@ export class BasePackageRepository
       isDeleted: false,
     };
 
-    if (search?.trim()) {
-      const regex = { $regex: search.trim(), $options: 'i' };
-      matchStage.$or = [{ title: regex }, { location: regex }, { state: regex }];
-    }
+    const searchMatchStage: mongoose.PipelineStage[] = search?.trim()
+      ? [
+          {
+            $match: {
+              $or: [
+                { title: { $regex: search.trim(), $options: 'i' } },
+                { location: { $regex: search.trim(), $options: 'i' } },
+                { state: { $regex: search.trim(), $options: 'i' } },
+                { 'vendor.name': { $regex: search.trim(), $options: 'i' } },
+              ],
+            },
+          },
+        ]
+      : [];
 
     const pipeline: mongoose.PipelineStage[] = [
       { $match: matchStage },
@@ -628,6 +638,8 @@ export class BasePackageRepository
         },
       },
       { $addFields: { vendor: { $arrayElemAt: ['$vendorData', 0] } } },
+
+      ...searchMatchStage,
 
       {
         $lookup: {
@@ -663,6 +675,7 @@ export class BasePackageRepository
                 packageName: '$title',
                 location: 1,
                 state: 1,
+                status: 1,
                 totalDays: { $toInt: '$days' },
                 difficultylevel: '$difficultyLevel',
                 vendorName: '$vendor.name',
@@ -741,6 +754,7 @@ export class BasePackageRepository
           _id: 1,
           packageName: '$title',
           location: 1,
+          state: 1,
           days: { $toInt: '$days' },
           nights: { $toInt: '$nights' },
           difficultylevel: '$difficultyLevel',
@@ -756,6 +770,7 @@ export class BasePackageRepository
               as: 'p',
               in: {
                 priceTier: '$$p.type',
+                peopleCount: '$$p.peopleCount',
                 price: '$$p.price',
               },
             },
