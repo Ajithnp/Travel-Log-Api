@@ -24,8 +24,8 @@ export class WishlistRepository
       { userId: toObjectId(userId) },
       { $addToSet: { packages: toObjectId(packageId) } },
       {
-        new: true, // return updated document
-        upsert: true, // create if doesn't exist
+        new: true, 
+        upsert: true, 
       },
     ).lean();
 
@@ -54,7 +54,7 @@ export class WishlistRepository
     const doc = await this.model
       .findOne(
         { userId: new Types.ObjectId(userId) },
-        { packages: 1, _id: 0 }, // projection: only packages array
+        { packages: 1, _id: 0 }, 
       )
       .lean();
     return doc as Pick<IWishlistEntity, 'packages'> | null;
@@ -68,7 +68,7 @@ export class WishlistRepository
     const wishlistDoc = await this.model
       .findOne(
         { userId: new Types.ObjectId(userId) },
-        { packages: 1 }, // projection: only the IDs array
+        { packages: 1 }, 
       )
       .lean();
 
@@ -110,9 +110,9 @@ export class WishlistRepository
           status: PACKAGE_STATUS.PUBLISHED,
         },
         select:
-          'title location state categoryId difficultyLevel days nights basePrice images isActive status',
+          'title location state categoryId difficultyLevel days nights basePrice images isActive status averageRating totalReviews',
         populate: {
-          path: 'categoryId', // nested populate to get category name
+          path: 'categoryId',
           select: 'name',
         },
       })

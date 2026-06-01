@@ -33,7 +33,6 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
       return;
     }
 
-    // checking blacklist
     const tokenBlackListService = container.resolve<ITokenBlackListService>(
       SERVICE_TOKENS.TOKEN_BLACKLIST,
     );
@@ -76,4 +75,36 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
       message: ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR,
     });
   }
+};
+
+/**
+ * Optional authentication middleware.
+ * Decodes the JWT and sets req.user if a valid token is present.
+ *  calls next() without error if no token is provided — keeps the route public.
+ */
+export const optionalAuth = async (req: Request, _res: Response, next: NextFunction) => {
+  const token = req.cookies?.[JWT_TOKEN.ACCESS_TOKEN];
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const tokenService = container.resolve<ITokenService>(SERVICE_TOKENS.TOKEN_SERVICE);
+    const decode = tokenService.verifyAccessToken(token as string);
+
+    if (!decode) return next();
+
+    const tokenBlackListService = container.resolve<ITokenBlackListService>(
+      SERVICE_TOKENS.TOKEN_BLACKLIST,
+    );
+    const isBlackListed = await tokenBlackListService.isBlackListed(token);
+    if (isBlackListed) return next();
+
+    req.user = decode;
+  } catch {
+    // Invalid token — proceed as guest
+  }
+
+  next();
 };

@@ -72,6 +72,7 @@ export class PublicPackageService implements IPublicPackageService {
       [
         { path: 'vendorId', select: '_id name' },
         { path: 'categoryId', select: 'name slug' },
+        { path: 'cancellationPolicy', select: 'key label description rules' },
       ],
     );
 

@@ -53,10 +53,17 @@ export interface ItineraryDayDTO {
   activities: ActivityDTO[];
 }
 
+export interface CancellationPolicyRule {
+  daysBeforeTrip: number;
+  refundPercent: number;
+}
+
 export interface CancellationPolicyType {
   _id: string;
   label: string;
   key: string;
+  description?: string;
+  rules?: CancellationPolicyRule[];
 }
 export interface PackageDetailDTO {
   packageId: string;

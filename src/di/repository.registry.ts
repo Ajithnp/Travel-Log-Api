@@ -25,6 +25,8 @@ import { IWalletRepository } from '../interfaces/repository_interfaces/IWalletRe
 import { WalletRepository } from '../repositories/wallet.repository';
 import { IWalletTransactionRepository } from '../interfaces/repository_interfaces/IWalletTransactionRepository';
 import { WalletTransactionRepository } from '../repositories/wallet-transaction.repository';
+import { IReviewRepository } from '../interfaces/repository_interfaces/IReviewRepository';
+import { ReviewRepository } from '../repositories/review.repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -86,6 +88,10 @@ export class RepositoryRegistry {
 
     container.register<IMessageRepository>('IMessageRepository', {
       useClass: MessageRepository,
+    });
+
+    container.register<IReviewRepository>('IReviewRepository', {
+      useClass: ReviewRepository,
     });
 
     // Register other repositories here

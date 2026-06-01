@@ -41,6 +41,8 @@ export interface IBasePackageEntity extends Document {
   cancellationPolicy?: Types.ObjectId;
   difficultyLevel?: DifficultyLevel;
   status: PackageStatus;
+  averageRating: number;
+  totalReviews: number;
   isActive: boolean;
   isDeleted: boolean;
   createdAt: Date;
@@ -64,11 +66,14 @@ interface PopulatedCategory {
   name: string;
   slug?: string;
 }
-interface PopulatedCancellationPolicy {
-  _id: string;
-  label: string;
-  key: string;
+export interface PopulatedCancellationPolicy {
+  _id: string,
+  key:string,
+  label:string,
+  description?:string,
+  rules: { daysBeforeTrip: number; refundPercent: number }[];
 }
+
 export interface IPopulatedPackageDetails
   extends Omit<IBasePackageEntity, 'vendorId' | 'categoryId' | 'cancellationPolicy'> {
   vendorId: PopulatedVendor;

@@ -55,6 +55,8 @@ import { IDocumentService } from '../interfaces/service_interfaces/IDocumentServ
 import { DocumentService } from '../services/document.service';
 import { IAdminVendorPackageOversightService } from '../interfaces/service_interfaces/admin/IAdminVendorPackageService';
 import { AdminVendorPackageOversightService } from '../services/admin/admin-vendor-package.service';
+import { IReviewService } from '../interfaces/service_interfaces/IReviewService';
+import { ReviewService } from '../services/review.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -104,6 +106,10 @@ export class ServiceRegistry {
 
     container.register<IDocumentService>('IDocumentService', {
       useClass: DocumentService,
+    });
+
+    container.register<IReviewService>('IReviewService', {
+      useClass: ReviewService,
     });
 
     //vendor-services

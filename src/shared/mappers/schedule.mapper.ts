@@ -112,6 +112,8 @@ export class ScheduleMapper {
         peopleCount: tier.peopleCount,
         price: tier.price,
       })),
+      reportingLocation:schedule.reportingLocation,
+      reportingTime:schedule.reportingTime,
     };
   }
 

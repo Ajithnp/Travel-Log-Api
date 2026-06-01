@@ -4,7 +4,8 @@ import { AdminRoutes } from '../routes/admin/admin.routes';
 import { VendorRoutes } from '../routes/vendor/vendor.routes';
 import { BookingRoutes } from '../routes/user/booking.route';
 import { PaymentWebhookRoutes } from '../routes/shared/payment-webhook.route';
-import { NotificationRoutes } from 'routes/shared/notification.routes';
+import { NotificationRoutes } from '../routes/shared/notification.routes';
+import { ReviewRoutes } from '../routes/shared/review.routes';
 
 export class RoutesRegistry {
   static registerRoutes() {
@@ -26,6 +27,9 @@ export class RoutesRegistry {
     });
     container.register(NotificationRoutes, {
       useClass: NotificationRoutes,
+    });
+    container.register(ReviewRoutes, {
+      useClass: ReviewRoutes,
     });
   }
 }

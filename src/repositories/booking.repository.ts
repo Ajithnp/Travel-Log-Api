@@ -241,6 +241,8 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           'inclusions',
           'exclusions',
           'packingList',
+          'averageRating',
+          'totalReviews',
           'categoryId',
         ].join(' '),
         populate: [

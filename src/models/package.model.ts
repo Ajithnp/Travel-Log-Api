@@ -84,7 +84,14 @@ const packageSchema = new Schema<IBasePackageEntity>(
       default: PACKAGE_STATUS.DRAFT,
       index: true,
     },
-
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

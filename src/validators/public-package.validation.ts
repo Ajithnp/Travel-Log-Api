@@ -34,7 +34,7 @@ export const publicPackageQuerySchema = z.object({
       page: z.coerce.number(),
       limit: z.coerce.number(),
     })
-    // ── Cross-field validations ───────────────────────────────────────────────
+   
     .refine(
       (q) => q.minPrice === undefined || q.maxPrice === undefined || q.minPrice <= q.maxPrice,
       { message: 'minPrice cannot be greater than maxPrice', path: ['minPrice'] },

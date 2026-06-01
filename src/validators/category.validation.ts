@@ -29,7 +29,7 @@ const categoryIcon = z
   )
   .optional();
 
-// create
+
 
 const createCategoryBodySchema = z.object({
   name: categoryName,
@@ -41,7 +41,7 @@ export const createCategorySchema = z.object({
   body: createCategoryBodySchema,
 });
 
-// update
+
 export const updateCategoryBodySchema = z
   .object({
     description: categoryDescription,
@@ -56,7 +56,7 @@ export const updateCategorySchema = z.object({
   body: updateCategoryBodySchema,
 });
 
-//=============================
+
 export const reviewCategoryBodySchema = z
   .object({
     action: z.enum(['approve', 'rejected'], {
@@ -80,7 +80,7 @@ export const reviewCategorySchema = z.object({
   body: reviewCategoryBodySchema,
 });
 
-//=============================
+
 export const reviewedCategoryBodySchema = z
   .object({
     selectedFilter: z
@@ -97,7 +97,7 @@ export const reviewedCategoryBodySchema = z
 export const reviewedCategorySchema = z.object({
   query: reviewedCategoryBodySchema,
 });
-//=================================================
+
 export const requestCategorySchemaBody = z.object({
   name: categoryName,
   vendorNote: vendorNote,

@@ -181,6 +181,15 @@ export const ERROR_MESSAGES = {
   // wallet
   WALLET_NOT_FOUND: 'Wallet not found',
   INSUFFICIENT_WALLET_BALANCE: 'Insufficient wallet balance',
+
+  // review
+  BOOKING_MUST_BE_COMPLETED_TO_REVIEW: 'Booking must be completed to review.',
+  REVIEW_ALREADY_EXIST: 'You have already submitted a review for this booking.',
+  REVIEW_ALREADY_EXISTS_THIS_PACKAGE:'Review already exists for this package',
+  REVIEW_NOT_FOUND:'Review not found',
+  UNAUTHORIZED_TO_DELETE_REVIEW:'You are not authorized to delete this review.',
+  REVIEW_ALREADY_DELETED:'Review already deleted',
+  
 } as const;
 
 export const NOTIFICATION_MESSAGES = {
