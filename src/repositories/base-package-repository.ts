@@ -32,7 +32,7 @@ export class BasePackageRepository
       case 'newest':
         return { earliestDate: 1 };
       case 'top_rated':
-        return { averageRating: -1 };
+        return { averageRating: -1, totalReviews: -1 };
       default:
         return { createdAt: -1 };
     }
@@ -302,9 +302,10 @@ export class BasePackageRepository
     }
 
     // ── Stage 7: Rating filter
+
     if (filters.minRating !== undefined) {
       pipeline.push({
-        $match: { averageRating: { $gte: filters.minRating } },
+        $match: { averageRating: { $gte: Number(filters.minRating) } },
       });
     }
 

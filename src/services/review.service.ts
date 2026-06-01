@@ -6,7 +6,7 @@ import { AppError } from "../errors/AppError";
 import { HTTP_STATUS } from "../shared/constants/http_status_code";
 import { ERROR_MESSAGES } from "../shared/constants/messages";
 import { BOOKING_STATUS } from "../shared/constants/booking";
-import { IReview } from "../types/entities/review.entity";
+import { IReview, IReviewUserPopulated } from "../types/entities/review.entity";
 import { toObjectId } from "../shared/utils/database/objectId.helper";
 import { ReviewMapper } from "../shared/mappers/review.mapper";
 import { IBasePackageRepository } from "../interfaces/repository_interfaces/IBasePackageRepository";
@@ -18,7 +18,7 @@ export class ReviewService implements IReviewService {
     private _reviewRepository: IReviewRepository,
     @inject('IBookingRepository')
     private _bookingRepository: IBookingRepository,
-    @inject('IPackageRepository')
+    @inject('IBasePackageRepository')
     private _packageRepository: IBasePackageRepository,
   ) {}
 
@@ -40,6 +40,7 @@ export class ReviewService implements IReviewService {
       throw new AppError(ERROR_MESSAGES.REVIEW_ALREADY_EXISTS_THIS_PACKAGE, HTTP_STATUS.BAD_REQUEST);
     }
 
+
     const packageId = booking.packageId?._id?.toString() ?? booking.packageId.toString();
     const vendorId  = booking.vendorId?._id?.toString()  ?? booking.vendorId.toString();
 
@@ -52,9 +53,16 @@ export class ReviewService implements IReviewService {
         images:reviewDto.images,
         userId:toObjectId(userId),
     }
-
+   
     await this._reviewRepository.create(reviewData);
+   
     await this._bookingRepository.findOneAndUpdate({_id:toObjectId(reviewDto.bookingId)},{hasReviewed:true});
+
+     const stats = await this._reviewRepository.getAverageRating(packageId);
+     if(stats){
+         await this._packageRepository.findOneAndUpdate({_id:toObjectId(packageId)},{averageRating:stats.average,totalReviews:stats.total});
+     }
+
   };
 
   async deleteReview(reviewId:string,userId:string):Promise<void>{
@@ -72,23 +80,42 @@ export class ReviewService implements IReviewService {
 
     await this._reviewRepository.findOneAndUpdate({_id:toObjectId(reviewId)},{isDeleted:true});
     await this._bookingRepository.findOneAndUpdate({_id:review.bookingId},{hasReviewed:false});
+
+    const packageId = review.packageId.toString();
+    const stats = await this._reviewRepository.getAverageRating(packageId);
+    if (stats) {
+      await this._packageRepository.findOneAndUpdate(
+        { _id: toObjectId(packageId) },
+        { averageRating: stats.average, totalReviews: stats.total }
+      );
+    }
   };
 
-  async getPackagePublicReviews(packageId:string,page:number,limit:number):Promise<IPackageReviewsResponseDto>{ 
+  async getPackagePublicReviews(packageId: string, page: number, limit: number, userId?: string): Promise<IPackageReviewsResponseDto> {
 
     const packageExists = await this._packageRepository.findOne({_id: toObjectId(packageId)});
     if(!packageExists){
         throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
+   let userReview: IReviewUserPopulated | null = null;
 
-     const {reviews,total} = await this._reviewRepository.findAllByPackageId({packageId,page,limit})
-     
-     return {
-        data:ReviewMapper.toPublicPackageResponse(reviews),
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
-        totalDocs: total,
-     }
+    if(userId){
+       const userReviewed = await this._reviewRepository.findOnePopulated<IReviewUserPopulated>({packageId:toObjectId(packageId),userId:toObjectId(userId)},
+         {path:'userId',select:'name'});
+
+        if(userReviewed && !userReviewed.isDeleted){
+           userReview = userReviewed;
+        }
+    }
+
+     const {reviews,total} = await this._reviewRepository.findAllByPackageId({packageId,page,limit, userId})
+
+    return {
+        data:ReviewMapper.toPublicPackageResponse(userReview ? [userReview, ...reviews] : reviews),
+       currentPage: page,
+       totalPages: Math.ceil(total / limit),
+       totalDocs: total,
+    }
   }
 
     async getPackageReviewsStats(packageId:string):Promise<IReviewStatsResponseDto>{ 

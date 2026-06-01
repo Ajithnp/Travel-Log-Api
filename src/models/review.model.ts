@@ -60,6 +60,5 @@ export const ReviewModel = model<IReview>('Review', reviewSchema);
 
 reviewSchema.index({ packageId: 1, isDeleted: 1, createdAt: -1 })  
 reviewSchema.index({ userId: 1,    isDeleted: 1 })                 
-reviewSchema.index({ vendorId: 1,  isDeleted: 1, createdAt: -1 })  
-reviewSchema.index({ bookingId: 1 }, { unique: true })             
+reviewSchema.index({ vendorId: 1,  isDeleted: 1, createdAt: -1 })             
 reviewSchema.index({ rating: 1 })   

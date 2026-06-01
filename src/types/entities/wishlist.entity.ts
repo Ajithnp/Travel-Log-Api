@@ -44,6 +44,8 @@ export interface IWishlistPackagePopulated {
   isActive: boolean;
   status: string;
   hasUpcomingSchedule: boolean;
+  averageRating: number;
+  totalReviews: number;
 }
 
 export interface IWishlistPopulatedDocument {
@@ -69,6 +71,8 @@ export interface IWishlistItem {
   days: string;
   nights: string;
   basePrice: string;
+  averageRating: number;
+  totalReviews: number;
   images: WishlistImageDTO[];
 }
 

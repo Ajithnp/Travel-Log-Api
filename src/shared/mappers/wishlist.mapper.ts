@@ -18,11 +18,13 @@ export class WishlistMapper {
       days: pkg.days,
       nights: pkg.nights,
       basePrice: pkg.basePrice,
+      averageRating: pkg.averageRating ?? 0,
+      totalReviews: pkg.totalReviews ?? 0,
       images: pkg.images.length > 0 ? [{ key: pkg.images[0].key }] : [],
     };
   }
 
-  // Filters inactive/deleted packages then maps to response shape
+  
   static toWishlistResponse(
     packages: IWishlistPackagePopulated[],
     page: number,

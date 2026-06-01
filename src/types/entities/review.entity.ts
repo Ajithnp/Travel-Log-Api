@@ -9,7 +9,7 @@ export interface IReview extends Document {
   packageId : mongoose.Types.ObjectId;
   bookingId: mongoose.Types.ObjectId; 
   vendorId: mongoose.Types.ObjectId;
-  rating : number; // Yes 1 to 5 stars (integer)
+  rating : number; 
   text : string;
   images ?: IFile[];
   isDeleted:Boolean;

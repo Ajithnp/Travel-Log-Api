@@ -1,4 +1,4 @@
-import { isAuthenticated } from '../../middlewares/auth.middleware';
+import { isAuthenticated, optionalAuth } from '../../middlewares/auth.middleware';
 import { IReviewController } from '../../interfaces/controller_interfaces/IReviewController';
 import BaseRoute from '../base.route';
 import { inject, injectable } from 'tsyringe';
@@ -35,6 +35,7 @@ export class ReviewRoutes extends BaseRoute {
 
     this._router.get(
       '/public/:packageId',
+      optionalAuth,
       this._reviewController.getPackagePublicReviews.bind(this._reviewController),
     );
 

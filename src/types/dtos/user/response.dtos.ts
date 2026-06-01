@@ -88,6 +88,8 @@ export interface PublicScheduleDTO {
   status: ScheduleStatus;
   seatsRemaining: number;
   pricing: SchedulePricingDTO[];
+  reportingTime: string;
+  reportingLocation: string;
 }
 // ====== vendor public profile =========
 export interface VendorPublicProfileVendorDTO {

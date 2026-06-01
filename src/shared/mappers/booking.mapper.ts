@@ -143,6 +143,8 @@ export class BookingMapper {
       packingList: pkg?.packingList ?? [],
       itinerary,
       category,
+      averageRating: pkg?.averageRating ?? 0,
+      totalReviews: pkg?.totalReviews ?? 0,
     };
 
     const sched = booking.scheduleId;
@@ -220,6 +222,8 @@ export class BookingMapper {
       attendedAt: booking.attendedAt?.toISOString?.() ?? null,
       hasReviewed: booking.hasReviewed ?? false,
       ticketUrl: booking.ticketUrl ?? null,
+      averageRating: booking.averageRating ?? 0,
+      totalReviews: booking.totalReviews ?? 0,
       chatId: null,
 
       createdAt: booking.createdAt?.toISOString?.() ?? '',
@@ -277,6 +281,8 @@ interface RawPackage {
   packingList?: string[];
   itinerary?: RawItineraryDay[];
   categoryId?: RawCategory | mongoose.Types.ObjectId | null;
+  averageRating?: number;
+  totalReviews?: number;
 }
 
 interface RawSchedule {
@@ -333,6 +339,8 @@ export interface RawPopulatedBooking {
   isAttended?: boolean;
   attendedAt?: Date | null;
   hasReviewed?: boolean;
+  averageRating?: number |null ;
+  totalReviews?: number | null ;
   ticketUrl?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
@@ -387,6 +395,8 @@ export interface PackageDTO {
   packingList: string[];
   itinerary: ItineraryDayDTO[];
   category: CategoryDTO | null;
+  averageRating: number 
+  totalReviews: number 
 }
 
 export interface CancellationRule {
@@ -449,6 +459,9 @@ export interface BookingDetailDTO {
   cancellationReason: string | null;
   cancelledAt: string | null;
   cancelledBy: string | null;
+
+  averageRating: number 
+  totalReviews: number ;
 
   isAttended: boolean;
   attendedAt: string | null;

@@ -52,6 +52,18 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
     }
   };
 
+  async getAverageRating(packageId:string):Promise<{average:number,total:number}>{
+    const result = await this.model.aggregate([
+      { $match: { packageId: toObjectId(packageId), isDeleted: false } },
+      { $group: { _id: null, avgRating: { $avg: "$rating" }, count: { $sum: 1 } } }
+    ])
+    if (!result[0]) {
+      return {average:0,total:0};
+    }
+    const data = result[0];
+    return {average: Math.round(data.avgRating),total:data.count};
+  }
+
   async findAllByPackageId(filters: PublicReviewFilters): Promise<{
     reviews: IReviewUserPopulated[]
     total:   number
@@ -59,6 +71,9 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
     const query: FilterQuery<IReview> = {
       packageId: toObjectId(filters.packageId),
       isDeleted: false,
+    }
+    if (filters.userId) {
+    query.userId = { $ne: filters.userId };
     }
 
     const skip = (filters.page - 1) * filters.limit
@@ -72,7 +87,7 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
         .lean(),
       this.model.countDocuments(query),
     ])
- 
+
     return { reviews: reviews as unknown as IReviewUserPopulated[], total }
   }
 

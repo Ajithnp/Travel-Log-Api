@@ -7,14 +7,16 @@ export interface IReviewRepository extends IBaseRepository<IReview> {
 
     getRatingStats(packageId: string): Promise<IRatingStatsSummary>;
 
+    getAverageRating(packageId:string):Promise<{average:number,total:number}>
+
     findAllByPackageId(filters: PublicReviewFilters): Promise<{reviews: IReviewUserPopulated[],total: number}>
 }
 
 export interface PublicReviewFilters{
-    packageId:string;
-    page:number;
-    limit:number;
-
+    packageId: string;
+    page: number;
+    limit: number;
+    userId?: string; 
 }
 
 export interface IRatingStatsSummary {

@@ -158,6 +158,11 @@ export class PackageMapper {
             _id: pkg.cancellationPolicy._id.toString(),
             label: pkg.cancellationPolicy.label ?? '',
             key: pkg.cancellationPolicy.key ?? '',
+            description: pkg.cancellationPolicy.description,
+            rules: pkg.cancellationPolicy.rules?.map((rule) => ({
+              daysBeforeTrip: rule.daysBeforeTrip,
+              refundPercent: rule.refundPercent,
+            })) ?? [],
           }
         : null,
       status: pkg.status,
