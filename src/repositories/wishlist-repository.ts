@@ -24,8 +24,8 @@ export class WishlistRepository
       { userId: toObjectId(userId) },
       { $addToSet: { packages: toObjectId(packageId) } },
       {
-        new: true, 
-        upsert: true, 
+        new: true,
+        upsert: true,
       },
     ).lean();
 
@@ -52,10 +52,7 @@ export class WishlistRepository
 
   async findWishlistedIds(userId: string): Promise<Pick<IWishlistEntity, 'packages'> | null> {
     const doc = await this.model
-      .findOne(
-        { userId: new Types.ObjectId(userId) },
-        { packages: 1, _id: 0 }, 
-      )
+      .findOne({ userId: new Types.ObjectId(userId) }, { packages: 1, _id: 0 })
       .lean();
     return doc as Pick<IWishlistEntity, 'packages'> | null;
   }
@@ -66,10 +63,7 @@ export class WishlistRepository
     limit: number,
   ): Promise<IWishlistPopulatedDocument | null> {
     const wishlistDoc = await this.model
-      .findOne(
-        { userId: new Types.ObjectId(userId) },
-        { packages: 1 }, 
-      )
+      .findOne({ userId: new Types.ObjectId(userId) }, { packages: 1 })
       .lean();
 
     if (!wishlistDoc) return null;

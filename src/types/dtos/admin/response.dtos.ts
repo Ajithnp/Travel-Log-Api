@@ -11,6 +11,14 @@ export interface UserResponseDTO {
 }
 
 // =========== package ==========
+
+export interface PackageForOfferResponseDTO {
+  id: string;
+  title: string;
+  hasOffer: boolean;
+  offerValue?: number;
+}
+
 export interface BasePackageSingleResponseDTO {
   id: string;
   title: string;
@@ -23,6 +31,9 @@ export interface BasePackageSingleResponseDTO {
   category: string;
   difficultyLevel: string;
   basePrice: number;
+  hasOffer: boolean;
+  offerPercentage: number;
+  scheduleCount: number;
 }
 
 export interface PackageScheduleContextResponseDTO {
@@ -88,6 +99,19 @@ export interface PackageDetailDTO {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface PackageDetailWithStats extends PackageDetailDTO {
+  activeOffer: {
+    hasOffer: boolean;
+    offerPercentage: number;
+    offerId: string | null;
+  };
+  reviewStats: {
+    average: number;
+    total: number;
+  };
+  scheduleCount: number;
 }
 
 //======= category =========

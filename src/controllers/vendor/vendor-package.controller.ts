@@ -10,6 +10,7 @@ import { getPaginationOptions } from '../../shared/utils/pagination.helper';
 import { CreateBasePackageDTO } from '../../validators/vendor/package/base-package.schema';
 import { FilterType } from '../../types/db';
 import expressAsyncHandler from 'express-async-handler';
+import { Request, Response } from 'express';
 
 @injectable()
 export class VendorPackageController implements IVendorPackageController {
@@ -56,6 +57,7 @@ export class VendorPackageController implements IVendorPackageController {
       selectedFilter,
     };
     const packages = await this._packageService.fetchPackages(vendorId, filters);
+
     const successResponse: IApiResponse<typeof packages> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
@@ -114,6 +116,18 @@ export class VendorPackageController implements IVendorPackageController {
     const successResponse: IApiResponse = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getPackagesForOffer = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const vendorId = req.user?.id;
+
+    const packages = await this._packageService.getPackagesForOffer(vendorId);
+    const successResponse: IApiResponse<typeof packages> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: packages,
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });

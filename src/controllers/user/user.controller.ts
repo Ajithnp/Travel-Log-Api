@@ -32,6 +32,7 @@ export class UserController implements IUserController {
     const query = req.query as unknown as PublicPackageQuery;
 
     const result = await this._publicPackageService.getPublicPackages(query);
+
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,

@@ -67,10 +67,10 @@ interface PopulatedCategory {
   slug?: string;
 }
 export interface PopulatedCancellationPolicy {
-  _id: string,
-  key:string,
-  label:string,
-  description?:string,
+  _id: string;
+  key: string;
+  label: string;
+  description?: string;
   rules: { daysBeforeTrip: number; refundPercent: number }[];
 }
 

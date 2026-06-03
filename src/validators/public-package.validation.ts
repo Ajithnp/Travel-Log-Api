@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const VALID_SORTS = ['newest', 'price_low_high', 'price_high_low', 'top_rated'] as const;
+const VALID_SORTS = ['newest', 'price_low_high', 'price_high_low', 'top_rated', 'offered'] as const;
 const VALID_RATINGS = [3, 3.5, 4, 4.5] as const;
 const VALID_DIFFICULTIES = ['Easy', 'Moderate', 'Challenging', 'Extreme'] as const;
 
@@ -34,7 +34,7 @@ export const publicPackageQuerySchema = z.object({
       page: z.coerce.number(),
       limit: z.coerce.number(),
     })
-   
+
     .refine(
       (q) => q.minPrice === undefined || q.maxPrice === undefined || q.minPrice <= q.maxPrice,
       { message: 'minPrice cannot be greater than maxPrice', path: ['minPrice'] },

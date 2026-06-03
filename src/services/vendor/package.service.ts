@@ -13,6 +13,8 @@ import { PaginatedData } from '../../types/common/IPaginationResponse';
 import {
   BasePackageSingleResponseDTO,
   PackageDetailDTO,
+  PackageDetailWithStats,
+  PackageForOfferResponseDTO,
   PackageScheduleContextResponseDTO,
 } from '../../types/dtos/admin/response.dtos';
 import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../../shared/constants/constants';
@@ -22,6 +24,8 @@ import { FilterType } from '../../types/db';
 import { PackageMapper } from '../../shared/mappers/package.mapper';
 import { IBasePackagePopulated, IFile } from '../../types/entities/base-package.entity';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
+import { IReviewRepository } from '../../interfaces/repository_interfaces/IReviewRepository';
+import { IOfferRepository } from '../../interfaces/repository_interfaces/IOfferRepository';
 
 @injectable()
 export class PackageService implements IPackageService {
@@ -36,6 +40,10 @@ export class PackageService implements IPackageService {
     private _categoryRepository: ICategoryRepository,
     @inject('ISchedulePackageRepository')
     private _scheduleRepository: ISchedulePackageRepository,
+    @inject('IReviewRepository')
+    private _reviewRepository: IReviewRepository,
+    @inject('IOfferRepository')
+    private _offerRepository: IOfferRepository,
   ) {}
 
   private async processPackageImages(images: { key: string; status: string }[]): Promise<IFile[]> {
@@ -62,7 +70,7 @@ export class PackageService implements IPackageService {
     return response;
   }
 
-  async fetchPackagesWithId(vendorId: string, packageId: string): Promise<PackageDetailDTO> {
+  async fetchPackagesWithId(vendorId: string, packageId: string): Promise<PackageDetailWithStats> {
     const vendorObjectId = toObjectId(vendorId);
     const packageObjectId = toObjectId(packageId);
 
@@ -81,7 +89,22 @@ export class PackageService implements IPackageService {
     if (!packageExist) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
-    return PackageMapper.toDetailResponse(packageExist);
+    const [scheduleCount, activeOfferCount, reviweStats] = await Promise.all([
+      this._scheduleRepository.countDocuments({
+        packageId: packageObjectId,
+        status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT] },
+      }),
+      this._offerRepository.hasActiveOfferByPackage(packageId),
+      this._reviewRepository.getAverageRating(packageId),
+    ]);
+    const response = PackageMapper.toDetailResponse(packageExist);
+
+    return {
+      ...response,
+      activeOffer: activeOfferCount,
+      reviewStats: reviweStats,
+      scheduleCount: scheduleCount,
+    };
   }
 
   async createPackage(
@@ -260,5 +283,12 @@ export class PackageService implements IPackageService {
     if (!product) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
+  }
+
+  async getPackagesForOffer(vendorId: string): Promise<PackageForOfferResponseDTO[]> {
+    const packagesWithOffers =
+      await this._basePackageRepository.findPackagesByVendorIdForOffer(vendorId);
+
+    return packagesWithOffers.map((pkg) => PackageMapper.toOfferResponse(pkg));
   }
 }

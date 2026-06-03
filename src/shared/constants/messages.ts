@@ -47,6 +47,9 @@ export const SUCCESS_MESSAGES = {
   // cancellation
   CANCELLATION_REQUEST_REJECETED: 'Cancellation request rejected successfully',
   CANCELLATION_REQUEST_APPROVED: 'Cancellation request approved successfully',
+
+  // offer
+  OFFER_CREATED_SUCCESSFULLY: 'Offer created successfully',
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -185,11 +188,17 @@ export const ERROR_MESSAGES = {
   // review
   BOOKING_MUST_BE_COMPLETED_TO_REVIEW: 'Booking must be completed to review.',
   REVIEW_ALREADY_EXIST: 'You have already submitted a review for this booking.',
-  REVIEW_ALREADY_EXISTS_THIS_PACKAGE:'Review already exists for this package',
-  REVIEW_NOT_FOUND:'Review not found',
-  UNAUTHORIZED_TO_DELETE_REVIEW:'You are not authorized to delete this review.',
-  REVIEW_ALREADY_DELETED:'Review already deleted',
-  
+  REVIEW_ALREADY_EXISTS_THIS_PACKAGE: 'Review already exists for this package',
+  REVIEW_NOT_FOUND: 'Review not found',
+  UNAUTHORIZED_TO_DELETE_REVIEW: 'You are not authorized to delete this review.',
+  REVIEW_ALREADY_DELETED: 'Review already deleted',
+
+  // offer
+  OFFER_NOT_FOUND: 'Offer not found',
+  INVALID_DATE_RANGE: 'Invalid Date Range',
+  OFFER_ALREADY_DEACTIVATED: 'Offer already deactivated',
+  PACKAGE_NOT_ABLE_TO_ADD_OFFER: 'Package not able to add offer',
+  ALREADY_HAVE_ACTIVE_OFFER: 'Already have an active offer for this package',
 } as const;
 
 export const NOTIFICATION_MESSAGES = {

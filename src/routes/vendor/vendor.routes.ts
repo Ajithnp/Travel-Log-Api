@@ -20,6 +20,13 @@ import { VendorVerificationSchema } from '../../validators/vendor/vendor-verific
 import { IChatController } from '../../interfaces/controller_interfaces/IChatController';
 import { IDocumentController } from '../../interfaces/controller_interfaces/IDocumentController';
 
+import { IVendorOfferController } from '../../interfaces/controller_interfaces/vendor/IVendorOfferController';
+import {
+  createOfferSchema,
+  getVendorOffersQuerySchema,
+} from '../../validators/vendor/offer.validation';
+import { CONTROLLER_TOKENS } from '../../shared/constants/di.tokens';
+
 @injectable()
 export class VendorRoutes extends BaseRoute {
   constructor(
@@ -35,6 +42,8 @@ export class VendorRoutes extends BaseRoute {
     private _chatController: IChatController,
     @inject('IDocumentController')
     private _documentController: IDocumentController,
+    @inject(CONTROLLER_TOKENS.VENDOR_OFFER_CONTROLLER)
+    private _vendorOfferController: IVendorOfferController,
   ) {
     super();
     this.initializeRoutes();
@@ -87,12 +96,11 @@ export class VendorRoutes extends BaseRoute {
       this._vendorPackageController.createPackage.bind(this._vendorPackageController),
     );
 
-    this._router.put(
-      '/packages/:packageId',
+    this._router.get(
+      '/packages/offers-context',
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
-      validateDTO(PackageCreateUnionSchema),
-      this._vendorPackageController.updatePackage.bind(this._vendorPackageController),
+      this._vendorPackageController.getPackagesForOffer.bind(this._vendorPackageController),
     );
 
     this._router.get(
@@ -100,6 +108,14 @@ export class VendorRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._vendorPackageController.fetchPackages.bind(this._vendorPackageController),
+    );
+
+    this._router.put(
+      '/packages/:packageId',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(PackageCreateUnionSchema),
+      this._vendorPackageController.updatePackage.bind(this._vendorPackageController),
     );
 
     this._router.get(
@@ -130,7 +146,7 @@ export class VendorRoutes extends BaseRoute {
       this._vendorPackageController.getPackageScheduleContext.bind(this._vendorPackageController),
     );
 
-    //======================category
+    //======category
 
     this._router.get(
       '/categories/request',
@@ -276,6 +292,30 @@ export class VendorRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._chatController.markChatAsReadForVendor.bind(this._chatController),
+    );
+
+    //===offers
+    this._router.post(
+      '/offers',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(createOfferSchema),
+      this._vendorOfferController.createOffer.bind(this._vendorOfferController),
+    );
+
+    this._router.get(
+      '/offers',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      validateDTO(getVendorOffersQuerySchema),
+      this._vendorOfferController.getOffers.bind(this._vendorOfferController),
+    );
+
+    this._router.patch(
+      '/offers/:offerId/deactivate',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorOfferController.deactivateOffer.bind(this._vendorOfferController),
     );
   }
 }

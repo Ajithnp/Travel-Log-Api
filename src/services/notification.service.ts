@@ -1,6 +1,5 @@
 import { inject, injectable } from 'tsyringe';
 import {
-  createBroadcastNotification,
   CreateNotificationDTO,
   INotificationService,
   NotificationResponseDTO,
