@@ -32,6 +32,8 @@ export interface PublicPackageSummary {
   earliestScheduleStatus: 'upcoming' | 'sold_out';
   scheduleCount: number; // total active schedules (upcoming + sold_out)
   isSoldOut: boolean;
+  hasOffer: boolean;
+  offerPercentage: number;
   averageRating: number;
   totalReviews: number;
 }

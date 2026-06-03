@@ -19,6 +19,8 @@ import { AdminCategoryController } from '../controllers/admin/admin.category.con
 import { IAdminCategoryController } from '../interfaces/controller_interfaces/admin/IAdminCategoryController';
 import { IVendorCategoryController } from '../interfaces/controller_interfaces/vendor/IVendorCategoryController';
 import { VendorCategoryController } from '../controllers/vendor/vendor-category.controller';
+import { IVendorOfferController } from '../interfaces/controller_interfaces/vendor/IVendorOfferController';
+import { VendorOfferController } from '../controllers/vendor/vendor-offer.controller';
 import { ISchedulePackageController } from '../interfaces/controller_interfaces/vendor/IShedulePackageController';
 import { ShedulePackageController } from '../controllers/vendor/shedule-package-controller';
 import { IBookingController } from '../interfaces/controller_interfaces/user/IBookingController';
@@ -39,6 +41,7 @@ import { IAdminVendorPackageOversightController } from '../interfaces/controller
 import { AdminVendorPackageOversightController } from '../controllers/admin/admin-vendor-package.controller';
 import { IReviewController } from '../interfaces/controller_interfaces/IReviewController';
 import { ReviewController } from '../controllers/review.controller';
+import { CONTROLLER_TOKENS } from '../shared/constants/di.tokens';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -68,6 +71,10 @@ export class ControllerRegistry {
 
     container.register<IReviewController>('IReviewController', {
       useClass: ReviewController,
+    });
+
+    container.register<IVendorOfferController>(CONTROLLER_TOKENS.VENDOR_OFFER_CONTROLLER, {
+      useClass: VendorOfferController,
     });
 
     //vendor controllers

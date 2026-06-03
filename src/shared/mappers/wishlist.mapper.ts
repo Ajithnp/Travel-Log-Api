@@ -24,7 +24,6 @@ export class WishlistMapper {
     };
   }
 
-  
   static toWishlistResponse(
     packages: IWishlistPackagePopulated[],
     page: number,

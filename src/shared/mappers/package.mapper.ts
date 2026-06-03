@@ -1,6 +1,7 @@
 import {
   BasePackageSingleResponseDTO,
   PackageDetailDTO,
+  PackageForOfferResponseDTO,
   PackageScheduleContextResponseDTO,
 } from '../../types/dtos/admin/response.dtos';
 import {
@@ -10,9 +11,23 @@ import {
 } from '../../types/entities/base-package.entity';
 import { PublicPackageSummary } from '../../types/user/types';
 import { PublicPackageDetailDTO } from '../../types/dtos/user/response.dtos';
+import {
+  IPackageListItem,
+  PackageOfferInfo,
+} from '../../interfaces/repository_interfaces/IBasePackageRepository';
+import { PackageStatus } from 'types/type';
 
 export class PackageMapper {
-  static toResponse(pkg: IBasePackagePopulated): BasePackageSingleResponseDTO {
+  static toOfferResponse(pkg: PackageOfferInfo): PackageForOfferResponseDTO {
+    return {
+      id: pkg._id.toString(),
+      title: pkg.title ?? '',
+      hasOffer: pkg.hasOffer ?? false,
+      offerValue: pkg.offerValue,
+    };
+  }
+
+  static toResponse(pkg: IPackageListItem): BasePackageSingleResponseDTO {
     return {
       id: pkg._id.toString(),
       title: pkg.title ?? '',
@@ -21,10 +36,13 @@ export class PackageMapper {
       durationDays: Number(pkg.days) || 0,
       durationNights: Number(pkg.nights) || 0,
       imageUrl: pkg.images?.map((image: IFile) => ({ key: image.key })) ?? [],
-      status: pkg.status,
+      status: pkg.status as PackageStatus,
       category: pkg.categoryId?.name ?? '',
       difficultyLevel: pkg.difficultyLevel ?? '',
       basePrice: Number(pkg.basePrice) || 0,
+      hasOffer: pkg.hasOffer,
+      offerPercentage: pkg.offerPercentage,
+      scheduleCount: pkg.scheduleCount,
     };
   }
 
@@ -112,6 +130,8 @@ export class PackageMapper {
       earliestScheduleStatus: p.earliestScheduleStatus ?? null,
       scheduleCount: p.scheduleCount ?? 0,
       isSoldOut: p.isSoldOut ?? false,
+      hasOffer: p.hasOffer ?? false,
+      offerPercentage: p.offerPercentage ?? 0,
       averageRating: p.averageRating ?? 0,
       totalReviews: p.totalReviews ?? 0,
     };
@@ -159,10 +179,11 @@ export class PackageMapper {
             label: pkg.cancellationPolicy.label ?? '',
             key: pkg.cancellationPolicy.key ?? '',
             description: pkg.cancellationPolicy.description,
-            rules: pkg.cancellationPolicy.rules?.map((rule) => ({
-              daysBeforeTrip: rule.daysBeforeTrip,
-              refundPercent: rule.refundPercent,
-            })) ?? [],
+            rules:
+              pkg.cancellationPolicy.rules?.map((rule) => ({
+                daysBeforeTrip: rule.daysBeforeTrip,
+                refundPercent: rule.refundPercent,
+              })) ?? [],
           }
         : null,
       status: pkg.status,

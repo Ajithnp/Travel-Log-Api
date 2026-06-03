@@ -8,4 +8,5 @@ export interface IVendorPackageController {
   getPackageScheduleContext: RequestHandler;
   deletePackage: RequestHandler;
   restorePackage: RequestHandler;
+  getPackagesForOffer: RequestHandler;
 }

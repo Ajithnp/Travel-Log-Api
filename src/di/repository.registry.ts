@@ -27,6 +27,9 @@ import { IWalletTransactionRepository } from '../interfaces/repository_interface
 import { WalletTransactionRepository } from '../repositories/wallet-transaction.repository';
 import { IReviewRepository } from '../interfaces/repository_interfaces/IReviewRepository';
 import { ReviewRepository } from '../repositories/review.repository';
+import { REPOSITORY_TOKENS } from '../shared/constants/di.tokens';
+import { IOfferRepository } from '../interfaces/repository_interfaces/IOfferRepository';
+import { OfferRepository } from '../repositories/offer.repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -58,6 +61,10 @@ export class RepositoryRegistry {
 
     container.register<IBookingRepository>('IBookingRepository', {
       useClass: BookingRepository,
+    });
+
+    container.register<IOfferRepository>(REPOSITORY_TOKENS.OFFER_REPOSITORY, {
+      useClass: OfferRepository,
     });
 
     container.register<IUserRepository>('IUserRepository', {

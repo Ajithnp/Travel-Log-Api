@@ -44,5 +44,4 @@ export class ReviewRoutes extends BaseRoute {
       this._reviewController.getPackageReviewsStats.bind(this._reviewController),
     );
   }
-
 }

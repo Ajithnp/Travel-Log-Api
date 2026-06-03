@@ -29,8 +29,6 @@ const categoryIcon = z
   )
   .optional();
 
-
-
 const createCategoryBodySchema = z.object({
   name: categoryName,
   description: categoryDescription,
@@ -40,7 +38,6 @@ const createCategoryBodySchema = z.object({
 export const createCategorySchema = z.object({
   body: createCategoryBodySchema,
 });
-
 
 export const updateCategoryBodySchema = z
   .object({
@@ -55,7 +52,6 @@ export const updateCategorySchema = z.object({
   params: z.object({ id: z.string() }),
   body: updateCategoryBodySchema,
 });
-
 
 export const reviewCategoryBodySchema = z
   .object({
@@ -79,7 +75,6 @@ export const reviewCategorySchema = z.object({
   params: z.object({ id: z.string() }),
   body: reviewCategoryBodySchema,
 });
-
 
 export const reviewedCategoryBodySchema = z
   .object({

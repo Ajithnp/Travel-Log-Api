@@ -87,8 +87,6 @@ export class WishlistService implements IWishlistService {
       };
     }
 
-   
-
     const result = WishlistMapper.toWishlistResponse(
       doc.packages,
       page,

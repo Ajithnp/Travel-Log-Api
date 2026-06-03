@@ -57,6 +57,9 @@ import { IAdminVendorPackageOversightService } from '../interfaces/service_inter
 import { AdminVendorPackageOversightService } from '../services/admin/admin-vendor-package.service';
 import { IReviewService } from '../interfaces/service_interfaces/IReviewService';
 import { ReviewService } from '../services/review.service';
+import { IVendorOfferService } from '../interfaces/service_interfaces/vendor/IVendorOfferService';
+import { SERVICE_TOKENS } from '../shared/constants/di.tokens';
+import { VendorOfferService } from '../services/vendor/vendor-offer.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -145,6 +148,9 @@ export class ServiceRegistry {
     });
     container.register<ICancellationPolicyService>('ICancellationPolicyService', {
       useClass: CancellationPolicyService,
+    });
+    container.register<IVendorOfferService>(SERVICE_TOKENS.VENDOR_OFFER_SERVICE, {
+      useClass: VendorOfferService,
     });
     container.register<IAdminVendorPackageOversightService>('IAdminVendorPackageOversightService', {
       useClass: AdminVendorPackageOversightService,

@@ -2,6 +2,13 @@ import { CategoryStatus } from '../shared/constants/constants';
 import { ICategory } from './entities/category.entity';
 import { CategoryStats } from './type';
 
+export interface VendorOfferFilters {
+  page: number;
+  limit: number;
+  search?: string;
+  isActive?: boolean;
+}
+
 export interface MongoNumberRange {
   $gte?: number;
   $lte?: number;
@@ -29,7 +36,12 @@ export interface CategoryFindAllResult {
   total: number;
 }
 
-export type PackageSortOption = 'price_low_high' | 'price_high_low' | 'newest' | 'top_rated';
+export type PackageSortOption =
+  | 'price_low_high'
+  | 'price_high_low'
+  | 'newest'
+  | 'top_rated'
+  | 'offered';
 
 export interface PublicPackageFilters {
   search?: string;

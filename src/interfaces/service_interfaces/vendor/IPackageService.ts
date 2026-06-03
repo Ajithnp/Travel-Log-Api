@@ -3,6 +3,7 @@ import { CreateBasePackageDTO } from 'validators/vendor/package/base-package.sch
 import {
   BasePackageSingleResponseDTO,
   PackageDetailDTO,
+  PackageForOfferResponseDTO,
   PackageScheduleContextResponseDTO,
 } from '../../../types/dtos/admin/response.dtos';
 import { FilterType } from 'types/db';
@@ -21,4 +22,5 @@ export interface IPackageService {
   ): Promise<PackageScheduleContextResponseDTO>;
   deletePackage(packageId: string, vendorId: string): Promise<void>;
   restorePackage(packageId: string, vendorId: string): Promise<void>;
+  getPackagesForOffer(vendorId: string): Promise<PackageForOfferResponseDTO[]>;
 }

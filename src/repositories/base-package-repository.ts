@@ -4,9 +4,11 @@ import {
   RawPublicPackageDocument,
   AdminPackageOversightResult,
   AdminPackageDetailsResult,
+  PackageOfferInfo,
+  IPackageListItem,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
-import { IBasePackageEntity, IBasePackagePopulated } from '../types/entities/base-package.entity';
+import { IBasePackageEntity } from '../types/entities/base-package.entity';
 import { PackageModel } from '../models/package.model';
 import { FilterType, PublicPackageFilters } from '../types/db';
 import mongoose, { FilterQuery, Types } from 'mongoose';
@@ -33,6 +35,8 @@ export class BasePackageRepository
         return { earliestDate: 1 };
       case 'top_rated':
         return { averageRating: -1, totalReviews: -1 };
+      case 'offered':
+        return { hasOffer: -1, offerPercentage: -1 };
       default:
         return { createdAt: -1 };
     }
@@ -41,36 +45,138 @@ export class BasePackageRepository
   async findPackages(
     vendorId: string,
     filters: FilterType,
-  ): Promise<{ requests: IBasePackagePopulated[]; total: number }> {
-    const query: mongoose.FilterQuery<IBasePackageEntity> = {
-      vendorId,
+  ): Promise<{ requests: IPackageListItem[]; total: number }> {
+    const matchStage: mongoose.FilterQuery<IBasePackageEntity> = {
+      vendorId: new mongoose.Types.ObjectId(vendorId),
     };
 
     if (filters.search?.trim()) {
-      const regex = new RegExp(filters.search.trim(), 'i');
-      query.$or = [{ location: { $regex: regex } }, { state: { $regex: regex } }];
+      const regex = { $regex: filters.search.trim(), $options: 'i' };
+      matchStage.$or = [{ location: regex }, { state: regex }];
     }
+
     if (filters.selectedFilter?.trim()) {
-      query.status = filters.selectedFilter;
+      matchStage.status = filters.selectedFilter;
     }
+
     const skip = (filters.page - 1) * filters.limit;
+    const now = new Date();
 
-    const [requests, total] = await Promise.all([
-      this.model
-        .find(query)
-        .populate<{ categoryId: { name: string } }>('categoryId', 'name')
-        .populate<{
-          cancellationPolicy: { _id: string; label: string; key: string };
-        }>('cancellationPolicy', '_id label key')
-        .sort({ createdAt: 1 })
-        .skip(skip)
-        .limit(filters.limit)
-        .lean<IBasePackagePopulated[]>(),
+    const pipeline: mongoose.PipelineStage[] = [
+      { $match: matchStage },
 
-      this.countDocuments(query),
-    ]);
+      {
+        $lookup: {
+          from: 'offers',
+          let: { pkgId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$packageId', '$$pkgId'] },
+                    { $eq: ['$isActive', true] },
+                    { $gt: ['$validUntil', now] },
+                  ],
+                },
+              },
+            },
+            { $sort: { discountValue: -1 } },
+            { $limit: 1 },
+            { $project: { discountValue: 1 } },
+          ],
+          as: 'activeOffer',
+        },
+      },
 
-    return { requests, total };
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          let: { pkgId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$packageId', '$$pkgId'] },
+                    { $in: ['$status', [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT]] },
+                  ],
+                },
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: 'scheduleMeta',
+        },
+      },
+
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'categoryData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+
+      {
+        $lookup: {
+          from: 'cancellationpolicies',
+          localField: 'cancellationPolicy',
+          foreignField: '_id',
+          as: 'policyData',
+          pipeline: [{ $project: { label: 1, key: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          hasOffer: { $gt: [{ $size: '$activeOffer' }, 0] },
+          offerPercentage: { $ifNull: [{ $arrayElemAt: ['$activeOffer.discountValue', 0] }, 0] },
+          scheduleCount: { $ifNull: [{ $arrayElemAt: ['$scheduleMeta.count', 0] }, 0] },
+          categoryId: { $ifNull: [{ $arrayElemAt: ['$categoryData', 0] }, null] },
+          cancellationPolicy: { $ifNull: [{ $arrayElemAt: ['$policyData', 0] }, null] },
+        },
+      },
+
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $sort: { createdAt: 1 } },
+            { $skip: skip },
+            { $limit: filters.limit },
+            {
+              $project: {
+                title: 1,
+                location: 1,
+                basePrice: 1,
+                state: 1,
+                status: 1,
+                days: 1,
+                nights: 1,
+                difficultyLevel: 1,
+                images: 1,
+                createdAt: 1,
+                categoryId: 1,
+                cancellationPolicy: 1,
+                hasOffer: 1,
+                offerPercentage: 1,
+                scheduleCount: 1,
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    return {
+      requests: result.data ?? [],
+      total: result.metadata[0]?.total ?? 0,
+    };
   }
 
   async findPublicPackages(
@@ -326,7 +432,41 @@ export class BasePackageRepository
       },
     });
 
-    // ── Stage 9: Facet — count + sort + paginate + project
+    // ── Stage 9: Offer lookup — check if package has an active, non-expired offer
+    pipeline.push({
+      $lookup: {
+        from: 'offers',
+        let: { pkgId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$packageId', '$$pkgId'] },
+                  { $eq: ['$isActive', true] },
+                  { $gte: ['$validUntil', new Date()] },
+                ],
+              },
+            },
+          },
+          { $sort: { discountValue: -1 } },
+          { $limit: 1 },
+          { $project: { discountValue: 1 } },
+        ],
+        as: 'activeOffer',
+      },
+    });
+
+    pipeline.push({
+      $addFields: {
+        hasOffer: { $gt: [{ $size: '$activeOffer' }, 0] },
+        offerPercentage: {
+          $ifNull: [{ $arrayElemAt: ['$activeOffer.discountValue', 0] }, 0],
+        },
+      },
+    });
+
+    // ── Stage 10: Facet — count + sort + paginate + project
     pipeline.push({
       $facet: {
         metadata: [{ $count: 'total' }],
@@ -353,6 +493,8 @@ export class BasePackageRepository
               earliestScheduleStatus: 1,
               scheduleCount: 1,
               isSoldOut: 1,
+              hasOffer: 1,
+              offerPercentage: 1,
               averageRating: 1,
               totalReviews: 1,
             },
@@ -782,5 +924,52 @@ export class BasePackageRepository
 
     const [result] = await this.model.aggregate(pipeline);
     return result || null;
+  }
+
+  async findPackagesByVendorIdForOffer(vendorId: string): Promise<PackageOfferInfo[]> {
+    const currentDate = new Date();
+
+    const pipeline = [
+      {
+        $match: {
+          vendorId: toObjectId(vendorId),
+          status: PACKAGE_STATUS.PUBLISHED,
+          isActive: true,
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: 'offers',
+          localField: '_id',
+          foreignField: 'packageId',
+          pipeline: [
+            {
+              $match: {
+                isActive: true,
+                validUntil: { $gte: currentDate },
+              },
+            },
+          ],
+          as: 'activeOffers',
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          hasOffer: { $gt: [{ $size: '$activeOffers' }, 0] },
+          offerValue: {
+            $cond: {
+              if: { $gt: [{ $size: '$activeOffers' }, 0] },
+              then: { $arrayElemAt: ['$activeOffers.discountValue', 0] },
+              else: 0,
+            },
+          },
+        },
+      },
+    ];
+
+    return this.model.aggregate(pipeline);
   }
 }

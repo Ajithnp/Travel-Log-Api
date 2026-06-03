@@ -18,6 +18,7 @@ import { IPopulatedPackageDetails } from '../../types/entities/base-package.enti
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
 import { ScheduleMapper } from '../../shared/mappers/schedule.mapper';
+import { IOfferRepository } from '../../interfaces/repository_interfaces/IOfferRepository';
 
 @injectable()
 export class PublicPackageService implements IPublicPackageService {
@@ -28,6 +29,8 @@ export class PublicPackageService implements IPublicPackageService {
     private _categoryRepository: ICategoryRepository,
     @inject('ISchedulePackageRepository')
     private _schedulePackageRepository: ISchedulePackageRepository,
+    @inject('IOfferRepository')
+    private _offerRepository: IOfferRepository,
   ) {}
 
   async getPublicPackages(query: PublicPackageQuery): Promise<PublicPackageListResponse> {
@@ -79,12 +82,19 @@ export class PublicPackageService implements IPublicPackageService {
     if (!pkg) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.BAD_REQUEST);
     }
+    const hasOffer = await this._offerRepository.hasActiveOfferByPackage(packageId);
 
-    return PackageMapper.toPublicDetailResponse({
+    const packageDetails = PackageMapper.toPublicDetailResponse({
       ...pkg,
       vendorId: pkg.vendorId,
       categoryId: pkg.categoryId,
     });
+
+    packageDetails.offerId = hasOffer.offerId;
+    packageDetails.offerPercentage = hasOffer.offerPercentage;
+    packageDetails.hasOffer = hasOffer.hasOffer;
+
+    return packageDetails;
   }
 
   async getPublicSchedulesByPackage(packageId: string): Promise<PublicScheduleDTO[]> {

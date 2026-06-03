@@ -339,8 +339,8 @@ export interface RawPopulatedBooking {
   isAttended?: boolean;
   attendedAt?: Date | null;
   hasReviewed?: boolean;
-  averageRating?: number |null ;
-  totalReviews?: number | null ;
+  averageRating?: number | null;
+  totalReviews?: number | null;
   ticketUrl?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
@@ -395,8 +395,8 @@ export interface PackageDTO {
   packingList: string[];
   itinerary: ItineraryDayDTO[];
   category: CategoryDTO | null;
-  averageRating: number 
-  totalReviews: number 
+  averageRating: number;
+  totalReviews: number;
 }
 
 export interface CancellationRule {
@@ -460,8 +460,8 @@ export interface BookingDetailDTO {
   cancelledAt: string | null;
   cancelledBy: string | null;
 
-  averageRating: number 
-  totalReviews: number ;
+  averageRating: number;
+  totalReviews: number;
 
   isAttended: boolean;
   attendedAt: string | null;

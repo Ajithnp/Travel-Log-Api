@@ -2,7 +2,7 @@ import { FilterType, PublicPackageFilters } from 'types/db';
 import {
   DifficultyLevel,
   IBasePackageEntity,
-  IBasePackagePopulated,
+  IFile,
 } from '../../types/entities/base-package.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
@@ -14,7 +14,7 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
   findPackages(
     vendorId: string,
     filters: FilterType,
-  ): Promise<{ requests: IBasePackagePopulated[]; total: number }>;
+  ): Promise<{ requests: IPackageListItem[]; total: number }>;
 
   findPublicPackages(filters: PublicPackageFilters): Promise<{
     packages: RawPublicPackageDocument[];
@@ -38,6 +38,8 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
   ): Promise<{ packages: AdminPackageOversightResult[]; total: number }>;
 
   getPackageDetails(packageId: string): Promise<AdminPackageDetailsResult | null>;
+
+  findPackagesByVendorIdForOffer(vendorId: string): Promise<PackageOfferInfo[]>;
 }
 
 export interface AdminPackageDetailsResult {
@@ -100,6 +102,34 @@ export interface RawPublicPackageDocument {
   earliestScheduleStatus?: string;
   scheduleCount?: number;
   isSoldOut?: boolean;
+  hasOffer?: boolean;
+  offerPercentage?: number;
   averageRating?: number;
   totalReviews?: number;
+}
+
+export interface PackageOfferInfo {
+  _id: Types.ObjectId;
+  title: string;
+  hasOffer: boolean;
+  offerValue?: number;
+}
+
+export interface IPackageListItem {
+  _id: string;
+  title: string;
+  location: string;
+  basePrice: number;
+  state: string;
+  status: string;
+  days: string;
+  nights: string;
+  difficultyLevel: string;
+  images: IFile[];
+  createdAt: Date;
+  categoryId: { name: string } | null;
+  cancellationPolicy: { _id: string; label: string; key: string } | null;
+  hasOffer: boolean;
+  offerPercentage: number;
+  scheduleCount: number;
 }
