@@ -30,6 +30,10 @@ import { ReviewRepository } from '../repositories/review.repository';
 import { REPOSITORY_TOKENS } from '../shared/constants/di.tokens';
 import { IOfferRepository } from '../interfaces/repository_interfaces/IOfferRepository';
 import { OfferRepository } from '../repositories/offer.repository';
+import { ICouponRepository } from '../interfaces/repository_interfaces/ICouponRepository';
+import { CouponRepository } from '../repositories/coupon.repository';
+import { IUserRewardRepository } from '../interfaces/repository_interfaces/IUserRewardRepository';
+import { UserRewardRepository } from '../repositories/user-reward.repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -99,6 +103,14 @@ export class RepositoryRegistry {
 
     container.register<IReviewRepository>('IReviewRepository', {
       useClass: ReviewRepository,
+    });
+
+    container.register<ICouponRepository>('ICouponRepository', {
+      useClass: CouponRepository,
+    });
+
+    container.register<IUserRewardRepository>('IUserRewardRepository', {
+      useClass: UserRewardRepository,
     });
 
     // Register other repositories here

@@ -84,7 +84,6 @@ export class WishlistRepository
     const skip = (page - 1) * limit;
     const pageIds = allPackageIds.slice(skip, skip + limit);
 
-    // No more pages
     if (pageIds.length === 0) {
       return {
         _id: wishlistDoc._id,

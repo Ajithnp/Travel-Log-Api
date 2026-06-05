@@ -19,6 +19,7 @@ import { makeRateLimiter } from '../../middlewares/rate.limiter.middleware';
 import { wishlistToggleLimiter } from '../../config/rate.limiter.config';
 import { IChatController } from '../../interfaces/controller_interfaces/IChatController';
 import { IWalletController } from '../../interfaces/controller_interfaces/user/IWalletController';
+import { ICouponController } from '../../interfaces/controller_interfaces/ICouponController';
 
 @injectable()
 export class UserRoutes extends BaseRoute {
@@ -34,6 +35,9 @@ export class UserRoutes extends BaseRoute {
 
     @inject('IWalletController')
     private _walletController: IWalletController,
+
+    @inject('ICouponController')
+    private _couponController: ICouponController,
   ) {
     super();
     this.initializeRoutes();
@@ -179,6 +183,20 @@ export class UserRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.USER]),
       this._userController.dashboard.bind(this._userController),
+    );
+    // reward
+    this._router.get(
+      '/reward/unrevealed',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._couponController.getUserReward.bind(this._couponController),
+    );
+
+    this._router.patch(
+      '/reward/:rewardId/reveal',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._couponController.revealReward.bind(this._couponController),
     );
   }
 }

@@ -12,10 +12,7 @@ export interface CreateOfferRequestDTO {
   name: string;
   discountType: 'percentage';
   discountValue: number;
-  maxDiscountCap?: number;
-  minBookingAmount?: number;
   usageLimit?: number;
-  validFrom: string;
   validUntil: string;
 }
 
@@ -28,11 +25,8 @@ export interface OfferResponseDTO {
   name: string;
   discountType: 'percentage';
   discountValue: number;
-  maxDiscountCap: number | null;
-  minBookingAmount: number | null;
   usageLimit: number | null;
   usedCount: number;
-  validFrom: string;
   validUntil: string;
   isActive: boolean;
   createdAt: string;

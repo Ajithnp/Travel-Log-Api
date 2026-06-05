@@ -8,8 +8,6 @@ export interface IOfferEntity extends Document {
   name: string;
   discountType: 'percentage';
   discountValue: number;
-  maxDiscountCap?: number;
-  minBookingAmount?: number;
   usageLimit?: number;
   usedCount: number;
   validFrom: Date;

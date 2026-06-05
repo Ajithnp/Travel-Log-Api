@@ -60,6 +60,10 @@ import { ReviewService } from '../services/review.service';
 import { IVendorOfferService } from '../interfaces/service_interfaces/vendor/IVendorOfferService';
 import { SERVICE_TOKENS } from '../shared/constants/di.tokens';
 import { VendorOfferService } from '../services/vendor/vendor-offer.service';
+import { ICouponService } from '../interfaces/service_interfaces/ICouponService';
+import { CouponService } from '../services/coupon.service';
+import { IRewardService } from '../interfaces/service_interfaces/user/IRewardService';
+import { UserRewardService } from '../services/user/user-reward.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -113,6 +117,10 @@ export class ServiceRegistry {
 
     container.register<IReviewService>('IReviewService', {
       useClass: ReviewService,
+    });
+
+    container.register<ICouponService>('ICouponService', {
+      useClass: CouponService,
     });
 
     //vendor-services
@@ -179,6 +187,10 @@ export class ServiceRegistry {
 
     container.register<IWalletService>('IWalletService', {
       useClass: WalletService,
+    });
+
+    container.register<IRewardService>('IRewardService', {
+      useClass: UserRewardService,
     });
   } // Register other services here
 }

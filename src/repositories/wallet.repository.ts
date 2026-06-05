@@ -27,7 +27,7 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
   async incrementBalance(
     userId: string,
     amount: number,
-    session: ClientSession,
+    session?: ClientSession,
   ): Promise<IWallet | null> {
     return this.model.findOneAndUpdate(
       { userId },
@@ -39,7 +39,7 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
   async decrementBalance(
     userId: string,
     amount: number,
-    session: ClientSession,
+    session?: ClientSession,
   ): Promise<IWallet | null> {
     return this.model.findOneAndUpdate(
       { userId, balance: { $gte: amount } },

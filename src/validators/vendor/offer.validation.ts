@@ -14,11 +14,10 @@ export const createOfferSchema = z.object({
       errorMap: () => ({ message: 'Discount type must be percentage' }),
     }),
     discountValue: z.number().min(1).max(100, 'Percentage cannot exceed 100'),
-    maxDiscountCap: z.number().min(1).optional(),
-    minBookingAmount: z.number().min(1).optional(),
     usageLimit: z.number().int().min(1).optional(),
-    validFrom: z.coerce.date(),
-    validUntil: z.coerce.date(),
+    validUntil: z.coerce.date().refine((date) => date > new Date(), {
+      message: 'validUntil must be a future date',
+    }),
   }),
 });
 

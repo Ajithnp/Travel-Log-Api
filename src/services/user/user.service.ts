@@ -29,6 +29,7 @@ import { BOOKING_STATUS } from '../../shared/constants/booking';
 import { AUTH_PROVIDER } from '../../shared/constants/constants';
 import { ERROR_CODES } from '../../shared/constants/error-code';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
+import { IReviewRepository } from '../../interfaces/repository_interfaces/IReviewRepository';
 
 @injectable()
 export class UserService implements IUserService {
@@ -49,6 +50,8 @@ export class UserService implements IUserService {
     private _walletRepository: IWalletRepository,
     @inject('IBookingRepository')
     private _bookingRepository: IBookingRepository,
+    @inject('IReviewRepository')
+    private _reviewRepository: IReviewRepository,
   ) {}
 
   async profile(id: string): Promise<UserProfileResponseDTO> {
@@ -177,7 +180,7 @@ export class UserService implements IUserService {
 
     await this._userRepository.findOneAndUpdate({ email }, { password: hashedPassword });
 
-    await this._emailUtil.sendEmail({
+    this._emailUtil.sendEmail({
       to: email,
       subject: 'Password Updated',
       text: 'Your account password was updated',
@@ -188,14 +191,14 @@ export class UserService implements IUserService {
       throw new AppError(ERROR_MESSAGES.AUTH_NO_TOKEN_PROVIDED, HTTP_STATUS.UNAUTHORIZED);
     }
 
-    await this._tokenBlackListService.blackListToken(token, decoded.exp.toString());
+    this._tokenBlackListService.blackListToken(token, decoded.exp.toString());
   }
 
   async dashboard(userId: string): Promise<UserDashboardResponseDTO> {
     const user = await this._userRepository.findById(userId);
     if (!user) throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
 
-    const [walletBalance, upcomingTrips, pastTrips] = await Promise.all([
+    const [walletBalance, upcomingTrips, pastTrips, reviewedTrips] = await Promise.all([
       this._walletRepository.getBalance(userId),
       this._bookingRepository.countDocuments({
         userId: toObjectId(userId),
@@ -205,10 +208,14 @@ export class UserService implements IUserService {
         userId: toObjectId(userId),
         bookingStatus: BOOKING_STATUS.COMPLETED,
       }),
+      this._reviewRepository.countDocuments({
+        userId: toObjectId(userId),
+        isDeleted: false,
+      }),
     ]);
 
     const response = {
-      reviewsCount: 0,
+      reviewsCount: reviewedTrips,
       walletBalance,
       upcomingTrips,
       pastTrips,

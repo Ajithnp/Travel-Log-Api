@@ -3,7 +3,7 @@ import { IPaymentWebhookService } from '../interfaces/service_interfaces/IPaymen
 import Stripe from 'stripe';
 import { inject, injectable } from 'tsyringe';
 import { IBookingService } from '../interfaces/service_interfaces/user/IBookingService';
-
+import { ICouponService } from 'interfaces/service_interfaces/ICouponService';
 type StripeCheckoutSession = Awaited<
   ReturnType<typeof Stripe.prototype.checkout.sessions.retrieve>
 >;
@@ -15,6 +15,8 @@ export class PaymentWebhookService implements IPaymentWebhookService {
     private _paymentGateway: IPaymentGateway,
     @inject('IBookingService')
     private _bookingService: IBookingService,
+    @inject('ICouponService')
+    private _couponService: ICouponService,
   ) {}
 
   async handleStripeEvent(rawBody: Buffer, signature: string): Promise<void> {
@@ -23,6 +25,7 @@ export class PaymentWebhookService implements IPaymentWebhookService {
     switch (event.type) {
       case 'checkout.session.completed':
         await this.handleSessionCompleted(event.data.object as StripeCheckoutSession);
+        this._couponService.processLuckyDrawCoupons(event.data.object.metadata!.userId);
         break;
 
       case 'checkout.session.expired':
@@ -40,15 +43,11 @@ export class PaymentWebhookService implements IPaymentWebhookService {
       return;
     }
 
-    try {
-      await this._bookingService.confirmBooking({
-        userId: session.metadata!.userId,
-        bookingId,
-        stripePaymentIntentId: session.payment_intent as string,
-      });
-    } catch (err) {
-      throw err;
-    }
+    await this._bookingService.confirmBooking({
+      userId: session.metadata!.userId,
+      bookingId,
+      stripePaymentIntentId: session.payment_intent as string,
+    });
   }
 
   private async handleSessionExpired(session: StripeCheckoutSession): Promise<void> {

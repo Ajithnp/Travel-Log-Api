@@ -24,6 +24,8 @@ import {
   CancellationPolicyRequestSchema,
   PolicyStatusRequestSchema,
 } from '../../types/dtos/admin/cancellation-policy.dtos';
+import { couponTemplateRequestSchema } from '../../validators/coupon.validation';
+import { ICouponController } from '../../interfaces/controller_interfaces/ICouponController';
 
 @injectable()
 export class AdminRoutes extends BaseRoute {
@@ -38,6 +40,8 @@ export class AdminRoutes extends BaseRoute {
     private _adminCancellationPolicyController: IAdminCancellationPolicyController,
     @inject('IAdminVendorPackageOversightController')
     private _adminVendorPackageController: IAdminVendorPackageOversightController,
+    @inject('ICouponController')
+    private _couponController: ICouponController,
   ) {
     super();
     this.initializeRoutes();
@@ -249,6 +253,28 @@ export class AdminRoutes extends BaseRoute {
       this._adminCancellationPolicyController.togglePolicyActiveStatus.bind(
         this._adminCancellationPolicyController,
       ),
+    );
+
+    this._router.post(
+      '/coupons',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      validateDTO(couponTemplateRequestSchema),
+      this._couponController.createCoupon.bind(this._couponController),
+    );
+
+    this._router.get(
+      '/coupons',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._couponController.getAllCoupons.bind(this._couponController),
+    );
+
+    this._router.patch(
+      '/coupons/:couponId/deactivate',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._couponController.deActivateCoupon.bind(this._couponController),
     );
   }
 }

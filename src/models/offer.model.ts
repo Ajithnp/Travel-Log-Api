@@ -36,14 +36,6 @@ const offerSchema = new Schema<IOfferEntity>(
       min: 1,
       max: 100,
     },
-    maxDiscountCap: {
-      type: Number,
-      default: null,
-    },
-    minBookingAmount: {
-      type: Number,
-      default: null,
-    },
     usageLimit: {
       type: Number,
       default: null,
@@ -55,6 +47,7 @@ const offerSchema = new Schema<IOfferEntity>(
     validFrom: {
       type: Date,
       required: true,
+      default: new Date(),
     },
     validUntil: {
       type: Date,
