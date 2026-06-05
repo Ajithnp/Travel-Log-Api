@@ -43,16 +43,11 @@ export class VendorOfferService implements IVendorOfferService {
       packageId: toObjectId(payload.packageId),
       isActive: true,
     });
-    if (alreadyHaveActiveOffer) {
+
+    if (alreadyHaveActiveOffer && alreadyHaveActiveOffer.validUntil > new Date()) {
       throw new AppError(ERROR_MESSAGES.ALREADY_HAVE_ACTIVE_OFFER, HTTP_STATUS.BAD_REQUEST);
     }
-
-    const validFrom = new Date(payload.validFrom);
     const validUntil = new Date(payload.validUntil);
-
-    if (validUntil <= validFrom) {
-      throw new AppError(ERROR_MESSAGES.INVALID_DATE_RANGE, HTTP_STATUS.BAD_REQUEST);
-    }
 
     await this._offerRepository.create({
       vendorId: toObjectId(vendorId),
@@ -61,10 +56,7 @@ export class VendorOfferService implements IVendorOfferService {
       name: payload.name,
       discountType: 'percentage',
       discountValue: payload.discountValue,
-      maxDiscountCap: payload.maxDiscountCap || undefined,
-      minBookingAmount: payload.minBookingAmount || undefined,
       usageLimit: payload.usageLimit || undefined,
-      validFrom,
       validUntil,
       isActive: true,
       usedCount: 0,

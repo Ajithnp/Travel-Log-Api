@@ -27,8 +27,17 @@ export class BookingController implements IBookingController {
 
   initiateBooking = expressAsyncHandler(async (req, res) => {
     const userId = req.user?.id;
-    const { packageId, scheduleId, tierType, seatsCount, travelers, useWallet, amountInPaise } =
-      req.body;
+    const {
+      packageId,
+      scheduleId,
+      tierType,
+      seatsCount,
+      travelers,
+      useWallet,
+      amountInPaise,
+      offerId,
+      offerDiscount,
+    } = req.body;
 
     const payload: InitiateBookingDTO = {
       userId,
@@ -39,6 +48,8 @@ export class BookingController implements IBookingController {
       useWallet,
       travelers,
       amountInPaise,
+      offerId,
+      offerDiscount,
     };
 
     const result = await this._bookingService.initiateBooking(payload);

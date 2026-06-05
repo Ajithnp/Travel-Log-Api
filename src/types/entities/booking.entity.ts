@@ -39,9 +39,9 @@ export interface IBooking extends Document {
   travelers: ITraveler[];
 
   grossAmount: number; // pricing[groupType] from schedule at time of booking
-  discountAmount: number; // offer + coupon combined
+  discountAmount: number; // offer
   walletAmountUsed: number; // wallet balance applied
-  finalAmount: number; // grossAmount - discountAmount - walletAmountUsed
+  finalAmount: number; // grossAmount - discountAmount
   platformCommission: number; // 15% of grossAmount
   vendorEarning: number; // grossAmount - platformCommission
 

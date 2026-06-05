@@ -4,6 +4,7 @@ import { IOfferEntity } from '../types/entities/offer.entity';
 import { OfferModel } from '../models/offer.model';
 import {
   IOfferRepository,
+  Offer,
   PaginatedOfferResult,
 } from '../interfaces/repository_interfaces/IOfferRepository';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
@@ -108,9 +109,7 @@ export class OfferRepository extends BaseRepository<IOfferEntity> implements IOf
     };
   }
 
-  async hasActiveOfferByPackage(
-    packageId: string,
-  ): Promise<{ hasOffer: boolean; offerPercentage: number; offerId: string | null }> {
+  async hasActiveOfferByPackage(packageId: string): Promise<Offer> {
     const offer = await this.findOne({
       packageId: toObjectId(packageId),
       isActive: true,
@@ -120,7 +119,11 @@ export class OfferRepository extends BaseRepository<IOfferEntity> implements IOf
     return {
       hasOffer: !!offer,
       offerPercentage: offer?.discountType === 'percentage' ? offer?.discountValue : 0,
-      offerId: offer?._id?.toString() || null,
+      offerId: offer?._id?.toString() || '',
     };
+  }
+
+  async updateUsageCount(offerId: string): Promise<void> {
+    await this.model.updateOne({ _id: toObjectId(offerId) }, { $inc: { usedCount: 1 } });
   }
 }

@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Mongo ObjectId validator
- */
 export const objectIdSchema = z
   .string({
     required_error: 'Field is required',
@@ -10,9 +7,6 @@ export const objectIdSchema = z
   })
   .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId format');
 
-/**
- * Traveler Schema
- */
 export const travelerSchema = z.object({
   fullName: z
     .string({
@@ -100,6 +94,14 @@ export const initiateBookingSchema = z
       })
       .int('amountInPaise must be an integer')
       .positive('amountInPaise must be greater than 0'),
+
+    offerId: objectIdSchema
+      .refine(Boolean, {
+        message: 'offerId is required',
+      })
+      .optional(),
+
+    offerDiscount: z.number().optional(),
   })
 
   .superRefine((data, ctx) => {

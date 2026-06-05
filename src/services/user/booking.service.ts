@@ -57,6 +57,7 @@ import logger from '../../config/logger';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { isRetryWindowOpen } from '../../shared/utils/booking/retry-payment-validate';
 import { IScheduleStartDatePopulated } from '../../types/entities/booking.entity';
+import { IOfferRepository, Offer } from 'interfaces/repository_interfaces/IOfferRepository';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -81,6 +82,8 @@ export class BookingService implements IBookingService {
     private _cancellationPolicyRepo: ICancellationPolicyRepository,
     @inject('IUserRepository')
     private _userRepository: IUserRepository,
+    @inject('IOfferRepository')
+    private _offerRepository: IOfferRepository,
   ) {}
 
   async initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO> {
@@ -93,6 +96,18 @@ export class BookingService implements IBookingService {
 
       if (!schedule) {
         throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+      }
+
+      let offer: Offer = { hasOffer: false, offerId: '', offerPercentage: 0 };
+      if (payload.offerId && payload.offerDiscount) {
+        const offerEntity = await this._offerRepository.findById(payload.offerId);
+        BookingValidator.validateBookingOffer(offerEntity, payload.packageId);
+        offer = {
+          hasOffer: true,
+          offerId: offerEntity!._id.toString(),
+          offerPercentage:
+            offerEntity!.discountType === 'percentage' ? offerEntity!.discountValue : 0,
+        };
       }
 
       BookingValidator.validateTripBookingDate(schedule.startDate);
@@ -162,8 +177,8 @@ export class BookingService implements IBookingService {
       }
 
       //  Financial calculation
+      const discountAmount = Math.round((priceTier.price * offer.offerPercentage) / 100);
 
-      const discountAmount = 0;
       const walletBalance = payload.useWallet
         ? (await this._walletService.getWalletBalance(payload.userId)).balance
         : 0;
@@ -172,9 +187,9 @@ export class BookingService implements IBookingService {
 
       const finalAmount = priceTier.price - discountAmount;
 
-      const platformCommission = Math.round(priceTier.price * PLATFORM_COMMISSION_RATE * 100) / 100;
+      const platformCommission = Math.round(finalAmount * PLATFORM_COMMISSION_RATE * 100) / 100;
 
-      const vendorEarning = Math.round((priceTier.price - platformCommission) * 100) / 100;
+      const vendorEarning = Math.round((finalAmount - platformCommission) * 100) / 100;
 
       session = await mongoose.startSession();
       session.startTransaction();
@@ -198,6 +213,7 @@ export class BookingService implements IBookingService {
           discountAmount,
           walletAmountUsed: split.walletAmount,
           finalAmount,
+          offerId: offer.offerId ? toObjectId(offer.offerId) : null,
           platformCommission: Math.round(platformCommission),
           vendorEarning: Math.round(vendorEarning),
           paymentMethod: split.method,
@@ -265,8 +281,8 @@ export class BookingService implements IBookingService {
       if (session) {
         try {
           await session.abortTransaction();
-        } catch (_) {
-          logger.error('rolling back transaction in booking.service.ts');
+        } catch (error) {
+          logger.error('rolling back transaction in booking.service.ts', error);
         }
 
         await session.endSession();
@@ -344,6 +360,10 @@ export class BookingService implements IBookingService {
       const schedule = await this._schedulePackageRepo.findById(booking.scheduleId.toString());
       if (!schedule) {
         throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+      }
+
+      if (booking.offerId) {
+        await this._offerRepository.updateUsageCount(booking.offerId.toString());
       }
 
       await Promise.all([
@@ -568,7 +588,7 @@ export class BookingService implements IBookingService {
       status: VERIFY_PAYMENT_STATUS.SUCCESS,
       bookingCode: updatedBooking!.bookingCode,
       bookingId: bookingId!,
-      amount: updatedBooking?.finalAmount!,
+      amount: updatedBooking!.finalAmount,
     };
   }
 
@@ -677,55 +697,49 @@ export class BookingService implements IBookingService {
       ? `${payload.reason} — ${payload.details}`
       : payload.reason;
 
-    try {
-      const updatedBooking = await this._bookingRepo.cancelBooking(
-        payload.bookingId,
-        payload.userId,
-        {
-          cancellationReason,
-          cancellationStatus: CANCELATION_STATUS.PENDING,
-          cancelledAt: new Date(),
-          cancelationRefundAmount: Math.floor(refundBreakdown.refundAmount),
-        },
-      );
+    const updatedBooking = await this._bookingRepo.cancelBooking(
+      payload.bookingId,
+      payload.userId,
+      {
+        cancellationReason,
+        cancellationStatus: CANCELATION_STATUS.PENDING,
+        cancelledAt: new Date(),
+        cancelationRefundAmount: Math.floor(refundBreakdown.refundAmount),
+      },
+    );
 
-      if (!updatedBooking) {
-        throw new AppError(ERROR_MESSAGES.BOOKING_CANCELLATION_FAILED, HTTP_STATUS.BAD_REQUEST);
-      }
+    if (!updatedBooking) {
+      throw new AppError(ERROR_MESSAGES.BOOKING_CANCELLATION_FAILED, HTTP_STATUS.BAD_REQUEST);
+    }
 
-      const admin = await this._userRepository.findOne({ role: USER_ROLES.ADMIN });
-      if (!admin) {
-        throw new AppError(
-          ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR,
-          HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        );
-      }
-      await this._userRepository.findByIdAndAddUnreadTabs(
-        admin._id.toString(),
-        ADMIN_TABS.CANCEL_BOOKINGS,
-      );
+    const admin = await this._userRepository.findOne({ role: USER_ROLES.ADMIN });
+    if (!admin) {
+      throw new AppError(ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+    await this._userRepository.findByIdAndAddUnreadTabs(
+      admin._id.toString(),
+      ADMIN_TABS.CANCEL_BOOKINGS,
+    );
 
-      await this._notificationService.createNotification({
-        recipientId: booking.vendorId._id.toString(),
-        recipientRole: USER_ROLES.VENDOR,
-        senderId: booking.userId.toString(),
-        notificationType: UserNotificationType.BookingCancelRequest,
-        title: 'Booking Cancellation Requested',
-        message: `Cancellation request for "${pkg.title}" is pending review. Estimated refund: ₹${refundBreakdown.refundAmount} (${refundBreakdown.refundPercent}%).`,
-        data: {
-          packageId: pkg._id.toString(),
-          bookingCode: booking.bookingCode,
-          refundAmount: refundBreakdown.refundAmount,
-          refundPercent: refundBreakdown.refundPercent,
-        },
-        redirectUrl: ``,
-      });
-      return {
+    this._notificationService.createNotification({
+      recipientId: booking.vendorId._id.toString(),
+      recipientRole: USER_ROLES.VENDOR,
+      senderId: booking.userId.toString(),
+      notificationType: UserNotificationType.BookingCancelRequest,
+      title: 'Booking Cancellation Requested',
+      message: `Cancellation request for "${pkg.title}" is pending review. Estimated refund: ₹${refundBreakdown.refundAmount} (${refundBreakdown.refundPercent}%).`,
+      data: {
+        packageId: pkg._id.toString(),
+        bookingCode: booking.bookingCode,
         refundAmount: refundBreakdown.refundAmount,
         refundPercent: refundBreakdown.refundPercent,
-      };
-    } catch (error) {
-      throw error;
-    }
+      },
+      redirectUrl: ``,
+    });
+
+    return {
+      refundAmount: refundBreakdown.refundAmount,
+      refundPercent: refundBreakdown.refundPercent,
+    };
   }
 }

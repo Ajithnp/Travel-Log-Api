@@ -15,6 +15,7 @@ import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
+import { IUserRewardRepository } from 'interfaces/repository_interfaces/IUserRewardRepository';
 
 @injectable()
 export class WalletService implements IWalletService {
@@ -23,6 +24,8 @@ export class WalletService implements IWalletService {
     private _walletRepository: IWalletRepository,
     @inject('IWalletTransactionRepository')
     private _walletTransactionRepository: IWalletTransactionRepository,
+    @inject('IUserRewardRepository')
+    private _userRewardRepository: IUserRewardRepository,
   ) {}
 
   async getWalletDetails(
@@ -37,9 +40,10 @@ export class WalletService implements IWalletService {
     }
     const balance = wallet.balance || 0;
 
-    const [totalCredit, totalDebit, paginatedResult] = await Promise.all([
+    const [totalCredit, totalDebit, totalReward, paginatedResult] = await Promise.all([
       this._walletTransactionRepository.calculateTotalAmountByType(userId, TRANSACTION_TYPE.CREDIT),
       this._walletTransactionRepository.calculateTotalAmountByType(userId, TRANSACTION_TYPE.DEBIT),
+      this._userRewardRepository.getRewardAmountByUserId(userId),
       this._walletTransactionRepository.findTransactionsByUserId(userId, filter, page, limit),
     ]);
 
@@ -47,6 +51,7 @@ export class WalletService implements IWalletService {
       balance,
       totalCredit,
       totalDebit,
+      totalReward,
       transactions: {
         data: WalletMapper.toTransactionDTOList(paginatedResult.transactions),
         currentPage: page,

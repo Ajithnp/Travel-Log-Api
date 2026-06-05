@@ -6,7 +6,6 @@ import { DependencyInjection } from './di/index';
 import { AuthRoutes } from './routes/auth/auth.routes';
 import { AdminRoutes } from './routes/admin/admin.routes';
 import { container } from 'tsyringe';
-import logger from './config/logger';
 import { corsOption } from './middlewares/cors.middleware';
 import { errorMiddleware } from './middlewares/error.handler.middleware';
 import { VendorRoutes } from './routes/vendor/vendor.routes';

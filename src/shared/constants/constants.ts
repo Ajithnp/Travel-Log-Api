@@ -65,3 +65,10 @@ export const ADMIN_TABS = {
 } as const;
 
 export type AdminTabs = (typeof ADMIN_TABS)[keyof typeof ADMIN_TABS];
+
+export const USER_REWARD_STATUS = {
+  UNREVEALED: 'UNREVEALED',
+  REVEALED: 'REVEALED',
+  USED: 'USED',
+  EXPIRED: 'EXPIRED',
+} as const;

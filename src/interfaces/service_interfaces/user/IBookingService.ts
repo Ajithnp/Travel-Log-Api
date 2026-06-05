@@ -21,6 +21,8 @@ export interface InitiateBookingDTO {
     relation?: string;
   }>;
   amountInPaise: number;
+  offerId?: string;
+  offerDiscount?: number;
 }
 
 export interface ConfirmBookingDTO {

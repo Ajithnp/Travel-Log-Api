@@ -50,6 +50,10 @@ export const SUCCESS_MESSAGES = {
 
   // offer
   OFFER_CREATED_SUCCESSFULLY: 'Offer created successfully',
+
+  // coupon
+  COUPON_CREATED: 'Coupon created successfully',
+  COUPON_DEACTIVATED: 'Coupon deactivated successfully',
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -199,6 +203,17 @@ export const ERROR_MESSAGES = {
   OFFER_ALREADY_DEACTIVATED: 'Offer already deactivated',
   PACKAGE_NOT_ABLE_TO_ADD_OFFER: 'Package not able to add offer',
   ALREADY_HAVE_ACTIVE_OFFER: 'Already have an active offer for this package',
+  OFFER_NOT_APPLICABLE_TO_THIS_PACKAGE: 'Offer not applicable to this package',
+  OFFER_USAGE_LIMIT_EXCEEDED: 'Offer usage limit has been exceeded',
+  OFFER_EXPIRED: 'Offer has expired',
+  // reward
+  REWARD_NOT_FOUND: 'Reward not found',
+  REWARD_ALREADY_USED: 'Reward already used',
+
+  // coupon
+  COUPON_NOT_FOUND: 'Coupon not found',
+  COUPON_ALREADY_DEACTIVATED: 'Coupon is already deactivated',
+  COUPON_EXIST_WITH_SAME_CRITERIA: 'A coupon with the same criteria already exists',
 } as const;
 
 export const NOTIFICATION_MESSAGES = {

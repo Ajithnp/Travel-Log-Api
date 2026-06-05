@@ -18,7 +18,7 @@ export class WalletTransactionRepository
 
   async createTransaction(
     transaction: Partial<IWalletTransaction>,
-    session: ClientSession,
+    session?: ClientSession,
   ): Promise<IWalletTransaction | null> {
     const [createdTransaction] = await this.model.create([transaction], { session });
     return createdTransaction;

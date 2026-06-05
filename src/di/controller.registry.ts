@@ -42,6 +42,8 @@ import { AdminVendorPackageOversightController } from '../controllers/admin/admi
 import { IReviewController } from '../interfaces/controller_interfaces/IReviewController';
 import { ReviewController } from '../controllers/review.controller';
 import { CONTROLLER_TOKENS } from '../shared/constants/di.tokens';
+import { ICouponController } from '../interfaces/controller_interfaces/ICouponController';
+import { CouponController } from '../controllers/coupon.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -71,6 +73,10 @@ export class ControllerRegistry {
 
     container.register<IReviewController>('IReviewController', {
       useClass: ReviewController,
+    });
+
+    container.register<ICouponController>('ICouponController', {
+      useClass: CouponController,
     });
 
     container.register<IVendorOfferController>(CONTROLLER_TOKENS.VENDOR_OFFER_CONTROLLER, {

@@ -12,7 +12,6 @@ import { toObjectId } from '../../shared/utils/database/objectId.helper';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
 import {
   BasePackageSingleResponseDTO,
-  PackageDetailDTO,
   PackageDetailWithStats,
   PackageForOfferResponseDTO,
   PackageScheduleContextResponseDTO,

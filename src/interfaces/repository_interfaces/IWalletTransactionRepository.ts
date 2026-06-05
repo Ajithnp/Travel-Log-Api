@@ -11,7 +11,7 @@ export type WalletTransactionFilterType = 'credit' | 'debit' | 'all';
 export interface IWalletTransactionRepository extends IBaseRepository<IWalletTransaction> {
   createTransaction(
     transaction: Partial<IWalletTransaction>,
-    session: ClientSession,
+    session?: ClientSession,
   ): Promise<IWalletTransaction | null>;
   updateTransactionStatus(
     transactionId: string,
