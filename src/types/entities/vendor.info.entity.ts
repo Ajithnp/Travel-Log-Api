@@ -72,7 +72,7 @@ export interface IBankDetailsDTO {
   branch: string;
 }
 
-// ─── First time submit ─────
+
 export interface VendorVerificationSubmitDTO {
   businessInfo: IBusinessInfoDTO;
   documents: IDocumentsDTO;

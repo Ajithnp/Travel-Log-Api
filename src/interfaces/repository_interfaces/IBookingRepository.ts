@@ -12,6 +12,7 @@ import {
 } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose, { ClientSession } from 'mongoose';
+import { CommissionOverview, PaginatedCommissionOverviewByVendors } from '../service_interfaces/admin/IAdminFinanceService';
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
   createBooking(data: Partial<IBooking>, session?: mongoose.ClientSession): Promise<IBooking>;
@@ -98,6 +99,8 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   ): Promise<IScheduleBookingSinglePopulated | null>;
 
   getTotalRevanueByVendorId(vendorId: string): Promise<{ totalRevenue: number } | null>;
+
+  getCommissionOverview(): Promise<CommissionOverview>;
 }
 
 export interface BookingFilters {

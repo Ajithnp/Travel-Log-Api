@@ -26,6 +26,7 @@ import {
 } from '../../types/dtos/admin/cancellation-policy.dtos';
 import { couponTemplateRequestSchema } from '../../validators/coupon.validation';
 import { ICouponController } from '../../interfaces/controller_interfaces/ICouponController';
+import { IAdminFinanceController } from '../../interfaces/controller_interfaces/admin/IAdminFinanceController';
 
 @injectable()
 export class AdminRoutes extends BaseRoute {
@@ -42,6 +43,8 @@ export class AdminRoutes extends BaseRoute {
     private _adminVendorPackageController: IAdminVendorPackageOversightController,
     @inject('ICouponController')
     private _couponController: ICouponController,
+    @inject('IAdminFinanceController')
+    private _adminFinanceController: IAdminFinanceController,
   ) {
     super();
     this.initializeRoutes();
@@ -276,5 +279,20 @@ export class AdminRoutes extends BaseRoute {
       authorize([USER_ROLES.ADMIN]),
       this._couponController.deActivateCoupon.bind(this._couponController),
     );
+    //=============== finanace and commision ======================
+    this._router.get(
+      '/commissions/summary',
+      // isAuthenticated,
+      // authorize([USER_ROLES.ADMIN]),
+      this._adminFinanceController.getCommissionOverview.bind(this._adminFinanceController),
+    );
+    
+    this._router.get(
+      '/commissions/vendors',
+      // isAuthenticated,
+      // authorize([USER_ROLES.ADMIN]),
+      this._adminFinanceController.getCommissionsByVendors.bind(this._adminFinanceController),
+    );
+    
   }
 }

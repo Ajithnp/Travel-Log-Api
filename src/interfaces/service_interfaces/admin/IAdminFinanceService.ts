@@ -1,5 +1,8 @@
 export interface IAdminFinanceService {
 
+     getCommissionOverview(): Promise<CommissionOverview>;
+     getCommissionsByVendors(page:number,limit:number,search?:string):Promise<PaginatedCommissionOverviewByVendors>;
+
 }
 
 export interface CommissionOverview{

@@ -16,10 +16,15 @@ import {
   BookingFilters,
   IBookingRepository,
 } from '../interfaces/repository_interfaces/IBookingRepository';
+import {
+  CommissionOverview,
+  PaginatedCommissionOverviewByVendors,
+} from '../interfaces/service_interfaces/admin/IAdminFinanceService';
 import BookingModel from '../models/booking.model';
 import mongoose, { ClientSession } from 'mongoose';
 import { BOOKING_STATUS, CANCELATION_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
 import { FilterQuery } from 'mongoose';
+import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
@@ -157,7 +162,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
     pipeline.push({ $unwind: '$packageId' });
 
-    // Filter by package location (search)
+
     if (filters.search) {
       pipeline.push({
         $match: {
@@ -583,15 +588,15 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
       ...(search
         ? [
-            {
-              $match: {
-                $or: [
-                  { 'user.name': { $regex: search, $options: 'i' } },
-                  { bookingCode: { $regex: search, $options: 'i' } },
-                ],
-              },
+          {
+            $match: {
+              $or: [
+                { 'user.name': { $regex: search, $options: 'i' } },
+                { bookingCode: { $regex: search, $options: 'i' } },
+              ],
             },
-          ]
+          },
+        ]
         : []),
       { $sort: { createdAt: -1 } },
       {
@@ -657,4 +662,37 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
     return result.length > 0 ? { totalRevenue: result[0].totalRevenue } : null;
   }
+
+  async getCommissionOverview(): Promise<CommissionOverview> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          bookingStatus: BOOKING_STATUS.COMPLETED,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalGrossAmount: { $sum: '$finalAmount' },
+          totalPlatformCommission: { $sum: '$platformCommission' },
+          totalVendorEarnings: { $sum: '$vendorEarning' },
+        },
+      },
+    ]);
+
+    if (result.length > 0) {
+      return {
+        totalGrossAmount: result[0].totalGrossAmount || 0,
+        totalPlatformCommission: result[0].totalPlatformCommission || 0,
+        totalVendorEarnings: result[0].totalVendorEarnings || 0,
+      };
+    }
+
+    return {
+      totalGrossAmount: 0,
+      totalPlatformCommission: 0,
+      totalVendorEarnings: 0,
+    };
+  };
+
 }

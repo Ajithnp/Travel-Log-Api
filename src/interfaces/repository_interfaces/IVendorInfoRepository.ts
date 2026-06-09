@@ -7,6 +7,8 @@ import { IBaseRepository } from './IBaseRepository';
 import { FilterQuery } from 'mongoose';
 import { CustomQueryOptions } from '../../types/common/IQueryOptions';
 import { IUser } from '../../types/entities/user.entity';
+import { PaginatedCommissionOverviewByVendors } from '../../interfaces/service_interfaces/admin/IAdminFinanceService';
+
 export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
   findVendorWithUserId(userId: string): Promise<IVendorInfoPopulated | null>;
 
@@ -27,4 +29,6 @@ export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
     vendorFilter?: FilterQuery<IVendorInfo>,
     options?: CustomQueryOptions,
   ): Promise<IVendorInfoWithUser[]>;
+
+  getCommissionOverviewByVendors(page:number,limit:number,search?:string): Promise<PaginatedCommissionOverviewByVendors>;
 }
