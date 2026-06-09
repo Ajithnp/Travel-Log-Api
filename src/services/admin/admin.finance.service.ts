@@ -1,9 +1,10 @@
 import { injectable, inject } from 'tsyringe';
-import { CommissionOverview, IAdminFinanceService, PaginatedCommissionOverviewByVendors } from '../../interfaces/service_interfaces/admin/IAdminFinanceService';
+import { CommissionOverview, IAdminFinanceService, PaginatedCommissionOverviewByPackages, PaginatedCommissionOverviewByVendors } from '../../interfaces/service_interfaces/admin/IAdminFinanceService';
 import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
 import { ICacheService } from '../../interfaces/service_interfaces/ICacheService';
 import { CACHE_KEYS, CACHE_TTL } from '../../types/cache';
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
+import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
 
 
 @injectable()
@@ -15,6 +16,8 @@ export class AdminFinanceService implements IAdminFinanceService {
     private _vendorRepository: IVendorInfoRepository,
     @inject('ICacheService')
     private _cacheService: ICacheService,
+    @inject('IBasePackageRepository')
+    private _basePackageRepository: IBasePackageRepository,
   ) {}
 
   async getCommissionOverview(): Promise<CommissionOverview> {
@@ -31,7 +34,14 @@ export class AdminFinanceService implements IAdminFinanceService {
 
   async getCommissionsByVendors(page:number,limit:number,search?:string):Promise<PaginatedCommissionOverviewByVendors>{
     return this._vendorRepository.getCommissionOverviewByVendors(page,limit,search);
-  }
+  };
+
+  async getCommissionsByVendorsPackages(page:number,limit:number,sortBy:string,search?:string):Promise<PaginatedCommissionOverviewByPackages>{
+    const data = await this._basePackageRepository.getCommissionOverviewByPackages(page,limit,sortBy,search);
+   
+    return data;
+  };
+
 }
 
 

@@ -282,16 +282,23 @@ export class AdminRoutes extends BaseRoute {
     //=============== finanace and commision ======================
     this._router.get(
       '/commissions/summary',
-      // isAuthenticated,
-      // authorize([USER_ROLES.ADMIN]),
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
       this._adminFinanceController.getCommissionOverview.bind(this._adminFinanceController),
     );
     
     this._router.get(
       '/commissions/vendors',
-      // isAuthenticated,
-      // authorize([USER_ROLES.ADMIN]),
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
       this._adminFinanceController.getCommissionsByVendors.bind(this._adminFinanceController),
+    );
+
+    this._router.get(
+      '/commissions/packages',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminFinanceController.getCommissionsByVendorsPackages.bind(this._adminFinanceController),
     );
     
   }

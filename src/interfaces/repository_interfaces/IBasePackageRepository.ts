@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import { PublicPackageImageDTO } from '../../types/user/types';
 import { Types } from 'mongoose';
 import { PackageStatus } from 'shared/constants/constants';
+import { PaginatedCommissionOverviewByPackages } from 'interfaces/service_interfaces/admin/IAdminFinanceService';
 
 export interface IBasePackageRepository extends IBaseRepository<IBasePackageEntity> {
   findPackages(
@@ -40,6 +41,13 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
   getPackageDetails(packageId: string): Promise<AdminPackageDetailsResult | null>;
 
   findPackagesByVendorIdForOffer(vendorId: string): Promise<PackageOfferInfo[]>;
+
+  getCommissionOverviewByPackages(
+      page: number,
+      limit: number,
+      sortBy: string,
+      search?: string,
+    ): Promise<PaginatedCommissionOverviewByPackages>
 }
 
 export interface AdminPackageDetailsResult {
