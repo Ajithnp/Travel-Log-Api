@@ -44,6 +44,8 @@ import { ReviewController } from '../controllers/review.controller';
 import { CONTROLLER_TOKENS } from '../shared/constants/di.tokens';
 import { ICouponController } from '../interfaces/controller_interfaces/ICouponController';
 import { CouponController } from '../controllers/coupon.controller';
+import { IAdminFinanceController } from '../interfaces/controller_interfaces/admin/IAdminFinanceController';
+import { AdminFinanceController } from '../controllers/admin/admin.finance.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -118,6 +120,9 @@ export class ControllerRegistry {
         useClass: AdminVendorPackageOversightController,
       },
     );
+    container.register<IAdminFinanceController>('IAdminFinanceController', {
+      useClass: AdminFinanceController,
+    });
 
     //user controllers
     container.register<IUserController>('IUserController', {

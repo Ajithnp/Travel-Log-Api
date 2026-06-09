@@ -64,6 +64,8 @@ import { ICouponService } from '../interfaces/service_interfaces/ICouponService'
 import { CouponService } from '../services/coupon.service';
 import { IRewardService } from '../interfaces/service_interfaces/user/IRewardService';
 import { UserRewardService } from '../services/user/user-reward.service';
+import { IAdminFinanceService } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
+import { AdminFinanceService } from '../services/admin/admin.finance.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -162,6 +164,9 @@ export class ServiceRegistry {
     });
     container.register<IAdminVendorPackageOversightService>('IAdminVendorPackageOversightService', {
       useClass: AdminVendorPackageOversightService,
+    });
+    container.register<IAdminFinanceService>('IAdminFinanceService', {
+      useClass: AdminFinanceService,
     });
 
     //user services
