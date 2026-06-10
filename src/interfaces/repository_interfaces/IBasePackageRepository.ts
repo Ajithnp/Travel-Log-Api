@@ -45,7 +45,6 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
   getCommissionOverviewByPackages(
       page: number,
       limit: number,
-      sortBy: string,
       search?: string,
     ): Promise<PaginatedCommissionOverviewByPackages>
 }

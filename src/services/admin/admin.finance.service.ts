@@ -36,8 +36,8 @@ export class AdminFinanceService implements IAdminFinanceService {
     return this._vendorRepository.getCommissionOverviewByVendors(page,limit,search);
   };
 
-  async getCommissionsByVendorsPackages(page:number,limit:number,sortBy:string,search?:string):Promise<PaginatedCommissionOverviewByPackages>{
-    const data = await this._basePackageRepository.getCommissionOverviewByPackages(page,limit,sortBy,search);
+  async getCommissionsByVendorsPackages(page:number,limit:number,search?:string):Promise<PaginatedCommissionOverviewByPackages>{
+    const data = await this._basePackageRepository.getCommissionOverviewByPackages(page,limit,search);
    
     return data;
   };

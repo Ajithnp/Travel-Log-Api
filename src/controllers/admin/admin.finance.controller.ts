@@ -46,8 +46,8 @@ export class AdminFinanceController implements IAdminFinanceController {
     getCommissionsByVendorsPackages = expressAsyncHandler(async (req:Request, res:Response):Promise<void> => {
      
       const {page,limit,search} = getPaginationOptions(req);
-      const {sortBy} = req.query as {sortBy:string};
-      const result = await this._adminFinanceService.getCommissionsByVendorsPackages(page,limit,sortBy,search);
+
+      const result = await this._adminFinanceService.getCommissionsByVendorsPackages(page,limit,search);
 
       const successResponse: IApiResponse <typeof result> = {
         success: SUCCESS_STATUS.SUCCESS,

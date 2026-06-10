@@ -978,7 +978,6 @@ export class BasePackageRepository
   async getCommissionOverviewByPackages(
     page: number,
     limit: number,
-    sortBy: string,
     search?: string,
     
   ): Promise<PaginatedCommissionOverviewByPackages> {
@@ -1054,9 +1053,6 @@ export class BasePackageRepository
       }
     );
 
-    const sortStage: Record<string, 1 | -1> =
-      sortBy === 'low_to_high' || sortBy === 'high_to_low' ? { totalGrossAmount: 1 } : { totalGrossAmount: -1 };
-
     pipeline.push({
       $facet: {
         metadata: [
@@ -1072,7 +1068,7 @@ export class BasePackageRepository
             },
           },
         ],
-        data: [{ $sort: sortStage }, { $skip: (page - 1) * limit }, { $limit: limit }],
+        data: [{ $sort: {totalVendorEarnings: -1} }, { $skip: (page - 1) * limit }, { $limit: limit }],
       },
     });
 

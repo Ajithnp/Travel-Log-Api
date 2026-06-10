@@ -2,7 +2,7 @@ export interface IAdminFinanceService {
 
      getCommissionOverview(): Promise<CommissionOverview>;
      getCommissionsByVendors(page:number,limit:number,search?:string):Promise<PaginatedCommissionOverviewByVendors>;
-     getCommissionsByVendorsPackages(page:number,limit:number,sortBy:string,search?:string):Promise<PaginatedCommissionOverviewByPackages>
+     getCommissionsByVendorsPackages(page:number,limit:number,search?:string):Promise<PaginatedCommissionOverviewByPackages>
 
 }
 
