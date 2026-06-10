@@ -14,7 +14,9 @@ import { FilterType, PublicPackageFilters } from '../types/db';
 import mongoose, { FilterQuery, Types } from 'mongoose';
 import { MongoNumberRange } from '../types/db';
 import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
+import { BOOKING_STATUS } from '../shared/constants/booking';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
+import { PaginatedCommissionOverviewByPackages } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
 
 @injectable()
 export class BasePackageRepository
@@ -971,5 +973,128 @@ export class BasePackageRepository
     ];
 
     return this.model.aggregate(pipeline);
+  }
+
+  async getCommissionOverviewByPackages(
+    page: number,
+    limit: number,
+    search?: string,
+    
+  ): Promise<PaginatedCommissionOverviewByPackages> {
+
+    const matchStage: mongoose.FilterQuery<IBasePackageEntity> = {
+      status: PACKAGE_STATUS.PUBLISHED,
+      isActive: true,
+    };
+
+    const pipeline: mongoose.PipelineStage[] = [
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendor',
+        },
+      },
+      { $unwind: '$vendor' },
+    ];
+
+    if (search?.trim()) {
+      const regex = { $regex: search.trim(), $options: 'i' };
+      pipeline.push({
+        $match: {
+          $or: [{ title: regex }, { 'vendor.name': regex }],
+        },
+      });
+    }
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          let: { pkgId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$packageId', '$$pkgId'] },
+                status: SCHEDULE_STATUS.COMPLETED,
+              },
+            },
+          ],
+          as: 'completedSchedules',
+        },
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { pkgId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$packageId', '$$pkgId'] },
+                bookingStatus: BOOKING_STATUS.COMPLETED,
+              },
+            },
+          ],
+          as: 'completedBookings',
+        },
+      },
+      {
+        $project: {
+          vendorName: '$vendor.name',
+          packageName: '$title',
+          totalScedule: { $size: '$completedSchedules' },
+          totalBookings: { $size: '$completedBookings' },
+          totalGrossAmount: { $sum: '$completedBookings.finalAmount' },
+          totalPlatformCommission: { $sum: '$completedBookings.platformCommission' },
+          totalVendorEarnings: { $sum: '$completedBookings.vendorEarning' },
+        },
+      }
+    );
+
+    pipeline.push({
+      $facet: {
+        metadata: [
+          {
+            $group: {
+              _id: null,
+              totalPackages: { $sum: 1 },
+              totalScedules: { $sum: '$totalScedule' },
+              totalBookings: { $sum: '$totalBookings' },
+              totalGrossAmount: { $sum: '$totalGrossAmount' },
+              totalPlatformCommission: { $sum: '$totalPlatformCommission' },
+              totalVendorEarnings: { $sum: '$totalVendorEarnings' },
+            },
+          },
+        ],
+        data: [{ $sort: {totalVendorEarnings: -1} }, { $skip: (page - 1) * limit }, { $limit: limit }],
+      },
+    });
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    const metadata = result.metadata[0] || {
+      totalPackages: 0,
+      totalScedules: 0,
+      totalBookings: 0,
+      totalGrossAmount: 0,
+      totalPlatformCommission: 0,
+      totalVendorEarnings: 0,
+    };
+
+    return {
+      data: result.data || [],
+      page,
+      limit,
+      totalPages: Math.ceil(metadata.totalPackages / limit),
+      totalDocs: metadata.totalPackages,
+      totalBookings: metadata.totalBookings,
+      totalScedules: metadata.totalScedules,
+      totalPackages: metadata.totalPackages,
+      totalVendorEarnings: metadata.totalVendorEarnings,
+      totalPlatformCommission: metadata.totalPlatformCommission,
+      totalGrossAmount: metadata.totalGrossAmount,
+    };
   }
 }

@@ -1,5 +1,5 @@
 import { VendorInformationModel } from '../models/vendor.info.model';
-import { FilterQuery, PipelineStage } from 'mongoose';
+import mongoose, { FilterQuery, PipelineStage } from 'mongoose';
 import { IVendorInfoRepository } from 'interfaces/repository_interfaces/IVendorInfoRepository';
 import { BaseRepository } from './base.repository';
 import { injectable } from 'tsyringe';
@@ -10,6 +10,9 @@ import {
 } from '../types/entities/vendor.info.entity';
 import { CustomQueryOptions } from '../types/common/IQueryOptions';
 import { IUser } from '../types/entities/user.entity';
+import { PaginatedCommissionOverviewByVendors } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
+import { BOOKING_STATUS } from '../shared/constants/booking';
+import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
 
 @injectable()
 export class VendorInfoRepository
@@ -112,24 +115,153 @@ export class VendorInfoRepository
     const result = await VendorInformationModel.aggregate<IVendorInfoWithUser>(pipeline);
 
     return result;
-  }
+  };
 
-  //   async reApply(
-  //   vendorId: Types.ObjectId,
-  //   payload:
-  // ): Promise<IVendorInfo | null> {
-  //   return await this.model.findOneAndUpdate(
-  //     {
-  //       vendorId,
-  //       status: VENDOR_VERIFICATION_STATUS.REJECTED
-  //     },
-  //     {
-  //       ...payload,
-  //       status: VENDOR_VERIFICATION_STATUS.PENDING,
-  //       reasonForReject: null,
-  //       updatedAt: new Date(),
-  //     },
-  //     { new: true }
-  //   );
-  // }
+  async getCommissionOverviewByVendors(
+      page: number,
+      limit: number,
+      search?: string,
+    ): Promise<PaginatedCommissionOverviewByVendors> {
+      const skip = (page - 1) * limit;
+  
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          isProfileVerified:true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { vendorId: '$userId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$vendorId', '$$vendorId'] },
+                bookingStatus: BOOKING_STATUS.COMPLETED,
+              },
+            },
+          ],
+          as: 'completedBookings',
+        },
+      },
+      {
+        $lookup: {
+          from: 'packages',
+          let: { vendorId: '$userId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$vendorId', '$$vendorId'] },
+                status: PACKAGE_STATUS.PUBLISHED,
+                isActive: true,
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: 'vendorPackages',
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          let: { vendorId: '$userId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$vendorId', '$$vendorId'] },
+                status: SCHEDULE_STATUS.COMPLETED,
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: 'vendorSchedules',
+        },
+      },
+            {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'vendorDetails',
+        },
+      },
+      {
+        $unwind: { path: '$vendorDetails', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $addFields: {
+          vendorName: { $ifNull: ['$vendorDetails.name', 'Unknown Vendor'] },
+          totalBookings: { $size: '$completedBookings' },
+          totalGrossAmount: { $sum: '$completedBookings.finalAmount' },
+          totalPlatformCommission: { $sum: '$completedBookings.platformCommission' },
+          totalVendorEarnings: { $sum: '$completedBookings.vendorEarning' },
+          totalPackages: {
+            $ifNull: [{ $arrayElemAt: ['$vendorPackages.count', 0] }, 0],
+          },
+          totalCompletedSchedules: {
+            $ifNull: [{ $arrayElemAt: ['$vendorSchedules.count', 0] }, 0],
+          },
+        },
+      },
+    ];
+  
+      if (search) {
+        pipeline.push({
+          $match: {
+            vendorName: { $regex: search, $options: 'i' },
+          },
+        });
+      }
+
+      pipeline.push({
+        $sort: { totalGrossAmount: -1 },
+      });
+  
+      pipeline.push({
+        $project: {
+          _id: 0,
+          vendorName: 1,
+          totalPackages: 1,
+          totalCompletedSchedules: 1,
+          totalBookings: 1,
+          totalGrossAmount: 1,
+          totalPlatformCommission: 1,
+          totalVendorEarnings: 1,
+        },
+      });
+  
+      pipeline.push({
+        $facet: {
+          metadata: [{ $count: 'totalDocs' }],
+          data: [{ $skip: skip }, { $limit: limit }],
+          totals: [
+            {
+              $group: {
+                _id: null,
+                totalBookings: { $sum: '$totalBookings' },
+                totalSchedules: { $sum: '$totalCompletedSchedules' },
+              },
+            },
+          ],
+        },
+      });
+  
+    const [result] = await this.model.aggregate(pipeline);
+  
+    const totalDocs = result?.metadata?.[0]?.totalDocs || 0;
+    const totals = result?.totals?.[0] || { totalBookings: 0, totalSchedules: 0 };
+  
+      return {
+        data: result?.data || [],
+        page,
+        limit,
+        totalPages: Math.ceil(totalDocs / limit),
+        totalDocs,
+        totalBookings: totals.totalBookings || 0,
+        totalScedules: totals.totalSchedules || 0,
+      };
+    }
+
+
 }
