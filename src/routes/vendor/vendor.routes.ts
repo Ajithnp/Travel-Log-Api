@@ -26,6 +26,7 @@ import {
   getVendorOffersQuerySchema,
 } from '../../validators/vendor/offer.validation';
 import { CONTROLLER_TOKENS } from '../../shared/constants/di.tokens';
+import { IVendorRevenueController } from '../../interfaces/controller_interfaces/vendor/IVendorRevenueController';
 
 @injectable()
 export class VendorRoutes extends BaseRoute {
@@ -44,6 +45,8 @@ export class VendorRoutes extends BaseRoute {
     private _documentController: IDocumentController,
     @inject(CONTROLLER_TOKENS.VENDOR_OFFER_CONTROLLER)
     private _vendorOfferController: IVendorOfferController,
+    @inject('IVendorRevenueController')
+    private _vendorRevenueController: IVendorRevenueController,
   ) {
     super();
     this.initializeRoutes();
@@ -316,6 +319,14 @@ export class VendorRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._vendorOfferController.deactivateOffer.bind(this._vendorOfferController),
+    );
+
+    //== revenue
+    this._router.get(
+      '/revenue/packages-earnings',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorRevenueController.packagesEarningOverview.bind(this._vendorRevenueController),
     );
   }
 }

@@ -17,6 +17,8 @@ import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
 import { BOOKING_STATUS } from '../shared/constants/booking';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
 import { PaginatedCommissionOverviewByPackages } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
+import { PaginatedData } from 'types/common/IPaginationResponse';
+import { PackagesEarningsByVendor } from 'interfaces/service_interfaces/vendor/IVendorRevenueService';
 
 @injectable()
 export class BasePackageRepository
@@ -1095,6 +1097,88 @@ export class BasePackageRepository
       totalVendorEarnings: metadata.totalVendorEarnings,
       totalPlatformCommission: metadata.totalPlatformCommission,
       totalGrossAmount: metadata.totalGrossAmount,
+    };
+  };
+
+  async getPackagesEarningOverviewByVendor(
+    vendorId: string,
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<PaginatedData<PackagesEarningsByVendor>> {
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          vendorId: toObjectId(vendorId),
+          status: PACKAGE_STATUS.PUBLISHED,
+        },
+      },
+    ];
+
+    if (search?.trim()) {
+      pipeline.push({
+        $match: { title: { $regex: search.trim(), $options: 'i' } },
+      });
+    }
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          let: { pkgId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$packageId', '$$pkgId'] },
+                status: SCHEDULE_STATUS.COMPLETED,
+              },
+            },
+          ],
+          as: 'completedSchedules',
+        },
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { pkgId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$packageId', '$$pkgId'] },
+                bookingStatus: BOOKING_STATUS.COMPLETED,
+              },
+            },
+          ],
+          as: 'completedBookings',
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          status: 1,
+          location: 1,
+          totalScheduled: { $size: '$completedSchedules' },
+          totalBookings: { $size: '$completedBookings' },
+          totalRevenue: { $sum: '$completedBookings.finalAmount' },
+          totalCommission: { $sum: '$completedBookings.platformCommission' },
+          netEarnings: { $sum: '$completedBookings.vendorEarning' },
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [{ $sort: { totalRevenue: -1 } }, { $skip: (page - 1) * limit }, { $limit: limit }],
+        },
+      },
+    );
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    return {
+      data: result.data ?? [],
+      currentPage: page,
+      totalPages: Math.ceil((result.metadata[0]?.total ?? 0) / limit),
+      totalDocs: result.metadata[0]?.total ?? 0,
     };
   }
 }

@@ -66,6 +66,8 @@ import { IRewardService } from '../interfaces/service_interfaces/user/IRewardSer
 import { UserRewardService } from '../services/user/user-reward.service';
 import { IAdminFinanceService } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
 import { AdminFinanceService } from '../services/admin/admin.finance.service';
+import { IVendorRevenueService } from '../interfaces/service_interfaces/vendor/IVendorRevenueService';
+import { VendorRevenueService } from '../services/vendor/vendor-revenue.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -128,6 +130,10 @@ export class ServiceRegistry {
     //vendor-services
     container.register<IVendorService>('IVendorService', {
       useClass: VendorService,
+    });
+
+    container.register<IVendorRevenueService>('IVendorRevenueService', {
+      useClass: VendorRevenueService,
     });
 
     container.register<IVendorVerificationService>('IVendorVerificationService', {
