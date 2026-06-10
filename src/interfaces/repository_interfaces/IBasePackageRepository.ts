@@ -1,4 +1,4 @@
-import { FilterType, PublicPackageFilters } from 'types/db';
+import { FilterType, PublicPackageFilters} from 'types/db';
 import {
   DifficultyLevel,
   IBasePackageEntity,
@@ -8,8 +8,10 @@ import { IBaseRepository } from './IBaseRepository';
 import mongoose from 'mongoose';
 import { PublicPackageImageDTO } from '../../types/user/types';
 import { Types } from 'mongoose';
-import { PackageStatus } from 'shared/constants/constants';
-import { PaginatedCommissionOverviewByPackages } from 'interfaces/service_interfaces/admin/IAdminFinanceService';
+import { PackageStatus } from '../../shared/constants/constants';
+import { PaginatedCommissionOverviewByPackages } from '../../interfaces/service_interfaces/admin/IAdminFinanceService';
+import { PackagesEarningsByVendor } from '../../interfaces/service_interfaces/vendor/IVendorRevenueService';
+import { PaginatedData } from '../../types/common/IPaginationResponse';
 
 export interface IBasePackageRepository extends IBaseRepository<IBasePackageEntity> {
   findPackages(
@@ -46,7 +48,14 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
       page: number,
       limit: number,
       search?: string,
-    ): Promise<PaginatedCommissionOverviewByPackages>
+    ): Promise<PaginatedCommissionOverviewByPackages>;
+
+  getPackagesEarningOverviewByVendor(
+      vendorId: string,
+      page: number,
+      limit: number,
+      search?: string,
+    ): Promise<PaginatedData<PackagesEarningsByVendor>>  
 }
 
 export interface AdminPackageDetailsResult {

@@ -46,6 +46,8 @@ import { ICouponController } from '../interfaces/controller_interfaces/ICouponCo
 import { CouponController } from '../controllers/coupon.controller';
 import { IAdminFinanceController } from '../interfaces/controller_interfaces/admin/IAdminFinanceController';
 import { AdminFinanceController } from '../controllers/admin/admin.finance.controller';
+import { IVendorRevenueController } from '../interfaces/controller_interfaces/vendor/IVendorRevenueController';
+import { VendorRevenueController } from '../controllers/vendor/vendor-revenue.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -99,6 +101,10 @@ export class ControllerRegistry {
 
     container.register<ISchedulePackageController>('ISchedulePackageController', {
       useClass: ShedulePackageController,
+    });
+
+    container.register<IVendorRevenueController>('IVendorRevenueController', {
+      useClass: VendorRevenueController,
     });
 
     //admin controllers
