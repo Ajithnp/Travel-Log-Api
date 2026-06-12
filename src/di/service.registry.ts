@@ -68,6 +68,9 @@ import { IAdminFinanceService } from '../interfaces/service_interfaces/admin/IAd
 import { AdminFinanceService } from '../services/admin/admin.finance.service';
 import { IVendorRevenueService } from '../interfaces/service_interfaces/vendor/IVendorRevenueService';
 import { VendorRevenueService } from '../services/vendor/vendor-revenue.service';
+import { IStripeService } from '../interfaces/service_interfaces/IStripeService';
+import { StripeService } from '../services/stripe.service';
+
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -93,6 +96,10 @@ export class ServiceRegistry {
 
     container.register<ICacheService>('ICacheService', {
       useClass: RedisService,
+    });
+
+    container.register<IStripeService>('IStripeService', {
+      useClass: StripeService,
     });
 
     container.register<IFileStorageService>('IFileStorageService', {

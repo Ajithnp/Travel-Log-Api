@@ -6,12 +6,14 @@ export const SERVICE_TOKENS = {
   PASSWORD_SERVICE: 'IPasswordService',
   TOKEN_BLACKLIST: 'ITokenBlackListService',
   VENDOR_OFFER_SERVICE: 'IVendorOfferService',
+  
 } as const;
 
 export const CONTROLLER_TOKENS = {
   AUTH_CONTROLLER: 'IAuthController',
   VERIFICATION_CONTROLLER: 'IVerificationController',
   VENDOR_OFFER_CONTROLLER: 'IVendorOfferController',
+  STRIPE_CONTROLLER: 'IStripeController',
 } as const;
 
 export const COMMON_TOKENS = {

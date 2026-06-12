@@ -48,11 +48,17 @@ import { IAdminFinanceController } from '../interfaces/controller_interfaces/adm
 import { AdminFinanceController } from '../controllers/admin/admin.finance.controller';
 import { IVendorRevenueController } from '../interfaces/controller_interfaces/vendor/IVendorRevenueController';
 import { VendorRevenueController } from '../controllers/vendor/vendor-revenue.controller';
+import { IStripeController } from '../interfaces/controller_interfaces/IPaymentController';
+import { StripeController } from '../controllers/stripe-controller';
 
 export class ControllerRegistry {
   static registerControllers() {
     container.register<IAuthController>('IAuthController', {
       useClass: AuthController,
+    });
+
+    container.register<IStripeController>(CONTROLLER_TOKENS.STRIPE_CONTROLLER, {
+      useClass: StripeController,
     });
 
     container.register<IS3Controller>('IS3Controller', {

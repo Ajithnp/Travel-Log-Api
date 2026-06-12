@@ -58,6 +58,7 @@ import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRep
 import { isRetryWindowOpen } from '../../shared/utils/booking/retry-payment-validate';
 import { IScheduleStartDatePopulated } from '../../types/entities/booking.entity';
 import { IOfferRepository, Offer } from 'interfaces/repository_interfaces/IOfferRepository';
+import { IVendorInfoRepository } from 'interfaces/repository_interfaces/IVendorInfoRepository';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -84,6 +85,8 @@ export class BookingService implements IBookingService {
     private _userRepository: IUserRepository,
     @inject('IOfferRepository')
     private _offerRepository: IOfferRepository,
+    @inject('IVendorInfoRepository')
+    private _vendorInfoRepository: IVendorInfoRepository,
   ) {}
 
   async initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO> {
@@ -253,6 +256,7 @@ export class BookingService implements IBookingService {
             startDate: schedule.startDate?.toISOString().split('T')[0] ?? '',
             endDate: schedule.endDate?.toISOString().split('T')[0] ?? '',
             packageName: pkg.title ?? '',
+           
           },
         });
 

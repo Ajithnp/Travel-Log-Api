@@ -13,6 +13,7 @@ import { IUser } from '../types/entities/user.entity';
 import { PaginatedCommissionOverviewByVendors } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
 import { BOOKING_STATUS } from '../shared/constants/booking';
 import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
+import { toObjectId } from '../shared/utils/database/objectId.helper';
 
 @injectable()
 export class VendorInfoRepository
@@ -31,7 +32,25 @@ export class VendorInfoRepository
     return vendor;
   }
 
-  async findVendors(
+  async updateStripeAccountId(vendorId: string, accountId: string): Promise<void> {
+    await this.model.updateOne(
+      { userId: toObjectId(vendorId) },
+      { $set: { 'transactionConnect.accountId': accountId } }
+    ).exec();
+  }
+
+  async updateStripeAccountStatus(vendorId: string, onboardingComplete:boolean, chargesEnabled: boolean, payoutsEnabled: boolean): Promise<void> {
+  await this.model.updateOne(
+    { userId: toObjectId(vendorId) },
+    { 
+      'transactionConnect.onboardingComplete': onboardingComplete,
+      'transactionConnect.chargesEnabled': chargesEnabled,
+      'transactionConnect.payoutsEnabled': payoutsEnabled 
+    }
+  ).exec();
+}
+
+async findVendors(
     vendorSearchQuery: FilterQuery<IUser>,
     vendorFilter: FilterQuery<IUser>,
     options: CustomQueryOptions = { skip: 0, limit: 10, sort: { createdAt: -1 } },

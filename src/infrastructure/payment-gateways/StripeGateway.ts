@@ -6,6 +6,7 @@ import {
   PaymentIntentResult,
   StripeWebhookEvent,
   StripeCheckoutSession,
+  StripeAccountResponse,
 } from './IPaymentGateway';
 import { injectable } from 'tsyringe';
 import { AppError } from '../../errors/AppError';
@@ -63,6 +64,7 @@ export class StripeGateway implements IPaymentGateway {
           startDate: data.metadata?.startDate ?? '',
           endDate: data.metadata?.endDate ?? '',
           packageName: data.metadata?.packageName ?? '',
+          
         },
 
         success_url: `${config.cors.ALLOWED_ORIGINS}/user/booking/confirm?session_id={CHECKOUT_SESSION_ID}`,
@@ -127,4 +129,31 @@ export class StripeGateway implements IPaymentGateway {
       );
     }
   }
+
+  async createConnectAccount(vendorId: string): Promise<string> {
+    const account = await this.stripe.accounts.create({
+      type: 'express',
+      capabilities: { 
+        card_payments: {requested: true},
+        transfers: {requested: true},
+      },
+      metadata: { vendorId },
+    });
+    return account.id;
+  }
+
+  async createAccountLink(accountId: string): Promise<string> {
+    const link = await this.stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: `${config.cors.ALLOWED_ORIGINS}/vendor/stripe/refresh`,
+      return_url: `${config.cors.ALLOWED_ORIGINS}/vendor/stripe/return`,
+      type: 'account_onboarding',
+    });
+    return link.url;
+  }
+
+  async retrieveAccount(accountId: string): Promise<StripeAccountResponse> {
+    return await this.stripe.accounts.retrieve(accountId);
+  }
 }
+

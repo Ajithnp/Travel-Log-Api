@@ -40,6 +40,16 @@ const bankDetailsSchema = new Schema(
   { _id: false },
 );
 
+const stripeConnectSchema = new Schema(
+  {
+    accountId: { type: String, default: null },        
+    onboardingComplete: { type: Boolean, default: false },
+    chargesEnabled: { type: Boolean, default: false }, 
+    payoutsEnabled: { type: Boolean, default: false }, 
+  },
+  { _id: false },
+);
+
 const vendorInfoSchema = new Schema<IVendorInfo>(
   {
     userId: {
@@ -52,7 +62,7 @@ const vendorInfoSchema = new Schema<IVendorInfo>(
     businessInfo: { type: businessInfoSchema, default: () => ({}) },
     documents: { type: documentsSchema, default: () => ({}) },
     bankDetails: { type: bankDetailsSchema, default: () => ({}) },
-
+    transactionConnect: { type: stripeConnectSchema, default: () => ({}) },
     status: {
       type: String,
       enum: ['Pending', 'UnderReview', 'Approved', 'Rejected', 'Suspended'],

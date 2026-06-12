@@ -6,6 +6,7 @@ import { BookingRoutes } from '../routes/user/booking.route';
 import { PaymentWebhookRoutes } from '../routes/shared/payment-webhook.route';
 import { NotificationRoutes } from '../routes/shared/notification.routes';
 import { ReviewRoutes } from '../routes/shared/review.routes';
+import { StripeRoutes } from '../routes/shared/stripe.route';
 
 export class RoutesRegistry {
   static registerRoutes() {
@@ -30,6 +31,9 @@ export class RoutesRegistry {
     });
     container.register(ReviewRoutes, {
       useClass: ReviewRoutes,
+    });
+    container.register(StripeRoutes, {
+      useClass: StripeRoutes,
     });
   }
 }

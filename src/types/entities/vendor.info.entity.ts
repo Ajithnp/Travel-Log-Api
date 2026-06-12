@@ -30,12 +30,20 @@ export interface IBankDetails {
   branch: string;
 }
 
+export interface ITransactionConnect {
+  accountId: string;          // acc_xxxxxxxx  (from Stripe)
+  onboardingComplete: boolean;  // if onboarding is complete or not
+  chargesEnabled: boolean;    // can receive payments
+  payoutsEnabled: boolean;    // can receive payouts
+}
+
 export interface IVendorInfo extends Document {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
   businessInfo: IBusinessInfo;
   documents: IDocuments;
   bankDetails: IBankDetails;
+  transactionConnect: ITransactionConnect;
   status: VendorStatus;
   reasonForReject?: string;
   isProfileVerified: boolean;
