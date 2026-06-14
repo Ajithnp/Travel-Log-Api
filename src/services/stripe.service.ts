@@ -42,20 +42,19 @@ export class StripeService implements IStripeService {
 
         await this._vendorInfoRepository.updateStripeAccountId(vendorId,stripeAccountId);
   }
-
-    // Generate hosted onboarding URL
     const onboardingUrl = await this._paymentGateway.createAccountLink(stripeAccountId);
-
      return { onboardingUrl: onboardingUrl };
   }
 
   async getStripeOnboardingStatus(vendorId: string): Promise<IStripeOnboardingStatusDTO> {
        const existingDoc = await this._vendorInfoRepository.findOne({
-      userId: toObjectId(vendorId),
+         userId: toObjectId(vendorId),
     });
+
 
   if (!existingDoc?.transactionConnect?.accountId) {
     return {
+      hasStripeAccount: false,
       onboardingComplete: false,
       chargesEnabled: false,
       payoutsEnabled: false,
@@ -65,11 +64,15 @@ export class StripeService implements IStripeService {
   const account = await this._paymentGateway.retrieveAccount(existingDoc.transactionConnect?.accountId!);
 
   const onboardingComplete = account.details_submitted ?? false;
-  const chargesEnabled     = account.charges_enabled   ?? false;
-  const payoutsEnabled     = account.payouts_enabled   ?? false;
+  const chargesEnabled = account.charges_enabled   ?? false;
+  const payoutsEnabled = account.payouts_enabled   ?? false;
 
   await this._vendorInfoRepository.updateStripeAccountStatus(vendorId,onboardingComplete,chargesEnabled,payoutsEnabled);
 
-   return { onboardingComplete, chargesEnabled, payoutsEnabled };
+   return {
+    hasStripeAccount: true, 
+    onboardingComplete, 
+    chargesEnabled, 
+    payoutsEnabled };
   }
 }

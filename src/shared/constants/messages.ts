@@ -54,6 +54,9 @@ export const SUCCESS_MESSAGES = {
   // coupon
   COUPON_CREATED: 'Coupon created successfully',
   COUPON_DEACTIVATED: 'Coupon deactivated successfully',
+
+  // payout
+  PAYOUT_RELEASED_SUCCESSFULLY: 'Payout released successfully',
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -214,6 +217,14 @@ export const ERROR_MESSAGES = {
   COUPON_NOT_FOUND: 'Coupon not found',
   COUPON_ALREADY_DEACTIVATED: 'Coupon is already deactivated',
   COUPON_EXIST_WITH_SAME_CRITERIA: 'A coupon with the same criteria already exists',
+
+  // stripe and payout
+  VENDOR_NOT_CHARGES_ENABLED: 'Vendor account is not charges enabled',
+  VENDOR_NOT_PAYOUTS_ENABLED: 'Vendor account is not payouts enabled',
+  VENDOR_NOT_TRANSFERS_ENABLED: 'Vendor account is not transfers enabled',
+  VENDOR_PAYOUT_NOT_ENABLED: 'Vendor payout is not enabled',
+  PAYOUT_FAILED: 'Payout transfer failed',
+  NO_PAYABLE_BOOKINGS_FOUND: 'No payable bookings found for this schedule',
 } as const;
 
 export const NOTIFICATION_MESSAGES = {

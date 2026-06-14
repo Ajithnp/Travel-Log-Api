@@ -27,6 +27,7 @@ import {
 import { couponTemplateRequestSchema } from '../../validators/coupon.validation';
 import { ICouponController } from '../../interfaces/controller_interfaces/ICouponController';
 import { IAdminFinanceController } from '../../interfaces/controller_interfaces/admin/IAdminFinanceController';
+import { IPayoutController } from '../../interfaces/controller_interfaces/IPayoutContoller';
 
 @injectable()
 export class AdminRoutes extends BaseRoute {
@@ -45,6 +46,8 @@ export class AdminRoutes extends BaseRoute {
     private _couponController: ICouponController,
     @inject('IAdminFinanceController')
     private _adminFinanceController: IAdminFinanceController,
+    @inject('IPayoutController')
+    private _payoutController: IPayoutController,
   ) {
     super();
     this.initializeRoutes();
@@ -300,6 +303,28 @@ export class AdminRoutes extends BaseRoute {
       authorize([USER_ROLES.ADMIN]),
       this._adminFinanceController.getCommissionsByVendorsPackages.bind(this._adminFinanceController),
     );
+    //====payout
+    this._router.post(
+    '/payouts/:scheduleId/release',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._payoutController.releasePayout.bind(this._adminFinanceController),
+   );
+
+   this._router.get(
+    '/payouts/overview',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._payoutController.payoutOverview.bind(this._payoutController),
+   );
+
+   this._router.get(
+    '/payouts/schedules',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._payoutController.getPayoutSchedules.bind(this._payoutController),
+   );
+
     
   }
 }

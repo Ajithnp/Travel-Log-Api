@@ -70,6 +70,8 @@ import { IVendorRevenueService } from '../interfaces/service_interfaces/vendor/I
 import { VendorRevenueService } from '../services/vendor/vendor-revenue.service';
 import { IStripeService } from '../interfaces/service_interfaces/IStripeService';
 import { StripeService } from '../services/stripe.service';
+import { IPayoutService } from '../interfaces/service_interfaces/IPayoutService';
+import { PayoutService } from '../services/payout.service';
 
 
 export class ServiceRegistry {
@@ -132,6 +134,10 @@ export class ServiceRegistry {
 
     container.register<ICouponService>('ICouponService', {
       useClass: CouponService,
+    });
+
+    container.register<IPayoutService>('IPayoutService', {
+      useClass: PayoutService,
     });
 
     //vendor-services

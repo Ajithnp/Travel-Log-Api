@@ -1,14 +1,17 @@
-import { Document, ObjectId } from 'mongoose';
+import mongoose, { Document, ObjectId, Types } from 'mongoose';
+import { PAYOUT_STATUS } from '../../shared/constants/constants';
+
+export type PayoutStatus = (typeof PAYOUT_STATUS)[keyof typeof PAYOUT_STATUS];
 
 export interface IPayout extends Document {
-  _id: ObjectId;
-  vendorId: ObjectId;
-  scheduleId: ObjectId;
-  bookingIds: ObjectId[];
+  _id: mongoose.Types.ObjectId;
+  vendorId: Types.ObjectId;
+  scheduleId: Types.ObjectId;
+  bookingIds: Types.ObjectId[];
   grossAmount: number;
   commissionAmount: number;
   netAmount: number;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: PayoutStatus;
   stripeTransferId: string | null;
   failureReason: string | null;
   triggeredBy: 'system' | 'admin';

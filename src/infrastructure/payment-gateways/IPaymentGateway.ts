@@ -32,4 +32,12 @@ export interface IPaymentGateway {
   createConnectAccount(vendorId: string): Promise<string>;
   createAccountLink(accountId: string): Promise<string>;
   retrieveAccount(accountId: string): Promise<StripeAccountResponse>;
+  transferToVendor(transferParams: TransferToVendorParams): Promise<string>;
+}
+
+export interface TransferToVendorParams {
+  amount: number;
+  vendorStripeAccountId: string;
+  payoutId: string;
+  vendorId: string;
 }

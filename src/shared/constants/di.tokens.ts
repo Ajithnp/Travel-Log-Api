@@ -14,6 +14,7 @@ export const CONTROLLER_TOKENS = {
   VERIFICATION_CONTROLLER: 'IVerificationController',
   VENDOR_OFFER_CONTROLLER: 'IVendorOfferController',
   STRIPE_CONTROLLER: 'IStripeController',
+  PAYOUT_CONTROLLER: 'IPayoutController',
 } as const;
 
 export const COMMON_TOKENS = {

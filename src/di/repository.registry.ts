@@ -34,6 +34,8 @@ import { ICouponRepository } from '../interfaces/repository_interfaces/ICouponRe
 import { CouponRepository } from '../repositories/coupon.repository';
 import { IUserRewardRepository } from '../interfaces/repository_interfaces/IUserRewardRepository';
 import { UserRewardRepository } from '../repositories/user-reward.repository';
+import { IPayoutRepository } from '../interfaces/repository_interfaces/IPayoutRepository';
+import { PayoutRepository } from '../repositories/payout.repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -111,6 +113,10 @@ export class RepositoryRegistry {
 
     container.register<IUserRewardRepository>('IUserRewardRepository', {
       useClass: UserRewardRepository,
+    });
+
+    container.register<IPayoutRepository>('IPayoutRepository', {
+      useClass: PayoutRepository,
     });
 
     // Register other repositories here

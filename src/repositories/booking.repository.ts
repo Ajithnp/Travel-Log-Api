@@ -15,16 +15,16 @@ import { BaseRepository } from './base.repository';
 import {
   BookingFilters,
   IBookingRepository,
+  SchedulePayoutTotals,
 } from '../interfaces/repository_interfaces/IBookingRepository';
 import {
   CommissionOverview,
-  PaginatedCommissionOverviewByVendors,
 } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
 import BookingModel from '../models/booking.model';
-import mongoose, { ClientSession } from 'mongoose';
+import mongoose, { ClientSession, Types } from 'mongoose';
 import { BOOKING_STATUS, CANCELATION_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
 import { FilterQuery } from 'mongoose';
-import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
+import { toObjectId } from '../shared/utils/database/objectId.helper';
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
@@ -694,5 +694,40 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       totalVendorEarnings: 0,
     };
   };
+
+  async findPayableBookingsBySchedule(scheduleId: string): Promise<SchedulePayoutTotals | null> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          scheduleId: toObjectId(scheduleId),
+          bookingStatus: BOOKING_STATUS.CONFIRMED,
+        }
+      },
+      {
+        $group: {
+          _id: '$vendorId',
+          grossAmount: { $sum: '$finalAmount' },
+          commissionAmount: { $sum: '$platformCommission' },
+          netAmount: { $sum: '$vendorEarning' },
+          bookingIds: { $push: '$_id' },
+          bookingCount: { $sum: 1 }
+        }
+      }
+    ]);
+
+    if (!result || result.length === 0) {
+      return null;
+    }
+
+    const totals = result[0];
+    return {
+      vendorId: totals._id.toString(),
+      grossAmount: totals.grossAmount,
+      commissionAmount: totals.commissionAmount,
+      netAmount: totals.netAmount,
+      bookingIds: totals.bookingIds.map((id: Types.ObjectId) => id as Types.ObjectId),
+      bookingCount: totals.bookingCount
+    };
+  }
 
 }

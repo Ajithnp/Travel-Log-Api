@@ -11,7 +11,7 @@ import {
   ITicketPopulatedBooking,
 } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
-import mongoose, { ClientSession } from 'mongoose';
+import mongoose, { ClientSession, Types } from 'mongoose';
 import { CommissionOverview, PaginatedCommissionOverviewByVendors } from '../service_interfaces/admin/IAdminFinanceService';
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
@@ -101,7 +101,20 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   getTotalRevanueByVendorId(vendorId: string): Promise<{ totalRevenue: number } | null>;
 
   getCommissionOverview(): Promise<CommissionOverview>;
+
+  findPayableBookingsBySchedule(scheduleId: string): Promise<SchedulePayoutTotals | null> 
+
 }
+
+export interface SchedulePayoutTotals {
+  vendorId: string;
+  grossAmount: number;
+  commissionAmount: number;
+  netAmount: number;
+  bookingIds: Types.ObjectId[];
+  bookingCount: number;
+}
+
 
 export interface BookingFilters {
   userId: string;

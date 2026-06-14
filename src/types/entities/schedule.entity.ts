@@ -29,7 +29,6 @@ export interface ISchedule extends Document {
   cancelledBookings?: number;
   totalRefunded?: number;
   payoutStatus: 'pending' | 'paid';
-
   notes?: string;
   createdAt: Date;
   updatedAt: Date;

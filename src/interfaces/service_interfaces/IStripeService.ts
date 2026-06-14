@@ -4,6 +4,7 @@ export interface IStripeService {
 }
 
 export interface IStripeOnboardingStatusDTO {
+  hasStripeAccount: boolean;
   onboardingComplete: boolean;
   chargesEnabled: boolean;
   payoutsEnabled: boolean;

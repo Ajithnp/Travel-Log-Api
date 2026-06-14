@@ -4,7 +4,7 @@ import { ISchedule, ISchedulePopulated } from '../types/entities/schedule.entity
 import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
 import SchedulePackageModel from '../models/schedule.model';
 import mongoose, { Types } from 'mongoose';
-import { SCHEDULE_STATUS, ScheduleStatus } from '../shared/constants/constants';
+import { PAYOUT_STATUS, SCHEDULE_STATUS, ScheduleStatus } from '../shared/constants/constants';
 import { FilterType } from '../types/db';
 import { FilterQuery, UpdateResult } from 'mongoose';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
@@ -13,6 +13,7 @@ import {
   PackageScheduleResult,
   SchedulesResponseResult,
 } from '../interfaces/repository_interfaces/ISchedulePackage';
+import { PayoutScheduleListResponseDto } from 'interfaces/service_interfaces/IPayoutService';
 
 @injectable()
 export class SchedulePackageRepository
@@ -330,5 +331,147 @@ export class SchedulePackageRepository
     const schedules = result.data ?? [];
 
     return { schedules, total };
+  }
+
+  async getSchedulesForPayout(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{ schedules: PayoutScheduleListResponseDto[]; total: number }> {
+    
+    const matchStage: mongoose.FilterQuery<ISchedule> = {
+      status: SCHEDULE_STATUS.COMPLETED,
+      payoutStatus: PAYOUT_STATUS.PENDING,
+    };
+
+    const pipeline: mongoose.PipelineStage[] = [
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'packageId',
+          foreignField: '_id',
+          as: 'packageData',
+          pipeline: [{ $project: { title: 1 } }],
+        },
+      },
+      { $addFields: { package: { $arrayElemAt: ['$packageData', 0] } } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendorData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { vendor: { $arrayElemAt: ['$vendorData', 0] } } },
+    ];
+
+    if (search?.trim()) {
+      const regex = { $regex: search.trim(), $options: 'i' };
+      pipeline.push({
+        $match: {
+          $or: [{ 'package.title': regex }, { 'vendor.name': regex }],
+        },
+      });
+    }
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'scheduleId',
+          pipeline: [
+            {
+              $match: {
+                bookingStatus: { $ne: BOOKING_STATUS.CANCELLED_BY_USER },
+              },
+            },
+            {
+              $project: {
+                finalAmount: 1,
+                platformCommission: 1,
+                vendorEarning: 1,
+              },
+            },
+          ],
+          as: 'bookings',
+        },
+      },
+      {
+        $lookup: {
+          from: 'vendorinfos',
+          localField: 'vendorId',
+          foreignField: 'userId',
+          as: 'vendorInfoData',
+          pipeline: [{ $project: { transactionConnect: 1 } }],
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $sort: { endDate: 1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                _id: 0,
+                id: '$_id',
+                vendorId: 1,
+                vendorname: '$vendor.name',
+                scheduleId: '$_id',
+                scheduleStartDate: '$startDate',
+                scheduleEndDate: '$endDate',
+                packageTittle: '$package.title',
+                grossAmount: { $sum: '$bookings.finalAmount' },
+                commissionAmount: { $sum: '$bookings.platformCommission' },
+                netAmount: { $sum: '$bookings.vendorEarning' },
+                status: 1,
+                scheduledAt: '$createdAt',
+                payoutsEnabled: {
+                  $let: {
+                    vars: { info: { $arrayElemAt: ['$vendorInfoData', 0] } },
+                    in: { $ifNull: ['$$info.transactionConnect.payoutsEnabled', false] },
+                  },
+                },
+                transactionConnectId: {
+                  $let: {
+                    vars: { info: { $arrayElemAt: ['$vendorInfoData', 0] } },
+                    in: { $ifNull: ['$$info.transactionConnect.accountId', ''] },
+                  },
+                },
+                readyToPayout: {
+                  $lte: [
+                    { $add: ['$endDate', 2 * 24 * 60 * 60 * 1000] },
+                    new Date()
+                  ]
+                },
+              },
+            },
+          ],
+        },
+      },
+    );
+
+    const [result] = await this.model.aggregate<{
+      metadata: [{ total: number }?];
+      data: PayoutScheduleListResponseDto[];
+    }>(pipeline);
+
+    const total = result?.metadata?.[0]?.total ?? 0;
+    const schedules = result?.data ?? [];
+
+    return { schedules, total };
+  }
+
+  async markSchedulePayoutAsCompleted(scheduleId: string, payoutId: Types.ObjectId): Promise<ISchedule | null> {
+    return await this.findOneAndUpdate(
+      { _id: toObjectId(scheduleId) },
+      { payoutStatus: 'paid', payoutId },
+      { new: true }
+    );
   }
 }

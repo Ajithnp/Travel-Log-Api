@@ -19,14 +19,14 @@ export class StripeRoutes extends BaseRoute {
 
   protected initializeRoutes(): void {
     this._router.post(
-      '/stripe/onboard',
+      '/onboard',
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._stripeController.initiateStripeOnboarding.bind(this._stripeController),
     );
 
     this._router.get(
-      '/stripe/onboard/status',
+      '/onboard/status',
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._stripeController.getStripeOnboardingStatus.bind(this._stripeController),

@@ -50,6 +50,8 @@ import { IVendorRevenueController } from '../interfaces/controller_interfaces/ve
 import { VendorRevenueController } from '../controllers/vendor/vendor-revenue.controller';
 import { IStripeController } from '../interfaces/controller_interfaces/IPaymentController';
 import { StripeController } from '../controllers/stripe-controller';
+import {IPayoutController} from "../interfaces/controller_interfaces/IPayoutContoller";
+import {PayoutController} from "../controllers/payout.controller";
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -91,6 +93,10 @@ export class ControllerRegistry {
 
     container.register<IVendorOfferController>(CONTROLLER_TOKENS.VENDOR_OFFER_CONTROLLER, {
       useClass: VendorOfferController,
+    });
+
+    container.register<IPayoutController>(CONTROLLER_TOKENS.PAYOUT_CONTROLLER, {
+      useClass: PayoutController,
     });
 
     //vendor controllers
