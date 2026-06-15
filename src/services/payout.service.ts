@@ -1,5 +1,5 @@
-import { injectable, inject } from "tsyringe";
-import { IPayoutService, PayoutOverviewResponseDto, PayoutScheduleListResponseDto, ReleasePayoutResponseDTO } from "../interfaces/service_interfaces/IPayoutService";
+import { inject, injectable } from "tsyringe";
+import { IPayoutService, PayoutOverviewResponseDto, PayoutScheduleListResponseDto, PayoutStatsResponseDto, ReleasePayoutResponseDTO, FindAllPayoutsResponseDto } from "../interfaces/service_interfaces/IPayoutService";
 import { IPayoutRepository, PayoutFilter } from "../interfaces/repository_interfaces/IPayoutRepository";
 import { IPaymentGateway } from "../infrastructure/payment-gateways/IPaymentGateway";
 import { IBookingRepository } from "../interfaces/repository_interfaces/IBookingRepository";
@@ -12,6 +12,7 @@ import { USER_ROLES } from "../shared/constants/roles";
 import { PAYOUT_STATUS } from "../shared/constants/constants";
 import { PaginatedData } from "../types/common/IPaginationResponse";
 import { ISchedulePackageRepository } from "../interfaces/repository_interfaces/ISchedulePackage";
+
 
 
 @injectable()
@@ -118,6 +119,26 @@ export class PayoutService implements IPayoutService {
       throw new AppError(ERROR_MESSAGES.PAYOUT_FAILED, HTTP_STATUS.BAD_GATEWAY);
     }
   };
+
+  async payoutStats(): Promise<PayoutStatsResponseDto> {
+
+    const data = await this._payoutRepository.payoutStats();
+
+    return data;
+  };
+
+  async findAllPayouts(page: number, limit: number, search?: string, filter?:PayoutFilter): Promise<PaginatedData<FindAllPayoutsResponseDto>> {
+
+    const data = await this._payoutRepository.findAllPayouts(page, limit, search,filter);
+
+    return {
+      data: data.payouts,
+      currentPage: page,
+      totalPages: Math.ceil(data.total / limit),
+      totalDocs: data.total,
+    }
+  };
+
 
 
 }

@@ -1,4 +1,4 @@
-import mongoose, { Document, ObjectId, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { PAYOUT_STATUS } from '../../shared/constants/constants';
 
 export type PayoutStatus = (typeof PAYOUT_STATUS)[keyof typeof PAYOUT_STATUS];

@@ -325,6 +325,20 @@ export class AdminRoutes extends BaseRoute {
     this._payoutController.getPayoutSchedules.bind(this._payoutController),
    );
 
+   this._router.get(
+    '/payouts/stats',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._payoutController.payoutStats.bind(this._payoutController),
+   );
+
+   this._router.get(
+    '/payouts',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._payoutController.findAllPayouts.bind(this._payoutController),
+   );
+
     
   }
 }
