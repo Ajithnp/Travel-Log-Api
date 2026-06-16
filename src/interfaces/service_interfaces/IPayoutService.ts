@@ -1,13 +1,16 @@
 import { PaginatedData } from "../../types/common/IPaginationResponse";
 import { PayoutFilter } from "../../interfaces/repository_interfaces/IPayoutRepository";
-import { PayoutStatus } from "types/entities/payout.entity";
+import { PayoutStatus } from "../../types/entities/payout.entity";
+import { BookingStatsResult, PayoutScheduleOverviewStats, ScheduleBookingsResult } from "../../interfaces/repository_interfaces/IBookingRepository";
 
 export interface IPayoutService {
     getPayoutSchedules(page: number,limit: number,search?: string): Promise<PaginatedData<PayoutScheduleListResponseDto>>;
     payoutOverview():Promise<PayoutOverviewResponseDto>;
+    schedulePayoutDetails(scheduleId:string): Promise<SchedulePayoutDetailsResponseDTO>;
     payoutStats(): Promise<PayoutStatsResponseDto>; 
     findAllPayouts(page: number,limit: number,search?: string,filter?:PayoutFilter):Promise<PaginatedData<FindAllPayoutsResponseDto>>   
     releasePayout(scheduleId: string): Promise<ReleasePayoutResponseDTO>
+    retryPayout(payoutId: string): Promise<ReleasePayoutResponseDTO>;
 }
 
 export interface ReleasePayoutResponseDTO {
@@ -28,11 +31,13 @@ export interface PayoutScheduleListResponseDto {
     grossAmount:number;
     commissionAmount:number;
     netAmount:number;
+    totalRefundedAmount:number;
     status:string;
     scheduledAt:string;
     payoutsEnabled:boolean;
     transactionConnectId:string;
     readyToPayout:boolean;
+    alreadyFailed:boolean;
 }
 
 export interface PayoutStatsResponseDto {
@@ -52,6 +57,7 @@ export interface PayoutOverviewResponseDto {
 
 export interface FindAllPayoutsResponseDto {
     id:string;
+    scheduleId:string;
     vendorname:string;    
     scheduleStartDate:string;
     scheduleEndDate:string;
@@ -63,3 +69,9 @@ export interface FindAllPayoutsResponseDto {
     scheduledAt:Date;
 };
 
+
+export interface SchedulePayoutDetailsResponseDTO {
+    bookingsData: ScheduleBookingsResult[];
+    bookingStats: BookingStatsResult;
+    bookingOverViewStats:PayoutScheduleOverviewStats;
+}

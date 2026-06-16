@@ -14,7 +14,10 @@ import {
 import { BaseRepository } from './base.repository';
 import {
   BookingFilters,
+  BookingStatsResult,
   IBookingRepository,
+  PayoutScheduleOverviewStats,
+  ScheduleBookingsResult,
   SchedulePayoutTotals,
 } from '../interfaces/repository_interfaces/IBookingRepository';
 import {
@@ -700,15 +703,26 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       {
         $match: {
           scheduleId: toObjectId(scheduleId),
-          bookingStatus: BOOKING_STATUS.CONFIRMED,
+          paymentStatus: { $in: [PAYMENT_STATUS.PAID, PAYMENT_STATUS.REFUNDED] },
+          bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED] },
+
         }
       },
       {
         $group: {
           _id: '$vendorId',
-          grossAmount: { $sum: '$finalAmount' },
-          commissionAmount: { $sum: '$platformCommission' },
-          netAmount: { $sum: '$vendorEarning' },
+          grossAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$finalAmount', 0] } },
+          commissionAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$platformCommission', 0] } },
+          vendorEarnings: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$vendorEarning', 0] } },
+          totalAmountFromCancelation: {
+            $sum: {
+              $cond: [
+                { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                { $subtract: ['$finalAmount', { $ifNull: ['$cancelationRefundAmount', 0] }] },
+                0,
+              ],
+            },
+          },
           bookingIds: { $push: '$_id' },
           bookingCount: { $sum: 1 }
         }
@@ -724,10 +738,164 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       vendorId: totals._id.toString(),
       grossAmount: totals.grossAmount,
       commissionAmount: totals.commissionAmount,
-      netAmount: totals.netAmount,
+      vendorEarnings: totals.vendorEarnings,
+      totalAmountFromCancelation: totals.totalAmountFromCancelation,
       bookingIds: totals.bookingIds.map((id: Types.ObjectId) => id as Types.ObjectId),
       bookingCount: totals.bookingCount
     };
   }
+
+  async findAllBookingsByScheduleId(scheduleId: string): Promise<ScheduleBookingsResult[] | null> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          scheduleId: toObjectId(scheduleId),
+          bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED, BOOKING_STATUS.CANCELLED_BY_USER] },
+          paymentStatus: { $in: [PAYMENT_STATUS.PAID, PAYMENT_STATUS.REFUNDED] },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { user: { $arrayElemAt: ['$user', 0] } } },
+      {
+        $project: {
+          _id: 0,
+          userName: '$user.name',
+          selectedGroupType: '$groupType',
+          finalAmount: 1,
+          platformCommission: 1,
+          vendorEarning: 1,
+        },
+      },
+    ]);
+
+    return result.length > 0 ? (result as ScheduleBookingsResult[]) : null;
+  };
+
+  async findBookingStatsByScheduleId(scheduleId: string): Promise<BookingStatsResult | null> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          scheduleId: toObjectId(scheduleId),
+          bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED] },
+          paymentStatus: { $in: [PAYMENT_STATUS.PAID, PAYMENT_STATUS.REFUNDED] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          scheduleId: { $first: '$scheduleId' },
+          packageId: { $first: '$packageId' },
+          vendorId: { $first: '$vendorId' },
+          totalBookingsCount: { $sum: 1 },
+          totalCancellationsCount: { $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 1, 0] } },
+          totalBookingGross: { $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 0, '$finalAmount'] } },
+          totalPlatformCommission: { $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 0, '$platformCommission'] } },
+          totalVendorEarnings: { $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 0, '$vendorEarning'] } },
+          totalRefundedAmount: {
+            $sum: {
+              $cond: [
+                { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                { $subtract: ['$finalAmount', { $ifNull: ['$cancelationRefundAmount', 0] }] },
+                0,
+              ],
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: 'scheduleId',
+          foreignField: '_id',
+          as: 'schedule',
+        },
+      },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'packageId',
+          foreignField: '_id',
+          as: 'package',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendor',
+        },
+      },
+      { $unwind: { path: '$schedule', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$package', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$vendor', preserveNullAndEmptyArrays: true } },
+    ]);
+
+    if (!result || result.length === 0) {
+      return null;
+    }
+
+    const totals = result[0];
+    return {
+      packageTitle: totals.package?.title ?? 'Unknown Package',
+      vendorName: totals.vendor?.name ?? 'Unknown Vendor',
+      scheduleStartDate: totals.schedule?.startDate,
+      scheduleEndDate: totals.schedule?.endDate,
+      schedulePayoutStatus: totals.schedule.payoutStatus,
+      totalBookingsCount: totals.totalBookingsCount,
+      totalCancellationsCount: totals.totalCancellationsCount,
+      totalBookingGross: totals.totalBookingGross,
+      totalPlatformCommission: totals.totalPlatformCommission,
+      totalVendorEarnings: totals.totalVendorEarnings,
+      totalRefundedAmount: totals.totalRefundedAmount,
+    };
+  }
+
+  async payoutOverviewByScheduleId(scheduleId: string): Promise<PayoutScheduleOverviewStats> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          scheduleId: toObjectId(scheduleId),
+          bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED, BOOKING_STATUS.CANCELLED_BY_USER] },
+          paymentStatus: { $in: [PAYMENT_STATUS.PAID, PAYMENT_STATUS.REFUNDED] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalGrossAmount: { $sum: '$finalAmount' },
+          totalPlatformCommission: { $sum: '$platformCommission' },
+          totalVendorEarnings: { $sum: '$vendorEarning' },
+          totalBookingsCount: { $sum: 1 },
+        },
+      },
+    ]);
+
+
+
+    if (result.length > 0) {
+      return {
+        totalBookingsCount: result[0].totalBookingsCount || 0,
+        totalGrossAmount: result[0].totalGrossAmount || 0,
+        totalPlatformCommission: result[0].totalPlatformCommission || 0,
+        totalVendorEarnings: result[0].totalVendorEarnings || 0,
+      };
+    }
+
+    return {
+      totalBookingsCount: 0,
+      totalGrossAmount: 0,
+      totalPlatformCommission: 0,
+      totalVendorEarnings: 0,
+    };
+  };
 
 }

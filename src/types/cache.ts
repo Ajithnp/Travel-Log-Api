@@ -3,6 +3,8 @@ export const CACHE_KEYS = {
   wishlistCount: (userId: string) => `wishlist:count:${userId}`,
   wishlistFull: (userId: string, page: number) => `wishlist:full:${userId}:page:${page}`,
   commissionOverview: 'commission:overview',
+  schedulePayoutDetails: (scheduleId: string) => `schedule-payout-details:${scheduleId}`,
+  
 };
 
 export const CACHE_TTL = {

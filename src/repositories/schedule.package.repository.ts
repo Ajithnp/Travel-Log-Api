@@ -8,7 +8,7 @@ import { PAYOUT_STATUS, SCHEDULE_STATUS, ScheduleStatus } from '../shared/consta
 import { FilterType } from '../types/db';
 import { FilterQuery, UpdateResult } from 'mongoose';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
-import { BOOKING_STATUS } from '../shared/constants/booking';
+import { BOOKING_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
 import {
   PackageScheduleResult,
   SchedulesResponseResult,
@@ -18,8 +18,7 @@ import { PayoutScheduleListResponseDto } from 'interfaces/service_interfaces/IPa
 @injectable()
 export class SchedulePackageRepository
   extends BaseRepository<ISchedule>
-  implements ISchedulePackageRepository
-{
+  implements ISchedulePackageRepository {
   constructor() {
     super(SchedulePackageModel);
   }
@@ -169,14 +168,14 @@ export class SchedulePackageRepository
           ...(filter
             ? { status: filter }
             : {
-                status: {
-                  $in: [
-                    SCHEDULE_STATUS.UPCOMING,
-                    SCHEDULE_STATUS.SOLD_OUT,
-                    SCHEDULE_STATUS.COMPLETED,
-                  ],
-                },
-              }),
+              status: {
+                $in: [
+                  SCHEDULE_STATUS.UPCOMING,
+                  SCHEDULE_STATUS.SOLD_OUT,
+                  SCHEDULE_STATUS.COMPLETED,
+                ],
+              },
+            }),
         },
       },
       {
@@ -338,7 +337,7 @@ export class SchedulePackageRepository
     limit: number,
     search?: string,
   ): Promise<{ schedules: PayoutScheduleListResponseDto[]; total: number }> {
-    
+
     const matchStage: mongoose.FilterQuery<ISchedule> = {
       status: SCHEDULE_STATUS.COMPLETED,
       payoutStatus: PAYOUT_STATUS.PENDING,
@@ -386,14 +385,25 @@ export class SchedulePackageRepository
           pipeline: [
             {
               $match: {
-                bookingStatus: { $ne: BOOKING_STATUS.CANCELLED_BY_USER },
+                bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED] },
+                paymentStatus: { $eq: PAYMENT_STATUS.PAID }
               },
             },
             {
-              $project: {
-                finalAmount: 1,
-                platformCommission: 1,
-                vendorEarning: 1,
+              $group: {
+                _id: null,
+                grossAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$finalAmount', 0] } },
+                commissionAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$platformCommission', 0] } },
+                netAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$vendorEarning', 0] } },
+                totalRefundedAmount: {
+                  $sum: {
+                    $cond: [
+                      { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                      { $subtract: ['$finalAmount', { $ifNull: ['$cancelationRefundAmount', 0] }] },
+                      0,
+                    ],
+                  },
+                },
               },
             },
           ],
@@ -407,6 +417,15 @@ export class SchedulePackageRepository
           foreignField: 'userId',
           as: 'vendorInfoData',
           pipeline: [{ $project: { transactionConnect: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: 'payouts',
+          localField: '_id',
+          foreignField: 'scheduleId',
+          as: 'failedPayouts',
+          pipeline: [{ $match: { status: PAYOUT_STATUS.FAILED } }, { $project: { _id: 1 } }],
         },
       },
       {
@@ -426,9 +445,10 @@ export class SchedulePackageRepository
                 scheduleStartDate: '$startDate',
                 scheduleEndDate: '$endDate',
                 packageTittle: '$package.title',
-                grossAmount: { $sum: '$bookings.finalAmount' },
-                commissionAmount: { $sum: '$bookings.platformCommission' },
-                netAmount: { $sum: '$bookings.vendorEarning' },
+                grossAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.grossAmount', 0] }, 0] },
+                commissionAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.commissionAmount', 0] }, 0] },
+                netAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.netAmount', 0] }, 0] },
+                totalRefundedAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.totalRefundedAmount', 0] }, 0] },
                 status: 1,
                 scheduledAt: '$createdAt',
                 payoutsEnabled: {
@@ -449,6 +469,7 @@ export class SchedulePackageRepository
                     new Date()
                   ]
                 },
+                alreadyFailed: { $gt: [{ $size: '$failedPayouts' }, 0] },
               },
             },
           ],

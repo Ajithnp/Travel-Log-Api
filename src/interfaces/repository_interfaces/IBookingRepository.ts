@@ -9,6 +9,7 @@ import {
   ScheduleBookingListResult,
   IScheduleBookingSinglePopulated,
   ITicketPopulatedBooking,
+  GroupType,
 } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose, { ClientSession, Types } from 'mongoose';
@@ -104,13 +105,20 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   findPayableBookingsBySchedule(scheduleId: string): Promise<SchedulePayoutTotals | null> 
 
+  findAllBookingsByScheduleId(scheduleId: string): Promise<ScheduleBookingsResult[] | null>;
+
+  findBookingStatsByScheduleId(scheduleId:string):Promise<BookingStatsResult | null>;
+
+  payoutOverviewByScheduleId(scheduleId:string): Promise<PayoutScheduleOverviewStats >;
+
 }
 
 export interface SchedulePayoutTotals {
   vendorId: string;
   grossAmount: number;
   commissionAmount: number;
-  netAmount: number;
+  vendorEarnings:number;
+  totalAmountFromCancelation:number;
   bookingIds: Types.ObjectId[];
   bookingCount: number;
 }
@@ -123,3 +131,33 @@ export interface BookingFilters {
   page: number;
   limit: number;
 }
+
+export interface ScheduleBookingsResult {
+  userName:string;
+  selectedGroupType:GroupType;
+  finalAmount:number;
+  platformCommission:number;
+  vendorEarning:number;
+
+};
+
+export interface PayoutScheduleOverviewStats {
+  totalBookingsCount:number;
+  totalGrossAmount:number;
+  totalPlatformCommission:number;
+  totalVendorEarnings:number;
+}
+
+export interface BookingStatsResult {
+  packageTitle:string;
+  vendorName:string;
+  scheduleStartDate:Date;
+  scheduleEndDate:Date;
+  schedulePayoutStatus:'pending' | 'paid';
+  totalBookingsCount:number;
+  totalCancellationsCount:number;
+  totalBookingGross:number;
+  totalPlatformCommission:number;
+  totalVendorEarnings:number;
+  totalRefundedAmount:number;
+};

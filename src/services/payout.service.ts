@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IPayoutService, PayoutOverviewResponseDto, PayoutScheduleListResponseDto, PayoutStatsResponseDto, ReleasePayoutResponseDTO, FindAllPayoutsResponseDto } from "../interfaces/service_interfaces/IPayoutService";
+import { IPayoutService, PayoutOverviewResponseDto, PayoutScheduleListResponseDto, PayoutStatsResponseDto, ReleasePayoutResponseDTO, FindAllPayoutsResponseDto, SchedulePayoutDetailsResponseDTO } from "../interfaces/service_interfaces/IPayoutService";
 import { IPayoutRepository, PayoutFilter } from "../interfaces/repository_interfaces/IPayoutRepository";
 import { IPaymentGateway } from "../infrastructure/payment-gateways/IPaymentGateway";
 import { IBookingRepository } from "../interfaces/repository_interfaces/IBookingRepository";
@@ -12,6 +12,9 @@ import { USER_ROLES } from "../shared/constants/roles";
 import { PAYOUT_STATUS } from "../shared/constants/constants";
 import { PaginatedData } from "../types/common/IPaginationResponse";
 import { ISchedulePackageRepository } from "../interfaces/repository_interfaces/ISchedulePackage";
+import { generatePayoutRefId } from "../shared/utils/generate-booking-code.helper";
+import { ICacheService } from "../interfaces/service_interfaces/ICacheService";
+import { CACHE_KEYS, CACHE_TTL } from "../types/cache";
 
 
 
@@ -28,6 +31,8 @@ export class PayoutService implements IPayoutService {
     private _vendorRepository: IVendorInfoRepository,
     @inject('ISchedulePackageRepository')
     private _scheduleRepository: ISchedulePackageRepository,
+    @inject('ICacheService')
+    private _cacheService: ICacheService,
   ) { }
 
   async getPayoutSchedules(page: number, limit: number, search: string): Promise<PaginatedData<PayoutScheduleListResponseDto>> {
@@ -52,8 +57,38 @@ export class PayoutService implements IPayoutService {
      
      return {completedCount, failedCount,processingCount};
   };
+ 
+  async schedulePayoutDetails(scheduleId: string): Promise<SchedulePayoutDetailsResponseDTO> {
+    const cacheKey = CACHE_KEYS.schedulePayoutDetails(scheduleId);
 
+    const cached = await this._cacheService.get<SchedulePayoutDetailsResponseDTO>(cacheKey);
+    if (cached) return cached;
 
+    const schedule = await this._scheduleRepository.findById(scheduleId);
+    if (!schedule) {
+      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    const [bookingStats, bookingsData, bookingOverViewStats] = await Promise.all([
+      this._bookingRepository.findBookingStatsByScheduleId(scheduleId),
+      this._bookingRepository.findAllBookingsByScheduleId(scheduleId),
+      this._bookingRepository.payoutOverviewByScheduleId(scheduleId),
+    ]);
+
+    if(!bookingStats || !bookingsData ){
+      throw new AppError(ERROR_MESSAGES.SCHEDULE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    const result: SchedulePayoutDetailsResponseDTO = {
+      bookingStats: bookingStats,
+      bookingsData: bookingsData,
+      bookingOverViewStats: bookingOverViewStats,
+    };
+
+    await this._cacheService.set(cacheKey, result, CACHE_TTL.ttl_5_minutes);
+
+    return result;
+  };
 
   async releasePayout(scheduleId: string): Promise<ReleasePayoutResponseDTO> {
 
@@ -63,8 +98,8 @@ export class PayoutService implements IPayoutService {
       throw new AppError(ERROR_MESSAGES.NO_PAYABLE_BOOKINGS_FOUND, HTTP_STATUS.BAD_REQUEST);
     }
 
-    const { vendorId, grossAmount, commissionAmount, netAmount, bookingIds, bookingCount } = totals;
-
+    const { vendorId, grossAmount, commissionAmount, vendorEarnings, totalAmountFromCancelation, bookingIds, bookingCount } = totals;
+    const netAmount = vendorEarnings + totalAmountFromCancelation;
     const vendorInfo = await this._vendorRepository.findOne({
       userId: toObjectId(vendorId),
     });
@@ -77,6 +112,7 @@ export class PayoutService implements IPayoutService {
     }
 
     const payout = await this._payoutRepository.create({
+      payoutRefId:generatePayoutRefId(),
       vendorId: toObjectId(vendorId),
       scheduleId: toObjectId(scheduleId),
       bookingIds: bookingIds,
@@ -119,6 +155,68 @@ export class PayoutService implements IPayoutService {
       throw new AppError(ERROR_MESSAGES.PAYOUT_FAILED, HTTP_STATUS.BAD_GATEWAY);
     }
   };
+
+  async retryPayout(payoutId: string): Promise<ReleasePayoutResponseDTO> {
+
+  const payout = await this._payoutRepository.findById(payoutId);
+
+  if (!payout) {
+    throw new AppError(ERROR_MESSAGES.PAYOUT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+  }
+
+  if (payout.status !== PAYOUT_STATUS.FAILED) {
+    throw new AppError(
+      `Payout cannot be retried. Current status: ${payout.status}`,
+      HTTP_STATUS.BAD_REQUEST,
+    );
+  }
+
+  const vendorInfo = await this._vendorRepository.findOne({
+    userId: payout.vendorId,
+  });
+
+  if (!vendorInfo?.transactionConnect?.payoutsEnabled) {
+    throw new AppError(
+      ERROR_MESSAGES.VENDOR_PAYOUT_NOT_ENABLED,
+      HTTP_STATUS.BAD_REQUEST,
+    );
+  }
+
+ 
+  await this._payoutRepository.updateStatus(payoutId, PAYOUT_STATUS.PROCESSING, {
+    failureReason: null,   
+    stripeTransferId: null,
+  });
+
+  try {
+    // Retry the transfer
+    const transferId = await this._paymentGateway.transferToVendor({
+      amount: payout.netAmount,
+      vendorStripeAccountId: vendorInfo.transactionConnect.accountId!,
+      payoutId: payout._id.toString(),
+      vendorId: payout.vendorId.toString(),
+    });
+
+    await this._payoutRepository.updateStatus(payoutId, PAYOUT_STATUS.PROCESSING, {
+      stripeTransferId: transferId,
+      triggeredBy: USER_ROLES.ADMIN,
+    });
+
+    return {
+      payoutId: payout._id.toString(),
+      netAmount: payout.netAmount,
+      transferId,
+      bookingCount: payout.bookingIds.length,
+    };
+
+  } catch (error) {
+   
+    await this._payoutRepository.updateStatus(payoutId, PAYOUT_STATUS.FAILED, {
+      failureReason: (error as Error).message,
+    });
+    throw new AppError(ERROR_MESSAGES.PAYOUT_FAILED, HTTP_STATUS.BAD_GATEWAY);
+  }
+}
 
   async payoutStats(): Promise<PayoutStatsResponseDto> {
 

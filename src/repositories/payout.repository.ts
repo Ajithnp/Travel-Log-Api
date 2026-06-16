@@ -132,6 +132,7 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
               $project: {
                 _id: 0,
                 id: '$_id',
+                scheduleId:'$schedule._id',
                 vendorname: '$vendor.name',
                 scheduleStartDate: '$schedule.startDate',
                 scheduleEndDate: '$schedule.endDate',

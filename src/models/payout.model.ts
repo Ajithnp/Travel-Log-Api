@@ -3,6 +3,7 @@ import { IPayout } from '../types/entities/payout.entity';
 
 const PayoutSchema = new Schema<IPayout>(
   {
+    payoutRefId: { type: String, required: true },
     vendorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     scheduleId: { type: Schema.Types.ObjectId, ref: 'SchedulePackage', required: true },
     bookingIds: [{ type: Schema.Types.ObjectId, ref: 'Booking', required: true }],

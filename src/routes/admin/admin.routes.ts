@@ -311,6 +311,13 @@ export class AdminRoutes extends BaseRoute {
     this._payoutController.releasePayout.bind(this._adminFinanceController),
    );
 
+   this._router.patch(
+    '/payouts/:payoutId/retry',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._payoutController.retryPayout.bind(this._payoutController),
+  );
+
    this._router.get(
     '/payouts/overview',
     isAuthenticated,
@@ -330,6 +337,13 @@ export class AdminRoutes extends BaseRoute {
     isAuthenticated,
     authorize([USER_ROLES.ADMIN]),
     this._payoutController.payoutStats.bind(this._payoutController),
+   );
+
+   this._router.get(
+    '/payouts/:scheduleId/details',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._payoutController.schedulePayoutDetails.bind(this._payoutController),
    );
 
    this._router.get(

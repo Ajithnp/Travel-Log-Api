@@ -5,6 +5,7 @@ export type PayoutStatus = (typeof PAYOUT_STATUS)[keyof typeof PAYOUT_STATUS];
 
 export interface IPayout extends Document {
   _id: mongoose.Types.ObjectId;
+  payoutRefId:string;
   vendorId: Types.ObjectId;
   scheduleId: Types.ObjectId;
   bookingIds: Types.ObjectId[];

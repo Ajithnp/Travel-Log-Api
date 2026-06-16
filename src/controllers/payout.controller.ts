@@ -46,12 +46,40 @@ export class PayoutController implements IPayoutController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
+  schedulePayoutDetails = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { scheduleId } = req.params as { scheduleId: string };
+    
+    const result = await this._payoutService.schedulePayoutDetails(scheduleId);
+
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
   releasePayout = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { scheduleId } = req.params as { scheduleId: string };
 
     const result = await this._payoutService.releasePayout(scheduleId);
 
     const successResponse: IApiResponse<typeof result> = {
+    success: SUCCESS_STATUS.SUCCESS,
+    message: SUCCESS_MESSAGES.PAYOUT_RELEASED_SUCCESSFULLY,
+    data: result,
+  };
+
+  res.status(HTTP_STATUS.OK).json(successResponse);
+});
+
+ retryPayout = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { payoutId } = req.params as { payoutId: string };
+
+  const result = await this._payoutService.retryPayout(payoutId);
+
+  const successResponse: IApiResponse<typeof result> = {
     success: SUCCESS_STATUS.SUCCESS,
     message: SUCCESS_MESSAGES.PAYOUT_RELEASED_SUCCESSFULLY,
     data: result,
@@ -78,7 +106,7 @@ export class PayoutController implements IPayoutController {
     const { filter } = req.query as { filter: PayoutFilter };
 
     const result = await this._payoutService.findAllPayouts(page,limit,search,filter);
-    
+
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.OK,

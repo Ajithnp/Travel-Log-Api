@@ -161,9 +161,6 @@ export class StripeGateway implements IPaymentGateway {
   async transferToVendor(transferParams:TransferToVendorParams): Promise<string> {
 
     try {
-
-       const balance = await this.stripe.balance.retrieve();
-    console.log('Stripe available balance:', JSON.stringify(balance.available, null, 2));
     const account = await this.stripe.accounts.retrieve(transferParams.vendorStripeAccountId);
 
     if (!account.charges_enabled) {
