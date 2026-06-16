@@ -15,6 +15,7 @@ export interface ISchedule extends Document {
   _id: mongoose.Types.ObjectId;
   packageId: mongoose.Types.ObjectId;
   vendorId: mongoose.Types.ObjectId;
+  payoutId: Types.ObjectId | null;
   startDate: Date;
   endDate: Date;
   reportingTime: string;
@@ -27,6 +28,7 @@ export interface ISchedule extends Document {
   cancelledAt?: Date;
   cancelledBookings?: number;
   totalRefunded?: number;
+  payoutStatus: 'pending' | 'paid';
   notes?: string;
   createdAt: Date;
   updatedAt: Date;

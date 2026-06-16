@@ -72,3 +72,12 @@ export const USER_REWARD_STATUS = {
   USED: 'USED',
   EXPIRED: 'EXPIRED',
 } as const;
+
+export const PAYOUT_STATUS = {
+  PENDING: 'pending',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+} as const;
+
+export const INR_TO_USD_TEST_RATE = 83;

@@ -68,6 +68,11 @@ import { IAdminFinanceService } from '../interfaces/service_interfaces/admin/IAd
 import { AdminFinanceService } from '../services/admin/admin.finance.service';
 import { IVendorRevenueService } from '../interfaces/service_interfaces/vendor/IVendorRevenueService';
 import { VendorRevenueService } from '../services/vendor/vendor-revenue.service';
+import { IStripeService } from '../interfaces/service_interfaces/IStripeService';
+import { StripeService } from '../services/stripe.service';
+import { IPayoutService } from '../interfaces/service_interfaces/IPayoutService';
+import { PayoutService } from '../services/payout.service';
+
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -93,6 +98,10 @@ export class ServiceRegistry {
 
     container.register<ICacheService>('ICacheService', {
       useClass: RedisService,
+    });
+
+    container.register<IStripeService>('IStripeService', {
+      useClass: StripeService,
     });
 
     container.register<IFileStorageService>('IFileStorageService', {
@@ -125,6 +134,10 @@ export class ServiceRegistry {
 
     container.register<ICouponService>('ICouponService', {
       useClass: CouponService,
+    });
+
+    container.register<IPayoutService>('IPayoutService', {
+      useClass: PayoutService,
     });
 
     //vendor-services

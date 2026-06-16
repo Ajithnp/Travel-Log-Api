@@ -39,6 +39,13 @@ const ScheduleSchema = new Schema<ISchedule>(
       index: true,
     },
 
+    payoutId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Payout',
+      index: true,
+      default: null,
+    },
+
     startDate: {
       type: Date,
       required: true,
@@ -76,6 +83,12 @@ const ScheduleSchema = new Schema<ISchedule>(
       type: Number,
       default: 0,
       min: [0, 'Seats booked cannot be negative'],
+    },
+
+    payoutStatus: {
+      type: String,
+      enum: ['pending', 'paid'],
+      default: 'pending'
     },
 
     status: {

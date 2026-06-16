@@ -18,6 +18,9 @@ export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
     options?: CustomQueryOptions,
   ): Promise<IVendorInfoWithUser[]>;
 
+  updateStripeAccountId(vendorId: string, accountId: string): Promise<void>
+  updateStripeAccountStatus(vendorId: string, onboardingComplete:boolean, chargesEnabled: boolean, payoutsEnabled: boolean): Promise<void>
+
   countVendorDocuments(
     vendorSearchQuery?: FilterQuery<IUser>,
     vendorFilter?: FilterQuery<IVendorInfo>,

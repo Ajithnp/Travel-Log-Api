@@ -4,21 +4,21 @@ import { ISchedule, ISchedulePopulated } from '../types/entities/schedule.entity
 import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
 import SchedulePackageModel from '../models/schedule.model';
 import mongoose, { Types } from 'mongoose';
-import { SCHEDULE_STATUS, ScheduleStatus } from '../shared/constants/constants';
+import { PAYOUT_STATUS, SCHEDULE_STATUS, ScheduleStatus } from '../shared/constants/constants';
 import { FilterType } from '../types/db';
 import { FilterQuery, UpdateResult } from 'mongoose';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
-import { BOOKING_STATUS } from '../shared/constants/booking';
+import { BOOKING_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
 import {
   PackageScheduleResult,
   SchedulesResponseResult,
 } from '../interfaces/repository_interfaces/ISchedulePackage';
+import { PayoutScheduleListResponseDto } from 'interfaces/service_interfaces/IPayoutService';
 
 @injectable()
 export class SchedulePackageRepository
   extends BaseRepository<ISchedule>
-  implements ISchedulePackageRepository
-{
+  implements ISchedulePackageRepository {
   constructor() {
     super(SchedulePackageModel);
   }
@@ -168,14 +168,14 @@ export class SchedulePackageRepository
           ...(filter
             ? { status: filter }
             : {
-                status: {
-                  $in: [
-                    SCHEDULE_STATUS.UPCOMING,
-                    SCHEDULE_STATUS.SOLD_OUT,
-                    SCHEDULE_STATUS.COMPLETED,
-                  ],
-                },
-              }),
+              status: {
+                $in: [
+                  SCHEDULE_STATUS.UPCOMING,
+                  SCHEDULE_STATUS.SOLD_OUT,
+                  SCHEDULE_STATUS.COMPLETED,
+                ],
+              },
+            }),
         },
       },
       {
@@ -330,5 +330,169 @@ export class SchedulePackageRepository
     const schedules = result.data ?? [];
 
     return { schedules, total };
+  }
+
+  async getSchedulesForPayout(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{ schedules: PayoutScheduleListResponseDto[]; total: number }> {
+
+    const matchStage: mongoose.FilterQuery<ISchedule> = {
+      status: SCHEDULE_STATUS.COMPLETED,
+      payoutStatus: PAYOUT_STATUS.PENDING,
+    };
+
+    const pipeline: mongoose.PipelineStage[] = [
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'packageId',
+          foreignField: '_id',
+          as: 'packageData',
+          pipeline: [{ $project: { title: 1 } }],
+        },
+      },
+      { $addFields: { package: { $arrayElemAt: ['$packageData', 0] } } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendorData',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { vendor: { $arrayElemAt: ['$vendorData', 0] } } },
+    ];
+
+    if (search?.trim()) {
+      const regex = { $regex: search.trim(), $options: 'i' };
+      pipeline.push({
+        $match: {
+          $or: [{ 'package.title': regex }, { 'vendor.name': regex }],
+        },
+      });
+    }
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'scheduleId',
+          pipeline: [
+            {
+              $match: {
+                bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED] },
+                paymentStatus: { $eq: PAYMENT_STATUS.PAID }
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                grossAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$finalAmount', 0] } },
+                commissionAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$platformCommission', 0] } },
+                netAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$vendorEarning', 0] } },
+                totalRefundedAmount: {
+                  $sum: {
+                    $cond: [
+                      { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                      { $subtract: ['$finalAmount', { $ifNull: ['$cancelationRefundAmount', 0] }] },
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+          as: 'bookings',
+        },
+      },
+      {
+        $lookup: {
+          from: 'vendorinfos',
+          localField: 'vendorId',
+          foreignField: 'userId',
+          as: 'vendorInfoData',
+          pipeline: [{ $project: { transactionConnect: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: 'payouts',
+          localField: '_id',
+          foreignField: 'scheduleId',
+          as: 'failedPayouts',
+          pipeline: [{ $match: { status: PAYOUT_STATUS.FAILED } }, { $project: { _id: 1 } }],
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $sort: { endDate: 1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                _id: 0,
+                id: '$_id',
+                vendorId: 1,
+                vendorname: '$vendor.name',
+                scheduleId: '$_id',
+                scheduleStartDate: '$startDate',
+                scheduleEndDate: '$endDate',
+                packageTittle: '$package.title',
+                grossAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.grossAmount', 0] }, 0] },
+                commissionAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.commissionAmount', 0] }, 0] },
+                netAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.netAmount', 0] }, 0] },
+                totalRefundedAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.totalRefundedAmount', 0] }, 0] },
+                status: 1,
+                scheduledAt: '$createdAt',
+                payoutsEnabled: {
+                  $let: {
+                    vars: { info: { $arrayElemAt: ['$vendorInfoData', 0] } },
+                    in: { $ifNull: ['$$info.transactionConnect.payoutsEnabled', false] },
+                  },
+                },
+                transactionConnectId: {
+                  $let: {
+                    vars: { info: { $arrayElemAt: ['$vendorInfoData', 0] } },
+                    in: { $ifNull: ['$$info.transactionConnect.accountId', ''] },
+                  },
+                },
+                readyToPayout: {
+                  $lte: [
+                    { $add: ['$endDate', 2 * 24 * 60 * 60 * 1000] },
+                    new Date()
+                  ]
+                },
+                alreadyFailed: { $gt: [{ $size: '$failedPayouts' }, 0] },
+              },
+            },
+          ],
+        },
+      },
+    );
+
+    const [result] = await this.model.aggregate<{
+      metadata: [{ total: number }?];
+      data: PayoutScheduleListResponseDto[];
+    }>(pipeline);
+
+    const total = result?.metadata?.[0]?.total ?? 0;
+    const schedules = result?.data ?? [];
+
+    return { schedules, total };
+  }
+
+  async markSchedulePayoutAsCompleted(scheduleId: string, payoutId: Types.ObjectId): Promise<ISchedule | null> {
+    return await this.findOneAndUpdate(
+      { _id: toObjectId(scheduleId) },
+      { payoutStatus: 'paid', payoutId },
+      { new: true }
+    );
   }
 }

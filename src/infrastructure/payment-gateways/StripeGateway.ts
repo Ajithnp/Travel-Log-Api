@@ -6,11 +6,14 @@ import {
   PaymentIntentResult,
   StripeWebhookEvent,
   StripeCheckoutSession,
+  StripeAccountResponse,
+  TransferToVendorParams,
 } from './IPaymentGateway';
 import { injectable } from 'tsyringe';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { ERROR_MESSAGES } from '../../shared/constants/messages';
+import { INR_TO_USD_TEST_RATE } from '../../shared/constants/constants';
 
 @injectable()
 export class StripeGateway implements IPaymentGateway {
@@ -63,6 +66,7 @@ export class StripeGateway implements IPaymentGateway {
           startDate: data.metadata?.startDate ?? '',
           endDate: data.metadata?.endDate ?? '',
           packageName: data.metadata?.packageName ?? '',
+          
         },
 
         success_url: `${config.cors.ALLOWED_ORIGINS}/user/booking/confirm?session_id={CHECKOUT_SESSION_ID}`,
@@ -127,4 +131,75 @@ export class StripeGateway implements IPaymentGateway {
       );
     }
   }
+
+  async createConnectAccount(vendorId: string): Promise<string> {
+    const account = await this.stripe.accounts.create({
+      type: 'express',
+      capabilities: { 
+        card_payments: {requested: true},
+        transfers: {requested: true},
+      },
+      metadata: { vendorId },
+    });
+    return account.id;
+  }
+
+  async createAccountLink(accountId: string): Promise<string> {
+    const link = await this.stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: `${config.cors.ALLOWED_ORIGINS}/vendor/stripe/refresh`,
+      return_url: `${config.cors.ALLOWED_ORIGINS}/vendor/stripe/return`,
+      type: 'account_onboarding',
+    });
+    return link.url;
+  }
+
+  async retrieveAccount(accountId: string): Promise<StripeAccountResponse> {
+    return await this.stripe.accounts.retrieve(accountId);
+  }
+
+  async transferToVendor(transferParams:TransferToVendorParams): Promise<string> {
+
+    try {
+    const account = await this.stripe.accounts.retrieve(transferParams.vendorStripeAccountId);
+
+    if (!account.charges_enabled) {
+      throw new AppError(
+        ERROR_MESSAGES.VENDOR_NOT_CHARGES_ENABLED,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
+    if(!account.payouts_enabled) {
+      throw new AppError(
+        ERROR_MESSAGES.VENDOR_NOT_PAYOUTS_ENABLED,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
+    if(account?.capabilities?.transfers!=='active'){
+      throw new AppError(
+        ERROR_MESSAGES.VENDOR_NOT_TRANSFERS_ENABLED,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
+
+  const transfer = await this.stripe.transfers.create({
+     amount: Math.round((transferParams.amount / INR_TO_USD_TEST_RATE) * 100), 
+    // currency: 'inr',
+    currency:"usd",
+    destination: transferParams.vendorStripeAccountId,
+    metadata: {
+      payoutId: transferParams.payoutId,
+      vendorId: transferParams.vendorId,
+    },
+  });
+  return transfer.id;
+    
+ }catch (err) {
+      if (err instanceof Stripe.errors.StripeError) {
+        throw new AppError(`Stripe error: ${err.message}`, HTTP_STATUS.BAD_GATEWAY);
+      }
+      throw err;
+    }
+  }
 }
+

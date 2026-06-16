@@ -3,6 +3,7 @@ import { IBaseRepository } from './IBaseRepository';
 import { FilterType } from '../../types/db';
 import mongoose, { UpdateResult } from 'mongoose';
 import { ScheduleStatus } from '../../shared/constants/constants';
+import { PayoutScheduleListResponseDto } from 'interfaces/service_interfaces/IPayoutService';
 
 export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
   findOverlapping(
@@ -54,6 +55,17 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     filter?: ScheduleStatus,
     search?: string,
   ): Promise<{ schedules: SchedulesResponseResult[]; total: number }>;
+   
+  getSchedulesForPayout(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{ schedules: PayoutScheduleListResponseDto[]; total: number }>;
+
+  markSchedulePayoutAsCompleted(
+    scheduleId: string,
+    payoutId: mongoose.Types.ObjectId
+  ): Promise<ISchedule | null>;
 }
 
 export interface SchedulesResponseResult {
@@ -80,3 +92,4 @@ export interface PackageScheduleResult {
   soldSeats: number;
   status: string;
 }
+

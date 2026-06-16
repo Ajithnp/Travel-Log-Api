@@ -15,6 +15,8 @@ import { S3Routes } from './routes/shared/s3.routes';
 import { PaymentWebhookRoutes } from './routes/shared/payment-webhook.route';
 import { NotificationRoutes } from './routes/shared/notification.routes';
 import { ReviewRoutes } from './routes/shared/review.routes';
+import { StripeRoutes } from './routes/shared/stripe.route';
+
 
 export default class App {
   private _app: Application;
@@ -57,6 +59,7 @@ export default class App {
     this._app.use('/api/v1/vendor', container.resolve(VendorRoutes).router);
     this._app.use('/api/v1/admin', container.resolve(AdminRoutes).router);
     this._app.use('/api/v1/user', container.resolve(UserRoutes).router);
+    this._app.use('/api/v1/stripe', container.resolve(StripeRoutes).router);
     this._app.use('/api/v1/s3', container.resolve(S3Routes).router);
     this._app.use('/api/v1/bookings', container.resolve(BookingRoutes).router);
     this._app.use('/api/v1/notifications', container.resolve(NotificationRoutes).router);

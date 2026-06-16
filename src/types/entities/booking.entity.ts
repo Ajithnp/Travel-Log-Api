@@ -40,7 +40,7 @@ export interface IBooking extends Document {
 
   grossAmount: number; // pricing[groupType] from schedule at time of booking
   discountAmount: number; // offer
-  walletAmountUsed: number; // wallet balance applied
+  walletAmountUsed: number; 
   finalAmount: number; // grossAmount - discountAmount
   platformCommission: number; // 15% of grossAmount
   vendorEarning: number; // grossAmount - platformCommission
