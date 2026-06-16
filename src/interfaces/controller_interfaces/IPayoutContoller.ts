@@ -8,4 +8,5 @@ export interface IPayoutController {
     releasePayout: RequestHandler;
     findAllPayouts: RequestHandler;
     retryPayout: RequestHandler;
+    findAllVendorPayouts:RequestHandler;
 }
