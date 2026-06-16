@@ -1,11 +1,12 @@
 import { injectable } from "tsyringe";
 import { BaseRepository } from "./base.repository";
 import mongoose, { FilterQuery } from "mongoose";
-import { IPayoutRepository, PayoutFilter } from "../interfaces/repository_interfaces/IPayoutRepository";
+import { IPayoutRepository, PayoutFilter, VendorPayoutsListResult } from "../interfaces/repository_interfaces/IPayoutRepository";
 import { FindAllPayoutsResponseDto, PayoutStatsResponseDto } from "../interfaces/service_interfaces/IPayoutService";
 import { PayoutModel } from "../models/payout.model";
 import { IPayout } from "../types/entities/payout.entity";
 import { PAYOUT_STATUS } from "../shared/constants/constants";
+import { toObjectId } from "../shared/utils/database/objectId.helper";
 
 @injectable()
 export class PayoutRepository extends BaseRepository<IPayout> implements IPayoutRepository {
@@ -157,5 +158,84 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     };
   }
 
+  async findAllPayoutsByVendor(
+    vendorId: string,
+    page: number,
+    limit: number,
+    search?: string,
+    filter?: PayoutFilter
+  ): Promise<{ payouts: VendorPayoutsListResult[]; total: number }> {
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          vendorId: toObjectId(vendorId),
+          ...(filter ? { status: filter } : {}),
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: 'scheduleId',
+          foreignField: '_id',
+          as: 'schedule',
+          pipeline: [{ $project: { startDate: 1, endDate: 1, packageId: 1 } }],
+        },
+      },
+      { $addFields: { schedule: { $arrayElemAt: ['$schedule', 0] } } },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'schedule.packageId',
+          foreignField: '_id',
+          as: 'packageData',
+          pipeline: [{ $project: { title: 1 } }],
+        },
+      },
+      { $addFields: { package: { $arrayElemAt: ['$packageData', 0] } } },
+    ];
+
+    if (search?.trim()) {
+      pipeline.push({
+        $match: {
+          'package.title': { $regex: search.trim(), $options: 'i' },
+        },
+      });
+    }
+
+    pipeline.push(
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $sort: { createdAt: -1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                _id: 0,
+                payoutId: '$_id',
+                scheduleId: '$scheduleId',
+                scheduleStartDate: '$schedule.startDate',
+                scheduleEndDate: '$schedule.endDate',
+                packageTittle: '$package.title',
+                grossAmount: 1,
+                commissionAmount: 1,
+                netAmount: 1,
+                status: 1,
+                scheduledAt: 1,
+              },
+            },
+          ],
+        },
+      }
+    );
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    return {
+      payouts: result?.data || [],
+      total: result?.metadata[0]?.total || 0,
+    };
+  }
 
 }

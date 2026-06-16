@@ -1,5 +1,5 @@
 import { PaginatedData } from "../../types/common/IPaginationResponse";
-import { PayoutFilter } from "../../interfaces/repository_interfaces/IPayoutRepository";
+import { PayoutFilter, VendorPayoutsListResult } from "../../interfaces/repository_interfaces/IPayoutRepository";
 import { PayoutStatus } from "../../types/entities/payout.entity";
 import { BookingStatsResult, PayoutScheduleOverviewStats, ScheduleBookingsResult } from "../../interfaces/repository_interfaces/IBookingRepository";
 
@@ -11,6 +11,7 @@ export interface IPayoutService {
     findAllPayouts(page: number,limit: number,search?: string,filter?:PayoutFilter):Promise<PaginatedData<FindAllPayoutsResponseDto>>   
     releasePayout(scheduleId: string): Promise<ReleasePayoutResponseDTO>
     retryPayout(payoutId: string): Promise<ReleasePayoutResponseDTO>;
+    findAllVendorPayouts(vendorId: string, page: number,limit: number,search?: string,filter?:PayoutFilter):Promise<PaginatedData<VendorPayoutsListResponseDto>>   
 }
 
 export interface ReleasePayoutResponseDTO {
@@ -75,3 +76,5 @@ export interface SchedulePayoutDetailsResponseDTO {
     bookingStats: BookingStatsResult;
     bookingOverViewStats:PayoutScheduleOverviewStats;
 }
+
+export type VendorPayoutsListResponseDto = VendorPayoutsListResult

@@ -27,6 +27,7 @@ import {
 } from '../../validators/vendor/offer.validation';
 import { CONTROLLER_TOKENS } from '../../shared/constants/di.tokens';
 import { IVendorRevenueController } from '../../interfaces/controller_interfaces/vendor/IVendorRevenueController';
+import { IPayoutController } from 'interfaces/controller_interfaces/IPayoutContoller';
 
 @injectable()
 export class VendorRoutes extends BaseRoute {
@@ -47,6 +48,8 @@ export class VendorRoutes extends BaseRoute {
     private _vendorOfferController: IVendorOfferController,
     @inject('IVendorRevenueController')
     private _vendorRevenueController: IVendorRevenueController,
+    @inject('IPayoutController')
+    private _payoutController: IPayoutController,
   ) {
     super();
     this.initializeRoutes();
@@ -327,6 +330,13 @@ export class VendorRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
       this._vendorRevenueController.packagesEarningOverview.bind(this._vendorRevenueController),
+    );
+    //=== payouts
+    this._router.get(
+      '/payouts',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._payoutController.findAllVendorPayouts.bind(this._payoutController),
     );
   }
 }

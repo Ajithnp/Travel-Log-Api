@@ -342,7 +342,7 @@ export class AdminRoutes extends BaseRoute {
    this._router.get(
     '/payouts/:scheduleId/details',
     isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
+    authorize([USER_ROLES.ADMIN, USER_ROLES.VENDOR]),
     this._payoutController.schedulePayoutDetails.bind(this._payoutController),
    );
 

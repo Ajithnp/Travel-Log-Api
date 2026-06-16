@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IPayoutService, PayoutOverviewResponseDto, PayoutScheduleListResponseDto, PayoutStatsResponseDto, ReleasePayoutResponseDTO, FindAllPayoutsResponseDto, SchedulePayoutDetailsResponseDTO } from "../interfaces/service_interfaces/IPayoutService";
+import { IPayoutService, PayoutOverviewResponseDto, PayoutScheduleListResponseDto, PayoutStatsResponseDto, ReleasePayoutResponseDTO, FindAllPayoutsResponseDto, SchedulePayoutDetailsResponseDTO, VendorPayoutsListResponseDto } from "../interfaces/service_interfaces/IPayoutService";
 import { IPayoutRepository, PayoutFilter } from "../interfaces/repository_interfaces/IPayoutRepository";
 import { IPaymentGateway } from "../infrastructure/payment-gateways/IPaymentGateway";
 import { IBookingRepository } from "../interfaces/repository_interfaces/IBookingRepository";
@@ -236,6 +236,17 @@ export class PayoutService implements IPayoutService {
       totalDocs: data.total,
     }
   };
+
+  async findAllVendorPayouts(vendorId: string, page: number, limit: number, search?: string, filter?: PayoutFilter): Promise<PaginatedData<VendorPayoutsListResponseDto>> {
+  const data = await this._payoutRepository.findAllPayoutsByVendor(vendorId, page, limit, search, filter);
+
+  return {
+    data: data.payouts,
+    currentPage: page,
+    totalPages: Math.ceil(data.total / limit),
+    totalDocs: data.total,
+  }
+}
 
 
 

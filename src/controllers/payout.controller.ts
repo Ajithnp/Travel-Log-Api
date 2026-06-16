@@ -115,4 +115,19 @@ export class PayoutController implements IPayoutController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
+  findAllVendorPayouts = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const {page, limit, search } = getPaginationOptions(req);
+    const { filter } = req.query as { filter: PayoutFilter };
+    const vendorId = req?.user?.id;
+
+    const result = await this._payoutService.findAllVendorPayouts(vendorId,page,limit,search,filter);
+
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
 }
