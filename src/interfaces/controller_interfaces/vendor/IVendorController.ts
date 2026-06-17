@@ -7,4 +7,5 @@ export interface IVendorController {
   getRejectedVendor: RequestHandler;
   vendorVerificationReapply: RequestHandler;
   getVendorSummaryStats: RequestHandler;
+  dashboardChartsData:RequestHandler;
 }

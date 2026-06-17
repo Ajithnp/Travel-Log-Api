@@ -898,4 +898,63 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     };
   };
 
+   
+  async getDailyRevenueStats(vendorId: string, from: Date, to: Date): Promise<Array<{ _id: string; count: number; revenue: number }>> {
+    return this.model.aggregate([
+      {
+        $match: {
+          vendorId: new mongoose.Types.ObjectId(vendorId),
+          paymentStatus: PAYMENT_STATUS.PAID,
+          bookingStatus: {$in: [BOOKING_STATUS.CONFIRMED, BOOKING_STATUS.COMPLETED]},
+          createdAt:     { $gte: from, $lte: to },
+        },
+      },
+      {
+        $group: {
+          _id:     { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count:   { $sum: 1 },
+          revenue: { $sum: '$vendorEarning' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+  }
+
+  async getTopPerformingPackages(vendorId: string, limit: number = 5): Promise<Array<{ packageTitle: string; bookingCount: number }>> {
+     const result = await this.model.aggregate([
+        {
+          $match: {
+            vendorId: new mongoose.Types.ObjectId(vendorId),
+            paymentStatus: PAYMENT_STATUS.PAID,
+            bookingStatus: BOOKING_STATUS.COMPLETED
+          },
+        },
+        {
+          $group: {
+            _id:   '$packageId',
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: limit },
+        {
+          $lookup: {
+            from:         'packages',
+            localField:   '_id',
+            foreignField: '_id',
+            as:           'pkg',
+          },
+        },
+        { $addFields: { pkg: { $arrayElemAt: ['$pkg', 0] } } },
+        {
+          $project: {
+            packageTitle:  { $ifNull: ['$pkg.title', 'Unknown'] },
+            bookingCount:  '$count',
+          },
+        },
+      ]);
+      return result;
+  }
+ 
+
 }

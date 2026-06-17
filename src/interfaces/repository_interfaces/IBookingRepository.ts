@@ -111,6 +111,10 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   payoutOverviewByScheduleId(scheduleId:string): Promise<PayoutScheduleOverviewStats >;
 
+  getDailyRevenueStats(vendorId: string, from: Date, to: Date): Promise<Array<{ _id: string; count: number; revenue: number }>>;
+  
+  getTopPerformingPackages(vendorId: string, limit?: number): Promise<Array<{ packageTitle: string; bookingCount: number }>>;
+
 }
 
 export interface SchedulePayoutTotals {

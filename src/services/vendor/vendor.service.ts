@@ -1,6 +1,6 @@
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { inject, injectable } from 'tsyringe';
-import { IVendorService, VendorDashBoardStatsDTO } from '../../interfaces/service_interfaces/vendor/IVendorService';
+import { DashboardChartResponseDTO, IVendorService, VendorDashBoardStatsDTO } from '../../interfaces/service_interfaces/vendor/IVendorService';
 import { Types } from 'mongoose';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -11,6 +11,7 @@ import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos'
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { UpdateProfileLogoRequestDTO } from '../../validators/vendor/profile.validation';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
+import { getDateRangeByPeriod } from '../../shared/utils/date.helper';
 import { IPayoutRepository } from '../../interfaces/repository_interfaces/IPayoutRepository';
 import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
 import { BOOKING_STATUS } from '../../shared/constants/booking';
@@ -123,5 +124,19 @@ export class VendorService implements IVendorService {
     }
   };
 
-  
+  async dashboardChartsData(vendorId: string, period: string): Promise<DashboardChartResponseDTO> {
+    const { from, now } = getDateRangeByPeriod(period);
+
+    const [revenueTrend, bookingsByPackage] = await Promise.all([
+      this._bookingRepository.getDailyRevenueStats(vendorId, from, now),
+      this._bookingRepository.getTopPerformingPackages(vendorId)
+    ]);
+
+    return {
+      bookingsOverTime:  revenueTrend.map(r => ({ date: r._id, count: r.count })),
+      revenueOverTime:   revenueTrend.map(r => ({ date: r._id, amount: Math.round(r.revenue) })),
+      bookingsByPackage: bookingsByPackage
+    };
+  }
+
 }

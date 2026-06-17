@@ -4,11 +4,13 @@ import { VendorRevenueStats } from 'interfaces/repository_interfaces/IPayoutRepo
 import { ScheduledStatsResult } from 'interfaces/repository_interfaces/ISchedulePackage';
 
 
+
 export interface IVendorService {
   profile(userId: string): Promise<VendorProfileResponseDTO>;
 
   updateProfileLogo(vendorId: string, payload: UpdateProfileLogoRequestDTO): Promise<void>;
   getSummaryStats(vendorId:string):Promise<VendorDashBoardStatsDTO>
+  dashboardChartsData(vendorId: string, period?: string): Promise<DashboardChartResponseDTO>;
 }
 
 export interface VendorDashBoardStatsDTO {
@@ -16,4 +18,10 @@ export interface VendorDashBoardStatsDTO {
  totalBookings:number;
  totalPackages:number;
  scheduleStats : ScheduledStatsResult;
+}
+
+export interface DashboardChartResponseDTO {
+  bookingsOverTime: Array<{ date: string; count: number }>;
+  revenueOverTime: Array<{ date: string; amount: number }>;
+  bookingsByPackage: Array<{ packageTitle: string; bookingCount: number }>;
 }
