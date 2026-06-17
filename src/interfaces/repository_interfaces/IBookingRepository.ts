@@ -115,6 +115,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   
   getTopPerformingPackages(vendorId: string, limit?: number): Promise<Array<{ packageTitle: string; bookingCount: number }>>;
 
+  getRecentActivity(vendorId: string, limit?: number): Promise<RecentBookingActivityResult[]>;
 }
 
 export interface SchedulePayoutTotals {
@@ -165,3 +166,14 @@ export interface BookingStatsResult {
   totalVendorEarnings:number;
   totalRefundedAmount:number;
 };
+
+export interface RecentBookingActivityResult {
+  userName: string;
+  packageTitle: string;
+  startDate: Date;
+  endDate: Date;
+  groupType: GroupType;
+  finalAmount: number;
+  status: BookingStatus;
+  createdAt: Date;
+}

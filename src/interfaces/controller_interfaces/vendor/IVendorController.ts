@@ -8,4 +8,5 @@ export interface IVendorController {
   vendorVerificationReapply: RequestHandler;
   getVendorSummaryStats: RequestHandler;
   dashboardChartsData:RequestHandler;
+  dashboardRecentActivity:RequestHandler;
 }

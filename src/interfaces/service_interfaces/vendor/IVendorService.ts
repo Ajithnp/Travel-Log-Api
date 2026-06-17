@@ -2,6 +2,7 @@ import { VendorProfileResponseDTO } from '../../../types/dtos/vendor/response.dt
 import { UpdateProfileLogoRequestDTO } from '../../../types/dtos/vendor/request.dtos';
 import { VendorRevenueStats } from 'interfaces/repository_interfaces/IPayoutRepository';
 import { ScheduledStatsResult } from 'interfaces/repository_interfaces/ISchedulePackage';
+import { RecentBookingActivityResult } from 'interfaces/repository_interfaces/IBookingRepository';
 
 
 
@@ -11,6 +12,7 @@ export interface IVendorService {
   updateProfileLogo(vendorId: string, payload: UpdateProfileLogoRequestDTO): Promise<void>;
   getSummaryStats(vendorId:string):Promise<VendorDashBoardStatsDTO>
   dashboardChartsData(vendorId: string, period?: string): Promise<DashboardChartResponseDTO>;
+  dashboardRecentActivity(vendorId:string):Promise<RecentBookingActivityResponseDTO>
 }
 
 export interface VendorDashBoardStatsDTO {
@@ -25,3 +27,5 @@ export interface DashboardChartResponseDTO {
   revenueOverTime: Array<{ date: string; amount: number }>;
   bookingsByPackage: Array<{ packageTitle: string; bookingCount: number }>;
 }
+
+export type RecentBookingActivityResponseDTO = RecentBookingActivityResult[];

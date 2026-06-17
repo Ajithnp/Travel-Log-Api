@@ -1,6 +1,6 @@
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { inject, injectable } from 'tsyringe';
-import { DashboardChartResponseDTO, IVendorService, VendorDashBoardStatsDTO } from '../../interfaces/service_interfaces/vendor/IVendorService';
+import { DashboardChartResponseDTO, IVendorService, RecentBookingActivityResponseDTO, VendorDashBoardStatsDTO } from '../../interfaces/service_interfaces/vendor/IVendorService';
 import { Types } from 'mongoose';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -137,6 +137,10 @@ export class VendorService implements IVendorService {
       revenueOverTime:   revenueTrend.map(r => ({ date: r._id, amount: Math.round(r.revenue) })),
       bookingsByPackage: bookingsByPackage
     };
+  }
+
+  async dashboardRecentActivity(vendorId:string):Promise<RecentBookingActivityResponseDTO> {
+    return this._bookingRepository.getRecentActivity(vendorId);
   }
 
 }

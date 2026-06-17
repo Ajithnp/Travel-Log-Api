@@ -124,4 +124,17 @@ export class VendorController implements IVendorController {
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
+
+  dashboardRecentActivity = asyncHandler(async (req:Request, res:Response) :Promise<void> => {
+    const vendorId = req.user?.id;
+
+    const result = await this._vendorService.dashboardRecentActivity(vendorId);
+
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.VERIFICATION_FORM_UPLOAD_SUCCESSFULLY,
+      data: result,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
 }

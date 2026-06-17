@@ -352,5 +352,12 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       this._vendorController.dashboardChartsData.bind(this._vendorController),
     );
+
+    this._router.get(
+      '/dashboard/recent-activity',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorController.dashboardRecentActivity.bind(this._vendorController),
+    );
   }
 }

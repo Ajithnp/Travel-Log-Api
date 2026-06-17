@@ -19,6 +19,7 @@ import {
   PayoutScheduleOverviewStats,
   ScheduleBookingsResult,
   SchedulePayoutTotals,
+  RecentBookingActivityResult,
 } from '../interfaces/repository_interfaces/IBookingRepository';
 import {
   CommissionOverview,
@@ -954,7 +955,65 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         },
       ]);
       return result;
-  }
- 
+  };
 
+    async getRecentActivity(vendorId: string, limit:number = 5): Promise<RecentBookingActivityResult[]> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          vendorId: new mongoose.Types.ObjectId(vendorId),
+          paymentStatus: PAYMENT_STATUS.PAID,
+          bookingStatus: BOOKING_STATUS.CONFIRMED,
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from:         'users',
+          localField:   'userId',
+          foreignField: '_id',
+          as:           'user',
+          pipeline:     [{ $project: { name: 1, profile: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from:         'packages',
+          localField:   'packageId',
+          foreignField: '_id',
+          as:           'package',
+          pipeline:     [{ $project: { title: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from:         'schedulepackages',
+          localField:   'scheduleId',
+          foreignField: '_id',
+          as:           'schedule',
+          pipeline:     [{ $project: { startDate: 1, endDate: 1 } }],
+        },
+      },
+      { $addFields: {
+        user:     { $arrayElemAt: ['$user', 0] },
+        package:  { $arrayElemAt: ['$package', 0] },
+        schedule: { $arrayElemAt: ['$schedule', 0] },
+      }},
+      {
+        $project: {
+          _id:          0,
+          userName:     '$user.name',
+          packageTitle: '$package.title',
+          startDate:    '$schedule.startDate',
+          endDate:      '$schedule.endDate',
+          groupType:    '$groupType',
+          finalAmount:  '$finalAmount',
+          status:       '$bookingStatus',
+          createdAt:    1,
+        },
+      },
+    ])
+    return result;
+  };
 }
