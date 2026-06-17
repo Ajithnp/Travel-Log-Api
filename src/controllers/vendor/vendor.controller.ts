@@ -13,6 +13,7 @@ import {
   IVendorVerificationResponse,
   IVendorVerificationService,
 } from '../../interfaces/service_interfaces/vendor/IvendorVerificationService';
+import { Request, Response } from 'express';
 
 @injectable()
 export class VendorController implements IVendorController {
@@ -90,6 +91,19 @@ export class VendorController implements IVendorController {
     );
 
     const successResponse: IApiResponse<IVendorVerificationResponseDTO> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.VERIFICATION_FORM_UPLOAD_SUCCESSFULLY,
+      data: result,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getVendorSummaryStats = asyncHandler(async (req:Request, res:Response) :Promise<void> => {
+    const vendorId = req.user?.id;
+
+    const result = await this._vendorService.getSummaryStats(vendorId);
+
+    const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
       message: SUCCESS_MESSAGES.VERIFICATION_FORM_UPLOAD_SUCCESSFULLY,
       data: result,

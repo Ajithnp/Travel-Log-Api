@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe';
 import { BaseRepository } from './base.repository';
 import { ISchedule, ISchedulePopulated } from '../types/entities/schedule.entity';
-import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
+import { ISchedulePackageRepository, ScheduledStatsResult } from '../interfaces/repository_interfaces/ISchedulePackage';
 import SchedulePackageModel from '../models/schedule.model';
 import mongoose, { Types } from 'mongoose';
 import { PAYOUT_STATUS, SCHEDULE_STATUS, ScheduleStatus } from '../shared/constants/constants';
@@ -494,5 +494,81 @@ export class SchedulePackageRepository
       { payoutStatus: 'paid', payoutId },
       { new: true }
     );
+  };
+
+  async scheduledStatsByVendor(vendorId:string):Promise<ScheduledStatsResult> {
+
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          vendorId: toObjectId(vendorId)
+        }
+      },
+      {
+        $facet: {
+          total: [
+            { $match: { status: SCHEDULE_STATUS.COMPLETED } },
+            { $group: { _id: null, value: { $sum: 1 } } }
+          ],
+          currentMonth: [
+            {
+              $match: {
+                createdAt: { $gte: currentMonthStart },
+                status: {$in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT,SCHEDULE_STATUS.UPCOMING] }
+              }
+            },
+            { $group: { _id: null, value: { $sum: 1 } } }
+          ],
+          previousMonth: [
+            {
+              $match: {
+                createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd },
+                status: {$in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT,SCHEDULE_STATUS.UPCOMING] }
+
+              }
+            },
+            { $group: { _id: null, value: { $sum: 1 } } }
+          ],
+          activeSchedule: [
+            {
+              $match: {
+                status: {$in:[SCHEDULE_STATUS.ONGOING,SCHEDULE_STATUS.UPCOMING]}
+              }
+            },
+            { $count: "count" }
+          ],
+          ongoingSchedule: [
+            {
+              $match: {
+                status: {$in:[SCHEDULE_STATUS.ONGOING]}
+              }
+            },
+            { $count: "count" }
+          ]
+        }
+      }
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    const totalSchedule = result?.total?.[0]?.value || 0;
+    const currentMonthRevanue = result?.currentMonth?.[0]?.value || 0;
+    const previousMonthRevanue = result?.previousMonth?.[0]?.value || 0;
+    const activeSchedule = result?.activeSchedule?.[0]?.count || 0;
+    const ongoingSchedule = result?.ongoingSchedule?.[0]?.count || 0;
+
+    return {
+      totalSchedule,
+      currentMonthSchedule:currentMonthRevanue,
+      hasGrowth: currentMonthRevanue > previousMonthRevanue,
+      activeSchedule,
+      ongoingSchedule,
+      
+    };
   }
 }

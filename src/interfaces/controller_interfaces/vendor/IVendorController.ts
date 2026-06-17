@@ -6,4 +6,5 @@ export interface IVendorController {
   vendorVerificationSubmit: RequestHandler;
   getRejectedVendor: RequestHandler;
   vendorVerificationReapply: RequestHandler;
+  getVendorSummaryStats: RequestHandler;
 }

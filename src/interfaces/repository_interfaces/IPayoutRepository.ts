@@ -8,6 +8,7 @@ export interface IPayoutRepository extends IBaseRepository<IPayout>{
     payoutStats(): Promise<PayoutStatsResponseDto>;
     findAllPayouts(page: number, limit: number, search?: string, filter?: PayoutFilter): Promise<{ payouts: FindAllPayoutsResponseDto[], total: number }>;
     findAllPayoutsByVendor(vendorId: string, page: number, limit: number, search?: string, filter?: PayoutFilter): Promise<{ payouts: VendorPayoutsListResponseDto[], total: number }>;
+    revenueStatsByVendor(vendorId:string): Promise<VendorRevenueStats>;
 };
 
 export type PayoutFilter = PayoutStatus
@@ -24,3 +25,9 @@ export interface VendorPayoutsListResult {
     status:PayoutStatus;
     scheduledAt:Date;
 };
+
+export interface VendorRevenueStats {
+    totalRevanue : number;
+    currentMonthRevanue: number;
+    hasGrowth: boolean;
+}

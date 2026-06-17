@@ -338,5 +338,12 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       this._payoutController.findAllVendorPayouts.bind(this._payoutController),
     );
+    //==dashboard
+    this._router.get(
+      '/dashboard/summary',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorController.getVendorSummaryStats.bind(this._vendorController),
+    );
   }
 }

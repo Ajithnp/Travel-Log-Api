@@ -66,6 +66,9 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     scheduleId: string,
     payoutId: mongoose.Types.ObjectId
   ): Promise<ISchedule | null>;
+
+  scheduledStatsByVendor(vendorId:string):Promise<ScheduledStatsResult>;
+
 }
 
 export interface SchedulesResponseResult {
@@ -93,3 +96,10 @@ export interface PackageScheduleResult {
   status: string;
 }
 
+export interface ScheduledStatsResult{
+  totalSchedule:number;
+  currentMonthSchedule:number;
+  hasGrowth:boolean;
+  activeSchedule:number;
+  ongoingSchedule:number;
+}
