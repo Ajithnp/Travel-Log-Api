@@ -12,6 +12,7 @@ import { BOOKING_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
 import {
   PackageScheduleResult,
   SchedulesResponseResult,
+  UpcomingScheduleResult,
 } from '../interfaces/repository_interfaces/ISchedulePackage';
 import { PayoutScheduleListResponseDto } from 'interfaces/service_interfaces/IPayoutService';
 
@@ -570,5 +571,55 @@ export class SchedulePackageRepository
       ongoingSchedule,
       
     };
+  };
+
+  async getUpcomingSchedules(vendorId: string, limit: number = 5): Promise<UpcomingScheduleResult[]> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          vendorId: toObjectId(vendorId),
+          status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.ONGOING] },
+        },
+      },
+      { $sort: { startDate: 1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'packageId',
+          foreignField: '_id',
+          as: 'package',
+          pipeline: [{ $project: { title: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'scheduleId',
+          as: 'bookings',
+          pipeline: [{ $match: { bookingStatus: BOOKING_STATUS.CONFIRMED } } ],
+        },
+      },
+      {
+        $addFields: {
+          package: { $arrayElemAt: ['$package', 0] },
+          bookedCount: { $sum: '$bookings.travelerCount' },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          startDate: 1,
+          endDate: 1,
+          packageTitle: '$package.title',
+          status: 1,
+          bookedCount: 1,
+          totalSeats: 1,
+        },
+      },
+    ]);
+
+    return result;
   }
 }

@@ -350,7 +350,7 @@ export class VendorRoutes extends BaseRoute {
       '/dashboard/charts',
       isAuthenticated,
       authorize([USER_ROLES.VENDOR]),
-      this._vendorController.dashboardChartsData.bind(this._vendorController),
+      this._vendorController.dashboardAnalytics.bind(this._vendorController),
     );
 
     this._router.get(

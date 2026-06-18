@@ -1,6 +1,6 @@
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { inject, injectable } from 'tsyringe';
-import { DashboardChartResponseDTO, IVendorService, RecentBookingActivityResponseDTO, VendorDashBoardStatsDTO } from '../../interfaces/service_interfaces/vendor/IVendorService';
+import { ChartDataPoint, DashboardAnalyticsResponseDTO, IVendorService, RecentBookingActivityResponseDTO, VendorDashBoardStatsDTO } from '../../interfaces/service_interfaces/vendor/IVendorService';
 import { Types } from 'mongoose';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -11,13 +11,13 @@ import { VendorProfileResponseDTO } from '../../types/dtos/vendor/response.dtos'
 import { IFileStorageHandlerService } from '../../interfaces/service_interfaces/IFileStorageBusinessService';
 import { UpdateProfileLogoRequestDTO } from '../../validators/vendor/profile.validation';
 import { toObjectId } from '../../shared/utils/database/objectId.helper';
-import { getDateRangeByPeriod } from '../../shared/utils/date.helper';
+import { getDateRange, getGranularity } from '../../shared/utils/date.helper';
 import { IPayoutRepository } from '../../interfaces/repository_interfaces/IPayoutRepository';
 import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
 import { BOOKING_STATUS } from '../../shared/constants/booking';
 import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
-import { PACKAGE_STATUS, SCHEDULE_STATUS } from 'shared/constants/constants';
+import { PACKAGE_STATUS } from '../../shared/constants/constants';
 
 @injectable()
 export class VendorService implements IVendorService {
@@ -36,9 +36,7 @@ export class VendorService implements IVendorService {
     private _packageRepository: IBasePackageRepository,
     @inject('ISchedulePackageRepository')
     private _scheduleRepository: ISchedulePackageRepository,
-
-
-  ) {}
+  ) { }
 
   async profile(userId: string): Promise<VendorProfileResponseDTO> {
     const vendorDoc = await this._vendorInfoRepository.findVendorWithUserId(userId);
@@ -104,16 +102,16 @@ export class VendorService implements IVendorService {
     });
   };
 
-  async getSummaryStats(vendorId:string):Promise<VendorDashBoardStatsDTO> {
-     
-    const vendor =  await this._userRepository.findOne({_id:toObjectId(vendorId)});
-    if(!vendor) throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+  async getSummaryStats(vendorId: string): Promise<VendorDashBoardStatsDTO> {
+
+    const vendor = await this._userRepository.findOne({ _id: toObjectId(vendorId) });
+    if (!vendor) throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
 
     const [revanueStats, totalBookings, totalPackages, scheduleStats] = await Promise.all([
-       this._payoutRepository.revenueStatsByVendor(vendorId),
-       this._bookingRepository.countDocuments({vendorId:vendorId,bookingStatus:{$in:[BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]}}),
-       this._packageRepository.countDocuments({userId:vendorId, status:PACKAGE_STATUS.PUBLISHED}),
-       this._scheduleRepository.scheduledStatsByVendor(vendorId),
+      this._payoutRepository.revenueStatsByVendor(vendorId),
+      this._bookingRepository.countDocuments({ vendorId: vendorId, bookingStatus: { $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED] } }),
+      this._packageRepository.countDocuments({ vendorId: vendorId, status: PACKAGE_STATUS.PUBLISHED, isActive: true }),
+      this._scheduleRepository.scheduledStatsByVendor(vendorId),
 
     ])
     return {
@@ -124,23 +122,40 @@ export class VendorService implements IVendorService {
     }
   };
 
-  async dashboardChartsData(vendorId: string, period: string): Promise<DashboardChartResponseDTO> {
-    const { from, now } = getDateRangeByPeriod(period);
-
-    const [revenueTrend, bookingsByPackage] = await Promise.all([
-      this._bookingRepository.getDailyRevenueStats(vendorId, from, now),
+  async getDashboardAnalytics(vendorId: string, period: string, customFrom?: Date, customTo?: Date): Promise<DashboardAnalyticsResponseDTO> {
+    const { from, now } = getDateRange(period, customFrom, customTo);
+    const granularity = getGranularity(from, now, period);
+    
+    const [rawTrend, bookingsByPackage] = await Promise.all([
+      this._bookingRepository.getAnalytics(vendorId, from, now, granularity),
       this._bookingRepository.getTopPerformingPackages(vendorId)
     ]);
 
+    const trend: ChartDataPoint[] = rawTrend.map((r) => ({
+      date: r._id,
+      bookings: r.count,
+      revenue: Math.round(r.revenue),
+    }));
+
     return {
-      bookingsOverTime:  revenueTrend.map(r => ({ date: r._id, count: r.count })),
-      revenueOverTime:   revenueTrend.map(r => ({ date: r._id, amount: Math.round(r.revenue) })),
+      granularity,
+      trend,
       bookingsByPackage: bookingsByPackage
     };
   }
 
-  async dashboardRecentActivity(vendorId:string):Promise<RecentBookingActivityResponseDTO> {
-    return this._bookingRepository.getRecentActivity(vendorId);
+  async dashboardRecentActivity(vendorId: string): Promise<RecentBookingActivityResponseDTO> {
+
+    const [bookings, schedules] = await Promise.all([
+      this._bookingRepository.getRecentActivity(vendorId),
+      this._scheduleRepository.getUpcomingSchedules(vendorId),
+    ]);
+
+    return {
+      bookings,
+      schedules
+    };
   }
+
 
 }

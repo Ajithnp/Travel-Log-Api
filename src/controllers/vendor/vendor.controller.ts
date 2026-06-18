@@ -105,21 +105,21 @@ export class VendorController implements IVendorController {
 
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
-      message: SUCCESS_MESSAGES.VERIFICATION_FORM_UPLOAD_SUCCESSFULLY,
+      message: SUCCESS_MESSAGES.OK,
       data: result,
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  dashboardChartsData = asyncHandler(async (req:Request, res:Response) :Promise<void> => {
+  dashboardAnalytics = asyncHandler(async (req:Request, res:Response) :Promise<void> => {
     const vendorId = req.user?.id;
-    const period   = req.query.period as string;
+    const {period, start, end } = req.query;
 
-    const result = await this._vendorService.dashboardChartsData(vendorId, period);
+    const result = await this._vendorService.getDashboardAnalytics(vendorId, period as string, start ? new Date(start as string) : undefined,end ? new Date(end as string) : undefined);
 
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
-      message: SUCCESS_MESSAGES.VERIFICATION_FORM_UPLOAD_SUCCESSFULLY,
+      message: SUCCESS_MESSAGES.OK,
       data: result,
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
@@ -132,7 +132,7 @@ export class VendorController implements IVendorController {
 
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
-      message: SUCCESS_MESSAGES.VERIFICATION_FORM_UPLOAD_SUCCESSFULLY,
+      message: SUCCESS_MESSAGES.OK,
       data: result,
     };
     res.status(HTTP_STATUS.OK).json(successResponse);

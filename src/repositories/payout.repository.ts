@@ -284,6 +284,7 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     return {
       totalRevanue,
       currentMonthRevanue,
+      previousMonthRevanue,
       hasGrowth: currentMonthRevanue > previousMonthRevanue
     };
   }

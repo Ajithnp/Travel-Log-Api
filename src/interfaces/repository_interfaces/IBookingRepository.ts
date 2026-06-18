@@ -111,7 +111,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   payoutOverviewByScheduleId(scheduleId:string): Promise<PayoutScheduleOverviewStats >;
 
-  getDailyRevenueStats(vendorId: string, from: Date, to: Date): Promise<Array<{ _id: string; count: number; revenue: number }>>;
+  getAnalytics(vendorId: string, from: Date, to: Date,granularity:string): Promise<AnalyticsDataPoint[]>;
   
   getTopPerformingPackages(vendorId: string, limit?: number): Promise<Array<{ packageTitle: string; bookingCount: number }>>;
 
@@ -168,12 +168,20 @@ export interface BookingStatsResult {
 };
 
 export interface RecentBookingActivityResult {
+  id:string;
   userName: string;
   packageTitle: string;
   startDate: Date;
   endDate: Date;
   groupType: GroupType;
+  travellerCount:number;
   finalAmount: number;
   status: BookingStatus;
   createdAt: Date;
+}
+
+export interface AnalyticsDataPoint {
+  _id: string;
+  count: number;
+  revenue: number;
 }

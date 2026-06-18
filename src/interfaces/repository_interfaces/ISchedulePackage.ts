@@ -69,6 +69,8 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
 
   scheduledStatsByVendor(vendorId:string):Promise<ScheduledStatsResult>;
 
+  getUpcomingSchedules(vendorId: string, limit?: number): Promise<UpcomingScheduleResult[]>;
+
 }
 
 export interface SchedulesResponseResult {
@@ -102,4 +104,14 @@ export interface ScheduledStatsResult{
   hasGrowth:boolean;
   activeSchedule:number;
   ongoingSchedule:number;
+}
+
+export interface UpcomingScheduleResult {
+  _id: string;
+  startDate: Date;
+  endDate: Date;
+  packageTitle: string;
+  status: ScheduleStatus;
+  bookedCount: number;
+  totalSeats: number;
 }

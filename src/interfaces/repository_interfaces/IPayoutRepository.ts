@@ -29,5 +29,6 @@ export interface VendorPayoutsListResult {
 export interface VendorRevenueStats {
     totalRevanue : number;
     currentMonthRevanue: number;
+    previousMonthRevanue: number;
     hasGrowth: boolean;
 }
