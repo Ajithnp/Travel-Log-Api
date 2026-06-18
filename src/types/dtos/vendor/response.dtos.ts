@@ -136,3 +136,5 @@ export interface ScheduleBookingSingleDetailDTO {
 export interface ScheduleStatusResponseDTO {
   status: ScheduleStatus;
 }
+
+

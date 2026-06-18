@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import { BaseRepository } from "./base.repository";
 import mongoose, { FilterQuery } from "mongoose";
-import { IPayoutRepository, PayoutFilter, VendorPayoutsListResult } from "../interfaces/repository_interfaces/IPayoutRepository";
+import { IPayoutRepository, PayoutFilter, VendorPayoutsListResult, VendorRevenueStats } from "../interfaces/repository_interfaces/IPayoutRepository";
 import { FindAllPayoutsResponseDto, PayoutStatsResponseDto } from "../interfaces/service_interfaces/IPayoutService";
 import { PayoutModel } from "../models/payout.model";
 import { IPayout } from "../types/entities/payout.entity";
@@ -236,6 +236,59 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
       payouts: result?.data || [],
       total: result?.metadata[0]?.total || 0,
     };
+  };
+
+  async revenueStatsByVendor(vendorId: string): Promise<VendorRevenueStats> {
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          vendorId: toObjectId(vendorId)
+        }
+      },
+      {
+        $facet: {
+          total: [
+            { $group: { _id: null, value: { $sum: "$netAmount" } } }
+          ],
+          currentMonth: [
+            {
+              $match: {
+                createdAt: { $gte: currentMonthStart }
+              }
+            },
+            { $group: { _id: null, value: { $sum: "$netAmount" } } }
+          ],
+          previousMonth: [
+            {
+              $match: {
+                createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd }
+              }
+            },
+            { $group: { _id: null, value: { $sum: "$netAmount" } } }
+          ]
+        }
+      }
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    const totalRevanue = result?.total?.[0]?.value || 0;
+    const currentMonthRevanue = result?.currentMonth?.[0]?.value || 0;
+    const previousMonthRevanue = result?.previousMonth?.[0]?.value || 0;
+
+    return {
+      totalRevanue,
+      currentMonthRevanue,
+      previousMonthRevanue,
+      hasGrowth: currentMonthRevanue > previousMonthRevanue
+    };
   }
+
+  
 
 }

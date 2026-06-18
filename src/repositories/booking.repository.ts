@@ -19,6 +19,8 @@ import {
   PayoutScheduleOverviewStats,
   ScheduleBookingsResult,
   SchedulePayoutTotals,
+  RecentBookingActivityResult,
+  AnalyticsDataPoint,
 } from '../interfaces/repository_interfaces/IBookingRepository';
 import {
   CommissionOverview,
@@ -28,6 +30,7 @@ import mongoose, { ClientSession, Types } from 'mongoose';
 import { BOOKING_STATUS, CANCELATION_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
 import { FilterQuery } from 'mongoose';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
+import { Granularity, GRANULARITY_FORMAT } from '../shared/utils/date.helper';
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
@@ -898,4 +901,135 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     };
   };
 
+
+  async getAnalytics(
+    vendorId: string,
+    from: Date,
+    to: Date,
+    granularity: Granularity
+  ): Promise<AnalyticsDataPoint[]> {
+    return this.model.aggregate([
+      {
+        $match: {
+          vendorId: new mongoose.Types.ObjectId(vendorId),
+          paymentStatus: PAYMENT_STATUS.PAID,
+          bookingStatus: { $in: [BOOKING_STATUS.CONFIRMED, BOOKING_STATUS.COMPLETED] },
+          createdAt: { $gte: from, $lte: to },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: GRANULARITY_FORMAT[granularity],
+              date: '$createdAt',
+            },
+          },
+          count: { $sum: 1 },
+          revenue: { $sum: '$vendorEarning' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+  }
+
+  async getTopPerformingPackages(vendorId: string, limit: number = 5): Promise<Array<{ packageTitle: string; bookingCount: number }>> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          vendorId: new mongoose.Types.ObjectId(vendorId),
+          paymentStatus: PAYMENT_STATUS.PAID,
+          bookingStatus: BOOKING_STATUS.COMPLETED
+        },
+      },
+      {
+        $group: {
+          _id: '$packageId',
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'pkg',
+        },
+      },
+      { $addFields: { pkg: { $arrayElemAt: ['$pkg', 0] } } },
+      {
+        $project: {
+          packageTitle: { $ifNull: ['$pkg.title', 'Unknown'] },
+          bookingCount: '$count',
+        },
+      },
+    ]);
+    return result;
+  };
+
+  async getRecentActivity(vendorId: string, limit: number = 5): Promise<RecentBookingActivityResult[]> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          vendorId: new mongoose.Types.ObjectId(vendorId),
+          paymentStatus: PAYMENT_STATUS.PAID,
+          bookingStatus: BOOKING_STATUS.CONFIRMED,
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+          pipeline: [{ $project: { name: 1, profile: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'packageId',
+          foreignField: '_id',
+          as: 'package',
+          pipeline: [{ $project: { title: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: 'scheduleId',
+          foreignField: '_id',
+          as: 'schedule',
+          pipeline: [{ $project: { startDate: 1, endDate: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          user: { $arrayElemAt: ['$user', 0] },
+          package: { $arrayElemAt: ['$package', 0] },
+          schedule: { $arrayElemAt: ['$schedule', 0] },
+        }
+      },
+      {
+        $project: {
+          id: "$_id",
+          _id: 0,
+          userName: '$user.name',
+          packageTitle: '$package.title',
+          startDate: '$schedule.startDate',
+          endDate: '$schedule.endDate',
+          groupType: '$groupType',
+          travellerCount: '$travellerCount',
+          finalAmount: '$finalAmount',
+          status: '$bookingStatus',
+          createdAt: 1,
+        },
+      },
+    ])
+    return result;
+  };
 }

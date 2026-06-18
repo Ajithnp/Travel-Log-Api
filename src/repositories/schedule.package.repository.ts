@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe';
 import { BaseRepository } from './base.repository';
 import { ISchedule, ISchedulePopulated } from '../types/entities/schedule.entity';
-import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
+import { ISchedulePackageRepository, ScheduledStatsResult } from '../interfaces/repository_interfaces/ISchedulePackage';
 import SchedulePackageModel from '../models/schedule.model';
 import mongoose, { Types } from 'mongoose';
 import { PAYOUT_STATUS, SCHEDULE_STATUS, ScheduleStatus } from '../shared/constants/constants';
@@ -12,6 +12,7 @@ import { BOOKING_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
 import {
   PackageScheduleResult,
   SchedulesResponseResult,
+  UpcomingScheduleResult,
 } from '../interfaces/repository_interfaces/ISchedulePackage';
 import { PayoutScheduleListResponseDto } from 'interfaces/service_interfaces/IPayoutService';
 
@@ -494,5 +495,131 @@ export class SchedulePackageRepository
       { payoutStatus: 'paid', payoutId },
       { new: true }
     );
+  };
+
+  async scheduledStatsByVendor(vendorId:string):Promise<ScheduledStatsResult> {
+
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          vendorId: toObjectId(vendorId)
+        }
+      },
+      {
+        $facet: {
+          total: [
+            { $match: { status: SCHEDULE_STATUS.COMPLETED } },
+            { $group: { _id: null, value: { $sum: 1 } } }
+          ],
+          currentMonth: [
+            {
+              $match: {
+                createdAt: { $gte: currentMonthStart },
+                status: {$in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT,SCHEDULE_STATUS.UPCOMING] }
+              }
+            },
+            { $group: { _id: null, value: { $sum: 1 } } }
+          ],
+          previousMonth: [
+            {
+              $match: {
+                createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd },
+                status: {$in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT,SCHEDULE_STATUS.UPCOMING] }
+
+              }
+            },
+            { $group: { _id: null, value: { $sum: 1 } } }
+          ],
+          activeSchedule: [
+            {
+              $match: {
+                status: {$in:[SCHEDULE_STATUS.ONGOING,SCHEDULE_STATUS.UPCOMING]}
+              }
+            },
+            { $count: "count" }
+          ],
+          ongoingSchedule: [
+            {
+              $match: {
+                status: {$in:[SCHEDULE_STATUS.ONGOING]}
+              }
+            },
+            { $count: "count" }
+          ]
+        }
+      }
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    const totalSchedule = result?.total?.[0]?.value || 0;
+    const currentMonthRevanue = result?.currentMonth?.[0]?.value || 0;
+    const previousMonthRevanue = result?.previousMonth?.[0]?.value || 0;
+    const activeSchedule = result?.activeSchedule?.[0]?.count || 0;
+    const ongoingSchedule = result?.ongoingSchedule?.[0]?.count || 0;
+
+    return {
+      totalSchedule,
+      currentMonthSchedule:currentMonthRevanue,
+      hasGrowth: currentMonthRevanue > previousMonthRevanue,
+      activeSchedule,
+      ongoingSchedule,
+      
+    };
+  };
+
+  async getUpcomingSchedules(vendorId: string, limit: number = 5): Promise<UpcomingScheduleResult[]> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          vendorId: toObjectId(vendorId),
+          status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.ONGOING] },
+        },
+      },
+      { $sort: { startDate: 1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'packageId',
+          foreignField: '_id',
+          as: 'package',
+          pipeline: [{ $project: { title: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'scheduleId',
+          as: 'bookings',
+          pipeline: [{ $match: { bookingStatus: BOOKING_STATUS.CONFIRMED } } ],
+        },
+      },
+      {
+        $addFields: {
+          package: { $arrayElemAt: ['$package', 0] },
+          bookedCount: { $sum: '$bookings.travelerCount' },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          startDate: 1,
+          endDate: 1,
+          packageTitle: '$package.title',
+          status: 1,
+          bookedCount: 1,
+          totalSeats: 1,
+        },
+      },
+    ]);
+
+    return result;
   }
 }
