@@ -71,6 +71,8 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
 
   getUpcomingSchedules(vendorId: string, limit?: number): Promise<UpcomingScheduleResult[]>;
 
+  getScheduleStats(): Promise<{ activeSchedules: number; completedSchedules: number }> 
+
 }
 
 export interface SchedulesResponseResult {

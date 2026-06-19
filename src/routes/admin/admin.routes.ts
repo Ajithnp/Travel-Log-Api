@@ -28,10 +28,13 @@ import { couponTemplateRequestSchema } from '../../validators/coupon.validation'
 import { ICouponController } from '../../interfaces/controller_interfaces/ICouponController';
 import { IAdminFinanceController } from '../../interfaces/controller_interfaces/admin/IAdminFinanceController';
 import { IPayoutController } from '../../interfaces/controller_interfaces/IPayoutContoller';
+import { IAdminController } from '../../interfaces/controller_interfaces/admin/IAdminController';
 
 @injectable()
 export class AdminRoutes extends BaseRoute {
   constructor(
+    @inject('IAdminController')
+    private _adminController: IAdminController,
     @inject('IAdminUserController')
     private _adminUserContoller: IAdminUserController,
     @inject('IAdminVendorController')
@@ -351,6 +354,13 @@ export class AdminRoutes extends BaseRoute {
     isAuthenticated,
     authorize([USER_ROLES.ADMIN]),
     this._payoutController.findAllPayouts.bind(this._payoutController),
+   );
+   // dashboard
+    this._router.get(
+    '/dashboard/stats',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._adminController.dashboardStats.bind(this._adminController),
    );
 
     

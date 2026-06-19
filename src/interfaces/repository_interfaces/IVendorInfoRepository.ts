@@ -12,6 +12,8 @@ import { PaginatedCommissionOverviewByVendors } from '../../interfaces/service_i
 export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
   findVendorWithUserId(userId: string): Promise<IVendorInfoPopulated | null>;
 
+  findActivevendors(): Promise<number>
+
   findVendors(
     vendorSearchQuery: FilterQuery<IUser>,
     vendorFilter: FilterQuery<IUser>,

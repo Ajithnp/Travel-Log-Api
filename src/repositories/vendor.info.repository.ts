@@ -18,8 +18,7 @@ import { toObjectId } from '../shared/utils/database/objectId.helper';
 @injectable()
 export class VendorInfoRepository
   extends BaseRepository<IVendorInfo>
-  implements IVendorInfoRepository
-{
+  implements IVendorInfoRepository {
   constructor() {
     super(VendorInformationModel);
   }
@@ -39,18 +38,18 @@ export class VendorInfoRepository
     ).exec();
   }
 
-  async updateStripeAccountStatus(vendorId: string, onboardingComplete:boolean, chargesEnabled: boolean, payoutsEnabled: boolean): Promise<void> {
-  await this.model.updateOne(
-    { userId: toObjectId(vendorId) },
-    { 
-      'transactionConnect.onboardingComplete': onboardingComplete,
-      'transactionConnect.chargesEnabled': chargesEnabled,
-      'transactionConnect.payoutsEnabled': payoutsEnabled 
-    }
-  ).exec();
-}
+  async updateStripeAccountStatus(vendorId: string, onboardingComplete: boolean, chargesEnabled: boolean, payoutsEnabled: boolean): Promise<void> {
+    await this.model.updateOne(
+      { userId: toObjectId(vendorId) },
+      {
+        'transactionConnect.onboardingComplete': onboardingComplete,
+        'transactionConnect.chargesEnabled': chargesEnabled,
+        'transactionConnect.payoutsEnabled': payoutsEnabled
+      }
+    ).exec();
+  }
 
-async findVendors(
+  async findVendors(
     vendorSearchQuery: FilterQuery<IUser>,
     vendorFilter: FilterQuery<IUser>,
     options: CustomQueryOptions = { skip: 0, limit: 10, sort: { createdAt: -1 } },
@@ -137,16 +136,16 @@ async findVendors(
   };
 
   async getCommissionOverviewByVendors(
-      page: number,
-      limit: number,
-      search?: string,
-    ): Promise<PaginatedCommissionOverviewByVendors> {
-      const skip = (page - 1) * limit;
-  
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<PaginatedCommissionOverviewByVendors> {
+    const skip = (page - 1) * limit;
+
     const pipeline: mongoose.PipelineStage[] = [
       {
         $match: {
-          isProfileVerified:true,
+          isProfileVerified: true,
         },
       },
       {
@@ -197,7 +196,7 @@ async findVendors(
           as: 'vendorSchedules',
         },
       },
-            {
+      {
         $lookup: {
           from: 'users',
           localField: 'userId',
@@ -224,63 +223,89 @@ async findVendors(
         },
       },
     ];
-  
-      if (search) {
-        pipeline.push({
-          $match: {
-            vendorName: { $regex: search, $options: 'i' },
-          },
-        });
-      }
 
+    if (search) {
       pipeline.push({
-        $sort: { totalGrossAmount: -1 },
-      });
-  
-      pipeline.push({
-        $project: {
-          _id: 0,
-          vendorName: 1,
-          totalPackages: 1,
-          totalCompletedSchedules: 1,
-          totalBookings: 1,
-          totalGrossAmount: 1,
-          totalPlatformCommission: 1,
-          totalVendorEarnings: 1,
+        $match: {
+          vendorName: { $regex: search, $options: 'i' },
         },
       });
-  
-      pipeline.push({
-        $facet: {
-          metadata: [{ $count: 'totalDocs' }],
-          data: [{ $skip: skip }, { $limit: limit }],
-          totals: [
-            {
-              $group: {
-                _id: null,
-                totalBookings: { $sum: '$totalBookings' },
-                totalSchedules: { $sum: '$totalCompletedSchedules' },
-              },
-            },
-          ],
-        },
-      });
-  
-    const [result] = await this.model.aggregate(pipeline);
-  
-    const totalDocs = result?.metadata?.[0]?.totalDocs || 0;
-    const totals = result?.totals?.[0] || { totalBookings: 0, totalSchedules: 0 };
-  
-      return {
-        data: result?.data || [],
-        page,
-        limit,
-        totalPages: Math.ceil(totalDocs / limit),
-        totalDocs,
-        totalBookings: totals.totalBookings || 0,
-        totalScedules: totals.totalSchedules || 0,
-      };
     }
 
+    pipeline.push({
+      $sort: { totalGrossAmount: -1 },
+    });
+
+    pipeline.push({
+      $project: {
+        _id: 0,
+        vendorName: 1,
+        totalPackages: 1,
+        totalCompletedSchedules: 1,
+        totalBookings: 1,
+        totalGrossAmount: 1,
+        totalPlatformCommission: 1,
+        totalVendorEarnings: 1,
+      },
+    });
+
+    pipeline.push({
+      $facet: {
+        metadata: [{ $count: 'totalDocs' }],
+        data: [{ $skip: skip }, { $limit: limit }],
+        totals: [
+          {
+            $group: {
+              _id: null,
+              totalBookings: { $sum: '$totalBookings' },
+              totalSchedules: { $sum: '$totalCompletedSchedules' },
+            },
+          },
+        ],
+      },
+    });
+
+    const [result] = await this.model.aggregate(pipeline);
+
+    const totalDocs = result?.metadata?.[0]?.totalDocs || 0;
+    const totals = result?.totals?.[0] || { totalBookings: 0, totalSchedules: 0 };
+
+    return {
+      data: result?.data || [],
+      page,
+      limit,
+      totalPages: Math.ceil(totalDocs / limit),
+      totalDocs,
+      totalBookings: totals.totalBookings || 0,
+      totalScedules: totals.totalSchedules || 0,
+    };
+  }
+
+  async findActivevendors(): Promise<number> {
+    const result = await this.model.aggregate([
+      {
+        $match: { isProfileVerified: true }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $match: { 'user.isBlocked': false }
+      },
+      {
+        $count: 'activeVendors'
+      }
+    ]);
+
+    return result[0]?.activeVendors || 0;
+  }
 
 }

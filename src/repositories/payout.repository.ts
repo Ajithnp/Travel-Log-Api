@@ -289,6 +289,23 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     };
   }
 
-  
+  async getTotalEarnings(): Promise<{ totalVendorEarnings: number; totalCommission: number; totalBookings: number }> {
+    const [result] = await this.model.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalVendorEarnings: { $sum: '$netAmount' },
+          totalCommission: { $sum: '$commissionAmount' },
+          totalBookings: { $sum: { $size: '$bookingIds' } },
+        }
+      }
+    ]);
+
+    return {
+      totalVendorEarnings: result?.totalVendorEarnings || 0,
+      totalCommission: result?.totalCommission || 0,
+      totalBookings: result?.totalBookings || 0,
+    };
+  }
 
 }
