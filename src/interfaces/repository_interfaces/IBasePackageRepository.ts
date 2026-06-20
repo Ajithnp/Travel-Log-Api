@@ -56,6 +56,8 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
       limit: number,
       search?: string,
     ): Promise<PaginatedData<PackagesEarningsByVendor>>  
+
+  
 }
 
 export interface AdminPackageDetailsResult {
@@ -149,3 +151,4 @@ export interface IPackageListItem {
   offerPercentage: number;
   scheduleCount: number;
 }
+

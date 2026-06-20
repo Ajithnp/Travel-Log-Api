@@ -25,4 +25,41 @@ export class AdminController implements IAdminController {
 
         res.status(HTTP_STATUS.OK).json(successResponse);
     });
+
+    dashboardTopPerformers = expressAsyncHandler(async (req: Request, res: Response):Promise<void> => {
+        const result = await this._adminService.dashboardTopPerformers();
+
+        const successResponse: IApiResponse<typeof result> = {
+            success: SUCCESS_STATUS.SUCCESS,
+            message: SUCCESS_MESSAGES.OK,
+            data: result,
+        };
+
+        res.status(HTTP_STATUS.OK).json(successResponse);
+    });
+
+    dashboardActionsRequired = expressAsyncHandler(async (req: Request, res: Response):Promise<void> => {
+        const result = await this._adminService.dashboardActionsRequired();
+
+        const successResponse: IApiResponse<typeof result> = {
+            success: SUCCESS_STATUS.SUCCESS,
+            message: SUCCESS_MESSAGES.OK,
+            data: result,
+        };
+
+        res.status(HTTP_STATUS.OK).json(successResponse);
+    });
+
+    dashboardRevenueTrend = expressAsyncHandler(async (req: Request, res: Response):Promise<void> => {
+        const { period, customFrom, customTo } = req.query as { period: string; customFrom?: string; customTo?: string };
+        const result = await this._adminService.dashboardRevenueTrend(period || 'week', customFrom, customTo);
+
+        const successResponse: IApiResponse<typeof result> = {
+            success: SUCCESS_STATUS.SUCCESS,
+            message: SUCCESS_MESSAGES.OK,
+            data: result,
+        };
+
+        res.status(HTTP_STATUS.OK).json(successResponse);
+    });
 }

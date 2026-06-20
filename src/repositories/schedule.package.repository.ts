@@ -333,6 +333,27 @@ export class SchedulePackageRepository
     return { schedules, total };
   }
 
+  async getPayoutSchedulesCount(): Promise<number> {
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          status: SCHEDULE_STATUS.COMPLETED,
+          payoutStatus: PAYOUT_STATUS.PENDING,
+          endDate: { $lte: twoDaysAgo },
+        },
+      },
+      {
+        $count: 'count',
+      },
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+    return result?.count || 0;
+  }
+
   async getSchedulesForPayout(
     page: number,
     limit: number,

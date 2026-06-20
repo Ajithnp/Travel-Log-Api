@@ -56,6 +56,8 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     search?: string,
   ): Promise<{ schedules: SchedulesResponseResult[]; total: number }>;
    
+  getPayoutSchedulesCount(): Promise<number>;
+   
   getSchedulesForPayout(
     page: number,
     limit: number,

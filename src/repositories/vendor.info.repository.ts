@@ -1,6 +1,6 @@
 import { VendorInformationModel } from '../models/vendor.info.model';
 import mongoose, { FilterQuery, PipelineStage } from 'mongoose';
-import { IVendorInfoRepository } from 'interfaces/repository_interfaces/IVendorInfoRepository';
+import { IVendorInfoRepository, TopPerformingVendorsResult } from 'interfaces/repository_interfaces/IVendorInfoRepository';
 import { BaseRepository } from './base.repository';
 import { injectable } from 'tsyringe';
 import {
@@ -306,6 +306,49 @@ export class VendorInfoRepository
     ]);
 
     return result[0]?.activeVendors || 0;
+  };
+
+  async findTop5Vendors(): Promise<TopPerformingVendorsResult[]> {
+    const result = await this.model.aggregate([
+      {
+        $match: { isProfileVerified: true },
+      },
+      {
+        $lookup: {
+          from: 'payouts',
+          localField: 'userId',
+          foreignField: 'vendorId',
+          as: 'payouts',
+        },
+      },
+      {
+        $addFields: {
+          totalRevenue: { $sum: '$payouts.commissionAmount' },
+        },
+      },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $addFields: { user: { $arrayElemAt: ['$user', 0] } } },
+      {
+        $project: {
+          _id: 0,
+          vendorId: '$userId',
+          vendorName: { $ifNull: ['$user.name', 'Unknown Vendor'] },
+          totalRevenue: 1,
+        },
+      },
+    ]);
+
+    return result;
   }
 
 }

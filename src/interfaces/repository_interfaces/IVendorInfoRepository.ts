@@ -36,4 +36,13 @@ export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
   ): Promise<IVendorInfoWithUser[]>;
 
   getCommissionOverviewByVendors(page:number,limit:number,search?:string): Promise<PaginatedCommissionOverviewByVendors>;
+
+  findTop5Vendors(): Promise<TopPerformingVendorsResult[]>;
 }
+
+export interface TopPerformingVendorsResult {
+  vendorId: string;
+  vendorName:string;
+  totalRevenue:number;
+}
+  

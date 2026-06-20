@@ -363,6 +363,28 @@ export class AdminRoutes extends BaseRoute {
     this._adminController.dashboardStats.bind(this._adminController),
    );
 
+   this._router.get(
+    '/dashboard/top-performers',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._adminController.dashboardTopPerformers.bind(this._adminController),
+   );
+
+   this._router.get(
+    '/dashboard/actions-required',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._adminController.dashboardActionsRequired.bind(this._adminController),
+   );
+
+  this._router.get(
+    '/dashboard/revenue-trend',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._adminController.dashboardRevenueTrend.bind(this._adminController),
+   );
+
+
     
   }
 }
