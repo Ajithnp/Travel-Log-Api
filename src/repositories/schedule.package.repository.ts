@@ -333,6 +333,27 @@ export class SchedulePackageRepository
     return { schedules, total };
   }
 
+  async getPayoutSchedulesCount(): Promise<number> {
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: {
+          status: SCHEDULE_STATUS.COMPLETED,
+          payoutStatus: PAYOUT_STATUS.PENDING,
+          endDate: { $lte: twoDaysAgo },
+        },
+      },
+      {
+        $count: 'count',
+      },
+    ];
+
+    const [result] = await this.model.aggregate(pipeline);
+    return result?.count || 0;
+  }
+
   async getSchedulesForPayout(
     page: number,
     limit: number,
@@ -497,7 +518,7 @@ export class SchedulePackageRepository
     );
   };
 
-  async scheduledStatsByVendor(vendorId:string):Promise<ScheduledStatsResult> {
+  async scheduledStatsByVendor(vendorId: string): Promise<ScheduledStatsResult> {
 
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -520,7 +541,7 @@ export class SchedulePackageRepository
             {
               $match: {
                 createdAt: { $gte: currentMonthStart },
-                status: {$in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT,SCHEDULE_STATUS.UPCOMING] }
+                status: { $in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.UPCOMING] }
               }
             },
             { $group: { _id: null, value: { $sum: 1 } } }
@@ -529,7 +550,7 @@ export class SchedulePackageRepository
             {
               $match: {
                 createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd },
-                status: {$in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT,SCHEDULE_STATUS.UPCOMING] }
+                status: { $in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.UPCOMING] }
 
               }
             },
@@ -538,7 +559,7 @@ export class SchedulePackageRepository
           activeSchedule: [
             {
               $match: {
-                status: {$in:[SCHEDULE_STATUS.ONGOING,SCHEDULE_STATUS.UPCOMING]}
+                status: { $in: [SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.UPCOMING] }
               }
             },
             { $count: "count" }
@@ -546,7 +567,7 @@ export class SchedulePackageRepository
           ongoingSchedule: [
             {
               $match: {
-                status: {$in:[SCHEDULE_STATUS.ONGOING]}
+                status: { $in: [SCHEDULE_STATUS.ONGOING] }
               }
             },
             { $count: "count" }
@@ -565,11 +586,11 @@ export class SchedulePackageRepository
 
     return {
       totalSchedule,
-      currentMonthSchedule:currentMonthRevanue,
+      currentMonthSchedule: currentMonthRevanue,
       hasGrowth: currentMonthRevanue > previousMonthRevanue,
       activeSchedule,
       ongoingSchedule,
-      
+
     };
   };
 
@@ -598,7 +619,7 @@ export class SchedulePackageRepository
           localField: '_id',
           foreignField: 'scheduleId',
           as: 'bookings',
-          pipeline: [{ $match: { bookingStatus: BOOKING_STATUS.CONFIRMED } } ],
+          pipeline: [{ $match: { bookingStatus: BOOKING_STATUS.CONFIRMED } }],
         },
       },
       {
@@ -621,5 +642,33 @@ export class SchedulePackageRepository
     ]);
 
     return result;
+  }
+
+  async getScheduleStats(): Promise<{ activeSchedules: number; completedSchedules: number }> {
+    const [result] = await this.model.aggregate([
+      {
+        $facet: {
+          active: [
+            {
+              $match: {
+                status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.ONGOING] },
+              },
+            },
+            { $count: 'count' },
+          ],
+          completed: [
+            {
+              $match: { status: SCHEDULE_STATUS.COMPLETED },
+            },
+            { $count: 'count' },
+          ],
+        },
+      },
+    ]);
+
+    return {
+      activeSchedules: result?.active?.[0]?.count || 0,
+      completedSchedules: result?.completed?.[0]?.count || 0,
+    };
   }
 }

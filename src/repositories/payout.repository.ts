@@ -1,12 +1,13 @@
 import { injectable } from "tsyringe";
 import { BaseRepository } from "./base.repository";
 import mongoose, { FilterQuery } from "mongoose";
-import { IPayoutRepository, PayoutFilter, VendorPayoutsListResult, VendorRevenueStats } from "../interfaces/repository_interfaces/IPayoutRepository";
+import { IPayoutRepository, PayoutFilter, PlatformRevenueTrendResult, TopPerfomingPackagesResult, VendorPayoutsListResult, VendorRevenueStats } from "../interfaces/repository_interfaces/IPayoutRepository";
 import { FindAllPayoutsResponseDto, PayoutStatsResponseDto } from "../interfaces/service_interfaces/IPayoutService";
 import { PayoutModel } from "../models/payout.model";
 import { IPayout } from "../types/entities/payout.entity";
 import { PAYOUT_STATUS } from "../shared/constants/constants";
 import { toObjectId } from "../shared/utils/database/objectId.helper";
+import { Granularity, GRANULARITY_FORMAT } from "../shared/utils/date.helper";
 
 @injectable()
 export class PayoutRepository extends BaseRepository<IPayout> implements IPayoutRepository {
@@ -289,6 +290,93 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     };
   }
 
-  
+  async getTotalEarnings(): Promise<{ totalVendorEarnings: number; totalCommission: number; totalBookings: number }> {
+    const [result] = await this.model.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalVendorEarnings: { $sum: '$netAmount' },
+          totalCommission: { $sum: '$commissionAmount' },
+          totalBookings: { $sum: { $size: '$bookingIds' } },
+        }
+      }
+    ]);
+
+    return {
+      totalVendorEarnings: result?.totalVendorEarnings || 0,
+      totalCommission: result?.totalCommission || 0,
+      totalBookings: result?.totalBookings || 0,
+    };
+  }
+
+  async findTop5Packages(): Promise<TopPerfomingPackagesResult[]> {
+    const result = await this.model.aggregate([
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: 'scheduleId',
+          foreignField: '_id',
+          as: 'schedule',
+          pipeline: [{ $project: { packageId: 1 } }],
+        },
+      },
+      { $addFields: { schedule: { $arrayElemAt: ['$schedule', 0] } } },
+      {
+        $group: {
+          _id: '$schedule.packageId',
+          revanueGenerate: { $sum: '$commissionAmount' },
+          totalScheduleCompleted: { $sum: 1 },
+        },
+      },
+      { $sort: { revanueGenerate: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'package',
+          pipeline: [{ $project: { title: 1 } }],
+        },
+      },
+      { $addFields: { package: { $arrayElemAt: ['$package', 0] } } },
+      {
+        $project: {
+          _id: 0,
+          id:'$package._id',
+          packageTitle: { $ifNull: ['$package.title', 'Unknown Package'] },
+          revanueGenerate: 1,
+          totalScheduleCompleted: 1,
+        },
+      },
+    ]);
+
+    return result;
+  };
+
+  async platformRevenueTrend(startDate:Date,endDate:Date,granularity:Granularity):Promise<PlatformRevenueTrendResult[]>{
+        return this.model.aggregate([
+          {
+            $match: {
+              status: PAYOUT_STATUS.COMPLETED,
+              createdAt: { $gte: startDate, $lte: endDate },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                $dateToString: {
+                  format: GRANULARITY_FORMAT[granularity],
+                  date: '$createdAt',
+                },
+              },
+              totalRevenue: { $sum: '$grossAmount' },
+              totalCommission: { $sum: '$commissionAmount' },
+              totalVendorEarnings:{$sum : '$netAmount'}
+            },
+          },
+          { $sort: { _id: 1 } },
+        ]);
+  }
 
 }

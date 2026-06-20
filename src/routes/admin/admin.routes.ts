@@ -28,10 +28,13 @@ import { couponTemplateRequestSchema } from '../../validators/coupon.validation'
 import { ICouponController } from '../../interfaces/controller_interfaces/ICouponController';
 import { IAdminFinanceController } from '../../interfaces/controller_interfaces/admin/IAdminFinanceController';
 import { IPayoutController } from '../../interfaces/controller_interfaces/IPayoutContoller';
+import { IAdminController } from '../../interfaces/controller_interfaces/admin/IAdminController';
 
 @injectable()
 export class AdminRoutes extends BaseRoute {
   constructor(
+    @inject('IAdminController')
+    private _adminController: IAdminController,
     @inject('IAdminUserController')
     private _adminUserContoller: IAdminUserController,
     @inject('IAdminVendorController')
@@ -352,6 +355,35 @@ export class AdminRoutes extends BaseRoute {
     authorize([USER_ROLES.ADMIN]),
     this._payoutController.findAllPayouts.bind(this._payoutController),
    );
+   // dashboard
+    this._router.get(
+    '/dashboard/stats',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._adminController.dashboardStats.bind(this._adminController),
+   );
+
+   this._router.get(
+    '/dashboard/top-performers',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._adminController.dashboardTopPerformers.bind(this._adminController),
+   );
+
+   this._router.get(
+    '/dashboard/actions-required',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._adminController.dashboardActionsRequired.bind(this._adminController),
+   );
+
+  this._router.get(
+    '/dashboard/revenue-trend',
+    isAuthenticated,
+    authorize([USER_ROLES.ADMIN]),
+    this._adminController.dashboardRevenueTrend.bind(this._adminController),
+   );
+
 
     
   }

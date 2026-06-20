@@ -72,7 +72,8 @@ import { IStripeService } from '../interfaces/service_interfaces/IStripeService'
 import { StripeService } from '../services/stripe.service';
 import { IPayoutService } from '../interfaces/service_interfaces/IPayoutService';
 import { PayoutService } from '../services/payout.service';
-
+import { IAdminService } from '../interfaces/service_interfaces/admin/IAdminService';
+import { AdminService } from '../services/admin/admin.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -166,6 +167,9 @@ export class ServiceRegistry {
     });
 
     //admin-services
+    container.register<IAdminService>('IAdminService', {
+      useClass: AdminService,
+    });
     container.register<IAdminUserService>('IAdminUserService', {
       useClass: AdminUserService,
     });

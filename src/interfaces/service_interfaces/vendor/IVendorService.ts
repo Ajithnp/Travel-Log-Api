@@ -6,10 +6,9 @@ import { RecentBookingActivityResult } from 'interfaces/repository_interfaces/IB
 import { Granularity } from 'shared/utils/date.helper';
 
 
-
 export interface IVendorService {
+  
   profile(userId: string): Promise<VendorProfileResponseDTO>;
-
   updateProfileLogo(vendorId: string, payload: UpdateProfileLogoRequestDTO): Promise<void>;
   getSummaryStats(vendorId:string):Promise<VendorDashBoardStatsDTO>
   getDashboardAnalytics(vendorId: string, period?: string, customFrom?:Date, customTo?: Date): Promise<DashboardAnalyticsResponseDTO>;

@@ -52,6 +52,8 @@ import { IStripeController } from '../interfaces/controller_interfaces/IPaymentC
 import { StripeController } from '../controllers/stripe-controller';
 import {IPayoutController} from "../interfaces/controller_interfaces/IPayoutContoller";
 import {PayoutController} from "../controllers/payout.controller";
+import { IAdminController } from '../interfaces/controller_interfaces/admin/IAdminController';
+import { AdminController } from '../controllers/admin/admin.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -120,6 +122,9 @@ export class ControllerRegistry {
     });
 
     //admin controllers
+    container.register<IAdminController>('IAdminController', {
+      useClass: AdminController,
+    });
     container.register<IAdminUserController>('IAdminUserController', {
       useClass: AdminUserController,
     });

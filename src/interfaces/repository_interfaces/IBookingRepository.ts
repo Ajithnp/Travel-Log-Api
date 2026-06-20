@@ -13,7 +13,7 @@ import {
 } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose, { ClientSession, Types } from 'mongoose';
-import { CommissionOverview, PaginatedCommissionOverviewByVendors } from '../service_interfaces/admin/IAdminFinanceService';
+import { CommissionOverview } from '../service_interfaces/admin/IAdminFinanceService';
 
 export interface IBookingRepository extends IBaseRepository<IBooking> {
   createBooking(data: Partial<IBooking>, session?: mongoose.ClientSession): Promise<IBooking>;

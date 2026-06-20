@@ -56,6 +56,8 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     search?: string,
   ): Promise<{ schedules: SchedulesResponseResult[]; total: number }>;
    
+  getPayoutSchedulesCount(): Promise<number>;
+   
   getSchedulesForPayout(
     page: number,
     limit: number,
@@ -70,6 +72,8 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
   scheduledStatsByVendor(vendorId:string):Promise<ScheduledStatsResult>;
 
   getUpcomingSchedules(vendorId: string, limit?: number): Promise<UpcomingScheduleResult[]>;
+
+  getScheduleStats(): Promise<{ activeSchedules: number; completedSchedules: number }> 
 
 }
 
