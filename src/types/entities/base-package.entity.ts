@@ -1,9 +1,11 @@
 import mongoose, { Document, Types } from 'mongoose';
 
 import { PackageStatus } from 'shared/constants/constants';
+
 export interface IFile {
   key: string;
 }
+
 export interface Activity {
   startTime?: string;
   endTime?: string;

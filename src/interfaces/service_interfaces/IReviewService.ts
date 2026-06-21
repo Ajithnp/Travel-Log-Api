@@ -1,6 +1,6 @@
 import { PaginatedData } from '../../types/common/IPaginationResponse';
 import { IFile } from '../../types/entities/base-package.entity';
-import { IRatingStatsSummary } from '../../interfaces/repository_interfaces/IReviewRepository';
+import { IRatingStatsSummary, VendorReviewFilters } from '../../interfaces/repository_interfaces/IReviewRepository';
 
 export interface IReviewService {
   addReview: (userId: string, reviewDto: IReviewRequestDto) => Promise<void>;
@@ -12,6 +12,8 @@ export interface IReviewService {
     userId?: string,
   ): Promise<IPackageReviewsResponseDto>;
   getPackageReviewsStats(packageId: string): Promise<IReviewStatsResponseDto>;
+  getVendorPackagesReviwes(vendorId: string, filters:VendorReviewFilters):Promise<PaginatedData<VendorPackageReviewResponseDto>>
+  getVendorPackagesReviwesStats(vendorId: string): Promise<IReviewStatsResponseDto>;
 }
 
 export interface IReviewRequestDto {
@@ -34,3 +36,13 @@ export interface IPackageReviewSinglesResponseDto {
 }
 
 export type IReviewStatsResponseDto = IRatingStatsSummary;
+
+export interface VendorPackageReviewResponseDto {
+  id: string;
+  packageName: string;
+  userName: string;
+  createdAt: Date;
+  rating: number;
+  text: string;
+  images: IFile[];
+}

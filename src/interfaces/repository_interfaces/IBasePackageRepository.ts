@@ -24,6 +24,8 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     total: number;
   }>;
 
+  packageMetaDataByVendorId(vendorId:string):Promise<PackageMetaData[]>
+
   findVendorPublicPackages(
     vendorId: string,
     page: number,
@@ -56,8 +58,6 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
       limit: number,
       search?: string,
     ): Promise<PaginatedData<PackagesEarningsByVendor>>  
-
-  
 }
 
 export interface AdminPackageDetailsResult {
@@ -152,3 +152,7 @@ export interface IPackageListItem {
   scheduleCount: number;
 }
 
+export interface PackageMetaData {
+  id:string;
+  packageTittle:string
+}

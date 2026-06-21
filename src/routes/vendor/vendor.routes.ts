@@ -27,7 +27,8 @@ import {
 } from '../../validators/vendor/offer.validation';
 import { CONTROLLER_TOKENS } from '../../shared/constants/di.tokens';
 import { IVendorRevenueController } from '../../interfaces/controller_interfaces/vendor/IVendorRevenueController';
-import { IPayoutController } from 'interfaces/controller_interfaces/IPayoutContoller';
+import { IPayoutController } from '../../interfaces/controller_interfaces/IPayoutContoller';
+import { IReviewController } from '../../interfaces/controller_interfaces/IReviewController';
 
 @injectable()
 export class VendorRoutes extends BaseRoute {
@@ -50,6 +51,8 @@ export class VendorRoutes extends BaseRoute {
     private _vendorRevenueController: IVendorRevenueController,
     @inject('IPayoutController')
     private _payoutController: IPayoutController,
+    @inject('IReviewController')
+    private _reviewController: IReviewController,
   ) {
     super();
     this.initializeRoutes();
@@ -116,6 +119,27 @@ export class VendorRoutes extends BaseRoute {
       this._vendorPackageController.fetchPackages.bind(this._vendorPackageController),
     );
 
+    this._router.get(
+      '/packages/meta',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._vendorPackageController.packageMetaData.bind(this._vendorPackageController),
+    );
+
+    this._router.get(
+      '/packages/reviews',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._reviewController.getVendorPackagesReviwes.bind(this._reviewController),
+    );
+
+    this._router.get(
+      '/packages/reviews/stats',
+      isAuthenticated,
+      authorize([USER_ROLES.VENDOR]),
+      this._reviewController.getVendorPackagesReviwesStats.bind(this._reviewController),
+    );
+
     this._router.put(
       '/packages/:packageId',
       isAuthenticated,
@@ -151,6 +175,7 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       this._vendorPackageController.getPackageScheduleContext.bind(this._vendorPackageController),
     );
+
 
     //======category
 
@@ -359,5 +384,7 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       this._vendorController.dashboardRecentActivity.bind(this._vendorController),
     );
+
+
   }
 }
