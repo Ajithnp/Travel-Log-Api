@@ -6,6 +6,7 @@ import {
   AdminPackageDetailsResult,
   PackageOfferInfo,
   IPackageListItem,
+  PackageMetaData,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
 import { IBasePackageEntity } from '../types/entities/base-package.entity';
@@ -181,6 +182,21 @@ export class BasePackageRepository
       requests: result.data ?? [],
       total: result.metadata[0]?.total ?? 0,
     };
+  }
+
+  async packageMetaDataByVendorId(vendorId:string):Promise<PackageMetaData[]>{
+    const packages = await this.model.find({
+      vendorId:new mongoose.Types.ObjectId(vendorId),
+      isActive:true
+    },{
+      _id:1,
+      title:1
+    }).lean().exec() as unknown as {_id:Types.ObjectId,title:string}[];
+
+    return packages.map((pkg: {_id:Types.ObjectId,title:string}) => ({
+      id: pkg._id.toString(),
+      packageTittle: pkg.title
+    }));
   }
 
   async findPublicPackages(

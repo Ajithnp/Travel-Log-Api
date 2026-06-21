@@ -131,4 +131,16 @@ export class VendorPackageController implements IVendorPackageController {
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
+
+  packageMetaData = asyncHandler(async (req,res)=>{
+    const vendorId = req.user?.id;
+    
+    const metadata = await this._packageService.packageMetaData(vendorId);
+    const successResponse: IApiResponse<typeof metadata> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: metadata,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  })
 }

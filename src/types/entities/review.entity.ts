@@ -23,3 +23,13 @@ export interface IPopulatedUser {
 export interface IReviewUserPopulated extends Omit<IReview, 'userId'> {
   userId: IPopulatedUser;
 }
+
+export interface IPopulatedPackage {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+}
+
+export interface IReviewDetailsPopulated extends Omit<IReview, 'packageId' | 'userId'> {
+  packageId: IPopulatedPackage;
+  userId: IPopulatedUser;
+}

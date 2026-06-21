@@ -7,6 +7,7 @@ import {
   PackageScheduleContextResponseDTO,
 } from '../../../types/dtos/admin/response.dtos';
 import { FilterType } from 'types/db';
+import { PackageMetaData } from '../../../interfaces/repository_interfaces/IBasePackageRepository';
 
 export interface IPackageService {
   fetchPackages(
@@ -23,4 +24,5 @@ export interface IPackageService {
   deletePackage(packageId: string, vendorId: string): Promise<void>;
   restorePackage(packageId: string, vendorId: string): Promise<void>;
   getPackagesForOffer(vendorId: string): Promise<PackageForOfferResponseDTO[]>;
+  packageMetaData(vendorId: string): Promise<PackageMetaData[]>;
 }

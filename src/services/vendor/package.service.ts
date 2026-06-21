@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 import { IPackageService } from '../../interfaces/service_interfaces/vendor/IPackageService';
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
-import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
+import { IBasePackageRepository, PackageMetaData } from '../../interfaces/repository_interfaces/IBasePackageRepository';
 import { CreateBasePackageDTO } from '../../validators/vendor/package/base-package.schema';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { AppError } from '../../errors/AppError';
@@ -289,5 +289,10 @@ export class PackageService implements IPackageService {
       await this._basePackageRepository.findPackagesByVendorIdForOffer(vendorId);
 
     return packagesWithOffers.map((pkg) => PackageMapper.toOfferResponse(pkg));
+  }
+
+  async packageMetaData(vendorId: string): Promise<PackageMetaData[]> {
+    const packages = await this._basePackageRepository.packageMetaDataByVendorId(vendorId);
+    return packages;
   }
 }

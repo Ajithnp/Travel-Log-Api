@@ -7,6 +7,7 @@ export interface PaginatedData<T> {
   currentPage?: number;
   totalPages?: number;
   totalDocs?: number;
+  hasNextPage?: boolean;
 }
 
 export interface PaginatedCategoryResponse extends PaginatedData<CategoryResponseDTO> {

@@ -9,4 +9,5 @@ export interface IVendorPackageController {
   deletePackage: RequestHandler;
   restorePackage: RequestHandler;
   getPackagesForOffer: RequestHandler;
+  packageMetaData: RequestHandler;
 }

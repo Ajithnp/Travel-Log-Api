@@ -1,10 +1,11 @@
 import { injectable, inject } from 'tsyringe';
-import { IReviewRepository } from '../interfaces/repository_interfaces/IReviewRepository';
+import { IReviewRepository, VendorReviewFilters } from '../interfaces/repository_interfaces/IReviewRepository';
 import {
   IPackageReviewsResponseDto,
   IReviewRequestDto,
   IReviewService,
   IReviewStatsResponseDto,
+  VendorPackageReviewResponseDto,
 } from '../interfaces/service_interfaces/IReviewService';
 import { IBookingRepository } from '../interfaces/repository_interfaces/IBookingRepository';
 import { AppError } from '../errors/AppError';
@@ -15,6 +16,8 @@ import { IReview, IReviewUserPopulated } from '../types/entities/review.entity';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
 import { ReviewMapper } from '../shared/mappers/review.mapper';
 import { IBasePackageRepository } from '../interfaces/repository_interfaces/IBasePackageRepository';
+import { IVendorInfoRepository } from '../interfaces/repository_interfaces/IVendorInfoRepository';
+import { PaginatedData } from '../types/common/IPaginationResponse';
 
 @injectable()
 export class ReviewService implements IReviewService {
@@ -25,6 +28,9 @@ export class ReviewService implements IReviewService {
     private _bookingRepository: IBookingRepository,
     @inject('IBasePackageRepository')
     private _packageRepository: IBasePackageRepository,
+    @inject('IVendorInfoRepository')
+    private _vendorRepository: IVendorInfoRepository,
+
   ) {}
 
   async addReview(userId: string, reviewDto: IReviewRequestDto): Promise<void> {
@@ -166,5 +172,31 @@ export class ReviewService implements IReviewService {
     const statsData = await this._reviewRepository.getRatingStats(packageId);
 
     return statsData;
-  }
+  };
+
+  async getVendorPackagesReviwes(vendorId: string, filters:VendorReviewFilters):Promise<PaginatedData<VendorPackageReviewResponseDto>>{
+    const vendorExists = await this._vendorRepository.findOne({ userId: toObjectId(vendorId) });
+    if (!vendorExists) {
+      throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+   const {reviews,total} = await this._reviewRepository.findAllByVendorId(vendorId,filters);
+   return {
+    data:ReviewMapper.toVendorPackageResponse(reviews),
+    currentPage: filters.page,
+    totalPages: Math.ceil(total / filters.limit),
+    totalDocs: total,
+    hasNextPage: filters.page * filters.limit < total
+   };
+  };
+
+  async getVendorPackagesReviwesStats(vendorId: string):Promise<IReviewStatsResponseDto>{
+    const vendorExists = await this._vendorRepository.findOne({ userId: toObjectId(vendorId) });
+    if (!vendorExists) {
+      throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+   const statsData = await this._reviewRepository.getRatingStatsByVendorId(vendorId);
+   return statsData;
+   };
+
 }
+
