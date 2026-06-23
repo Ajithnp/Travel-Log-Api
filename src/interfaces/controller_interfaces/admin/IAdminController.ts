@@ -1,8 +1,8 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
 
 export interface IAdminController {
-   dashboardStats: RequestHandler;
-   dashboardTopPerformers: RequestHandler;
-   dashboardActionsRequired: RequestHandler;
-   dashboardRevenueTrend: RequestHandler;
-};
+  dashboardStats: RequestHandler;
+  dashboardTopPerformers: RequestHandler;
+  dashboardActionsRequired: RequestHandler;
+  dashboardRevenueTrend: RequestHandler;
+}

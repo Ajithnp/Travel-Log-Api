@@ -15,18 +15,25 @@ export class VendorRevenueController implements IVendorRevenueController {
     private _vendorRevenueService: IVendorRevenueService,
   ) {}
 
-    packagesEarningOverview = expressAsyncHandler(async (req:Request, res:Response):Promise<void> => {
+  packagesEarningOverview = expressAsyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
       const vendorId = req.user?.id;
       const { page, limit, search } = getPaginationOptions(req);
- 
-      const result = await this._vendorRevenueService.packagesEarningOverview(vendorId, page, limit, search);
-  
+
+      const result = await this._vendorRevenueService.packagesEarningOverview(
+        vendorId,
+        page,
+        limit,
+        search,
+      );
+
       const successResponse: IApiResponse<typeof result> = {
         success: SUCCESS_STATUS.SUCCESS,
         message: SUCCESS_MESSAGES.OK,
         data: result,
       };
-  
+
       res.status(HTTP_STATUS.OK).json(successResponse);
-    });
+    },
+  );
 }

@@ -42,10 +42,10 @@ const bankDetailsSchema = new Schema(
 
 const stripeConnectSchema = new Schema(
   {
-    accountId: { type: String, default: null },        
+    accountId: { type: String, default: null },
     onboardingComplete: { type: Boolean, default: false },
-    chargesEnabled: { type: Boolean, default: false }, 
-    payoutsEnabled: { type: Boolean, default: false }, 
+    chargesEnabled: { type: Boolean, default: false },
+    payoutsEnabled: { type: Boolean, default: false },
   },
   { _id: false },
 );

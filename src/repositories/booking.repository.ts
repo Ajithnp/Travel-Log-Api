@@ -22,9 +22,7 @@ import {
   RecentBookingActivityResult,
   AnalyticsDataPoint,
 } from '../interfaces/repository_interfaces/IBookingRepository';
-import {
-  CommissionOverview,
-} from '../interfaces/service_interfaces/admin/IAdminFinanceService';
+import { CommissionOverview } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
 import BookingModel from '../models/booking.model';
 import mongoose, { ClientSession, Types } from 'mongoose';
 import { BOOKING_STATUS, CANCELATION_STATUS, PAYMENT_STATUS } from '../shared/constants/booking';
@@ -167,7 +165,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     });
 
     pipeline.push({ $unwind: '$packageId' });
-
 
     if (filters.search) {
       pipeline.push({
@@ -594,15 +591,15 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
       ...(search
         ? [
-          {
-            $match: {
-              $or: [
-                { 'user.name': { $regex: search, $options: 'i' } },
-                { bookingCode: { $regex: search, $options: 'i' } },
-              ],
+            {
+              $match: {
+                $or: [
+                  { 'user.name': { $regex: search, $options: 'i' } },
+                  { bookingCode: { $regex: search, $options: 'i' } },
+                ],
+              },
             },
-          },
-        ]
+          ]
         : []),
       { $sort: { createdAt: -1 } },
       {
@@ -699,7 +696,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       totalPlatformCommission: 0,
       totalVendorEarnings: 0,
     };
-  };
+  }
 
   async findPayableBookingsBySchedule(scheduleId: string): Promise<SchedulePayoutTotals | null> {
     const result = await this.model.aggregate([
@@ -708,15 +705,38 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           scheduleId: toObjectId(scheduleId),
           paymentStatus: { $in: [PAYMENT_STATUS.PAID, PAYMENT_STATUS.REFUNDED] },
           bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED] },
-
-        }
+        },
       },
       {
         $group: {
           _id: '$vendorId',
-          grossAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$finalAmount', 0] } },
-          commissionAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$platformCommission', 0] } },
-          vendorEarnings: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$vendorEarning', 0] } },
+          grossAmount: {
+            $sum: {
+              $cond: [
+                { $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] },
+                '$finalAmount',
+                0,
+              ],
+            },
+          },
+          commissionAmount: {
+            $sum: {
+              $cond: [
+                { $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] },
+                '$platformCommission',
+                0,
+              ],
+            },
+          },
+          vendorEarnings: {
+            $sum: {
+              $cond: [
+                { $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] },
+                '$vendorEarning',
+                0,
+              ],
+            },
+          },
           totalAmountFromCancelation: {
             $sum: {
               $cond: [
@@ -727,9 +747,9 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
             },
           },
           bookingIds: { $push: '$_id' },
-          bookingCount: { $sum: 1 }
-        }
-      }
+          bookingCount: { $sum: 1 },
+        },
+      },
     ]);
 
     if (!result || result.length === 0) {
@@ -744,7 +764,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       vendorEarnings: totals.vendorEarnings,
       totalAmountFromCancelation: totals.totalAmountFromCancelation,
       bookingIds: totals.bookingIds.map((id: Types.ObjectId) => id as Types.ObjectId),
-      bookingCount: totals.bookingCount
+      bookingCount: totals.bookingCount,
     };
   }
 
@@ -753,7 +773,13 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       {
         $match: {
           scheduleId: toObjectId(scheduleId),
-          bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED, BOOKING_STATUS.CANCELLED_BY_USER] },
+          bookingStatus: {
+            $nin: [
+              BOOKING_STATUS.PENDING,
+              BOOKING_STATUS.PAYMENT_FAILED,
+              BOOKING_STATUS.CANCELLED_BY_USER,
+            ],
+          },
           paymentStatus: { $in: [PAYMENT_STATUS.PAID, PAYMENT_STATUS.REFUNDED] },
         },
       },
@@ -780,7 +806,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     ]);
 
     return result.length > 0 ? (result as ScheduleBookingsResult[]) : null;
-  };
+  }
 
   async findBookingStatsByScheduleId(scheduleId: string): Promise<BookingStatsResult | null> {
     const result = await this.model.aggregate([
@@ -798,10 +824,36 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           packageId: { $first: '$packageId' },
           vendorId: { $first: '$vendorId' },
           totalBookingsCount: { $sum: 1 },
-          totalCancellationsCount: { $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 1, 0] } },
-          totalBookingGross: { $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 0, '$finalAmount'] } },
-          totalPlatformCommission: { $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 0, '$platformCommission'] } },
-          totalVendorEarnings: { $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 0, '$vendorEarning'] } },
+          totalCancellationsCount: {
+            $sum: { $cond: [{ $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] }, 1, 0] },
+          },
+          totalBookingGross: {
+            $sum: {
+              $cond: [
+                { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                0,
+                '$finalAmount',
+              ],
+            },
+          },
+          totalPlatformCommission: {
+            $sum: {
+              $cond: [
+                { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                0,
+                '$platformCommission',
+              ],
+            },
+          },
+          totalVendorEarnings: {
+            $sum: {
+              $cond: [
+                { $eq: ['$bookingStatus', BOOKING_STATUS.CANCELLED_BY_USER] },
+                0,
+                '$vendorEarning',
+              ],
+            },
+          },
           totalRefundedAmount: {
             $sum: {
               $cond: [
@@ -867,7 +919,13 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       {
         $match: {
           scheduleId: toObjectId(scheduleId),
-          bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED, BOOKING_STATUS.CANCELLED_BY_USER] },
+          bookingStatus: {
+            $nin: [
+              BOOKING_STATUS.PENDING,
+              BOOKING_STATUS.PAYMENT_FAILED,
+              BOOKING_STATUS.CANCELLED_BY_USER,
+            ],
+          },
           paymentStatus: { $in: [PAYMENT_STATUS.PAID, PAYMENT_STATUS.REFUNDED] },
         },
       },
@@ -881,8 +939,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         },
       },
     ]);
-
-
 
     if (result.length > 0) {
       return {
@@ -899,14 +955,13 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       totalPlatformCommission: 0,
       totalVendorEarnings: 0,
     };
-  };
-
+  }
 
   async getAnalytics(
     vendorId: string,
     from: Date,
     to: Date,
-    granularity: Granularity
+    granularity: Granularity,
   ): Promise<AnalyticsDataPoint[]> {
     return this.model.aggregate([
       {
@@ -933,13 +988,16 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     ]);
   }
 
-  async getTopPerformingPackages(vendorId: string, limit: number = 5): Promise<Array<{ packageTitle: string; bookingCount: number }>> {
+  async getTopPerformingPackages(
+    vendorId: string,
+    limit: number = 5,
+  ): Promise<Array<{ packageTitle: string; bookingCount: number }>> {
     const result = await this.model.aggregate([
       {
         $match: {
           vendorId: new mongoose.Types.ObjectId(vendorId),
           paymentStatus: PAYMENT_STATUS.PAID,
-          bookingStatus: BOOKING_STATUS.COMPLETED
+          bookingStatus: BOOKING_STATUS.COMPLETED,
         },
       },
       {
@@ -967,9 +1025,12 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       },
     ]);
     return result;
-  };
+  }
 
-  async getRecentActivity(vendorId: string, limit: number = 5): Promise<RecentBookingActivityResult[]> {
+  async getRecentActivity(
+    vendorId: string,
+    limit: number = 5,
+  ): Promise<RecentBookingActivityResult[]> {
     const result = await this.model.aggregate([
       {
         $match: {
@@ -1012,11 +1073,11 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           user: { $arrayElemAt: ['$user', 0] },
           package: { $arrayElemAt: ['$package', 0] },
           schedule: { $arrayElemAt: ['$schedule', 0] },
-        }
+        },
       },
       {
         $project: {
-          id: "$_id",
+          id: '$_id',
           _id: 0,
           userName: '$user.name',
           packageTitle: '$package.title',
@@ -1029,7 +1090,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           createdAt: 1,
         },
       },
-    ])
+    ]);
     return result;
-  };
+  }
 }

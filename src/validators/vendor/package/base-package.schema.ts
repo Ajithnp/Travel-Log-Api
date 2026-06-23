@@ -62,7 +62,7 @@ const draftPackageBackendSchema = basePackageBackendSchema.extend({
 
 export type CreateBasePackageDTO = z.infer<typeof draftPackageBackendSchema>;
 
-const packageResponseSchema = draftPackageBackendSchema.extend({
+export const packageResponseSchema = draftPackageBackendSchema.extend({
   packageId: z.string(),
   vendorId: z.string(),
 });

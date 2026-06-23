@@ -307,7 +307,9 @@ export class AdminRoutes extends BaseRoute {
       '/commissions/packages',
       isAuthenticated,
       authorize([USER_ROLES.ADMIN]),
-      this._adminFinanceController.getCommissionsByVendorsPackages.bind(this._adminFinanceController),
+      this._adminFinanceController.getCommissionsByVendorsPackages.bind(
+        this._adminFinanceController,
+      ),
     );
     //====payout
     this._router.post(
@@ -400,6 +402,5 @@ export class AdminRoutes extends BaseRoute {
       authorize([USER_ROLES.ADMIN]),
       this._contactController.updateEnquiry.bind(this._contactController),
     );
-
   }
 }

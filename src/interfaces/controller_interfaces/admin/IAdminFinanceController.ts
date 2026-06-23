@@ -1,7 +1,7 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
 
 export interface IAdminFinanceController {
-    getCommissionOverview:RequestHandler;
-    getCommissionsByVendors:RequestHandler;
-    getCommissionsByVendorsPackages:RequestHandler;
-};
+  getCommissionOverview: RequestHandler;
+  getCommissionsByVendors: RequestHandler;
+  getCommissionsByVendorsPackages: RequestHandler;
+}

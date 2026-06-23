@@ -1,4 +1,4 @@
-import { FilterType, PublicPackageFilters} from 'types/db';
+import { FilterType, PublicPackageFilters } from 'types/db';
 import {
   DifficultyLevel,
   IBasePackageEntity,
@@ -24,7 +24,7 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     total: number;
   }>;
 
-  packageMetaDataByVendorId(vendorId:string):Promise<PackageMetaData[]>
+  packageMetaDataByVendorId(vendorId: string): Promise<PackageMetaData[]>;
 
   findVendorPublicPackages(
     vendorId: string,
@@ -47,17 +47,17 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
   findPackagesByVendorIdForOffer(vendorId: string): Promise<PackageOfferInfo[]>;
 
   getCommissionOverviewByPackages(
-      page: number,
-      limit: number,
-      search?: string,
-    ): Promise<PaginatedCommissionOverviewByPackages>;
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<PaginatedCommissionOverviewByPackages>;
 
   getPackagesEarningOverviewByVendor(
-      vendorId: string,
-      page: number,
-      limit: number,
-      search?: string,
-    ): Promise<PaginatedData<PackagesEarningsByVendor>>  
+    vendorId: string,
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<PaginatedData<PackagesEarningsByVendor>>;
 }
 
 export interface AdminPackageDetailsResult {
@@ -153,6 +153,6 @@ export interface IPackageListItem {
 }
 
 export interface PackageMetaData {
-  id:string;
-  packageTittle:string
+  id: string;
+  packageTittle: string;
 }

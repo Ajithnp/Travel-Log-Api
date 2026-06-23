@@ -184,18 +184,24 @@ export class BasePackageRepository
     };
   }
 
-  async packageMetaDataByVendorId(vendorId:string):Promise<PackageMetaData[]>{
-    const packages = await this.model.find({
-      vendorId:new mongoose.Types.ObjectId(vendorId),
-      isActive:true
-    },{
-      _id:1,
-      title:1
-    }).lean().exec() as unknown as {_id:Types.ObjectId,title:string}[];
+  async packageMetaDataByVendorId(vendorId: string): Promise<PackageMetaData[]> {
+    const packages = (await this.model
+      .find(
+        {
+          vendorId: new mongoose.Types.ObjectId(vendorId),
+          isActive: true,
+        },
+        {
+          _id: 1,
+          title: 1,
+        },
+      )
+      .lean()
+      .exec()) as unknown as { _id: Types.ObjectId; title: string }[];
 
-    return packages.map((pkg: {_id:Types.ObjectId,title:string}) => ({
+    return packages.map((pkg: { _id: Types.ObjectId; title: string }) => ({
       id: pkg._id.toString(),
-      packageTittle: pkg.title
+      packageTittle: pkg.title,
     }));
   }
 
@@ -997,9 +1003,7 @@ export class BasePackageRepository
     page: number,
     limit: number,
     search?: string,
-    
   ): Promise<PaginatedCommissionOverviewByPackages> {
-
     const matchStage: mongoose.FilterQuery<IBasePackageEntity> = {
       status: PACKAGE_STATUS.PUBLISHED,
       isActive: true,
@@ -1068,7 +1072,7 @@ export class BasePackageRepository
           totalPlatformCommission: { $sum: '$completedBookings.platformCommission' },
           totalVendorEarnings: { $sum: '$completedBookings.vendorEarning' },
         },
-      }
+      },
     );
 
     pipeline.push({
@@ -1086,7 +1090,11 @@ export class BasePackageRepository
             },
           },
         ],
-        data: [{ $sort: {totalVendorEarnings: -1} }, { $skip: (page - 1) * limit }, { $limit: limit }],
+        data: [
+          { $sort: { totalVendorEarnings: -1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+        ],
       },
     });
 
@@ -1114,7 +1122,7 @@ export class BasePackageRepository
       totalPlatformCommission: metadata.totalPlatformCommission,
       totalGrossAmount: metadata.totalGrossAmount,
     };
-  };
+  }
 
   async getPackagesEarningOverviewByVendor(
     vendorId: string,
@@ -1197,6 +1205,4 @@ export class BasePackageRepository
       totalDocs: result.metadata[0]?.total ?? 0,
     };
   }
-
-  
 }

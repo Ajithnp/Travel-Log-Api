@@ -6,7 +6,6 @@ export const SERVICE_TOKENS = {
   PASSWORD_SERVICE: 'IPasswordService',
   TOKEN_BLACKLIST: 'ITokenBlackListService',
   VENDOR_OFFER_SERVICE: 'IVendorOfferService',
-  
 } as const;
 
 export const CONTROLLER_TOKENS = {

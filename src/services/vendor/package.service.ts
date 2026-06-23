@@ -1,7 +1,10 @@
 import { inject, injectable } from 'tsyringe';
 import { IPackageService } from '../../interfaces/service_interfaces/vendor/IPackageService';
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
-import { IBasePackageRepository, PackageMetaData } from '../../interfaces/repository_interfaces/IBasePackageRepository';
+import {
+  IBasePackageRepository,
+  PackageMetaData,
+} from '../../interfaces/repository_interfaces/IBasePackageRepository';
 import { CreateBasePackageDTO } from '../../validators/vendor/package/base-package.schema';
 import { VENDOR_VERIFICATION_STATUS } from '../../types/enum/vendor-verfication-status.enum';
 import { AppError } from '../../errors/AppError';
@@ -145,6 +148,7 @@ export class PackageService implements IPackageService {
     if (payload.images && payload.images.length > 0) {
       imageKeys = await this.processPackageImages(payload.images);
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { categoryId, images, cancellationPolicy, ...restPayload } = payload;
 
     let cancellationPolicyObjectId: Types.ObjectId | undefined;

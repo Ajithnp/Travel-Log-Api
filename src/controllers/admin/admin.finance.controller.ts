@@ -4,7 +4,7 @@ import { IAdminFinanceService } from '../../interfaces/service_interfaces/admin/
 import expressAsyncHandler from 'express-async-handler';
 import { Request, Response } from 'express';
 import { IApiResponse } from '../../types/common/IApiResponse';
-import { HTTP_STATUS, SUCCESS_STATUS} from '../../shared/constants/http_status_code';
+import { HTTP_STATUS, SUCCESS_STATUS } from '../../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES } from '../../shared/constants/messages';
 import { getPaginationOptions } from '../../shared/utils/pagination.helper';
 
@@ -15,47 +15,52 @@ export class AdminFinanceController implements IAdminFinanceController {
     private _adminFinanceService: IAdminFinanceService,
   ) {}
 
-    getCommissionOverview = expressAsyncHandler(async (req:Request, res:Response):Promise<void> => {
- 
-     const result = await this._adminFinanceService.getCommissionOverview();
-  
-      const successResponse: IApiResponse <typeof result> = {
+  getCommissionOverview = expressAsyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const result = await this._adminFinanceService.getCommissionOverview();
+
+      const successResponse: IApiResponse<typeof result> = {
         success: SUCCESS_STATUS.SUCCESS,
         message: SUCCESS_MESSAGES.OK,
-        data:result,
+        data: result,
       };
-  
+
       res.status(HTTP_STATUS.OK).json(successResponse);
-    });
+    },
+  );
 
+  getCommissionsByVendors = expressAsyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const { page, limit, search } = getPaginationOptions(req);
+      const result = await this._adminFinanceService.getCommissionsByVendors(page, limit, search);
 
-    getCommissionsByVendors = expressAsyncHandler(async (req:Request, res:Response):Promise<void> => {
-     
-      const {page,limit,search} = getPaginationOptions(req);
-      const result = await this._adminFinanceService.getCommissionsByVendors(page,limit,search);
-
-      const successResponse: IApiResponse <typeof result> = {
+      const successResponse: IApiResponse<typeof result> = {
         success: SUCCESS_STATUS.SUCCESS,
         message: SUCCESS_MESSAGES.OK,
-        data:result,
+        data: result,
       };
-  
+
       res.status(HTTP_STATUS.OK).json(successResponse);
-    });
+    },
+  );
 
-    getCommissionsByVendorsPackages = expressAsyncHandler(async (req:Request, res:Response):Promise<void> => {
-     
-      const {page,limit,search} = getPaginationOptions(req);
+  getCommissionsByVendorsPackages = expressAsyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const { page, limit, search } = getPaginationOptions(req);
 
-      const result = await this._adminFinanceService.getCommissionsByVendorsPackages(page,limit,search);
+      const result = await this._adminFinanceService.getCommissionsByVendorsPackages(
+        page,
+        limit,
+        search,
+      );
 
-      const successResponse: IApiResponse <typeof result> = {
+      const successResponse: IApiResponse<typeof result> = {
         success: SUCCESS_STATUS.SUCCESS,
         message: SUCCESS_MESSAGES.OK,
-        data:result,
+        data: result,
       };
-  
+
       res.status(HTTP_STATUS.OK).json(successResponse);
-    });
-  
+    },
+  );
 }

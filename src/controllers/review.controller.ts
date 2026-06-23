@@ -6,7 +6,10 @@ import { IApiResponse } from '../types/common/IApiResponse';
 import { HTTP_STATUS, SUCCESS_STATUS } from '../shared/constants/http_status_code';
 import { SUCCESS_MESSAGES } from '../shared/constants/messages';
 import { getPaginationOptions } from '../shared/utils/pagination.helper';
-import { ReviewSortBy, VendorReviewFilters } from '../interfaces/repository_interfaces/IReviewRepository';
+import {
+  ReviewSortBy,
+  VendorReviewFilters,
+} from '../interfaces/repository_interfaces/IReviewRepository';
 
 @injectable()
 export class ReviewController implements IReviewController {
@@ -76,20 +79,20 @@ export class ReviewController implements IReviewController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  getVendorPackagesReviwes= expressAsyncHandler(async (req, res) => {
+  getVendorPackagesReviwes = expressAsyncHandler(async (req, res) => {
     const vendorId = req.user?.id;
     const { page, limit } = getPaginationOptions(req);
-    const {packageId} = req.query as {packageId?:string};
-    const {rating} = req.query as {rating?:string};
-    const {sortBy} = req.query as {sortBy?:ReviewSortBy};
+    const { packageId } = req.query as { packageId?: string };
+    const { rating } = req.query as { rating?: string };
+    const { sortBy } = req.query as { sortBy?: ReviewSortBy };
 
-    const reviewFilter : VendorReviewFilters = {
-      page:page,
-      limit:limit,
-      packageId:packageId,
-      rating:rating,
-      sortBy:sortBy
-    }
+    const reviewFilter: VendorReviewFilters = {
+      page: page,
+      limit: limit,
+      packageId: packageId,
+      rating: rating,
+      sortBy: sortBy,
+    };
 
     const result = await this._reviewService.getVendorPackagesReviwes(vendorId, reviewFilter);
 
@@ -101,7 +104,7 @@ export class ReviewController implements IReviewController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  getVendorPackagesReviwesStats= expressAsyncHandler(async (req, res) => {
+  getVendorPackagesReviwesStats = expressAsyncHandler(async (req, res) => {
     const vendorId = req.user?.id;
 
     const result = await this._reviewService.getVendorPackagesReviwesStats(vendorId);

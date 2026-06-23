@@ -1,4 +1,8 @@
-import { IPaymentGateway, StripeAccountResponse, StripeTransferResponse } from '../infrastructure/payment-gateways/IPaymentGateway';
+import {
+  IPaymentGateway,
+  StripeAccountResponse,
+  StripeTransferResponse,
+} from '../infrastructure/payment-gateways/IPaymentGateway';
 import { IPaymentWebhookService } from '../interfaces/service_interfaces/IPaymentWebhookService';
 import Stripe from 'stripe';
 import { inject, injectable } from 'tsyringe';
@@ -28,7 +32,6 @@ export class PaymentWebhookService implements IPaymentWebhookService {
     private _payoutRepository: IPayoutRepository,
     @inject('ISchedulePackageRepository')
     private _schedulePackageRepository: ISchedulePackageRepository,
-
   ) {}
 
   async handleStripeEvent(rawBody: Buffer, signature: string): Promise<void> {
@@ -44,17 +47,13 @@ export class PaymentWebhookService implements IPaymentWebhookService {
         await this.handleSessionExpired(event.data.object as StripeCheckoutSession);
         break;
 
-      case 'account.updated':                            
-        await this.handleAccountUpdated(
-          event.data.object as StripeAccountResponse
-        );
-        break;  
+      case 'account.updated':
+        await this.handleAccountUpdated(event.data.object as StripeAccountResponse);
+        break;
 
-      case 'transfer.created':                           
-        await this.handleTransferCreated(
-          event.data.object as StripeTransferResponse
-        );
-        break;  
+      case 'transfer.created':
+        await this.handleTransferCreated(event.data.object as StripeTransferResponse);
+        break;
 
       default:
         break;
@@ -92,34 +91,34 @@ export class PaymentWebhookService implements IPaymentWebhookService {
         vendorId,
         account.details_submitted ?? false,
         account.charges_enabled ?? false,
-        account.payouts_enabled ?? false
+        account.payouts_enabled ?? false,
       );
     } else {
       logger.warn(`[Webhook] Account ${account.id} updated but no vendorId found in metadata`);
     }
   }
 
-private async handleTransferCreated(transfer: StripeTransferResponse): Promise<void> {
-  const payoutId = transfer.metadata?.payoutId;
-  if (!payoutId) {
-    logger.warn(`[Webhook] Transfer ${transfer.id} has no payoutId in metadata`);
-    return;
-  }
-  // Mark payout as completed
-  await this._payoutRepository.updateStatus(payoutId, PAYOUT_STATUS.COMPLETED, {
-    stripeTransferId: transfer.id,
-    processedAt: new Date(),
-  });
- 
-  const payout = await this._payoutRepository.findById(payoutId);
- 
-  if (payout?.scheduleId) {
-    await this._schedulePackageRepository.markSchedulePayoutAsCompleted(
-      payout.scheduleId.toString(),
-      payout._id
-    );
-  }
+  private async handleTransferCreated(transfer: StripeTransferResponse): Promise<void> {
+    const payoutId = transfer.metadata?.payoutId;
+    if (!payoutId) {
+      logger.warn(`[Webhook] Transfer ${transfer.id} has no payoutId in metadata`);
+      return;
+    }
+    // Mark payout as completed
+    await this._payoutRepository.updateStatus(payoutId, PAYOUT_STATUS.COMPLETED, {
+      stripeTransferId: transfer.id,
+      processedAt: new Date(),
+    });
 
-  logger.info(`[Webhook] Payout ${payoutId} completed via transfer ${transfer.id}`);
-}
+    const payout = await this._payoutRepository.findById(payoutId);
+
+    if (payout?.scheduleId) {
+      await this._schedulePackageRepository.markSchedulePayoutAsCompleted(
+        payout.scheduleId.toString(),
+        payout._id,
+      );
+    }
+
+    logger.info(`[Webhook] Payout ${payoutId} completed via transfer ${transfer.id}`);
+  }
 }

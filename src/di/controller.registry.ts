@@ -50,8 +50,8 @@ import { IVendorRevenueController } from '../interfaces/controller_interfaces/ve
 import { VendorRevenueController } from '../controllers/vendor/vendor-revenue.controller';
 import { IStripeController } from '../interfaces/controller_interfaces/IPaymentController';
 import { StripeController } from '../controllers/stripe-controller';
-import {IPayoutController} from "../interfaces/controller_interfaces/IPayoutContoller";
-import {PayoutController} from "../controllers/payout.controller";
+import { IPayoutController } from '../interfaces/controller_interfaces/IPayoutContoller';
+import { PayoutController } from '../controllers/payout.controller';
 import { IAdminController } from '../interfaces/controller_interfaces/admin/IAdminController';
 import { AdminController } from '../controllers/admin/admin.controller';
 import { IContactController } from '../interfaces/controller_interfaces/IContactController';

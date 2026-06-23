@@ -256,7 +256,6 @@ export class BookingService implements IBookingService {
             startDate: schedule.startDate?.toISOString().split('T')[0] ?? '',
             endDate: schedule.endDate?.toISOString().split('T')[0] ?? '',
             packageName: pkg.title ?? '',
-           
           },
         });
 

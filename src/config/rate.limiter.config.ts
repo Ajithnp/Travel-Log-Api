@@ -32,7 +32,7 @@ export const wishlistToggleLimiter = new RateLimiterRedis({
 export const contactLimiter = new RateLimiterRedis({
   storeClient: redisClient,
   points: 10,
-  duration: 60, 
-  blockDuration: 600, 
+  duration: 60,
+  blockDuration: 600,
   useRedisPackage: true,
 });

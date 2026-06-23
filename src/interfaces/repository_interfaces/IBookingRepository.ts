@@ -103,17 +103,25 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   getCommissionOverview(): Promise<CommissionOverview>;
 
-  findPayableBookingsBySchedule(scheduleId: string): Promise<SchedulePayoutTotals | null> 
+  findPayableBookingsBySchedule(scheduleId: string): Promise<SchedulePayoutTotals | null>;
 
   findAllBookingsByScheduleId(scheduleId: string): Promise<ScheduleBookingsResult[] | null>;
 
-  findBookingStatsByScheduleId(scheduleId:string):Promise<BookingStatsResult | null>;
+  findBookingStatsByScheduleId(scheduleId: string): Promise<BookingStatsResult | null>;
 
-  payoutOverviewByScheduleId(scheduleId:string): Promise<PayoutScheduleOverviewStats >;
+  payoutOverviewByScheduleId(scheduleId: string): Promise<PayoutScheduleOverviewStats>;
 
-  getAnalytics(vendorId: string, from: Date, to: Date,granularity:string): Promise<AnalyticsDataPoint[]>;
-  
-  getTopPerformingPackages(vendorId: string, limit?: number): Promise<Array<{ packageTitle: string; bookingCount: number }>>;
+  getAnalytics(
+    vendorId: string,
+    from: Date,
+    to: Date,
+    granularity: string,
+  ): Promise<AnalyticsDataPoint[]>;
+
+  getTopPerformingPackages(
+    vendorId: string,
+    limit?: number,
+  ): Promise<Array<{ packageTitle: string; bookingCount: number }>>;
 
   getRecentActivity(vendorId: string, limit?: number): Promise<RecentBookingActivityResult[]>;
 }
@@ -122,12 +130,11 @@ export interface SchedulePayoutTotals {
   vendorId: string;
   grossAmount: number;
   commissionAmount: number;
-  vendorEarnings:number;
-  totalAmountFromCancelation:number;
+  vendorEarnings: number;
+  totalAmountFromCancelation: number;
   bookingIds: Types.ObjectId[];
   bookingCount: number;
 }
-
 
 export interface BookingFilters {
   userId: string;
@@ -138,43 +145,42 @@ export interface BookingFilters {
 }
 
 export interface ScheduleBookingsResult {
-  userName:string;
-  selectedGroupType:GroupType;
-  finalAmount:number;
-  platformCommission:number;
-  vendorEarning:number;
-
-};
+  userName: string;
+  selectedGroupType: GroupType;
+  finalAmount: number;
+  platformCommission: number;
+  vendorEarning: number;
+}
 
 export interface PayoutScheduleOverviewStats {
-  totalBookingsCount:number;
-  totalGrossAmount:number;
-  totalPlatformCommission:number;
-  totalVendorEarnings:number;
+  totalBookingsCount: number;
+  totalGrossAmount: number;
+  totalPlatformCommission: number;
+  totalVendorEarnings: number;
 }
 
 export interface BookingStatsResult {
-  packageTitle:string;
-  vendorName:string;
-  scheduleStartDate:Date;
-  scheduleEndDate:Date;
-  schedulePayoutStatus:'pending' | 'paid';
-  totalBookingsCount:number;
-  totalCancellationsCount:number;
-  totalBookingGross:number;
-  totalPlatformCommission:number;
-  totalVendorEarnings:number;
-  totalRefundedAmount:number;
-};
+  packageTitle: string;
+  vendorName: string;
+  scheduleStartDate: Date;
+  scheduleEndDate: Date;
+  schedulePayoutStatus: 'pending' | 'paid';
+  totalBookingsCount: number;
+  totalCancellationsCount: number;
+  totalBookingGross: number;
+  totalPlatformCommission: number;
+  totalVendorEarnings: number;
+  totalRefundedAmount: number;
+}
 
 export interface RecentBookingActivityResult {
-  id:string;
+  id: string;
   userName: string;
   packageTitle: string;
   startDate: Date;
   endDate: Date;
   groupType: GroupType;
-  travellerCount:number;
+  travellerCount: number;
   finalAmount: number;
   status: BookingStatus;
   createdAt: Date;

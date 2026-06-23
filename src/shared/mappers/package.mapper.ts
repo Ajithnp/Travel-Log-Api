@@ -5,15 +5,17 @@ import {
   PackageScheduleContextResponseDTO,
 } from '../../types/dtos/admin/response.dtos';
 import {
+  DifficultyLevel,
   IBasePackagePopulated,
   IFile,
   IPopulatedPackageDetails,
 } from '../../types/entities/base-package.entity';
-import { PublicPackageSummary } from '../../types/user/types';
+import { PublicPackageCategoryDTO, PublicPackageSummary } from '../../types/user/types';
 import { PublicPackageDetailDTO } from '../../types/dtos/user/response.dtos';
 import {
   IPackageListItem,
   PackageOfferInfo,
+  RawPublicPackageDocument,
 } from '../../interfaces/repository_interfaces/IBasePackageRepository';
 import { PackageStatus } from 'types/type';
 
@@ -107,27 +109,33 @@ export class PackageMapper {
     };
   }
 
-  static toPublicListing(p: any): PublicPackageSummary {
+  static toPublicListing(p: RawPublicPackageDocument): PublicPackageSummary {
     return {
-      _id: p._id,
+      _id: p._id.toString(),
       title: p.title,
       description: p.description ? p.description.substring(0, 200) + '…' : '',
-      location: p.location ?? null,
-      state: p.state ?? null,
-      difficultyLevel: p.difficultyLevel ?? null,
-      days: p.days ?? null,
-      nights: p.nights ?? null,
-      usp: p.usp ?? null,
+      location: p.location ?? '',
+      state: p.state ?? '',
+      difficultyLevel: p.difficultyLevel as unknown as DifficultyLevel,
+      days: p.days ?? 0,
+      nights: p.nights ?? 0,
+      usp: p.usp ?? '',
       images: p.images ?? [],
-      category: p.category ?? null,
+      category: p.category
+        ? {
+            _id: p.category._id.toString(),
+            name: p.category.name,
+            slug: p.category.slug,
+          }
+        : (null as unknown as PublicPackageCategoryDTO),
       vendor: {
-        _id: p.vendor?._id ?? null,
-        name: p.vendor?.name ?? null,
+        _id: p.vendor?._id?.toString() ?? '',
+        name: p.vendor?.name ?? '',
       },
       startingFromPrice: p.startingFromPrice ?? 0,
-      earliestDate: p.earliestDate ?? null,
-      earliestEndDate: p.earliestEndDate ?? null,
-      earliestScheduleStatus: p.earliestScheduleStatus ?? null,
+      earliestDate: p.earliestDate!,
+      earliestEndDate: p.earliestEndDate!,
+      earliestScheduleStatus: p.earliestScheduleStatus as unknown as 'upcoming' | 'sold_out',
       scheduleCount: p.scheduleCount ?? 0,
       isSoldOut: p.isSoldOut ?? false,
       hasOffer: p.hasOffer ?? false,

@@ -1,6 +1,12 @@
 import { IVendorInfoRepository } from '../../interfaces/repository_interfaces/IVendorInfoRepository';
 import { inject, injectable } from 'tsyringe';
-import { ChartDataPoint, DashboardAnalyticsResponseDTO, IVendorService, RecentBookingActivityResponseDTO, VendorDashBoardStatsDTO } from '../../interfaces/service_interfaces/vendor/IVendorService';
+import {
+  ChartDataPoint,
+  DashboardAnalyticsResponseDTO,
+  IVendorService,
+  RecentBookingActivityResponseDTO,
+  VendorDashBoardStatsDTO,
+} from '../../interfaces/service_interfaces/vendor/IVendorService';
 import { Types } from 'mongoose';
 import { AppError } from '../../errors/AppError';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
@@ -36,7 +42,7 @@ export class VendorService implements IVendorService {
     private _packageRepository: IBasePackageRepository,
     @inject('ISchedulePackageRepository')
     private _scheduleRepository: ISchedulePackageRepository,
-  ) { }
+  ) {}
 
   async profile(userId: string): Promise<VendorProfileResponseDTO> {
     const vendorDoc = await this._vendorInfoRepository.findVendorWithUserId(userId);
@@ -100,35 +106,45 @@ export class VendorService implements IVendorService {
         fieldName: 'companyLogo',
       },
     });
-  };
+  }
 
   async getSummaryStats(vendorId: string): Promise<VendorDashBoardStatsDTO> {
-
     const vendor = await this._userRepository.findOne({ _id: toObjectId(vendorId) });
     if (!vendor) throw new AppError(ERROR_MESSAGES.VENDOR_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
 
     const [revanueStats, totalBookings, totalPackages, scheduleStats] = await Promise.all([
       this._payoutRepository.revenueStatsByVendor(vendorId),
-      this._bookingRepository.countDocuments({ vendorId: vendorId, bookingStatus: { $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED] } }),
-      this._packageRepository.countDocuments({ vendorId: vendorId, status: PACKAGE_STATUS.PUBLISHED, isActive: true }),
+      this._bookingRepository.countDocuments({
+        vendorId: vendorId,
+        bookingStatus: { $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED] },
+      }),
+      this._packageRepository.countDocuments({
+        vendorId: vendorId,
+        status: PACKAGE_STATUS.PUBLISHED,
+        isActive: true,
+      }),
       this._scheduleRepository.scheduledStatsByVendor(vendorId),
-
-    ])
+    ]);
     return {
       revanueStats,
       totalBookings,
       totalPackages,
       scheduleStats,
-    }
-  };
+    };
+  }
 
-  async getDashboardAnalytics(vendorId: string, period: string, customFrom?: Date, customTo?: Date): Promise<DashboardAnalyticsResponseDTO> {
+  async getDashboardAnalytics(
+    vendorId: string,
+    period: string,
+    customFrom?: Date,
+    customTo?: Date,
+  ): Promise<DashboardAnalyticsResponseDTO> {
     const { from, now } = getDateRange(period, customFrom, customTo);
     const granularity = getGranularity(from, now, period);
-    
+
     const [rawTrend, bookingsByPackage] = await Promise.all([
       this._bookingRepository.getAnalytics(vendorId, from, now, granularity),
-      this._bookingRepository.getTopPerformingPackages(vendorId)
+      this._bookingRepository.getTopPerformingPackages(vendorId),
     ]);
 
     const trend: ChartDataPoint[] = rawTrend.map((r) => ({
@@ -140,12 +156,11 @@ export class VendorService implements IVendorService {
     return {
       granularity,
       trend,
-      bookingsByPackage: bookingsByPackage
+      bookingsByPackage: bookingsByPackage,
     };
   }
 
   async dashboardRecentActivity(vendorId: string): Promise<RecentBookingActivityResponseDTO> {
-
     const [bookings, schedules] = await Promise.all([
       this._bookingRepository.getRecentActivity(vendorId),
       this._scheduleRepository.getUpcomingSchedules(vendorId),
@@ -153,9 +168,7 @@ export class VendorService implements IVendorService {
 
     return {
       bookings,
-      schedules
+      schedules,
     };
   }
-
-
 }

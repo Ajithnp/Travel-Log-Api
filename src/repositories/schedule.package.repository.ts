@@ -1,7 +1,10 @@
 import { injectable } from 'tsyringe';
 import { BaseRepository } from './base.repository';
 import { ISchedule, ISchedulePopulated } from '../types/entities/schedule.entity';
-import { ISchedulePackageRepository, ScheduledStatsResult } from '../interfaces/repository_interfaces/ISchedulePackage';
+import {
+  ISchedulePackageRepository,
+  ScheduledStatsResult,
+} from '../interfaces/repository_interfaces/ISchedulePackage';
 import SchedulePackageModel from '../models/schedule.model';
 import mongoose, { Types } from 'mongoose';
 import { PAYOUT_STATUS, SCHEDULE_STATUS, ScheduleStatus } from '../shared/constants/constants';
@@ -19,7 +22,8 @@ import { PayoutScheduleListResponseDto } from 'interfaces/service_interfaces/IPa
 @injectable()
 export class SchedulePackageRepository
   extends BaseRepository<ISchedule>
-  implements ISchedulePackageRepository {
+  implements ISchedulePackageRepository
+{
   constructor() {
     super(SchedulePackageModel);
   }
@@ -169,14 +173,14 @@ export class SchedulePackageRepository
           ...(filter
             ? { status: filter }
             : {
-              status: {
-                $in: [
-                  SCHEDULE_STATUS.UPCOMING,
-                  SCHEDULE_STATUS.SOLD_OUT,
-                  SCHEDULE_STATUS.COMPLETED,
-                ],
-              },
-            }),
+                status: {
+                  $in: [
+                    SCHEDULE_STATUS.UPCOMING,
+                    SCHEDULE_STATUS.SOLD_OUT,
+                    SCHEDULE_STATUS.COMPLETED,
+                  ],
+                },
+              }),
         },
       },
       {
@@ -359,7 +363,6 @@ export class SchedulePackageRepository
     limit: number,
     search?: string,
   ): Promise<{ schedules: PayoutScheduleListResponseDto[]; total: number }> {
-
     const matchStage: mongoose.FilterQuery<ISchedule> = {
       status: SCHEDULE_STATUS.COMPLETED,
       payoutStatus: PAYOUT_STATUS.PENDING,
@@ -408,15 +411,54 @@ export class SchedulePackageRepository
             {
               $match: {
                 bookingStatus: { $nin: [BOOKING_STATUS.PENDING, BOOKING_STATUS.PAYMENT_FAILED] },
-                paymentStatus: { $eq: PAYMENT_STATUS.PAID }
+                paymentStatus: { $eq: PAYMENT_STATUS.PAID },
               },
             },
             {
               $group: {
                 _id: null,
-                grossAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$finalAmount', 0] } },
-                commissionAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$platformCommission', 0] } },
-                netAmount: { $sum: { $cond: [{ $in: ['$bookingStatus', [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED]] }, '$vendorEarning', 0] } },
+                grossAmount: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          '$bookingStatus',
+                          [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED],
+                        ],
+                      },
+                      '$finalAmount',
+                      0,
+                    ],
+                  },
+                },
+                commissionAmount: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          '$bookingStatus',
+                          [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED],
+                        ],
+                      },
+                      '$platformCommission',
+                      0,
+                    ],
+                  },
+                },
+                netAmount: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          '$bookingStatus',
+                          [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CONFIRMED],
+                        ],
+                      },
+                      '$vendorEarning',
+                      0,
+                    ],
+                  },
+                },
                 totalRefundedAmount: {
                   $sum: {
                     $cond: [
@@ -468,9 +510,13 @@ export class SchedulePackageRepository
                 scheduleEndDate: '$endDate',
                 packageTittle: '$package.title',
                 grossAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.grossAmount', 0] }, 0] },
-                commissionAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.commissionAmount', 0] }, 0] },
+                commissionAmount: {
+                  $ifNull: [{ $arrayElemAt: ['$bookings.commissionAmount', 0] }, 0],
+                },
                 netAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.netAmount', 0] }, 0] },
-                totalRefundedAmount: { $ifNull: [{ $arrayElemAt: ['$bookings.totalRefundedAmount', 0] }, 0] },
+                totalRefundedAmount: {
+                  $ifNull: [{ $arrayElemAt: ['$bookings.totalRefundedAmount', 0] }, 0],
+                },
                 status: 1,
                 scheduledAt: '$createdAt',
                 payoutsEnabled: {
@@ -486,10 +532,7 @@ export class SchedulePackageRepository
                   },
                 },
                 readyToPayout: {
-                  $lte: [
-                    { $add: ['$endDate', 2 * 24 * 60 * 60 * 1000] },
-                    new Date()
-                  ]
+                  $lte: [{ $add: ['$endDate', 2 * 24 * 60 * 60 * 1000] }, new Date()],
                 },
                 alreadyFailed: { $gt: [{ $size: '$failedPayouts' }, 0] },
               },
@@ -510,16 +553,18 @@ export class SchedulePackageRepository
     return { schedules, total };
   }
 
-  async markSchedulePayoutAsCompleted(scheduleId: string, payoutId: Types.ObjectId): Promise<ISchedule | null> {
+  async markSchedulePayoutAsCompleted(
+    scheduleId: string,
+    payoutId: Types.ObjectId,
+  ): Promise<ISchedule | null> {
     return await this.findOneAndUpdate(
       { _id: toObjectId(scheduleId) },
       { payoutStatus: 'paid', payoutId },
-      { new: true }
+      { new: true },
     );
-  };
+  }
 
   async scheduledStatsByVendor(vendorId: string): Promise<ScheduledStatsResult> {
-
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -528,52 +573,65 @@ export class SchedulePackageRepository
     const pipeline: mongoose.PipelineStage[] = [
       {
         $match: {
-          vendorId: toObjectId(vendorId)
-        }
+          vendorId: toObjectId(vendorId),
+        },
       },
       {
         $facet: {
           total: [
             { $match: { status: SCHEDULE_STATUS.COMPLETED } },
-            { $group: { _id: null, value: { $sum: 1 } } }
+            { $group: { _id: null, value: { $sum: 1 } } },
           ],
           currentMonth: [
             {
               $match: {
                 createdAt: { $gte: currentMonthStart },
-                status: { $in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.UPCOMING] }
-              }
+                status: {
+                  $in: [
+                    SCHEDULE_STATUS.COMPLETED,
+                    SCHEDULE_STATUS.ONGOING,
+                    SCHEDULE_STATUS.SOLD_OUT,
+                    SCHEDULE_STATUS.UPCOMING,
+                  ],
+                },
+              },
             },
-            { $group: { _id: null, value: { $sum: 1 } } }
+            { $group: { _id: null, value: { $sum: 1 } } },
           ],
           previousMonth: [
             {
               $match: {
                 createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd },
-                status: { $in: [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.UPCOMING] }
-
-              }
+                status: {
+                  $in: [
+                    SCHEDULE_STATUS.COMPLETED,
+                    SCHEDULE_STATUS.ONGOING,
+                    SCHEDULE_STATUS.SOLD_OUT,
+                    SCHEDULE_STATUS.UPCOMING,
+                  ],
+                },
+              },
             },
-            { $group: { _id: null, value: { $sum: 1 } } }
+            { $group: { _id: null, value: { $sum: 1 } } },
           ],
           activeSchedule: [
             {
               $match: {
-                status: { $in: [SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.UPCOMING] }
-              }
+                status: { $in: [SCHEDULE_STATUS.ONGOING, SCHEDULE_STATUS.UPCOMING] },
+              },
             },
-            { $count: "count" }
+            { $count: 'count' },
           ],
           ongoingSchedule: [
             {
               $match: {
-                status: { $in: [SCHEDULE_STATUS.ONGOING] }
-              }
+                status: { $in: [SCHEDULE_STATUS.ONGOING] },
+              },
             },
-            { $count: "count" }
-          ]
-        }
-      }
+            { $count: 'count' },
+          ],
+        },
+      },
     ];
 
     const [result] = await this.model.aggregate(pipeline);
@@ -590,16 +648,20 @@ export class SchedulePackageRepository
       hasGrowth: currentMonthRevanue > previousMonthRevanue,
       activeSchedule,
       ongoingSchedule,
-
     };
-  };
+  }
 
-  async getUpcomingSchedules(vendorId: string, limit: number = 5): Promise<UpcomingScheduleResult[]> {
+  async getUpcomingSchedules(
+    vendorId: string,
+    limit: number = 5,
+  ): Promise<UpcomingScheduleResult[]> {
     const result = await this.model.aggregate([
       {
         $match: {
           vendorId: toObjectId(vendorId),
-          status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.ONGOING] },
+          status: {
+            $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.ONGOING],
+          },
         },
       },
       { $sort: { startDate: 1 } },
@@ -651,7 +713,13 @@ export class SchedulePackageRepository
           active: [
             {
               $match: {
-                status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT, SCHEDULE_STATUS.ONGOING] },
+                status: {
+                  $in: [
+                    SCHEDULE_STATUS.UPCOMING,
+                    SCHEDULE_STATUS.SOLD_OUT,
+                    SCHEDULE_STATUS.ONGOING,
+                  ],
+                },
               },
             },
             { $count: 'count' },
