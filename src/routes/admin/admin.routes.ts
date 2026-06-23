@@ -394,5 +394,12 @@ export class AdminRoutes extends BaseRoute {
       this._contactController.contactEnquiries.bind(this._contactController),
     );
 
+    this._router.patch(
+      '/contacts-enquiry/:enquiryId',
+      // isAuthenticated,
+      // authorize([USER_ROLES.ADMIN]),
+      this._contactController.updateEnquiry.bind(this._contactController),
+    );
+
   }
 }

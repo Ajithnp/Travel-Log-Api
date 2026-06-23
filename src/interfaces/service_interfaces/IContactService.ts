@@ -3,7 +3,8 @@ import { PaginatedData } from "types/common/IPaginationResponse";
 
 export interface IContactService {
     createContact(payload:CreateContactRequestDTO):Promise<void>;
-    contactEnquiries (page:number,limit:number,search:string,status:ContactStatus):Promise<ContactEnquiriesResponseDTO>
+    contactEnquiries (page:number,limit:number,search:string,status:ContactStatus):Promise<ContactEnquiriesResponseDTO>;
+    updateEnquiry(enquiryId: string): Promise<string>;
 }
 
 export interface CreateContactRequestDTO {

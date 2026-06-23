@@ -52,5 +52,19 @@ export class ContactController implements IContactController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
+  updateEnquiry = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+
+    const { enquiryId } = req.params;
+    
+    const data = await this._contactService.updateEnquiry(enquiryId);
+
+    const successResponse: IApiResponse<typeof data> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data,
+    };
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
 
 }
