@@ -1,7 +1,6 @@
-import { RequestHandler } from "express";
-
+import { RequestHandler } from 'express';
 
 export interface IStripeController {
-    initiateStripeOnboarding: RequestHandler;
-    getStripeOnboardingStatus: RequestHandler;
+  initiateStripeOnboarding: RequestHandler;
+  getStripeOnboardingStatus: RequestHandler;
 }

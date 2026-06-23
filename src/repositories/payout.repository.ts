@@ -1,13 +1,23 @@
-import { injectable } from "tsyringe";
-import { BaseRepository } from "./base.repository";
-import mongoose, { FilterQuery } from "mongoose";
-import { IPayoutRepository, PayoutFilter, PlatformRevenueTrendResult, TopPerfomingPackagesResult, VendorPayoutsListResult, VendorRevenueStats } from "../interfaces/repository_interfaces/IPayoutRepository";
-import { FindAllPayoutsResponseDto, PayoutStatsResponseDto } from "../interfaces/service_interfaces/IPayoutService";
-import { PayoutModel } from "../models/payout.model";
-import { IPayout } from "../types/entities/payout.entity";
-import { PAYOUT_STATUS } from "../shared/constants/constants";
-import { toObjectId } from "../shared/utils/database/objectId.helper";
-import { Granularity, GRANULARITY_FORMAT } from "../shared/utils/date.helper";
+import { injectable } from 'tsyringe';
+import { BaseRepository } from './base.repository';
+import mongoose, { FilterQuery } from 'mongoose';
+import {
+  IPayoutRepository,
+  PayoutFilter,
+  PlatformRevenueTrendResult,
+  TopPerfomingPackagesResult,
+  VendorPayoutsListResult,
+  VendorRevenueStats,
+} from '../interfaces/repository_interfaces/IPayoutRepository';
+import {
+  FindAllPayoutsResponseDto,
+  PayoutStatsResponseDto,
+} from '../interfaces/service_interfaces/IPayoutService';
+import { PayoutModel } from '../models/payout.model';
+import { IPayout } from '../types/entities/payout.entity';
+import { PAYOUT_STATUS } from '../shared/constants/constants';
+import { toObjectId } from '../shared/utils/database/objectId.helper';
+import { Granularity, GRANULARITY_FORMAT } from '../shared/utils/date.helper';
 
 @injectable()
 export class PayoutRepository extends BaseRepository<IPayout> implements IPayoutRepository {
@@ -21,38 +31,30 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     extras?: Partial<IPayout>,
   ): Promise<void> {
     await this.findByIdAndUpdate(payoutId, { status, ...extras });
-  };
+  }
 
   async payoutStats(): Promise<PayoutStatsResponseDto> {
-
     const pipeline: mongoose.PipelineStage[] = [
-       
       {
-        $facet:{
-          totalPayouts:[{$group:{_id:null,value:{  $sum:1}}}]  ,
-          completedPayouts:[
-            {$match:{status:PAYOUT_STATUS.COMPLETED}},
-            {$group:{_id:null,value:{$sum:1}}}
+        $facet: {
+          totalPayouts: [{ $group: { _id: null, value: { $sum: 1 } } }],
+          completedPayouts: [
+            { $match: { status: PAYOUT_STATUS.COMPLETED } },
+            { $group: { _id: null, value: { $sum: 1 } } },
           ],
-          failedPayouts:[
-            {$match:{status:PAYOUT_STATUS.FAILED}},
-            {$group:{_id:null,value:{$sum:1}}}
+          failedPayouts: [
+            { $match: { status: PAYOUT_STATUS.FAILED } },
+            { $group: { _id: null, value: { $sum: 1 } } },
           ],
-          processingPayouts:[
-            {$match:{status:PAYOUT_STATUS.PROCESSING}},
-            {$group:{_id:null,value:{$sum:1}}}
+          processingPayouts: [
+            { $match: { status: PAYOUT_STATUS.PROCESSING } },
+            { $group: { _id: null, value: { $sum: 1 } } },
           ],
-          totalRevenue:[
-            {$group:{_id:null,value:{$sum:"$grossAmount"}}}
-          ],
-          totalCommision:[
-            {$group:{_id:null,value:{$sum:"$commissionAmount"}}}
-          ],
-          totalNetAmount:[
-            {$group:{_id:null,value:{$sum:"$netAmount"}}}
-          ],
-        }
-      }
+          totalRevenue: [{ $group: { _id: null, value: { $sum: '$grossAmount' } } }],
+          totalCommision: [{ $group: { _id: null, value: { $sum: '$commissionAmount' } } }],
+          totalNetAmount: [{ $group: { _id: null, value: { $sum: '$netAmount' } } }],
+        },
+      },
     ];
 
     const [result] = await this.model.aggregate(pipeline);
@@ -71,9 +73,9 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     page: number,
     limit: number,
     search?: string,
-    filter?: PayoutFilter
+    filter?: PayoutFilter,
   ): Promise<{ payouts: FindAllPayoutsResponseDto[]; total: number }> {
-    const matchStage:FilterQuery<IPayout> = {};
+    const matchStage: FilterQuery<IPayout> = {};
     if (filter) {
       matchStage.status = filter;
     }
@@ -122,37 +124,35 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
       });
     }
 
-    pipeline.push(
-      {
-        $facet: {
-          metadata: [{ $count: 'total' }],
-          data: [
-            { $sort: { createdAt: -1 } },
-            { $skip: (page - 1) * limit },
-            { $limit: limit },
-            {
-              $project: {
-                _id: 0,
-                id: '$_id',
-                scheduleId:'$schedule._id',
-                vendorname: '$vendor.name',
-                scheduleStartDate: '$schedule.startDate',
-                scheduleEndDate: '$schedule.endDate',
-                packageTittle: '$package.title',
-                grossAmount: 1,
-                commissionAmount: 1,
-                netAmount: 1,
-                status: 1,
-                scheduledAt: 1,
-              },
+    pipeline.push({
+      $facet: {
+        metadata: [{ $count: 'total' }],
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 0,
+              id: '$_id',
+              scheduleId: '$schedule._id',
+              vendorname: '$vendor.name',
+              scheduleStartDate: '$schedule.startDate',
+              scheduleEndDate: '$schedule.endDate',
+              packageTittle: '$package.title',
+              grossAmount: 1,
+              commissionAmount: 1,
+              netAmount: 1,
+              status: 1,
+              scheduledAt: 1,
             },
-          ],
-        },
-      }
-    );
+          },
+        ],
+      },
+    });
 
     const [result] = await this.model.aggregate(pipeline);
-    
+
     return {
       payouts: result?.data || [],
       total: result?.metadata[0]?.total || 0,
@@ -164,7 +164,7 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     page: number,
     limit: number,
     search?: string,
-    filter?: PayoutFilter
+    filter?: PayoutFilter,
   ): Promise<{ payouts: VendorPayoutsListResult[]; total: number }> {
     const pipeline: mongoose.PipelineStage[] = [
       {
@@ -203,33 +203,31 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
       });
     }
 
-    pipeline.push(
-      {
-        $facet: {
-          metadata: [{ $count: 'total' }],
-          data: [
-            { $sort: { createdAt: -1 } },
-            { $skip: (page - 1) * limit },
-            { $limit: limit },
-            {
-              $project: {
-                _id: 0,
-                payoutId: '$_id',
-                scheduleId: '$scheduleId',
-                scheduleStartDate: '$schedule.startDate',
-                scheduleEndDate: '$schedule.endDate',
-                packageTittle: '$package.title',
-                grossAmount: 1,
-                commissionAmount: 1,
-                netAmount: 1,
-                status: 1,
-                scheduledAt: 1,
-              },
+    pipeline.push({
+      $facet: {
+        metadata: [{ $count: 'total' }],
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 0,
+              payoutId: '$_id',
+              scheduleId: '$scheduleId',
+              scheduleStartDate: '$schedule.startDate',
+              scheduleEndDate: '$schedule.endDate',
+              packageTittle: '$package.title',
+              grossAmount: 1,
+              commissionAmount: 1,
+              netAmount: 1,
+              status: 1,
+              scheduledAt: 1,
             },
-          ],
-        },
-      }
-    );
+          },
+        ],
+      },
+    });
 
     const [result] = await this.model.aggregate(pipeline);
 
@@ -237,7 +235,7 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
       payouts: result?.data || [],
       total: result?.metadata[0]?.total || 0,
     };
-  };
+  }
 
   async revenueStatsByVendor(vendorId: string): Promise<VendorRevenueStats> {
     const now = new Date();
@@ -248,32 +246,30 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     const pipeline: mongoose.PipelineStage[] = [
       {
         $match: {
-          vendorId: toObjectId(vendorId)
-        }
+          vendorId: toObjectId(vendorId),
+        },
       },
       {
         $facet: {
-          total: [
-            { $group: { _id: null, value: { $sum: "$netAmount" } } }
-          ],
+          total: [{ $group: { _id: null, value: { $sum: '$netAmount' } } }],
           currentMonth: [
             {
               $match: {
-                createdAt: { $gte: currentMonthStart }
-              }
+                createdAt: { $gte: currentMonthStart },
+              },
             },
-            { $group: { _id: null, value: { $sum: "$netAmount" } } }
+            { $group: { _id: null, value: { $sum: '$netAmount' } } },
           ],
           previousMonth: [
             {
               $match: {
-                createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd }
-              }
+                createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd },
+              },
             },
-            { $group: { _id: null, value: { $sum: "$netAmount" } } }
-          ]
-        }
-      }
+            { $group: { _id: null, value: { $sum: '$netAmount' } } },
+          ],
+        },
+      },
     ];
 
     const [result] = await this.model.aggregate(pipeline);
@@ -286,11 +282,15 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
       totalRevanue,
       currentMonthRevanue,
       previousMonthRevanue,
-      hasGrowth: currentMonthRevanue > previousMonthRevanue
+      hasGrowth: currentMonthRevanue > previousMonthRevanue,
     };
   }
 
-  async getTotalEarnings(): Promise<{ totalVendorEarnings: number; totalCommission: number; totalBookings: number }> {
+  async getTotalEarnings(): Promise<{
+    totalVendorEarnings: number;
+    totalCommission: number;
+    totalBookings: number;
+  }> {
     const [result] = await this.model.aggregate([
       {
         $group: {
@@ -298,8 +298,8 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
           totalVendorEarnings: { $sum: '$netAmount' },
           totalCommission: { $sum: '$commissionAmount' },
           totalBookings: { $sum: { $size: '$bookingIds' } },
-        }
-      }
+        },
+      },
     ]);
 
     return {
@@ -343,7 +343,7 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
       {
         $project: {
           _id: 0,
-          id:'$package._id',
+          id: '$package._id',
           packageTitle: { $ifNull: ['$package.title', 'Unknown Package'] },
           revanueGenerate: 1,
           totalScheduleCompleted: 1,
@@ -352,31 +352,34 @@ export class PayoutRepository extends BaseRepository<IPayout> implements IPayout
     ]);
 
     return result;
-  };
-
-  async platformRevenueTrend(startDate:Date,endDate:Date,granularity:Granularity):Promise<PlatformRevenueTrendResult[]>{
-        return this.model.aggregate([
-          {
-            $match: {
-              status: PAYOUT_STATUS.COMPLETED,
-              createdAt: { $gte: startDate, $lte: endDate },
-            },
-          },
-          {
-            $group: {
-              _id: {
-                $dateToString: {
-                  format: GRANULARITY_FORMAT[granularity],
-                  date: '$createdAt',
-                },
-              },
-              totalRevenue: { $sum: '$grossAmount' },
-              totalCommission: { $sum: '$commissionAmount' },
-              totalVendorEarnings:{$sum : '$netAmount'}
-            },
-          },
-          { $sort: { _id: 1 } },
-        ]);
   }
 
+  async platformRevenueTrend(
+    startDate: Date,
+    endDate: Date,
+    granularity: Granularity,
+  ): Promise<PlatformRevenueTrendResult[]> {
+    return this.model.aggregate([
+      {
+        $match: {
+          status: PAYOUT_STATUS.COMPLETED,
+          createdAt: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: GRANULARITY_FORMAT[granularity],
+              date: '$createdAt',
+            },
+          },
+          totalRevenue: { $sum: '$grossAmount' },
+          totalCommission: { $sum: '$commissionAmount' },
+          totalVendorEarnings: { $sum: '$netAmount' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+  }
 }

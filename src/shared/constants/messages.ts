@@ -229,7 +229,6 @@ export const ERROR_MESSAGES = {
 
   ENQUIRY_NOT_FOUND: 'Enquiry not found',
   ENQUIRY_ALREADY_RESOLVED: 'Enquiry already resolved',
-
 } as const;
 
 export const NOTIFICATION_MESSAGES = {

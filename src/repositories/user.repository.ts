@@ -29,6 +29,5 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
   async getUserUnreadTabs(userId: string): Promise<string[]> {
     const user = await this.findById(userId);
     return user?.unreadTabs || [];
-  };
-
+  }
 }

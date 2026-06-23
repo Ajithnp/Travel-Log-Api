@@ -1,9 +1,13 @@
-import { IPackageReviewSinglesResponseDto, VendorPackageReviewResponseDto } from '../../interfaces/service_interfaces/IReviewService';
+import {
+  IPackageReviewSinglesResponseDto,
+  VendorPackageReviewResponseDto,
+} from '../../interfaces/service_interfaces/IReviewService';
 import { IReviewDetailsPopulated, IReviewUserPopulated } from '../../types/entities/review.entity';
 
 export class ReviewMapper {
-
-  static toPublicPackageResponse(reviews: IReviewUserPopulated[]): IPackageReviewSinglesResponseDto[] {
+  static toPublicPackageResponse(
+    reviews: IReviewUserPopulated[],
+  ): IPackageReviewSinglesResponseDto[] {
     return reviews.map((review) => ({
       id: review._id.toString(),
       userId: review.userId._id.toString(),
@@ -15,7 +19,9 @@ export class ReviewMapper {
     }));
   }
 
-  static toVendorPackageResponse(reviews: IReviewDetailsPopulated[]): VendorPackageReviewResponseDto[] {
+  static toVendorPackageResponse(
+    reviews: IReviewDetailsPopulated[],
+  ): VendorPackageReviewResponseDto[] {
     return reviews.map((review) => ({
       id: review._id.toString(),
       packageName: review.packageId.title,
@@ -26,6 +32,4 @@ export class ReviewMapper {
       images: review.images || [],
     }));
   }
-
 }
-

@@ -98,7 +98,7 @@ export class VendorController implements IVendorController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  getVendorSummaryStats = asyncHandler(async (req:Request, res:Response) :Promise<void> => {
+  getVendorSummaryStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const vendorId = req.user?.id;
 
     const result = await this._vendorService.getSummaryStats(vendorId);
@@ -111,11 +111,16 @@ export class VendorController implements IVendorController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  dashboardAnalytics = asyncHandler(async (req:Request, res:Response) :Promise<void> => {
+  dashboardAnalytics = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const vendorId = req.user?.id;
-    const {period, start, end } = req.query;
+    const { period, start, end } = req.query;
 
-    const result = await this._vendorService.getDashboardAnalytics(vendorId, period as string, start ? new Date(start as string) : undefined,end ? new Date(end as string) : undefined);
+    const result = await this._vendorService.getDashboardAnalytics(
+      vendorId,
+      period as string,
+      start ? new Date(start as string) : undefined,
+      end ? new Date(end as string) : undefined,
+    );
 
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,
@@ -125,7 +130,7 @@ export class VendorController implements IVendorController {
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
 
-  dashboardRecentActivity = asyncHandler(async (req:Request, res:Response) :Promise<void> => {
+  dashboardRecentActivity = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const vendorId = req.user?.id;
 
     const result = await this._vendorService.dashboardRecentActivity(vendorId);

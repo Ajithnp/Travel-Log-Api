@@ -14,12 +14,10 @@ export class PaymentWebhookRoutes extends BaseRoute {
   }
 
   protected initializeRoutes(): void {
-
     this._router.post(
       '/webhook',
       express.raw({ type: 'application/json' }),
       this._paymentWebhookController.confirmPayment.bind(this._paymentWebhookController),
     );
-    
   }
 }

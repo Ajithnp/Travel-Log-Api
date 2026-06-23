@@ -7,9 +7,10 @@ import { isMongoServerError, isSyntaxError } from '../errors/gurdes/isMongoError
 import { handleMongoDuplicateError } from '../errors/MongoError';
 
 export const errorMiddleware = (
-  err: Error | AppError | any,
+  err: Error | AppError | unknown,
   req: Request,
   res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) => {
   let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
@@ -29,9 +30,13 @@ export const errorMiddleware = (
     statusCode = HTTP_STATUS.BAD_REQUEST;
     message = ERROR_MESSAGES.INVALID_JSON_PAYLOAD;
   } else {
-    statusCode = err?.status_code ?? HTTP_STATUS.INTERNAL_SERVER_ERROR;
-    message = err?.message ?? ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR;
-    errorCode = err?.error_code;
+    const errorObj = err as
+      | { status_code?: number; error_code?: string; message?: string }
+      | null
+      | undefined;
+    statusCode = errorObj?.status_code ?? HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    message = errorObj?.message ?? ERROR_MESSAGES.UNEXPECTED_SERVER_ERROR;
+    errorCode = errorObj?.error_code;
   }
 
   const response: IApiResponse = {

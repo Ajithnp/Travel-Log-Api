@@ -88,7 +88,7 @@ const ScheduleSchema = new Schema<ISchedule>(
     payoutStatus: {
       type: String,
       enum: ['pending', 'paid'],
-      default: 'pending'
+      default: 'pending',
     },
 
     status: {

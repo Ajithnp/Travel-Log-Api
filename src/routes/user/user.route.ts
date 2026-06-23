@@ -41,7 +41,7 @@ export class UserRoutes extends BaseRoute {
     @inject('ICouponController')
     private _couponController: ICouponController,
 
-     @inject('IContactController')
+    @inject('IContactController')
     private _contactController: IContactController,
   ) {
     super();
@@ -210,6 +210,5 @@ export class UserRoutes extends BaseRoute {
       validateDTO(contactFormRequestSchema),
       this._contactController.createContact.bind(this._contactController),
     );
-
   }
 }

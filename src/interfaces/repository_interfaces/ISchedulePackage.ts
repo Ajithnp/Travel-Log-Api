@@ -55,9 +55,9 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     filter?: ScheduleStatus,
     search?: string,
   ): Promise<{ schedules: SchedulesResponseResult[]; total: number }>;
-   
+
   getPayoutSchedulesCount(): Promise<number>;
-   
+
   getSchedulesForPayout(
     page: number,
     limit: number,
@@ -66,15 +66,14 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
 
   markSchedulePayoutAsCompleted(
     scheduleId: string,
-    payoutId: mongoose.Types.ObjectId
+    payoutId: mongoose.Types.ObjectId,
   ): Promise<ISchedule | null>;
 
-  scheduledStatsByVendor(vendorId:string):Promise<ScheduledStatsResult>;
+  scheduledStatsByVendor(vendorId: string): Promise<ScheduledStatsResult>;
 
   getUpcomingSchedules(vendorId: string, limit?: number): Promise<UpcomingScheduleResult[]>;
 
-  getScheduleStats(): Promise<{ activeSchedules: number; completedSchedules: number }> 
-
+  getScheduleStats(): Promise<{ activeSchedules: number; completedSchedules: number }>;
 }
 
 export interface SchedulesResponseResult {
@@ -102,12 +101,12 @@ export interface PackageScheduleResult {
   status: string;
 }
 
-export interface ScheduledStatsResult{
-  totalSchedule:number;
-  currentMonthSchedule:number;
-  hasGrowth:boolean;
-  activeSchedule:number;
-  ongoingSchedule:number;
+export interface ScheduledStatsResult {
+  totalSchedule: number;
+  currentMonthSchedule: number;
+  hasGrowth: boolean;
+  activeSchedule: number;
+  ongoingSchedule: number;
 }
 
 export interface UpcomingScheduleResult {

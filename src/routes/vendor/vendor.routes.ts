@@ -176,7 +176,6 @@ export class VendorRoutes extends BaseRoute {
       this._vendorPackageController.getPackageScheduleContext.bind(this._vendorPackageController),
     );
 
-
     //======category
 
     this._router.get(
@@ -384,7 +383,5 @@ export class VendorRoutes extends BaseRoute {
       authorize([USER_ROLES.VENDOR]),
       this._vendorController.dashboardRecentActivity.bind(this._vendorController),
     );
-
-
   }
 }

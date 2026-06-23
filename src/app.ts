@@ -17,7 +17,6 @@ import { NotificationRoutes } from './routes/shared/notification.routes';
 import { ReviewRoutes } from './routes/shared/review.routes';
 import { StripeRoutes } from './routes/shared/stripe.route';
 
-
 export default class App {
   private _app: Application;
   private _port: number;

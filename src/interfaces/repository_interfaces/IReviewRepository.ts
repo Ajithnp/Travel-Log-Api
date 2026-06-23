@@ -1,5 +1,9 @@
 import { IBaseRepository } from './IBaseRepository';
-import { IReview, IReviewDetailsPopulated, IReviewUserPopulated } from '../../types/entities/review.entity';
+import {
+  IReview,
+  IReviewDetailsPopulated,
+  IReviewUserPopulated,
+} from '../../types/entities/review.entity';
 
 export interface IReviewRepository extends IBaseRepository<IReview> {
   findByPackageId(packageId: string, userId: string): Promise<IReview | null>;
@@ -10,9 +14,14 @@ export interface IReviewRepository extends IBaseRepository<IReview> {
 
   getAverageRating(packageId: string): Promise<{ average: number; total: number }>;
 
-  findAllByPackageId( filters: PublicReviewFilters ): Promise<{ reviews: IReviewUserPopulated[]; total: number }>;
+  findAllByPackageId(
+    filters: PublicReviewFilters,
+  ): Promise<{ reviews: IReviewUserPopulated[]; total: number }>;
 
-  findAllByVendorId( vendorId: string, filters: VendorReviewFilters): Promise<{ reviews: IReviewDetailsPopulated[]; total: number }>;
+  findAllByVendorId(
+    vendorId: string,
+    filters: VendorReviewFilters,
+  ): Promise<{ reviews: IReviewDetailsPopulated[]; total: number }>;
 }
 
 export interface PublicReviewFilters {

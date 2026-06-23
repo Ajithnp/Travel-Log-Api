@@ -1,6 +1,10 @@
 import { injectable } from 'tsyringe';
 import { BaseRepository } from './base.repository';
-import { IReview, IReviewDetailsPopulated, IReviewUserPopulated } from '../types/entities/review.entity';
+import {
+  IReview,
+  IReviewDetailsPopulated,
+  IReviewUserPopulated,
+} from '../types/entities/review.entity';
 import {
   IRatingStatsSummary,
   IReviewRepository,
@@ -102,7 +106,7 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
       total: data.total,
       breakdown: { 1: data.count1, 2: data.count2, 3: data.count3, 4: data.count4, 5: data.count5 },
     };
-  };
+  }
 
   async getAverageRating(packageId: string): Promise<{ average: number; total: number }> {
     const result = await this.model.aggregate([
@@ -144,8 +148,10 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
     return { reviews: reviews as unknown as IReviewUserPopulated[], total };
   }
 
-  async findAllByVendorId( vendorId: string, filters: VendorReviewFilters): Promise<{ reviews: IReviewDetailsPopulated[]; total: number }> {
-
+  async findAllByVendorId(
+    vendorId: string,
+    filters: VendorReviewFilters,
+  ): Promise<{ reviews: IReviewDetailsPopulated[]; total: number }> {
     let query: FilterQuery<IReview> = {
       vendorId: toObjectId(vendorId),
       isDeleted: false,

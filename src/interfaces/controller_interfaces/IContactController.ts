@@ -1,7 +1,7 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
 
 export interface IContactController {
-   createContact:RequestHandler;
-   contactEnquiries:RequestHandler;
-   updateEnquiry:RequestHandler;
+  createContact: RequestHandler;
+  contactEnquiries: RequestHandler;
+  updateEnquiry: RequestHandler;
 }

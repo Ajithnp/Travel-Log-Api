@@ -31,10 +31,10 @@ export interface IBankDetails {
 }
 
 export interface ITransactionConnect {
-  accountId: string;          // acc_xxxxxxxx  (from Stripe)
-  onboardingComplete: boolean;  // if onboarding is complete or not
-  chargesEnabled: boolean;    // can receive payments
-  payoutsEnabled: boolean;    // can receive payouts
+  accountId: string; // acc_xxxxxxxx  (from Stripe)
+  onboardingComplete: boolean; // if onboarding is complete or not
+  chargesEnabled: boolean; // can receive payments
+  payoutsEnabled: boolean; // can receive payouts
 }
 
 export interface IVendorInfo extends Document {
@@ -79,7 +79,6 @@ export interface IBankDetailsDTO {
   bankName: string;
   branch: string;
 }
-
 
 export interface VendorVerificationSubmitDTO {
   businessInfo: IBusinessInfoDTO;

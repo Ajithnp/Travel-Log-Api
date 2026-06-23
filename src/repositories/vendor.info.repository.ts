@@ -1,6 +1,9 @@
 import { VendorInformationModel } from '../models/vendor.info.model';
 import mongoose, { FilterQuery, PipelineStage } from 'mongoose';
-import { IVendorInfoRepository, TopPerformingVendorsResult } from 'interfaces/repository_interfaces/IVendorInfoRepository';
+import {
+  IVendorInfoRepository,
+  TopPerformingVendorsResult,
+} from 'interfaces/repository_interfaces/IVendorInfoRepository';
 import { BaseRepository } from './base.repository';
 import { injectable } from 'tsyringe';
 import {
@@ -18,7 +21,8 @@ import { toObjectId } from '../shared/utils/database/objectId.helper';
 @injectable()
 export class VendorInfoRepository
   extends BaseRepository<IVendorInfo>
-  implements IVendorInfoRepository {
+  implements IVendorInfoRepository
+{
   constructor() {
     super(VendorInformationModel);
   }
@@ -32,21 +36,30 @@ export class VendorInfoRepository
   }
 
   async updateStripeAccountId(vendorId: string, accountId: string): Promise<void> {
-    await this.model.updateOne(
-      { userId: toObjectId(vendorId) },
-      { $set: { 'transactionConnect.accountId': accountId } }
-    ).exec();
+    await this.model
+      .updateOne(
+        { userId: toObjectId(vendorId) },
+        { $set: { 'transactionConnect.accountId': accountId } },
+      )
+      .exec();
   }
 
-  async updateStripeAccountStatus(vendorId: string, onboardingComplete: boolean, chargesEnabled: boolean, payoutsEnabled: boolean): Promise<void> {
-    await this.model.updateOne(
-      { userId: toObjectId(vendorId) },
-      {
-        'transactionConnect.onboardingComplete': onboardingComplete,
-        'transactionConnect.chargesEnabled': chargesEnabled,
-        'transactionConnect.payoutsEnabled': payoutsEnabled
-      }
-    ).exec();
+  async updateStripeAccountStatus(
+    vendorId: string,
+    onboardingComplete: boolean,
+    chargesEnabled: boolean,
+    payoutsEnabled: boolean,
+  ): Promise<void> {
+    await this.model
+      .updateOne(
+        { userId: toObjectId(vendorId) },
+        {
+          'transactionConnect.onboardingComplete': onboardingComplete,
+          'transactionConnect.chargesEnabled': chargesEnabled,
+          'transactionConnect.payoutsEnabled': payoutsEnabled,
+        },
+      )
+      .exec();
   }
 
   async findVendors(
@@ -133,7 +146,7 @@ export class VendorInfoRepository
     const result = await VendorInformationModel.aggregate<IVendorInfoWithUser>(pipeline);
 
     return result;
-  };
+  }
 
   async getCommissionOverviewByVendors(
     page: number,
@@ -284,29 +297,29 @@ export class VendorInfoRepository
   async findActivevendors(): Promise<number> {
     const result = await this.model.aggregate([
       {
-        $match: { isProfileVerified: true }
+        $match: { isProfileVerified: true },
       },
       {
         $lookup: {
           from: 'users',
           localField: 'userId',
           foreignField: '_id',
-          as: 'user'
-        }
+          as: 'user',
+        },
       },
       {
-        $unwind: '$user'
+        $unwind: '$user',
       },
       {
-        $match: { 'user.isBlocked': false }
+        $match: { 'user.isBlocked': false },
       },
       {
-        $count: 'activeVendors'
-      }
+        $count: 'activeVendors',
+      },
     ]);
 
     return result[0]?.activeVendors || 0;
-  };
+  }
 
   async findTop5Vendors(): Promise<TopPerformingVendorsResult[]> {
     const result = await this.model.aggregate([
@@ -350,5 +363,4 @@ export class VendorInfoRepository
 
     return result;
   }
-
 }

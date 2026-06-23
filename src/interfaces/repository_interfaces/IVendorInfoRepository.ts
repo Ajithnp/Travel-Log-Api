@@ -12,7 +12,7 @@ import { PaginatedCommissionOverviewByVendors } from '../../interfaces/service_i
 export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
   findVendorWithUserId(userId: string): Promise<IVendorInfoPopulated | null>;
 
-  findActivevendors(): Promise<number>
+  findActivevendors(): Promise<number>;
 
   findVendors(
     vendorSearchQuery: FilterQuery<IUser>,
@@ -20,8 +20,13 @@ export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
     options?: CustomQueryOptions,
   ): Promise<IVendorInfoWithUser[]>;
 
-  updateStripeAccountId(vendorId: string, accountId: string): Promise<void>
-  updateStripeAccountStatus(vendorId: string, onboardingComplete:boolean, chargesEnabled: boolean, payoutsEnabled: boolean): Promise<void>
+  updateStripeAccountId(vendorId: string, accountId: string): Promise<void>;
+  updateStripeAccountStatus(
+    vendorId: string,
+    onboardingComplete: boolean,
+    chargesEnabled: boolean,
+    payoutsEnabled: boolean,
+  ): Promise<void>;
 
   countVendorDocuments(
     vendorSearchQuery?: FilterQuery<IUser>,
@@ -35,14 +40,17 @@ export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
     options?: CustomQueryOptions,
   ): Promise<IVendorInfoWithUser[]>;
 
-  getCommissionOverviewByVendors(page:number,limit:number,search?:string): Promise<PaginatedCommissionOverviewByVendors>;
+  getCommissionOverviewByVendors(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<PaginatedCommissionOverviewByVendors>;
 
   findTop5Vendors(): Promise<TopPerformingVendorsResult[]>;
 }
 
 export interface TopPerformingVendorsResult {
   vendorId: string;
-  vendorName:string;
-  totalRevenue:number;
+  vendorName: string;
+  totalRevenue: number;
 }
-  

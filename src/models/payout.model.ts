@@ -8,9 +8,9 @@ const PayoutSchema = new Schema<IPayout>(
     scheduleId: { type: Schema.Types.ObjectId, ref: 'SchedulePackage', required: true },
     bookingIds: [{ type: Schema.Types.ObjectId, ref: 'Booking', required: true }],
 
-    grossAmount:      { type: Number, required: true },
+    grossAmount: { type: Number, required: true },
     commissionAmount: { type: Number, required: true },
-    netAmount:        { type: Number, required: true },
+    netAmount: { type: Number, required: true },
 
     status: {
       type: String,
@@ -19,11 +19,11 @@ const PayoutSchema = new Schema<IPayout>(
     },
 
     stripeTransferId: { type: String, default: null },
-    failureReason:    { type: String, default: null },
-    triggeredBy:      { type: String, enum: ['system', 'admin'], required: true },
+    failureReason: { type: String, default: null },
+    triggeredBy: { type: String, enum: ['system', 'admin'], required: true },
 
-    scheduledAt:  { type: Date, required: true },
-    processedAt:  { type: Date, default: null },
+    scheduledAt: { type: Date, required: true },
+    processedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

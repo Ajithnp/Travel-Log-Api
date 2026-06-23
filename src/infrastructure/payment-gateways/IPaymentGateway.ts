@@ -3,9 +3,7 @@ export type StripeWebhookEvent = ReturnType<typeof Stripe.prototype.webhooks.con
 export type StripeCheckoutSession = Awaited<
   ReturnType<typeof Stripe.prototype.checkout.sessions.retrieve>
 >;
-export type StripeAccountResponse = Awaited<
-  ReturnType<typeof Stripe.prototype.accounts.retrieve>
->;
+export type StripeAccountResponse = Awaited<ReturnType<typeof Stripe.prototype.accounts.retrieve>>;
 export type StripeTransferResponse = Awaited<
   ReturnType<typeof Stripe.prototype.transfers.retrieve>
 >;

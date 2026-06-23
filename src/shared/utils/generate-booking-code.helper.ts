@@ -1,7 +1,7 @@
 export function generateBookingCode() {
-    return `#TRP-${Date.now()}`;
+  return `#TRP-${Date.now()}`;
 }
 
 export function generatePayoutRefId() {
-    return `#PTID-${crypto.randomUUID()}`;
+  return `#PTID-${crypto.randomUUID()}`;
 }
