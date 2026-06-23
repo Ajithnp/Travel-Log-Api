@@ -36,6 +36,8 @@ import { IUserRewardRepository } from '../interfaces/repository_interfaces/IUser
 import { UserRewardRepository } from '../repositories/user-reward.repository';
 import { IPayoutRepository } from '../interfaces/repository_interfaces/IPayoutRepository';
 import { PayoutRepository } from '../repositories/payout.repository';
+import { IContactRepository } from '../interfaces/repository_interfaces/IContactRepository';
+import { ContactRepository } from '../repositories/contact.repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -117,6 +119,10 @@ export class RepositoryRegistry {
 
     container.register<IPayoutRepository>('IPayoutRepository', {
       useClass: PayoutRepository,
+    });
+
+    container.register<IContactRepository>('IContactRepository', {
+      useClass: ContactRepository,
     });
 
     // Register other repositories here

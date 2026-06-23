@@ -81,3 +81,10 @@ export const PAYOUT_STATUS = {
 } as const;
 
 export const INR_TO_USD_TEST_RATE = 83;
+
+export const CONTACT_STATUS = {
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+} as const;
+
+export type ContactStatus = (typeof CONTACT_STATUS)[keyof typeof CONTACT_STATUS];

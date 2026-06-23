@@ -29,6 +29,7 @@ import { ICouponController } from '../../interfaces/controller_interfaces/ICoupo
 import { IAdminFinanceController } from '../../interfaces/controller_interfaces/admin/IAdminFinanceController';
 import { IPayoutController } from '../../interfaces/controller_interfaces/IPayoutContoller';
 import { IAdminController } from '../../interfaces/controller_interfaces/admin/IAdminController';
+import { IContactController } from '../../interfaces/controller_interfaces/IContactController';
 
 @injectable()
 export class AdminRoutes extends BaseRoute {
@@ -51,6 +52,8 @@ export class AdminRoutes extends BaseRoute {
     private _adminFinanceController: IAdminFinanceController,
     @inject('IPayoutController')
     private _payoutController: IPayoutController,
+    @inject('IContactController')
+    private _contactController: IContactController,
   ) {
     super();
     this.initializeRoutes();
@@ -292,7 +295,7 @@ export class AdminRoutes extends BaseRoute {
       authorize([USER_ROLES.ADMIN]),
       this._adminFinanceController.getCommissionOverview.bind(this._adminFinanceController),
     );
-    
+
     this._router.get(
       '/commissions/vendors',
       isAuthenticated,
@@ -308,83 +311,95 @@ export class AdminRoutes extends BaseRoute {
     );
     //====payout
     this._router.post(
-    '/payouts/:scheduleId/release',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._payoutController.releasePayout.bind(this._adminFinanceController),
-   );
+      '/payouts/:scheduleId/release',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._payoutController.releasePayout.bind(this._adminFinanceController),
+    );
 
-   this._router.patch(
-    '/payouts/:payoutId/retry',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._payoutController.retryPayout.bind(this._payoutController),
-  );
+    this._router.patch(
+      '/payouts/:payoutId/retry',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._payoutController.retryPayout.bind(this._payoutController),
+    );
 
-   this._router.get(
-    '/payouts/overview',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._payoutController.payoutOverview.bind(this._payoutController),
-   );
-
-   this._router.get(
-    '/payouts/schedules',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._payoutController.getPayoutSchedules.bind(this._payoutController),
-   );
-
-   this._router.get(
-    '/payouts/stats',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._payoutController.payoutStats.bind(this._payoutController),
-   );
-
-   this._router.get(
-    '/payouts/:scheduleId/details',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN, USER_ROLES.VENDOR]),
-    this._payoutController.schedulePayoutDetails.bind(this._payoutController),
-   );
-
-   this._router.get(
-    '/payouts',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._payoutController.findAllPayouts.bind(this._payoutController),
-   );
-   // dashboard
     this._router.get(
-    '/dashboard/stats',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._adminController.dashboardStats.bind(this._adminController),
-   );
+      '/payouts/overview',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._payoutController.payoutOverview.bind(this._payoutController),
+    );
 
-   this._router.get(
-    '/dashboard/top-performers',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._adminController.dashboardTopPerformers.bind(this._adminController),
-   );
+    this._router.get(
+      '/payouts/schedules',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._payoutController.getPayoutSchedules.bind(this._payoutController),
+    );
 
-   this._router.get(
-    '/dashboard/actions-required',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._adminController.dashboardActionsRequired.bind(this._adminController),
-   );
+    this._router.get(
+      '/payouts/stats',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._payoutController.payoutStats.bind(this._payoutController),
+    );
 
-  this._router.get(
-    '/dashboard/revenue-trend',
-    isAuthenticated,
-    authorize([USER_ROLES.ADMIN]),
-    this._adminController.dashboardRevenueTrend.bind(this._adminController),
-   );
+    this._router.get(
+      '/payouts/:scheduleId/details',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN, USER_ROLES.VENDOR]),
+      this._payoutController.schedulePayoutDetails.bind(this._payoutController),
+    );
 
+    this._router.get(
+      '/payouts',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._payoutController.findAllPayouts.bind(this._payoutController),
+    );
+    // dashboard
+    this._router.get(
+      '/dashboard/stats',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminController.dashboardStats.bind(this._adminController),
+    );
 
-    
+    this._router.get(
+      '/dashboard/top-performers',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminController.dashboardTopPerformers.bind(this._adminController),
+    );
+
+    this._router.get(
+      '/dashboard/actions-required',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminController.dashboardActionsRequired.bind(this._adminController),
+    );
+
+    this._router.get(
+      '/dashboard/revenue-trend',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._adminController.dashboardRevenueTrend.bind(this._adminController),
+    );
+
+    this._router.get(
+      '/contacts-enquiry',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._contactController.contactEnquiries.bind(this._contactController),
+    );
+
+    this._router.patch(
+      '/contacts-enquiry/:enquiryId',
+      isAuthenticated,
+      authorize([USER_ROLES.ADMIN]),
+      this._contactController.updateEnquiry.bind(this._contactController),
+    );
+
   }
 }

@@ -226,6 +226,10 @@ export const ERROR_MESSAGES = {
   PAYOUT_FAILED: 'Payout transfer failed',
   NO_PAYABLE_BOOKINGS_FOUND: 'No payable bookings found for this schedule',
   PAYOUT_NOT_FOUND: 'Payout not found',
+
+  ENQUIRY_NOT_FOUND: 'Enquiry not found',
+  ENQUIRY_ALREADY_RESOLVED: 'Enquiry already resolved',
+
 } as const;
 
 export const NOTIFICATION_MESSAGES = {
