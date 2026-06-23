@@ -18,6 +18,7 @@ export class ContactController implements IContactController {
   ) { }
 
   createContact = expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+
     const payload: CreateContactRequestDTO = {
       userId: req.user?.id || null,
       name: req.body.name,

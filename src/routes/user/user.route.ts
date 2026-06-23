@@ -208,7 +208,7 @@ export class UserRoutes extends BaseRoute {
       '/contacts-enquiry',
       optionalAuth,
       validateDTO(contactFormRequestSchema),
-      this._contactController.contactEnquiries.bind(this._contactController),
+      this._contactController.createContact.bind(this._contactController),
     );
 
   }

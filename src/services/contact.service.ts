@@ -31,6 +31,7 @@ export class ContactService implements IContactService {
    }
 
    async createContact(payload: CreateContactRequestDTO) {
+
       await this._contactRepository.create({ ...payload, userId: payload.userId ? toObjectId(payload.userId) : null });
    };
 
