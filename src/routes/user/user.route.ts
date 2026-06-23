@@ -205,10 +205,11 @@ export class UserRoutes extends BaseRoute {
     );
 
     this._router.post(
-      '/contact',
+      '/contacts-enquiry',
       optionalAuth,
       validateDTO(contactFormRequestSchema),
-      this._contactController.createContact.bind(this._contactController),
+      this._contactController.contactEnquiries.bind(this._contactController),
     );
+
   }
 }
