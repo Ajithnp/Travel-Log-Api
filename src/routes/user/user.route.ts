@@ -2,7 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import BaseRoute from '../base.route';
 import { IUserController } from '../../interfaces/controller_interfaces/user/IUserController';
 import { IUserProfileController } from '../../interfaces/controller_interfaces/user/IUserProfileController';
-import { isAuthenticated } from '../../middlewares/auth.middleware';
+import { isAuthenticated, optionalAuth } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/aurhorization.middleware';
 import { USER_ROLES } from '../../shared/constants/roles';
 // import { otpLimiter } from '../../config/rate.limiter.config';
@@ -20,6 +20,8 @@ import { wishlistToggleLimiter } from '../../config/rate.limiter.config';
 import { IChatController } from '../../interfaces/controller_interfaces/IChatController';
 import { IWalletController } from '../../interfaces/controller_interfaces/user/IWalletController';
 import { ICouponController } from '../../interfaces/controller_interfaces/ICouponController';
+import { contactFormRequestSchema } from '../../validators/contact.validation';
+import { IContactController } from '../../interfaces/controller_interfaces/IContactController';
 
 @injectable()
 export class UserRoutes extends BaseRoute {
@@ -38,6 +40,9 @@ export class UserRoutes extends BaseRoute {
 
     @inject('ICouponController')
     private _couponController: ICouponController,
+
+     @inject('IContactController')
+    private _contactController: IContactController,
   ) {
     super();
     this.initializeRoutes();
@@ -197,6 +202,13 @@ export class UserRoutes extends BaseRoute {
       isAuthenticated,
       authorize([USER_ROLES.USER]),
       this._couponController.revealReward.bind(this._couponController),
+    );
+
+    this._router.post(
+      '/contact',
+      optionalAuth,
+      validateDTO(contactFormRequestSchema),
+      this._contactController.createContact.bind(this._contactController),
     );
   }
 }

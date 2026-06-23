@@ -74,6 +74,8 @@ import { IPayoutService } from '../interfaces/service_interfaces/IPayoutService'
 import { PayoutService } from '../services/payout.service';
 import { IAdminService } from '../interfaces/service_interfaces/admin/IAdminService';
 import { AdminService } from '../services/admin/admin.service';
+import { IContactService } from '../interfaces/service_interfaces/IContactService';
+import { ContactService } from '../services/contact.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -139,6 +141,10 @@ export class ServiceRegistry {
 
     container.register<IPayoutService>('IPayoutService', {
       useClass: PayoutService,
+    });
+
+    container.register<IContactService>('IContactService', {
+      useClass: ContactService,
     });
 
     //vendor-services
