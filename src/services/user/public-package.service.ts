@@ -108,13 +108,22 @@ export class PublicPackageService implements IPublicPackageService {
   }
 
   async getPublicSchedulesByPackage(packageId: string): Promise<PublicScheduleDTO[]> {
+    
+    const cacheKey = CACHE_KEYS.publicScheduleByPackage(packageId);
+    
+    const cached = await this._cacheService.get<PublicScheduleDTO[]>(cacheKey);
+    console.log("schedules=====", cached)
+    if (cached) return cached;
+    
     const schedules = await this._schedulePackageRepository.findPublicSchedulesByPackage(packageId);
-
+ console.log("schedules from db ======", schedules)
     if (!schedules) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.BAD_REQUEST);
     }
+    const data = schedules.map((schedule) => ScheduleMapper.toPublicSchedule(schedule));
+    await this._cacheService.set(cacheKey, data, CACHE_TTL.ttl_5_minutes);
 
-    return schedules.map((schedule) => ScheduleMapper.toPublicSchedule(schedule));
+    return data;
   }
 
   async getPopularPackages(): Promise<PopularPackagesResponseDTO[]> {
@@ -166,7 +175,6 @@ export class PublicPackageService implements IPublicPackageService {
     }
 
     await this._cacheService.set(cacheKey, data, CACHE_TTL.ttl_30_minutes);
-
     return data; 
    }
 }
