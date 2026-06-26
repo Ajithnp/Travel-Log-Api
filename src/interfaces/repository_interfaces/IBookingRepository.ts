@@ -124,6 +124,8 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   ): Promise<Array<{ packageTitle: string; bookingCount: number }>>;
 
   getRecentActivity(vendorId: string, limit?: number): Promise<RecentBookingActivityResult[]>;
+
+  findUserBookingsMeta(userId: string):Promise<UserBookingsMetaResult>;
 }
 
 export interface SchedulePayoutTotals {
@@ -190,4 +192,12 @@ export interface AnalyticsDataPoint {
   _id: string;
   count: number;
   revenue: number;
+}
+
+export interface UserBookingsMetaResult {
+  states:      string[];
+  locations:   string[];
+  categoryIds: Types.ObjectId[];
+  bookedPackageIds: Types.ObjectId[];
+  totalBookings: number;
 }

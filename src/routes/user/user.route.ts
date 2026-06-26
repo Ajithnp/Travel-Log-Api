@@ -62,6 +62,12 @@ export class UserRoutes extends BaseRoute {
     );
 
     this._router.get(
+      '/packages/recommended',
+      optionalAuth,
+      this._userController.getRecommendedPackages.bind(this._userController),
+    );
+
+    this._router.get(
       '/packages/categories',
       this._userController.getCategories.bind(this._userController),
     );

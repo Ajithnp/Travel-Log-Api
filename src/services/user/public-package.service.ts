@@ -1,6 +1,6 @@
 import { AppError } from '../../errors/AppError';
 import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
-import { IPublicPackageService, PopularPackagesResponseDTO } from '../../interfaces/service_interfaces/user/IPublicPackageService';
+import { IPublicPackageService, PopularPackagesResponseDTO, RecommendedPackagesResponseDTO } from '../../interfaces/service_interfaces/user/IPublicPackageService';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { injectable, inject } from 'tsyringe';
 import { PublicPackageFilters } from '../../types/db';
@@ -19,18 +19,24 @@ import { ERROR_MESSAGES } from '../../shared/constants/messages';
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
 import { ScheduleMapper } from '../../shared/mappers/schedule.mapper';
 import { IOfferRepository } from '../../interfaces/repository_interfaces/IOfferRepository';
+import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
+import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
 
 @injectable()
 export class PublicPackageService implements IPublicPackageService {
   constructor(
     @inject('IBasePackageRepository')
     private _basePackageRepository: IBasePackageRepository,
+    @inject('IUserRepository')
+    private _userRepository: IUserRepository,
     @inject('ICategoryRepository')
     private _categoryRepository: ICategoryRepository,
     @inject('ISchedulePackageRepository')
     private _schedulePackageRepository: ISchedulePackageRepository,
     @inject('IOfferRepository')
     private _offerRepository: IOfferRepository,
+    @inject('IBookingRepository')
+    private _bookingRepository: IBookingRepository,
   ) {}
 
   async getPublicPackages(query: PublicPackageQuery): Promise<PublicPackageListResponse> {
@@ -111,5 +117,30 @@ export class PublicPackageService implements IPublicPackageService {
     const packages = await this._basePackageRepository.findPopularPackages();
 
     return packages;
-  }
+  };
+
+  async getRecommendedPackages(userId?:string):Promise<RecommendedPackagesResponseDTO[]>{
+    
+    if(!userId){
+      return await this._basePackageRepository.topRatedPackages();
+    };
+
+    const user = await this._userRepository.findById(userId);
+
+    if(!user){
+      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.BAD_REQUEST);
+    };
+
+    const bookingsMeta = await this._bookingRepository.findUserBookingsMeta(userId);
+
+    if(bookingsMeta.totalBookings === 0){
+      return await this._basePackageRepository.topRatedPackages();
+    }
+  
+    const recommends = await this._basePackageRepository.getPersonalizedPackagesByUserId(bookingsMeta);
+
+    const data = recommends.map((pkg) => PackageMapper.toRecommededPackages(pkg));
+
+    return data; 
+   }
 }

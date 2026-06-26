@@ -5,7 +5,7 @@ import {
   PublicPackageListResponse,
   PublicScheduleDTO,
 } from '../../../types/dtos/user/response.dtos';
-import { PopularPackagesResult } from 'interfaces/repository_interfaces/IBasePackageRepository';
+import { PopularPackagesResult, TopRatedPackagesResult } from 'interfaces/repository_interfaces/IBasePackageRepository';
 
 export interface IPublicPackageService {
   getPublicPackages(filters: PublicPackageQuery): Promise<PublicPackageListResponse>;
@@ -13,6 +13,10 @@ export interface IPublicPackageService {
   getPackageDetails(packageId: string): Promise<PublicPackageDetailDTO>;
   getPublicSchedulesByPackage(packageId: string): Promise<PublicScheduleDTO[]>;
   getPopularPackages(): Promise<PopularPackagesResponseDTO[]>;
+  getRecommendedPackages(userId?:string):Promise<RecommendedPackagesResponseDTO[]>;
 }
 
 export type PopularPackagesResponseDTO = PopularPackagesResult;
+export interface RecommendedPackagesResponseDTO extends TopRatedPackagesResult {
+  category?:string;
+}

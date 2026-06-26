@@ -8,9 +8,10 @@ import {
   IPackageListItem,
   PackageMetaData,
   PopularPackagesResult,
+  TopRatedPackagesResult,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
-import { IBasePackageEntity } from '../types/entities/base-package.entity';
+import { IBasePackageEntity, IBasePackagePopulatedByCategory } from '../types/entities/base-package.entity';
 import { PackageModel } from '../models/package.model';
 import { FilterType, PublicPackageFilters } from '../types/db';
 import mongoose, { FilterQuery, Types } from 'mongoose';
@@ -19,8 +20,9 @@ import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
 import { BOOKING_STATUS } from '../shared/constants/booking';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
 import { PaginatedCommissionOverviewByPackages } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
-import { PaginatedData } from 'types/common/IPaginationResponse';
-import { PackagesEarningsByVendor } from 'interfaces/service_interfaces/vendor/IVendorRevenueService';
+import { PaginatedData } from '../types/common/IPaginationResponse';
+import { PackagesEarningsByVendor } from '../interfaces/service_interfaces/vendor/IVendorRevenueService';
+import { UserBookingsMetaResult } from '../interfaces/repository_interfaces/IBookingRepository';
 
 @injectable()
 export class BasePackageRepository
@@ -1318,4 +1320,115 @@ export class BasePackageRepository
     ]);
     return packages;
   }
+  async topRatedPackages(): Promise<TopRatedPackagesResult[]> {
+    const packages = await this.model.aggregate([
+      {
+        $match: {
+          status: PACKAGE_STATUS.PUBLISHED,
+          isActive: true,
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'activeSchedules',
+          pipeline: [
+            {
+              $match: {
+                status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT] },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $match: {
+          'activeSchedules.0': { $exists: true },
+        },
+      },
+      {
+        $addFields: {
+          soloPrice: {
+            $min: {
+              $map: {
+                input: '$activeSchedules',
+                as: 'sc',
+                in: {
+                  $let: {
+                    vars: {
+                      soloTier: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: '$$sc.pricing',
+                              as: 'p',
+                              cond: { $eq: ['$$p.type', 'SOLO'] },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: '$$soloTier.price',
+                  },
+                },
+              },
+            },
+          },
+          image: {
+            $let: {
+              vars: { firstImage: { $arrayElemAt: ['$images', 0] } },
+              in: { key: '$$firstImage.key', url: '$$firstImage.url' },
+            },
+          },
+        },
+      },
+      {
+        $sort: { averageRating: -1, totalReviews: -1 },
+      },
+      {
+        $limit: 4,
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          location: 1,
+          state: 1,
+          rating: { $ifNull: ['$averageRating', 0] },
+          image: 1,
+          soloPrice: { $ifNull: ['$soloPrice', 0] },
+        },
+      },
+    ]);
+    return packages;
+  };
+
+ async getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<IBasePackagePopulatedByCategory[]> {
+  const { states, locations, categoryIds, bookedPackageIds } = meta;
+
+  const orConditions: FilterQuery<IBasePackageEntity>[] = [];
+
+  if (states.length) orConditions.push({ state: { $in: states } });
+  if (locations.length) orConditions.push({ location: { $in: locations } });
+  if (categoryIds.length) orConditions.push({ categoryId: { $in: categoryIds } });
+
+
+  const recommended = await PackageModel.find({
+    _id:       { $nin: bookedPackageIds },  // exclude already booked
+    isActive:  true,
+    isDeleted: false,
+    status:    PACKAGE_STATUS.PUBLISHED,
+    $or:       orConditions,
+  })
+    .sort({ averageRating: -1, totalReviews: -1 })
+    .limit(4)
+    .populate('categoryId', 'name')
+    .lean();
+
+  return recommended as unknown as IBasePackagePopulatedByCategory[];
+}
 }

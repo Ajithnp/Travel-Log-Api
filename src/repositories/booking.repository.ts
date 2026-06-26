@@ -21,6 +21,7 @@ import {
   SchedulePayoutTotals,
   RecentBookingActivityResult,
   AnalyticsDataPoint,
+  UserBookingsMetaResult,
 } from '../interfaces/repository_interfaces/IBookingRepository';
 import { CommissionOverview } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
 import BookingModel from '../models/booking.model';
@@ -591,15 +592,15 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
       ...(search
         ? [
-            {
-              $match: {
-                $or: [
-                  { 'user.name': { $regex: search, $options: 'i' } },
-                  { bookingCode: { $regex: search, $options: 'i' } },
-                ],
-              },
+          {
+            $match: {
+              $or: [
+                { 'user.name': { $regex: search, $options: 'i' } },
+                { bookingCode: { $regex: search, $options: 'i' } },
+              ],
             },
-          ]
+          },
+        ]
         : []),
       { $sort: { createdAt: -1 } },
       {
@@ -1092,5 +1093,64 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       },
     ]);
     return result;
+  };
+
+  async findUserBookingsMeta(userId: string): Promise<UserBookingsMetaResult> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          userId: new Types.ObjectId(userId),
+          bookingStatus: BOOKING_STATUS.CONFIRMED,
+          paymentStatus: PAYMENT_STATUS.PAID,
+        },
+      },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'packageId',
+          foreignField: '_id',
+          as: 'package',
+        },
+      },
+      { $unwind: '$package' },
+      {
+        $project: {
+          _id: 0,
+          state: '$package.state',
+          location: '$package.location',
+          categoryId: '$package.categoryId',
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+          states: { $addToSet: '$state' },
+          locations: { $addToSet: '$location' },
+          categoryIds: { $addToSet: '$categoryId' },
+          bookedPackageIds: { $addToSet: '$packageId' },
+          totalBookings: { $sum: 1 },
+        },
+      },
+
+      {
+        $project: {
+          _id: 0,
+          states: 1,
+          locations: 1,
+          categoryIds: 1,
+          bookedPackageIds: 1,
+          totalBookings: 1,
+        },
+      },
+    ]);
+
+    return result[0] ?? {
+      states: [],
+      locations: [],
+      categoryIds: [],
+      bookedPackageIds: [],
+      totalBookings: 0,
+    };
   }
 }
