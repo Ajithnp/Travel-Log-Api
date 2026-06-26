@@ -7,6 +7,7 @@ import {
   PackageOfferInfo,
   IPackageListItem,
   PackageMetaData,
+  PopularPackagesResult,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
 import { IBasePackageEntity } from '../types/entities/base-package.entity';
@@ -1204,5 +1205,117 @@ export class BasePackageRepository
       totalPages: Math.ceil((result.metadata[0]?.total ?? 0) / limit),
       totalDocs: result.metadata[0]?.total ?? 0,
     };
+  }
+
+  async findPopularPackages(): Promise<PopularPackagesResult[]> {
+    const packages = await this.model.aggregate([
+      {
+        $match: {
+          status: PACKAGE_STATUS.PUBLISHED,
+          isActive: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'scheduledPackages',
+          pipeline: [
+            {
+              $match: {
+                status: SCHEDULE_STATUS.COMPLETED,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          soloPrice: {
+            $min: {
+              $map: {
+                input: '$scheduledPackages',
+                as: 'sc',
+                in: {
+                  $let: {
+                    vars: {
+                      soloTier: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: '$$sc.pricing',
+                              as: 'p',
+                              cond: { $eq: ['$$p.type', 'SOLO'] },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: '$$soloTier.price',
+                  },
+                },
+              },
+            },
+          },
+          image: {
+            $let: {
+              vars: { firstImage: { $arrayElemAt: ['$images', 0] } },
+              in: { key: '$$firstImage.key', url: '$$firstImage.url' },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'bookings',
+          pipeline: [
+            {
+              $match: {
+                bookingStatus: BOOKING_STATUS.COMPLETED,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: '$bookings',
+      },
+      {
+        $group: {
+          _id: '$_id',
+          title: { $first: '$title' },
+          location: { $first: '$location' },
+          state: { $first: '$state' },
+          rating: { $first: { $ifNull: ['$averageRating', 0] } },
+          image: { $first: '$image' },
+          soloPrice: { $first: '$soloPrice' },
+          totalBookings: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalBookings: -1 },
+      },
+      {
+        $limit: 8,
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          location: 1,
+          state: 1,
+          rating: 1,
+          image: 1,
+          soloPrice: { $ifNull: ['$soloPrice', 0] },
+          totalBookings: 1,
+        },
+      },
+    ]);
+    return packages;
   }
 }

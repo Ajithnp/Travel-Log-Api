@@ -58,6 +58,18 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     limit: number,
     search?: string,
   ): Promise<PaginatedData<PackagesEarningsByVendor>>;
+
+  findPopularPackages(): Promise<PopularPackagesResult[]>;
+}
+
+export interface PopularPackagesResult {
+  _id: string;
+  title: string;
+  location: string;
+  state: string;
+  rating: number;
+  image: { key: string; url?: string };
+  soloPrice: number;
 }
 
 export interface AdminPackageDetailsResult {

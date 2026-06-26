@@ -1,6 +1,6 @@
 import { AppError } from '../../errors/AppError';
 import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
-import { IPublicPackageService } from '../../interfaces/service_interfaces/user/IPublicPackageService';
+import { IPublicPackageService, PopularPackagesResponseDTO } from '../../interfaces/service_interfaces/user/IPublicPackageService';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { injectable, inject } from 'tsyringe';
 import { PublicPackageFilters } from '../../types/db';
@@ -105,5 +105,11 @@ export class PublicPackageService implements IPublicPackageService {
     }
 
     return schedules.map((schedule) => ScheduleMapper.toPublicSchedule(schedule));
+  }
+
+  async getPopularPackages(): Promise<PopularPackagesResponseDTO[]> {
+    const packages = await this._basePackageRepository.findPopularPackages();
+
+    return packages;
   }
 }
