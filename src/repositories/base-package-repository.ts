@@ -1434,7 +1434,7 @@ export class BasePackageRepository
     return packages;
   };
 
-  async getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<IBasePackagePopulatedByCategory[]> {
+  async getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<TopRatedPackagesResult[]> {
     const { states, locations, categoryIds, bookedPackageIds } = meta;
 
     const orConditions: FilterQuery<IBasePackageEntity>[] = [];
@@ -1474,6 +1474,43 @@ export class BasePackageRepository
         },
       },
       {
+        $addFields: {
+          soloPrice: {
+            $min: {
+              $map: {
+                input: '$activeSchedules',
+                as: 'sc',
+                in: {
+                  $let: {
+                    vars: {
+                      soloTier: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: '$$sc.pricing',
+                              as: 'p',
+                              cond: { $eq: ['$$p.type', 'SOLO'] },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: '$$soloTier.price',
+                  },
+                },
+              },
+            },
+          },
+          image: {
+            $let: {
+              vars: { firstImage: { $arrayElemAt: ['$images', 0] } },
+              in: { key: '$$firstImage.key', url: '$$firstImage.url' },
+            },
+          },
+        },
+      },
+      {
         $lookup: {
           from: 'categories',
           localField: 'categoryId',
@@ -1490,8 +1527,21 @@ export class BasePackageRepository
       },
       { $sort: { averageRating: -1, totalReviews: -1 } },
       { $limit: 4 },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          location: 1,
+          state: 1,
+          rating: { $ifNull: ['$averageRating', 0] },
+          image: 1,
+          soloPrice: { $ifNull: ['$soloPrice', 0] },
+          totalReviews: { $ifNull: ['$totalReviews', 0] },
+          category: { $ifNull: ['$categoryId.name', ''] },
+        },
+      },
     ]);
 
-    return recommended as unknown as IBasePackagePopulatedByCategory[];
+    return recommended;
   }
 }

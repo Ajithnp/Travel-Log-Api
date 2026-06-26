@@ -201,19 +201,4 @@ export class PackageMapper {
     };
   }
 
-  static toRecommededPackages(pkg: IBasePackagePopulatedByCategory): RecommendedPackagesResponseDTO {
-    return {
-      _id: pkg._id.toString(),
-      title: pkg.title ?? '',
-      location: pkg.location ?? '',
-      state: pkg.state ?? '',
-      rating: pkg.averageRating ?? 0,
-      image: {
-        key: (pkg.images && pkg.images.length > 0) ? (pkg.images[0] as IFile).key ?? (pkg.images[0] as IFile).url ?? '' : '',
-      },
-      soloPrice: 0,
-      category: pkg.categoryId?.name,
-      totalReviews: pkg.totalReviews ?? 0,
-    };
-  }
 }
