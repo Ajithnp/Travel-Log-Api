@@ -2,6 +2,7 @@ import { FilterType, PublicPackageFilters } from 'types/db';
 import {
   DifficultyLevel,
   IBasePackageEntity,
+  IBasePackagePopulatedByCategory,
   IFile,
 } from '../../types/entities/base-package.entity';
 import { IBaseRepository } from './IBaseRepository';
@@ -12,6 +13,7 @@ import { PackageStatus } from '../../shared/constants/constants';
 import { PaginatedCommissionOverviewByPackages } from '../../interfaces/service_interfaces/admin/IAdminFinanceService';
 import { PackagesEarningsByVendor } from '../../interfaces/service_interfaces/vendor/IVendorRevenueService';
 import { PaginatedData } from '../../types/common/IPaginationResponse';
+import { UserBookingsMetaResult } from './IBookingRepository';
 
 export interface IBasePackageRepository extends IBaseRepository<IBasePackageEntity> {
   findPackages(
@@ -58,6 +60,22 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     limit: number,
     search?: string,
   ): Promise<PaginatedData<PackagesEarningsByVendor>>;
+
+  findPopularPackages(): Promise<PopularPackagesResult[]>;
+
+  topRatedPackages(): Promise<TopRatedPackagesResult[]>;
+
+  getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<IBasePackagePopulatedByCategory[]>
+}
+
+export interface PopularPackagesResult {
+  _id: string;
+  title: string;
+  location: string;
+  state: string;
+  rating: number;
+  image: { key: string; url?: string };
+  soloPrice: number;
 }
 
 export interface AdminPackageDetailsResult {
@@ -155,4 +173,16 @@ export interface IPackageListItem {
 export interface PackageMetaData {
   id: string;
   packageTittle: string;
+}
+
+export interface TopRatedPackagesResult {
+  _id: string;
+  title: string;
+  location: string;
+  state: string;
+  rating: number;
+  image: { key: string; url?: string };
+  soloPrice: number;
+  totalReviews:number;
+  category?:string;
 }

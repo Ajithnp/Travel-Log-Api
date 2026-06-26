@@ -26,12 +26,37 @@ export class UserController implements IUserController {
     private _wishlistService: IWishlistService,
     @inject('IPublicVendorService')
     private _publicVendorService: IPublicVendorService,
-  ) {}
+  ) { }
 
   getPublicPackages = asyncHandler(async (req, res) => {
     const query = req.query as unknown as PublicPackageQuery;
 
     const result = await this._publicPackageService.getPublicPackages(query);
+
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getPopularPackages = asyncHandler(async (req, res) => {
+    const result = await this._publicPackageService.getPopularPackages();
+
+    const successResponse: IApiResponse<typeof result> = {
+      success: SUCCESS_STATUS.SUCCESS,
+      message: SUCCESS_MESSAGES.OK,
+      data: result,
+    };
+
+    res.status(HTTP_STATUS.OK).json(successResponse);
+  });
+
+  getRecommendedPackages = asyncHandler(async (req, res) => {
+    const userId = req.user?.id;
+    const result = await this._publicPackageService.getRecommendedPackages(userId);
 
     const successResponse: IApiResponse<typeof result> = {
       success: SUCCESS_STATUS.SUCCESS,

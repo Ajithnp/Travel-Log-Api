@@ -4,6 +4,7 @@ import { PackageStatus } from 'shared/constants/constants';
 
 export interface IFile {
   key: string;
+  url?: string;
 }
 
 export interface Activity {
@@ -81,4 +82,8 @@ export interface IPopulatedPackageDetails
   vendorId: PopulatedVendor;
   categoryId: PopulatedCategory;
   cancellationPolicy: PopulatedCancellationPolicy;
+}
+
+export interface IBasePackagePopulatedByCategory extends Omit<IBasePackageEntity, 'categoryId'> {
+  categoryId: { name: string };
 }

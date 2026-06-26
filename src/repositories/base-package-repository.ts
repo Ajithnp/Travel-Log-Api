@@ -7,9 +7,11 @@ import {
   PackageOfferInfo,
   IPackageListItem,
   PackageMetaData,
+  PopularPackagesResult,
+  TopRatedPackagesResult,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
-import { IBasePackageEntity } from '../types/entities/base-package.entity';
+import { IBasePackageEntity, IBasePackagePopulatedByCategory } from '../types/entities/base-package.entity';
 import { PackageModel } from '../models/package.model';
 import { FilterType, PublicPackageFilters } from '../types/db';
 import mongoose, { FilterQuery, Types } from 'mongoose';
@@ -18,14 +20,14 @@ import { PACKAGE_STATUS, SCHEDULE_STATUS } from '../shared/constants/constants';
 import { BOOKING_STATUS } from '../shared/constants/booking';
 import { toObjectId } from '../shared/utils/database/objectId.helper';
 import { PaginatedCommissionOverviewByPackages } from '../interfaces/service_interfaces/admin/IAdminFinanceService';
-import { PaginatedData } from 'types/common/IPaginationResponse';
-import { PackagesEarningsByVendor } from 'interfaces/service_interfaces/vendor/IVendorRevenueService';
+import { PaginatedData } from '../types/common/IPaginationResponse';
+import { PackagesEarningsByVendor } from '../interfaces/service_interfaces/vendor/IVendorRevenueService';
+import { UserBookingsMetaResult } from '../interfaces/repository_interfaces/IBookingRepository';
 
 @injectable()
 export class BasePackageRepository
   extends BaseRepository<IBasePackageEntity>
-  implements IBasePackageRepository
-{
+  implements IBasePackageRepository {
   constructor() {
     super(PackageModel);
   }
@@ -781,17 +783,17 @@ export class BasePackageRepository
 
     const searchMatchStage: mongoose.PipelineStage[] = search?.trim()
       ? [
-          {
-            $match: {
-              $or: [
-                { title: { $regex: search.trim(), $options: 'i' } },
-                { location: { $regex: search.trim(), $options: 'i' } },
-                { state: { $regex: search.trim(), $options: 'i' } },
-                { 'vendor.name': { $regex: search.trim(), $options: 'i' } },
-              ],
-            },
+        {
+          $match: {
+            $or: [
+              { title: { $regex: search.trim(), $options: 'i' } },
+              { location: { $regex: search.trim(), $options: 'i' } },
+              { state: { $regex: search.trim(), $options: 'i' } },
+              { 'vendor.name': { $regex: search.trim(), $options: 'i' } },
+            ],
           },
-        ]
+        },
+      ]
       : [];
 
     const pipeline: mongoose.PipelineStage[] = [
@@ -1204,5 +1206,290 @@ export class BasePackageRepository
       totalPages: Math.ceil((result.metadata[0]?.total ?? 0) / limit),
       totalDocs: result.metadata[0]?.total ?? 0,
     };
+  }
+
+  async findPopularPackages(): Promise<PopularPackagesResult[]> {
+    const packages = await this.model.aggregate([
+      {
+        $match: {
+          status: PACKAGE_STATUS.PUBLISHED,
+          isActive: true,
+        },
+      },
+      // Step 1: Lookup active (upcoming / sold-out) schedules
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'activeSchedules',
+          pipeline: [
+            {
+              $match: {
+                status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT] },
+              },
+            },
+          ],
+        },
+      },
+      // Step 2: Only keep packages that have at least one active schedule
+      {
+        $match: {
+          'activeSchedules.0': { $exists: true },
+        },
+      },
+      // Step 3: Extract soloPrice from active schedules & first image
+      {
+        $addFields: {
+          soloPrice: {
+            $min: {
+              $map: {
+                input: '$activeSchedules',
+                as: 'sc',
+                in: {
+                  $let: {
+                    vars: {
+                      soloTier: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: '$$sc.pricing',
+                              as: 'p',
+                              cond: { $eq: ['$$p.type', 'SOLO'] },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: '$$soloTier.price',
+                  },
+                },
+              },
+            },
+          },
+          image: {
+            $let: {
+              vars: { firstImage: { $arrayElemAt: ['$images', 0] } },
+              in: { key: '$$firstImage.key', url: '$$firstImage.url' },
+            },
+          },
+        },
+      },
+      // Step 4: Count completed bookings to rank by popularity
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'bookings',
+          pipeline: [
+            {
+              $match: {
+                bookingStatus: BOOKING_STATUS.COMPLETED,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: '$bookings',
+      },
+      {
+        $group: {
+          _id: '$_id',
+          title: { $first: '$title' },
+          location: { $first: '$location' },
+          state: { $first: '$state' },
+          rating: { $first: { $ifNull: ['$averageRating', 0] } },
+          image: { $first: '$image' },
+          soloPrice: { $first: '$soloPrice' },
+          totalBookings: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalBookings: -1 },
+      },
+      {
+        $limit: 4,
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          location: 1,
+          state: 1,
+          rating: 1,
+          image: 1,
+          soloPrice: { $ifNull: ['$soloPrice', 0] },
+          totalBookings: 1,
+        },
+      },
+    ]);
+    return packages;
+  }
+  async topRatedPackages(): Promise<TopRatedPackagesResult[]> {
+    const packages = await this.model.aggregate([
+      {
+        $match: {
+          status: PACKAGE_STATUS.PUBLISHED,
+          isActive: true,
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'activeSchedules',
+          pipeline: [
+            {
+              $match: {
+                status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT] },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $match: {
+          'activeSchedules.0': { $exists: true },
+        },
+      },
+      {
+        $addFields: {
+          soloPrice: {
+            $min: {
+              $map: {
+                input: '$activeSchedules',
+                as: 'sc',
+                in: {
+                  $let: {
+                    vars: {
+                      soloTier: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: '$$sc.pricing',
+                              as: 'p',
+                              cond: { $eq: ['$$p.type', 'SOLO'] },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: '$$soloTier.price',
+                  },
+                },
+              },
+            },
+          },
+          image: {
+            $let: {
+              vars: { firstImage: { $arrayElemAt: ['$images', 0] } },
+              in: { key: '$$firstImage.key', url: '$$firstImage.url' },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'categoryId',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      {
+        $unwind: {
+          path: '$categoryId',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $sort: { averageRating: -1, totalReviews: -1 },
+      },
+      {
+        $limit: 4,
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          location: 1,
+          state: 1,
+          rating: { $ifNull: ['$averageRating', 0] },
+          image: 1,
+          soloPrice: { $ifNull: ['$soloPrice', 0] },
+          totalReviews: { $ifNull: ['$totalReviews', 0] },
+          category: { $ifNull: ['$categoryId.name', ''] },
+        },
+      },
+    ]);
+    return packages;
+  };
+
+  async getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<IBasePackagePopulatedByCategory[]> {
+    const { states, locations, categoryIds, bookedPackageIds } = meta;
+
+    const orConditions: FilterQuery<IBasePackageEntity>[] = [];
+    if (states.length) orConditions.push({ state: { $in: states } });
+    if (locations.length) orConditions.push({ location: { $in: locations } });
+    if (categoryIds.length) orConditions.push({ categoryId: { $in: categoryIds } });
+
+    const recommended = await this.model.aggregate([
+      {
+        $match: {
+          _id: { $nin: bookedPackageIds },
+          isActive: true,
+          isDeleted: false,
+          status: PACKAGE_STATUS.PUBLISHED,
+          ...(orConditions.length ? { $or: orConditions } : {}),
+        },
+      },
+
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          localField: '_id',
+          foreignField: 'packageId',
+          as: 'activeSchedules',
+          pipeline: [
+            {
+              $match: {
+                status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT] },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $match: {
+          'activeSchedules.0': { $exists: true },
+        },
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'categoryId',
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      {
+        $unwind: {
+          path: '$categoryId',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $sort: { averageRating: -1, totalReviews: -1 } },
+      { $limit: 4 },
+    ]);
+
+    return recommended as unknown as IBasePackagePopulatedByCategory[];
   }
 }
