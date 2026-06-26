@@ -29,7 +29,7 @@ const ChatSchema = new mongoose.Schema<IChat>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'SchedulePackage',
       required: true,
-      unique: true, // one chat room per schedule
+      unique: true, 
       index: true,
     },
 

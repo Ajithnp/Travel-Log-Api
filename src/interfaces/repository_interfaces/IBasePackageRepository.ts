@@ -65,7 +65,7 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
 
   topRatedPackages(): Promise<TopRatedPackagesResult[]>;
 
-  getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<IBasePackagePopulatedByCategory[]>
+  getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<TopRatedPackagesResult[]>
 }
 
 export interface PopularPackagesResult {
