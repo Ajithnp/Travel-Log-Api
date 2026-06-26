@@ -183,4 +183,6 @@ export interface TopRatedPackagesResult {
   rating: number;
   image: { key: string; url?: string };
   soloPrice: number;
+  totalReviews:number;
+  category?:string;
 }

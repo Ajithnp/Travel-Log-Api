@@ -213,6 +213,7 @@ export class PackageMapper {
       },
       soloPrice: 0,
       category: pkg.categoryId?.name,
+      totalReviews: pkg.totalReviews ?? 0,
     };
   }
 }

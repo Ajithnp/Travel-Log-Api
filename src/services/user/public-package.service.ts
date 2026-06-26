@@ -21,6 +21,8 @@ import { ScheduleMapper } from '../../shared/mappers/schedule.mapper';
 import { IOfferRepository } from '../../interfaces/repository_interfaces/IOfferRepository';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
+import { ICacheService } from '../../interfaces/service_interfaces/ICacheService';
+import { CACHE_KEYS, CACHE_TTL } from '../../types/cache';
 
 @injectable()
 export class PublicPackageService implements IPublicPackageService {
@@ -37,6 +39,8 @@ export class PublicPackageService implements IPublicPackageService {
     private _offerRepository: IOfferRepository,
     @inject('IBookingRepository')
     private _bookingRepository: IBookingRepository,
+    @inject('ICacheService')
+    private _cacheService: ICacheService,
   ) {}
 
   async getPublicPackages(query: PublicPackageQuery): Promise<PublicPackageListResponse> {
@@ -114,7 +118,14 @@ export class PublicPackageService implements IPublicPackageService {
   }
 
   async getPopularPackages(): Promise<PopularPackagesResponseDTO[]> {
+    const cacheKey = CACHE_KEYS.popularPackages;
+
+    const cached = await this._cacheService.get<PopularPackagesResponseDTO[]>(cacheKey);
+    if (cached) return cached;
+
     const packages = await this._basePackageRepository.findPopularPackages();
+
+    await this._cacheService.set(cacheKey, packages, CACHE_TTL.ttl_30_minutes);
 
     return packages;
   };
@@ -122,8 +133,20 @@ export class PublicPackageService implements IPublicPackageService {
   async getRecommendedPackages(userId?:string):Promise<RecommendedPackagesResponseDTO[]>{
     
     if(!userId){
-      return await this._basePackageRepository.topRatedPackages();
+      const cacheKey = CACHE_KEYS.recommendedPackagesGuest;
+
+      const cached = await this._cacheService.get<RecommendedPackagesResponseDTO[]>(cacheKey);
+      if (cached) return cached;
+
+      const data = await this._basePackageRepository.topRatedPackages();
+      await this._cacheService.set(cacheKey, data, CACHE_TTL.ttl_30_minutes);
+      
+      return data;
     };
+    
+    const cacheKey = CACHE_KEYS.recommendedPackages(userId);
+    const cached = await this._cacheService.get<RecommendedPackagesResponseDTO[]>(cacheKey);
+    if (cached) return cached;
 
     const user = await this._userRepository.findById(userId);
 
@@ -132,14 +155,17 @@ export class PublicPackageService implements IPublicPackageService {
     };
 
     const bookingsMeta = await this._bookingRepository.findUserBookingsMeta(userId);
+    
+    let data: RecommendedPackagesResponseDTO[];
 
     if(bookingsMeta.totalBookings === 0){
-      return await this._basePackageRepository.topRatedPackages();
+      data = await this._basePackageRepository.topRatedPackages();
+    }else{
+      const recommends = await this._basePackageRepository.getPersonalizedPackagesByUserId(bookingsMeta);
+      data = recommends.map((pkg) => PackageMapper.toRecommededPackages(pkg));
     }
-  
-    const recommends = await this._basePackageRepository.getPersonalizedPackagesByUserId(bookingsMeta);
 
-    const data = recommends.map((pkg) => PackageMapper.toRecommededPackages(pkg));
+    await this._cacheService.set(cacheKey, data, CACHE_TTL.ttl_30_minutes);
 
     return data; 
    }
