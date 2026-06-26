@@ -9,6 +9,7 @@ export const CACHE_KEYS = {
   popularPackages: 'packages:popular',
   recommendedPackagesGuest: 'packages:recommended:guest',
   recommendedPackages: (userId: string) => `packages:recommended:${userId}`,
+  publicScheduleByPackage: (packageId: string) => `public-schedule-by-package:${packageId}`,
 };
 
 export const CACHE_TTL = {

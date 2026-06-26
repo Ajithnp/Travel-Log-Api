@@ -187,6 +187,7 @@ export class BookingService implements IBookingService {
         : 0;
 
       const split = calculatePaymentSplit(priceTier.price, walletBalance, payload.useWallet);
+      
 
       const finalAmount = priceTier.price - discountAmount;
 
@@ -243,7 +244,7 @@ export class BookingService implements IBookingService {
 
       try {
         const payment = await this.paymentGateway.createPaymentIntent({
-          amount: priceTier.price,
+          amount: split.walletAmount ? split.stripeAmount : finalAmount,
           currency: 'inr',
           bookingId: booking._id.toString(),
           bookingCode: booking.bookingCode,

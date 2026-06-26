@@ -109,6 +109,7 @@ export class BasePackageRepository
                     { $in: ['$status', [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT]] },
                   ],
                 },
+
               },
             },
             { $count: 'count' },
@@ -288,6 +289,7 @@ export class BasePackageRepository
                 $and: [
                   { $eq: ['$packageId', '$$pkgId'] },
                   { $in: ['$status', [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT]] },
+                  { $gt: ['$startDate', new Date()] },
                   ...(filters.startDate
                     ? [{ $gte: ['$startDate', new Date(filters.startDate)] }]
                     : []),
