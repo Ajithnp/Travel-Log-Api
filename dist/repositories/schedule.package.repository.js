@@ -124,6 +124,7 @@ let SchedulePackageRepository = class SchedulePackageRepository extends base_rep
                 .find({
                 packageId: new mongoose_1.default.Types.ObjectId(packageId),
                 status: { $in: [constants_1.SCHEDULE_STATUS.UPCOMING, constants_1.SCHEDULE_STATUS.SOLD_OUT] },
+                startDate: { $gt: new Date().toISOString() },
             })
                 .sort({ startDate: 1 })
                 .lean();

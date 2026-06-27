@@ -166,7 +166,7 @@ let BookingService = class BookingService {
                 }
                 try {
                     const payment = yield this.paymentGateway.createPaymentIntent({
-                        amount: priceTier.price,
+                        amount: split.walletAmount ? split.stripeAmount : finalAmount,
                         currency: 'inr',
                         bookingId: booking._id.toString(),
                         bookingCode: booking.bookingCode,

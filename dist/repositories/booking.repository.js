@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15,7 +48,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BookingRepository = void 0;
 const base_repository_1 = require("./base.repository");
 const booking_model_1 = __importDefault(require("../models/booking.model"));
-const mongoose_1 = __importDefault(require("mongoose"));
+const mongoose_1 = __importStar(require("mongoose"));
 const booking_1 = require("../shared/constants/booking");
 const objectId_helper_1 = require("../shared/utils/database/objectId.helper");
 const date_helper_1 = require("../shared/utils/date.helper");
@@ -977,6 +1010,64 @@ class BookingRepository extends base_repository_1.BaseRepository {
                 },
             ]);
             return result;
+        });
+    }
+    findUserBookingsMeta(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const result = yield this.model.aggregate([
+                {
+                    $match: {
+                        userId: new mongoose_1.Types.ObjectId(userId),
+                        bookingStatus: booking_1.BOOKING_STATUS.CONFIRMED,
+                        paymentStatus: booking_1.PAYMENT_STATUS.PAID,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'packages',
+                        localField: 'packageId',
+                        foreignField: '_id',
+                        as: 'package',
+                    },
+                },
+                { $unwind: '$package' },
+                {
+                    $project: {
+                        _id: 0,
+                        state: '$package.state',
+                        location: '$package.location',
+                        categoryId: '$package.categoryId',
+                    },
+                },
+                {
+                    $group: {
+                        _id: null,
+                        states: { $addToSet: '$state' },
+                        locations: { $addToSet: '$location' },
+                        categoryIds: { $addToSet: '$categoryId' },
+                        bookedPackageIds: { $addToSet: '$packageId' },
+                        totalBookings: { $sum: 1 },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        states: 1,
+                        locations: 1,
+                        categoryIds: 1,
+                        bookedPackageIds: 1,
+                        totalBookings: 1,
+                    },
+                },
+            ]);
+            return ((_a = result[0]) !== null && _a !== void 0 ? _a : {
+                states: [],
+                locations: [],
+                categoryIds: [],
+                bookedPackageIds: [],
+                totalBookings: 0,
+            });
         });
     }
 }

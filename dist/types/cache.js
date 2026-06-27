@@ -9,6 +9,10 @@ exports.CACHE_KEYS = {
     schedulePayoutDetails: (scheduleId) => `schedule-payout-details:${scheduleId}`,
     vendorAnalyticsTrend: (vendorId, period, customFrom, customTo) => `vendor:analytics:trend:${vendorId}:${period}:${(customFrom === null || customFrom === void 0 ? void 0 : customFrom.toISOString()) || ''}:${(customTo === null || customTo === void 0 ? void 0 : customTo.toISOString()) || ''}`,
     vendorAnalyticsTopPackages: (vendorId) => `vendor:analytics:top-packages:${vendorId}`,
+    popularPackages: 'packages:popular',
+    recommendedPackagesGuest: 'packages:recommended:guest',
+    recommendedPackages: (userId) => `packages:recommended:${userId}`,
+    publicScheduleByPackage: (packageId) => `public-schedule-by-package:${packageId}`,
 };
 exports.CACHE_TTL = {
     ids: 60 * 5, // 5 minutes
@@ -17,4 +21,5 @@ exports.CACHE_TTL = {
     ttl_5_minutes: 60 * 5,
     ttl_1_minute: 60,
     ttl_10_minutes: 60 * 10,
+    ttl_30_minutes: 60 * 30,
 };

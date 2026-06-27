@@ -46,6 +46,26 @@ let UserController = class UserController {
             };
             res.status(http_status_code_1.HTTP_STATUS.OK).json(successResponse);
         }));
+        this.getPopularPackages = (0, express_async_handler_1.default)((req, res) => __awaiter(this, void 0, void 0, function* () {
+            const result = yield this._publicPackageService.getPopularPackages();
+            const successResponse = {
+                success: http_status_code_1.SUCCESS_STATUS.SUCCESS,
+                message: messages_1.SUCCESS_MESSAGES.OK,
+                data: result,
+            };
+            res.status(http_status_code_1.HTTP_STATUS.OK).json(successResponse);
+        }));
+        this.getRecommendedPackages = (0, express_async_handler_1.default)((req, res) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+            const result = yield this._publicPackageService.getRecommendedPackages(userId);
+            const successResponse = {
+                success: http_status_code_1.SUCCESS_STATUS.SUCCESS,
+                message: messages_1.SUCCESS_MESSAGES.OK,
+                data: result,
+            };
+            res.status(http_status_code_1.HTTP_STATUS.OK).json(successResponse);
+        }));
         this.getCategories = (0, express_async_handler_1.default)((req, res) => __awaiter(this, void 0, void 0, function* () {
             const result = yield this._publicPackageService.getCategories();
             const successResponse = {

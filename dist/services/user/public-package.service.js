@@ -29,12 +29,16 @@ const category_mapper_1 = require("../../shared/mappers/category.mapper");
 const package_mapper_1 = require("../../shared/mappers/package.mapper");
 const messages_1 = require("../../shared/constants/messages");
 const schedule_mapper_1 = require("../../shared/mappers/schedule.mapper");
+const cache_1 = require("../../types/cache");
 let PublicPackageService = class PublicPackageService {
-    constructor(_basePackageRepository, _categoryRepository, _schedulePackageRepository, _offerRepository) {
+    constructor(_basePackageRepository, _userRepository, _categoryRepository, _schedulePackageRepository, _offerRepository, _bookingRepository, _cacheService) {
         this._basePackageRepository = _basePackageRepository;
+        this._userRepository = _userRepository;
         this._categoryRepository = _categoryRepository;
         this._schedulePackageRepository = _schedulePackageRepository;
         this._offerRepository = _offerRepository;
+        this._bookingRepository = _bookingRepository;
+        this._cacheService = _cacheService;
     }
     getPublicPackages(query) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -91,11 +95,59 @@ let PublicPackageService = class PublicPackageService {
     }
     getPublicSchedulesByPackage(packageId) {
         return __awaiter(this, void 0, void 0, function* () {
+            const cacheKey = cache_1.CACHE_KEYS.publicScheduleByPackage(packageId);
+            const cached = yield this._cacheService.get(cacheKey);
+            if (cached)
+                return cached;
             const schedules = yield this._schedulePackageRepository.findPublicSchedulesByPackage(packageId);
             if (!schedules) {
                 throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.PACKAGE_NOT_FOUND, http_status_code_1.HTTP_STATUS.BAD_REQUEST);
             }
-            return schedules.map((schedule) => schedule_mapper_1.ScheduleMapper.toPublicSchedule(schedule));
+            const data = schedules.map((schedule) => schedule_mapper_1.ScheduleMapper.toPublicSchedule(schedule));
+            yield this._cacheService.set(cacheKey, data, cache_1.CACHE_TTL.ttl_5_minutes);
+            return data;
+        });
+    }
+    getPopularPackages() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cacheKey = cache_1.CACHE_KEYS.popularPackages;
+            const cached = yield this._cacheService.get(cacheKey);
+            if (cached)
+                return cached;
+            const packages = yield this._basePackageRepository.findPopularPackages();
+            yield this._cacheService.set(cacheKey, packages, cache_1.CACHE_TTL.ttl_30_minutes);
+            return packages;
+        });
+    }
+    getRecommendedPackages(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!userId) {
+                const cacheKey = cache_1.CACHE_KEYS.recommendedPackagesGuest;
+                const cached = yield this._cacheService.get(cacheKey);
+                if (cached)
+                    return cached;
+                const data = yield this._basePackageRepository.topRatedPackages();
+                yield this._cacheService.set(cacheKey, data, cache_1.CACHE_TTL.ttl_30_minutes);
+                return data;
+            }
+            const cacheKey = cache_1.CACHE_KEYS.recommendedPackages(userId);
+            const cached = yield this._cacheService.get(cacheKey);
+            if (cached)
+                return cached;
+            const user = yield this._userRepository.findById(userId);
+            if (!user) {
+                throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.USER_NOT_FOUND, http_status_code_1.HTTP_STATUS.BAD_REQUEST);
+            }
+            const bookingsMeta = yield this._bookingRepository.findUserBookingsMeta(userId);
+            let data;
+            if (bookingsMeta.totalBookings === 0) {
+                data = yield this._basePackageRepository.topRatedPackages();
+            }
+            else {
+                data = yield this._basePackageRepository.getPersonalizedPackagesByUserId(bookingsMeta);
+            }
+            yield this._cacheService.set(cacheKey, data, cache_1.CACHE_TTL.ttl_30_minutes);
+            return data;
         });
     }
 };
@@ -103,8 +155,11 @@ exports.PublicPackageService = PublicPackageService;
 exports.PublicPackageService = PublicPackageService = __decorate([
     (0, tsyringe_1.injectable)(),
     __param(0, (0, tsyringe_1.inject)('IBasePackageRepository')),
-    __param(1, (0, tsyringe_1.inject)('ICategoryRepository')),
-    __param(2, (0, tsyringe_1.inject)('ISchedulePackageRepository')),
-    __param(3, (0, tsyringe_1.inject)('IOfferRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object, Object])
+    __param(1, (0, tsyringe_1.inject)('IUserRepository')),
+    __param(2, (0, tsyringe_1.inject)('ICategoryRepository')),
+    __param(3, (0, tsyringe_1.inject)('ISchedulePackageRepository')),
+    __param(4, (0, tsyringe_1.inject)('IOfferRepository')),
+    __param(5, (0, tsyringe_1.inject)('IBookingRepository')),
+    __param(6, (0, tsyringe_1.inject)('ICacheService')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object])
 ], PublicPackageService);

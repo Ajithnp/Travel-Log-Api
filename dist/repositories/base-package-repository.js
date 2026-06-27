@@ -261,6 +261,7 @@ let BasePackageRepository = class BasePackageRepository extends base_repository_
                                     $and: [
                                         { $eq: ['$packageId', '$$pkgId'] },
                                         { $in: ['$status', [constants_1.SCHEDULE_STATUS.UPCOMING, constants_1.SCHEDULE_STATUS.SOLD_OUT]] },
+                                        { $gt: ['$startDate', new Date()] },
                                         ...(filters.startDate
                                             ? [{ $gte: ['$startDate', new Date(filters.startDate)] }]
                                             : []),
@@ -1091,6 +1092,338 @@ let BasePackageRepository = class BasePackageRepository extends base_repository_
                 totalPages: Math.ceil(((_c = (_b = result.metadata[0]) === null || _b === void 0 ? void 0 : _b.total) !== null && _c !== void 0 ? _c : 0) / limit),
                 totalDocs: (_e = (_d = result.metadata[0]) === null || _d === void 0 ? void 0 : _d.total) !== null && _e !== void 0 ? _e : 0,
             };
+        });
+    }
+    findPopularPackages() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const packages = yield this.model.aggregate([
+                {
+                    $match: {
+                        status: constants_1.PACKAGE_STATUS.PUBLISHED,
+                        isActive: true,
+                    },
+                },
+                // Step 1: Lookup active (upcoming / sold-out) schedules
+                {
+                    $lookup: {
+                        from: 'schedulepackages',
+                        localField: '_id',
+                        foreignField: 'packageId',
+                        as: 'activeSchedules',
+                        pipeline: [
+                            {
+                                $match: {
+                                    status: { $in: [constants_1.SCHEDULE_STATUS.UPCOMING, constants_1.SCHEDULE_STATUS.SOLD_OUT] },
+                                },
+                            },
+                        ],
+                    },
+                },
+                // Step 2: Only keep packages that have at least one active schedule
+                {
+                    $match: {
+                        'activeSchedules.0': { $exists: true },
+                    },
+                },
+                // Step 3: Extract soloPrice from active schedules & first image
+                {
+                    $addFields: {
+                        soloPrice: {
+                            $min: {
+                                $map: {
+                                    input: '$activeSchedules',
+                                    as: 'sc',
+                                    in: {
+                                        $let: {
+                                            vars: {
+                                                soloTier: {
+                                                    $arrayElemAt: [
+                                                        {
+                                                            $filter: {
+                                                                input: '$$sc.pricing',
+                                                                as: 'p',
+                                                                cond: { $eq: ['$$p.type', 'SOLO'] },
+                                                            },
+                                                        },
+                                                        0,
+                                                    ],
+                                                },
+                                            },
+                                            in: '$$soloTier.price',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        image: {
+                            $let: {
+                                vars: { firstImage: { $arrayElemAt: ['$images', 0] } },
+                                in: { key: '$$firstImage.key', url: '$$firstImage.url' },
+                            },
+                        },
+                    },
+                },
+                // Step 4: Count completed bookings to rank by popularity
+                {
+                    $lookup: {
+                        from: 'bookings',
+                        localField: '_id',
+                        foreignField: 'packageId',
+                        as: 'bookings',
+                        pipeline: [
+                            {
+                                $match: {
+                                    bookingStatus: booking_1.BOOKING_STATUS.COMPLETED,
+                                },
+                            },
+                        ],
+                    },
+                },
+                {
+                    $unwind: '$bookings',
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        title: { $first: '$title' },
+                        location: { $first: '$location' },
+                        state: { $first: '$state' },
+                        rating: { $first: { $ifNull: ['$averageRating', 0] } },
+                        image: { $first: '$image' },
+                        soloPrice: { $first: '$soloPrice' },
+                        totalBookings: { $sum: 1 },
+                    },
+                },
+                {
+                    $sort: { totalBookings: -1 },
+                },
+                {
+                    $limit: 4,
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        title: 1,
+                        location: 1,
+                        state: 1,
+                        rating: 1,
+                        image: 1,
+                        soloPrice: { $ifNull: ['$soloPrice', 0] },
+                        totalBookings: 1,
+                    },
+                },
+            ]);
+            return packages;
+        });
+    }
+    topRatedPackages() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const packages = yield this.model.aggregate([
+                {
+                    $match: {
+                        status: constants_1.PACKAGE_STATUS.PUBLISHED,
+                        isActive: true,
+                        isDeleted: false,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'schedulepackages',
+                        localField: '_id',
+                        foreignField: 'packageId',
+                        as: 'activeSchedules',
+                        pipeline: [
+                            {
+                                $match: {
+                                    status: { $in: [constants_1.SCHEDULE_STATUS.UPCOMING, constants_1.SCHEDULE_STATUS.SOLD_OUT] },
+                                },
+                            },
+                        ],
+                    },
+                },
+                {
+                    $match: {
+                        'activeSchedules.0': { $exists: true },
+                    },
+                },
+                {
+                    $addFields: {
+                        soloPrice: {
+                            $min: {
+                                $map: {
+                                    input: '$activeSchedules',
+                                    as: 'sc',
+                                    in: {
+                                        $let: {
+                                            vars: {
+                                                soloTier: {
+                                                    $arrayElemAt: [
+                                                        {
+                                                            $filter: {
+                                                                input: '$$sc.pricing',
+                                                                as: 'p',
+                                                                cond: { $eq: ['$$p.type', 'SOLO'] },
+                                                            },
+                                                        },
+                                                        0,
+                                                    ],
+                                                },
+                                            },
+                                            in: '$$soloTier.price',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        image: {
+                            $let: {
+                                vars: { firstImage: { $arrayElemAt: ['$images', 0] } },
+                                in: { key: '$$firstImage.key', url: '$$firstImage.url' },
+                            },
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'categories',
+                        localField: 'categoryId',
+                        foreignField: '_id',
+                        as: 'categoryId',
+                        pipeline: [{ $project: { name: 1 } }],
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$categoryId',
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                {
+                    $sort: { averageRating: -1, totalReviews: -1 },
+                },
+                {
+                    $limit: 4,
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        title: 1,
+                        location: 1,
+                        state: 1,
+                        rating: { $ifNull: ['$averageRating', 0] },
+                        image: 1,
+                        soloPrice: { $ifNull: ['$soloPrice', 0] },
+                        totalReviews: { $ifNull: ['$totalReviews', 0] },
+                        category: { $ifNull: ['$categoryId.name', ''] },
+                    },
+                },
+            ]);
+            return packages;
+        });
+    }
+    getPersonalizedPackagesByUserId(meta) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { states, locations, categoryIds, bookedPackageIds } = meta;
+            const orConditions = [];
+            if (states.length)
+                orConditions.push({ state: { $in: states } });
+            if (locations.length)
+                orConditions.push({ location: { $in: locations } });
+            if (categoryIds.length)
+                orConditions.push({ categoryId: { $in: categoryIds } });
+            const recommended = yield this.model.aggregate([
+                {
+                    $match: Object.assign({ _id: { $nin: bookedPackageIds }, isActive: true, isDeleted: false, status: constants_1.PACKAGE_STATUS.PUBLISHED }, (orConditions.length ? { $or: orConditions } : {})),
+                },
+                {
+                    $lookup: {
+                        from: 'schedulepackages',
+                        localField: '_id',
+                        foreignField: 'packageId',
+                        as: 'activeSchedules',
+                        pipeline: [
+                            {
+                                $match: {
+                                    status: { $in: [constants_1.SCHEDULE_STATUS.UPCOMING, constants_1.SCHEDULE_STATUS.SOLD_OUT] },
+                                },
+                            },
+                        ],
+                    },
+                },
+                {
+                    $match: {
+                        'activeSchedules.0': { $exists: true },
+                    },
+                },
+                {
+                    $addFields: {
+                        soloPrice: {
+                            $min: {
+                                $map: {
+                                    input: '$activeSchedules',
+                                    as: 'sc',
+                                    in: {
+                                        $let: {
+                                            vars: {
+                                                soloTier: {
+                                                    $arrayElemAt: [
+                                                        {
+                                                            $filter: {
+                                                                input: '$$sc.pricing',
+                                                                as: 'p',
+                                                                cond: { $eq: ['$$p.type', 'SOLO'] },
+                                                            },
+                                                        },
+                                                        0,
+                                                    ],
+                                                },
+                                            },
+                                            in: '$$soloTier.price',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        image: {
+                            $let: {
+                                vars: { firstImage: { $arrayElemAt: ['$images', 0] } },
+                                in: { key: '$$firstImage.key', url: '$$firstImage.url' },
+                            },
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'categories',
+                        localField: 'categoryId',
+                        foreignField: '_id',
+                        as: 'categoryId',
+                        pipeline: [{ $project: { name: 1 } }],
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$categoryId',
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                { $sort: { averageRating: -1, totalReviews: -1 } },
+                { $limit: 4 },
+                {
+                    $project: {
+                        _id: 1,
+                        title: 1,
+                        location: 1,
+                        state: 1,
+                        rating: { $ifNull: ['$averageRating', 0] },
+                        image: 1,
+                        soloPrice: { $ifNull: ['$soloPrice', 0] },
+                        totalReviews: { $ifNull: ['$totalReviews', 0] },
+                        category: { $ifNull: ['$categoryId.name', ''] },
+                    },
+                },
+            ]);
+            return recommended;
         });
     }
 };

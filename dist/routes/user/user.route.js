@@ -43,6 +43,8 @@ let UserRoutes = class UserRoutes extends base_route_1.default {
     initializeRoutes() {
         // public //
         this._router.get('/packages/public', (0, validate_dto_middleware_1.validateDTO)(public_package_validation_1.publicPackageQuerySchema), this._userController.getPublicPackages.bind(this._userController));
+        this._router.get('/packages/popular', this._userController.getPopularPackages.bind(this._userController));
+        this._router.get('/packages/recommended', auth_middleware_1.optionalAuth, this._userController.getRecommendedPackages.bind(this._userController));
         this._router.get('/packages/categories', this._userController.getCategories.bind(this._userController));
         this._router.get('/packages/:packageId', this._userController.getPackageDetails.bind(this._userController));
         this._router.get('/packages/:packageId/schedules', this._userController.getPackageSchedules.bind(this._userController));
