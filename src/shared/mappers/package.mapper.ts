@@ -7,7 +7,6 @@ import {
 import {
   DifficultyLevel,
   IBasePackagePopulated,
-  IBasePackagePopulatedByCategory,
   IFile,
   IPopulatedPackageDetails,
 } from '../../types/entities/base-package.entity';
@@ -19,7 +18,6 @@ import {
   RawPublicPackageDocument,
 } from '../../interfaces/repository_interfaces/IBasePackageRepository';
 import { PackageStatus } from 'types/type';
-import { RecommendedPackagesResponseDTO } from 'interfaces/service_interfaces/user/IPublicPackageService';
 
 export class PackageMapper {
   static toOfferResponse(pkg: PackageOfferInfo): PackageForOfferResponseDTO {
@@ -200,5 +198,4 @@ export class PackageMapper {
       isActive: pkg.isActive,
     };
   }
-
 }

@@ -4,7 +4,8 @@ export const CACHE_KEYS = {
   wishlistFull: (userId: string, page: number) => `wishlist:full:${userId}:page:${page}`,
   commissionOverview: 'commission:overview',
   schedulePayoutDetails: (scheduleId: string) => `schedule-payout-details:${scheduleId}`,
-  vendorAnalyticsTrend: (vendorId: string, period: string, customFrom?: Date, customTo?: Date) => `vendor:analytics:trend:${vendorId}:${period}:${customFrom?.toISOString() || ''}:${customTo?.toISOString() || ''}`,
+  vendorAnalyticsTrend: (vendorId: string, period: string, customFrom?: Date, customTo?: Date) =>
+    `vendor:analytics:trend:${vendorId}:${period}:${customFrom?.toISOString() || ''}:${customTo?.toISOString() || ''}`,
   vendorAnalyticsTopPackages: (vendorId: string) => `vendor:analytics:top-packages:${vendorId}`,
   popularPackages: 'packages:popular',
   recommendedPackagesGuest: 'packages:recommended:guest',

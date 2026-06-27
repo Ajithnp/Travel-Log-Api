@@ -592,15 +592,15 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
       ...(search
         ? [
-          {
-            $match: {
-              $or: [
-                { 'user.name': { $regex: search, $options: 'i' } },
-                { bookingCode: { $regex: search, $options: 'i' } },
-              ],
+            {
+              $match: {
+                $or: [
+                  { 'user.name': { $regex: search, $options: 'i' } },
+                  { bookingCode: { $regex: search, $options: 'i' } },
+                ],
+              },
             },
-          },
-        ]
+          ]
         : []),
       { $sort: { createdAt: -1 } },
       {
@@ -1093,7 +1093,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       },
     ]);
     return result;
-  };
+  }
 
   async findUserBookingsMeta(userId: string): Promise<UserBookingsMetaResult> {
     const result = await this.model.aggregate([
@@ -1145,12 +1145,14 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       },
     ]);
 
-    return result[0] ?? {
-      states: [],
-      locations: [],
-      categoryIds: [],
-      bookedPackageIds: [],
-      totalBookings: 0,
-    };
+    return (
+      result[0] ?? {
+        states: [],
+        locations: [],
+        categoryIds: [],
+        bookedPackageIds: [],
+        totalBookings: 0,
+      }
+    );
   }
 }

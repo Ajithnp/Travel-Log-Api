@@ -11,7 +11,7 @@ import {
   TopRatedPackagesResult,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
-import { IBasePackageEntity, IBasePackagePopulatedByCategory } from '../types/entities/base-package.entity';
+import { IBasePackageEntity } from '../types/entities/base-package.entity';
 import { PackageModel } from '../models/package.model';
 import { FilterType, PublicPackageFilters } from '../types/db';
 import mongoose, { FilterQuery, Types } from 'mongoose';
@@ -27,7 +27,8 @@ import { UserBookingsMetaResult } from '../interfaces/repository_interfaces/IBoo
 @injectable()
 export class BasePackageRepository
   extends BaseRepository<IBasePackageEntity>
-  implements IBasePackageRepository {
+  implements IBasePackageRepository
+{
   constructor() {
     super(PackageModel);
   }
@@ -109,7 +110,6 @@ export class BasePackageRepository
                     { $in: ['$status', [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT]] },
                   ],
                 },
-
               },
             },
             { $count: 'count' },
@@ -785,17 +785,17 @@ export class BasePackageRepository
 
     const searchMatchStage: mongoose.PipelineStage[] = search?.trim()
       ? [
-        {
-          $match: {
-            $or: [
-              { title: { $regex: search.trim(), $options: 'i' } },
-              { location: { $regex: search.trim(), $options: 'i' } },
-              { state: { $regex: search.trim(), $options: 'i' } },
-              { 'vendor.name': { $regex: search.trim(), $options: 'i' } },
-            ],
+          {
+            $match: {
+              $or: [
+                { title: { $regex: search.trim(), $options: 'i' } },
+                { location: { $regex: search.trim(), $options: 'i' } },
+                { state: { $regex: search.trim(), $options: 'i' } },
+                { 'vendor.name': { $regex: search.trim(), $options: 'i' } },
+              ],
+            },
           },
-        },
-      ]
+        ]
       : [];
 
     const pipeline: mongoose.PipelineStage[] = [
@@ -1432,9 +1432,11 @@ export class BasePackageRepository
       },
     ]);
     return packages;
-  };
+  }
 
-  async getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<TopRatedPackagesResult[]> {
+  async getPersonalizedPackagesByUserId(
+    meta: UserBookingsMetaResult,
+  ): Promise<TopRatedPackagesResult[]> {
     const { states, locations, categoryIds, bookedPackageIds } = meta;
 
     const orConditions: FilterQuery<IBasePackageEntity>[] = [];

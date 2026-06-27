@@ -29,7 +29,7 @@ const ChatSchema = new mongoose.Schema<IChat>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'SchedulePackage',
       required: true,
-      unique: true, 
+      unique: true,
       index: true,
     },
 

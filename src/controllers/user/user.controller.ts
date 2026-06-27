@@ -26,7 +26,7 @@ export class UserController implements IUserController {
     private _wishlistService: IWishlistService,
     @inject('IPublicVendorService')
     private _publicVendorService: IPublicVendorService,
-  ) { }
+  ) {}
 
   getPublicPackages = asyncHandler(async (req, res) => {
     const query = req.query as unknown as PublicPackageQuery;

@@ -1,6 +1,10 @@
 import { AppError } from '../../errors/AppError';
 import { IBasePackageRepository } from '../../interfaces/repository_interfaces/IBasePackageRepository';
-import { IPublicPackageService, PopularPackagesResponseDTO, RecommendedPackagesResponseDTO } from '../../interfaces/service_interfaces/user/IPublicPackageService';
+import {
+  IPublicPackageService,
+  PopularPackagesResponseDTO,
+  RecommendedPackagesResponseDTO,
+} from '../../interfaces/service_interfaces/user/IPublicPackageService';
 import { HTTP_STATUS } from '../../shared/constants/http_status_code';
 import { injectable, inject } from 'tsyringe';
 import { PublicPackageFilters } from '../../types/db';
@@ -108,13 +112,12 @@ export class PublicPackageService implements IPublicPackageService {
   }
 
   async getPublicSchedulesByPackage(packageId: string): Promise<PublicScheduleDTO[]> {
-    
     const cacheKey = CACHE_KEYS.publicScheduleByPackage(packageId);
-    
+
     const cached = await this._cacheService.get<PublicScheduleDTO[]>(cacheKey);
-   
+
     if (cached) return cached;
-    
+
     const schedules = await this._schedulePackageRepository.findPublicSchedulesByPackage(packageId);
 
     if (!schedules) {
@@ -137,11 +140,10 @@ export class PublicPackageService implements IPublicPackageService {
     await this._cacheService.set(cacheKey, packages, CACHE_TTL.ttl_30_minutes);
 
     return packages;
-  };
+  }
 
-  async getRecommendedPackages(userId?:string):Promise<RecommendedPackagesResponseDTO[]>{
-    
-    if(!userId){
+  async getRecommendedPackages(userId?: string): Promise<RecommendedPackagesResponseDTO[]> {
+    if (!userId) {
       const cacheKey = CACHE_KEYS.recommendedPackagesGuest;
 
       const cached = await this._cacheService.get<RecommendedPackagesResponseDTO[]>(cacheKey);
@@ -149,10 +151,10 @@ export class PublicPackageService implements IPublicPackageService {
 
       const data = await this._basePackageRepository.topRatedPackages();
       await this._cacheService.set(cacheKey, data, CACHE_TTL.ttl_30_minutes);
-      
+
       return data;
-    };
-    
+    }
+
     const cacheKey = CACHE_KEYS.recommendedPackages(userId);
     const cached = await this._cacheService.get<RecommendedPackagesResponseDTO[]>(cacheKey);
 
@@ -160,21 +162,21 @@ export class PublicPackageService implements IPublicPackageService {
 
     const user = await this._userRepository.findById(userId);
 
-    if(!user){
+    if (!user) {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.BAD_REQUEST);
-    };
+    }
 
     const bookingsMeta = await this._bookingRepository.findUserBookingsMeta(userId);
-  
+
     let data: RecommendedPackagesResponseDTO[];
 
-    if(bookingsMeta.totalBookings === 0){
+    if (bookingsMeta.totalBookings === 0) {
       data = await this._basePackageRepository.topRatedPackages();
-    }else{
+    } else {
       data = await this._basePackageRepository.getPersonalizedPackagesByUserId(bookingsMeta);
     }
 
     await this._cacheService.set(cacheKey, data, CACHE_TTL.ttl_30_minutes);
-    return data; 
-   }
+    return data;
+  }
 }

@@ -2,7 +2,6 @@ import { FilterType, PublicPackageFilters } from 'types/db';
 import {
   DifficultyLevel,
   IBasePackageEntity,
-  IBasePackagePopulatedByCategory,
   IFile,
 } from '../../types/entities/base-package.entity';
 import { IBaseRepository } from './IBaseRepository';
@@ -65,7 +64,7 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
 
   topRatedPackages(): Promise<TopRatedPackagesResult[]>;
 
-  getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<TopRatedPackagesResult[]>
+  getPersonalizedPackagesByUserId(meta: UserBookingsMetaResult): Promise<TopRatedPackagesResult[]>;
 }
 
 export interface PopularPackagesResult {
@@ -183,6 +182,6 @@ export interface TopRatedPackagesResult {
   rating: number;
   image: { key: string; url?: string };
   soloPrice: number;
-  totalReviews:number;
-  category?:string;
+  totalReviews: number;
+  category?: string;
 }

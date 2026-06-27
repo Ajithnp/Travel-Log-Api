@@ -187,7 +187,6 @@ export class BookingService implements IBookingService {
         : 0;
 
       const split = calculatePaymentSplit(priceTier.price, walletBalance, payload.useWallet);
-      
 
       const finalAmount = priceTier.price - discountAmount;
 

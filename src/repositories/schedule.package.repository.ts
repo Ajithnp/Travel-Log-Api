@@ -106,7 +106,7 @@ export class SchedulePackageRepository
       .find({
         packageId: new mongoose.Types.ObjectId(packageId),
         status: { $in: [SCHEDULE_STATUS.UPCOMING, SCHEDULE_STATUS.SOLD_OUT] },
-        startDate: {$gt: new Date().toISOString()}
+        startDate: { $gt: new Date().toISOString() },
       })
       .sort({ startDate: 1 })
       .lean();
