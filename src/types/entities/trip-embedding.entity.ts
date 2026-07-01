@@ -1,8 +1,9 @@
-import { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITripEmbedding extends Document {
-  scheduleId: Schema.Types.ObjectId;
-  packageId: Schema.Types.ObjectId;
+  _id:mongoose.Types.ObjectId;
+  scheduleId: mongoose.Types.ObjectId;
+  packageId: mongoose.Types.ObjectId;
 
   combinedText: string; // for rag
   embedding: number[]; // for vector search

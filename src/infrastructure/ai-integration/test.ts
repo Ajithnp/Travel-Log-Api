@@ -2,10 +2,10 @@ import 'reflect-metadata';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { GeminiAi } from './gemini-ai';
+import { GeminiProvider } from './gemini-ai';
 
 async function test() {
-    const gemini = new GeminiAi();
+    const gemini = new GeminiProvider();
     const llm = gemini.getChatModel();
     const embeddings = gemini.getEmbeddingModel();
 
@@ -16,7 +16,7 @@ async function test() {
     console.log('\nTesting Embeddings...');
     const vector = await embeddings.embedQuery('Munnar weekend trip');
     console.log('Embedding vector length:', vector.length);
-    // 768 print ആകണം — Gemini embedding dimension
+   
 }
 
 test().catch(console.error);

@@ -76,6 +76,8 @@ import { IAdminService } from '../interfaces/service_interfaces/admin/IAdminServ
 import { AdminService } from '../services/admin/admin.service';
 import { IContactService } from '../interfaces/service_interfaces/IContactService';
 import { ContactService } from '../services/contact.service';
+import { IEmbeddingService } from '../interfaces/service_interfaces/IEmbeddingService';
+import { EmbeddingService } from '../services/embedding.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -145,6 +147,10 @@ export class ServiceRegistry {
 
     container.register<IContactService>('IContactService', {
       useClass: ContactService,
+    });
+
+    container.register<IEmbeddingService>('IEmbeddingService', {
+      useClass: EmbeddingService,
     });
 
     //vendor-services
