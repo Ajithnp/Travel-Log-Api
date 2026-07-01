@@ -65,4 +65,10 @@ export const config = {
     STRIPE_SECRET_KEY: requireEnv('STRIPE_SECRET_KEY'),
     STRIPE_WEBHOOK_SECRET: requireEnv('STRIPE_WEBHOOK_SECRET'),
   },
+  ai: {
+    CHAT_MODEL: requireEnv('GEMINI_CHAT_MODEL'),
+    GEMINI_API_KEY: requireEnv('GEMINI_API_KEY'),
+    EMBEDDING_MODEL: requireEnv('GEMINI_EMBEDDING_MODEL'),
+    EMBEDDING_DIMENSIONS: requireEnv('GEMINI_EMBEDDING_DIMENSIONS'),
+  }
 };

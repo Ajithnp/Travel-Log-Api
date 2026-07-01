@@ -5,6 +5,9 @@ import { IEmailUtils } from '../interfaces/common_interfaces/IEmailUtils';
 import { EmailUtils } from '../shared/utils/email.transporter.helper';
 import { IPaymentGateway } from '../infrastructure/payment-gateways/IPaymentGateway';
 import { StripeGateway } from '../infrastructure/payment-gateways/StripeGateway';
+import { GeminiAi } from '../infrastructure/ai-integration/gemini-ai';
+import { AIIntegration } from '../infrastructure/ai-integration/IAiIntegartion';
+
 export class CommonRegistry {
   static registerCommonDependencies() {
     container.register<IBcryptUtils>('IBcryptUtils', {
@@ -17,6 +20,10 @@ export class CommonRegistry {
 
     container.register<IPaymentGateway>('IPaymentGateway', {
       useClass: StripeGateway,
+    });
+
+    container.register<AIIntegration>('AIIntegration', {
+      useClass: GeminiAi,
     });
   }
 }
