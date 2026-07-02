@@ -1,6 +1,8 @@
 import { container } from 'tsyringe';
 import { IAuthService } from '../interfaces/service_interfaces/IAuthService';
 import { AuthService } from '../services/auth.service';
+import { IRagService } from '../interfaces/service_interfaces/IRagService';
+import { RagService } from '../services/rag.service';
 import { ITokenService } from '../interfaces/service_interfaces/ITokenService';
 import { TokenService } from '../services/jwt.service';
 import { IGoogleService } from '../interfaces/service_interfaces/IGoogleService';
@@ -231,6 +233,10 @@ export class ServiceRegistry {
 
     container.register<IRewardService>('IRewardService', {
       useClass: UserRewardService,
+    });
+
+    container.register<IRagService>('IRagService', {
+      useClass: RagService,
     });
   } // Register other services here
 }

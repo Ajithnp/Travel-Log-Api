@@ -57,8 +57,8 @@ import logger from '../../config/logger';
 import { IUserRepository } from '../../interfaces/repository_interfaces/IUserRepository';
 import { isRetryWindowOpen } from '../../shared/utils/booking/retry-payment-validate';
 import { IScheduleStartDatePopulated } from '../../types/entities/booking.entity';
-import { IOfferRepository, Offer } from 'interfaces/repository_interfaces/IOfferRepository';
-import { IVendorInfoRepository } from 'interfaces/repository_interfaces/IVendorInfoRepository';
+import { IOfferRepository, Offer } from '../../interfaces/repository_interfaces/IOfferRepository';
+import { IEmbeddingService } from '../../interfaces/service_interfaces/IEmbeddingService';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -85,9 +85,9 @@ export class BookingService implements IBookingService {
     private _userRepository: IUserRepository,
     @inject('IOfferRepository')
     private _offerRepository: IOfferRepository,
-    @inject('IVendorInfoRepository')
-    private _vendorInfoRepository: IVendorInfoRepository,
-  ) {}
+    @inject('IEmbeddingService')
+    private _embeddingService: IEmbeddingService,
+  ) { }
 
   async initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO> {
     let session: mongoose.ClientSession | null = null;
@@ -108,8 +108,7 @@ export class BookingService implements IBookingService {
         offer = {
           hasOffer: true,
           offerId: offerEntity!._id.toString(),
-          offerPercentage:
-            offerEntity!.discountType === 'percentage' ? offerEntity!.discountValue : 0,
+          offerPercentage:offerEntity!.discountType === 'percentage' ? offerEntity!.discountValue : 0,
         };
       }
 
@@ -359,6 +358,13 @@ export class BookingService implements IBookingService {
 
       await session.commitTransaction();
       session.endSession();
+
+      this._embeddingService.updateSeatsInEmbedding(
+        booking.scheduleId.toString(),
+        updatedSchedule.seatsBooked,
+        updatedSchedule.totalSeats,
+      ).catch((err) =>
+        logger.error("error updating schedule seats in embedding", err));
 
       const schedule = await this._schedulePackageRepo.findById(booking.scheduleId.toString());
       if (!schedule) {

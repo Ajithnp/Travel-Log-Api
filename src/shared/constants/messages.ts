@@ -229,6 +229,8 @@ export const ERROR_MESSAGES = {
 
   ENQUIRY_NOT_FOUND: 'Enquiry not found',
   ENQUIRY_ALREADY_RESOLVED: 'Enquiry already resolved',
+
+  NO_TRIPS_FOUND: 'No matching trips found in the database.',
 } as const;
 
 export const NOTIFICATION_MESSAGES = {
