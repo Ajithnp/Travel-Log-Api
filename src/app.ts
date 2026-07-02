@@ -16,6 +16,7 @@ import { PaymentWebhookRoutes } from './routes/shared/payment-webhook.route';
 import { NotificationRoutes } from './routes/shared/notification.routes';
 import { ReviewRoutes } from './routes/shared/review.routes';
 import { StripeRoutes } from './routes/shared/stripe.route';
+import { AIChatRoutes } from './routes/shared/ai-chat.route';
 
 export default class App {
   private _app: Application;
@@ -63,6 +64,7 @@ export default class App {
     this._app.use('/api/v1/bookings', container.resolve(BookingRoutes).router);
     this._app.use('/api/v1/notifications', container.resolve(NotificationRoutes).router);
     this._app.use('/api/v1/reviews', container.resolve(ReviewRoutes).router);
+    this._app.use('/api/v1/ai', container.resolve(AIChatRoutes).router);
   }
 
   public get expressApp(): Application {

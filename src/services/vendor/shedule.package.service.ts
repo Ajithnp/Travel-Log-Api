@@ -25,6 +25,8 @@ import {
   ScheduleStatusResponseDTO,
 } from '../../types/dtos/vendor/response.dtos';
 import { IBookingRepository } from '../../interfaces/repository_interfaces/IBookingRepository';
+import { IEmbeddingService } from '../../interfaces/service_interfaces/IEmbeddingService';
+import logger from '../../config/logger';
 
 @injectable()
 export class SchedulePackageService implements ISchedulePackageService {
@@ -35,6 +37,8 @@ export class SchedulePackageService implements ISchedulePackageService {
     private _basePackageRepository: IBasePackageRepository,
     @inject('IBookingRepository')
     private _bookingRepo: IBookingRepository,
+    @inject('IEmbeddingService')
+    private _embeddingService: IEmbeddingService,
   ) {}
 
   private validateDateRange(startDate: Date, endDate: Date, packageDurationDays: number): void {
@@ -132,7 +136,7 @@ export class SchedulePackageService implements ISchedulePackageService {
 
     const pricing = this.buildPricing(data.pricing);
 
-    await this._schedulePackageRepository.create({
+   const newSchedule = await this._schedulePackageRepository.create({
       ...data,
       packageId: pkdId,
       vendorId: vendorObjId,
@@ -140,6 +144,10 @@ export class SchedulePackageService implements ISchedulePackageService {
       startDate,
       endDate,
     });
+
+    this._embeddingService.generateAndSaveEmbedding(newSchedule._id.toString(),newSchedule.packageId.toString()).catch((error) => 
+      logger.error(`embedding failed for schedule ${newSchedule._id}:`,error)
+    )
   }
 
   async fetchVendorSchedules(
@@ -255,6 +263,8 @@ export class SchedulePackageService implements ISchedulePackageService {
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
       );
     }
+    this._embeddingService.deleteEmbedding(scheduleId).catch((err)=>
+       logger.error(`embedding deletion failed for schedule ${scheduleId}:`,err));
     return { status: updated.status };
   }
 }

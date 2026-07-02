@@ -1,6 +1,8 @@
 import { container } from 'tsyringe';
 import { IAuthService } from '../interfaces/service_interfaces/IAuthService';
 import { AuthService } from '../services/auth.service';
+import { IRagService } from '../interfaces/service_interfaces/IRagService';
+import { RagService } from '../services/rag.service';
 import { ITokenService } from '../interfaces/service_interfaces/ITokenService';
 import { TokenService } from '../services/jwt.service';
 import { IGoogleService } from '../interfaces/service_interfaces/IGoogleService';
@@ -76,6 +78,8 @@ import { IAdminService } from '../interfaces/service_interfaces/admin/IAdminServ
 import { AdminService } from '../services/admin/admin.service';
 import { IContactService } from '../interfaces/service_interfaces/IContactService';
 import { ContactService } from '../services/contact.service';
+import { IEmbeddingService } from '../interfaces/service_interfaces/IEmbeddingService';
+import { EmbeddingService } from '../services/embedding.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -145,6 +149,10 @@ export class ServiceRegistry {
 
     container.register<IContactService>('IContactService', {
       useClass: ContactService,
+    });
+
+    container.register<IEmbeddingService>('IEmbeddingService', {
+      useClass: EmbeddingService,
     });
 
     //vendor-services
@@ -225,6 +233,10 @@ export class ServiceRegistry {
 
     container.register<IRewardService>('IRewardService', {
       useClass: UserRewardService,
+    });
+
+    container.register<IRagService>('IRagService', {
+      useClass: RagService,
     });
   } // Register other services here
 }

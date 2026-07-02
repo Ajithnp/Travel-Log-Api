@@ -12,6 +12,7 @@ export class ConnectDB {
     try {
       await mongoose.connect(this._dburl);
       console.log('Database connected successfully');
+      // Native MongoDB client (for RAG )
     } catch (error) {
       console.error('Database connection failed:', error);
       throw error;

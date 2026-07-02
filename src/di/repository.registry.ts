@@ -38,6 +38,8 @@ import { IPayoutRepository } from '../interfaces/repository_interfaces/IPayoutRe
 import { PayoutRepository } from '../repositories/payout.repository';
 import { IContactRepository } from '../interfaces/repository_interfaces/IContactRepository';
 import { ContactRepository } from '../repositories/contact.repository';
+import { ITripEmbeddingRepository } from '../interfaces/repository_interfaces/ITripEmbeddingRepository';
+import { TripEmbeddingRepository } from '../repositories/trip-embedding.repository';
 
 export class RepositoryRegistry {
   static registerRepositories(): void {
@@ -119,6 +121,10 @@ export class RepositoryRegistry {
 
     container.register<IPayoutRepository>('IPayoutRepository', {
       useClass: PayoutRepository,
+    });
+
+    container.register<ITripEmbeddingRepository>('ITripEmbeddingRepository', {
+      useClass: TripEmbeddingRepository,
     });
 
     container.register<IContactRepository>('IContactRepository', {
