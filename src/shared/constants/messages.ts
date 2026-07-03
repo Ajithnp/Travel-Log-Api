@@ -231,6 +231,7 @@ export const ERROR_MESSAGES = {
   ENQUIRY_ALREADY_RESOLVED: 'Enquiry already resolved',
 
   NO_TRIPS_FOUND: 'No matching trips found in the database.',
+  FAILED_TO_UPDATE_REVIEW_IN_EMBEDDING: 'Failed to update review in embedding'
 } as const;
 
 export const NOTIFICATION_MESSAGES = {

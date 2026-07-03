@@ -59,6 +59,8 @@ import { isRetryWindowOpen } from '../../shared/utils/booking/retry-payment-vali
 import { IScheduleStartDatePopulated } from '../../types/entities/booking.entity';
 import { IOfferRepository, Offer } from '../../interfaces/repository_interfaces/IOfferRepository';
 import { IEmbeddingService } from '../../interfaces/service_interfaces/IEmbeddingService';
+import { ICacheService } from '../../interfaces/service_interfaces/ICacheService';
+import { CACHE_KEYS } from '../../types/cache';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -87,6 +89,8 @@ export class BookingService implements IBookingService {
     private _offerRepository: IOfferRepository,
     @inject('IEmbeddingService')
     private _embeddingService: IEmbeddingService,
+    @inject('ICacheService')
+    private _cacheService: ICacheService,
   ) { }
 
   async initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO> {
@@ -365,6 +369,8 @@ export class BookingService implements IBookingService {
         updatedSchedule.totalSeats,
       ).catch((err) =>
         logger.error("error updating schedule seats in embedding", err));
+      
+      this._cacheService.del(CACHE_KEYS.recommendedPackages(booking.userId.toString()));
 
       const schedule = await this._schedulePackageRepo.findById(booking.scheduleId.toString());
       if (!schedule) {

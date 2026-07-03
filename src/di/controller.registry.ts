@@ -56,8 +56,8 @@ import { IAdminController } from '../interfaces/controller_interfaces/admin/IAdm
 import { AdminController } from '../controllers/admin/admin.controller';
 import { IContactController } from '../interfaces/controller_interfaces/IContactController';
 import { ContactController } from '../controllers/contact.controller';
-import { IAIChatController } from '../interfaces/controller_interfaces/IAIChatController';
-import { AIChatController } from '../controllers/ai-chat.controller';
+import { IAIController } from '../interfaces/controller_interfaces/IAIController';
+import { AIController } from '../controllers/ai.controller';
 
 export class ControllerRegistry {
   static registerControllers() {
@@ -93,8 +93,8 @@ export class ControllerRegistry {
       useClass: ContactController,
     });
 
-    container.register<IAIChatController>('IAIChatController', {
-      useClass: AIChatController,
+    container.register<IAIController>('IAIController', {
+      useClass: AIController,
     });
 
     container.register<IReviewController>('IReviewController', {

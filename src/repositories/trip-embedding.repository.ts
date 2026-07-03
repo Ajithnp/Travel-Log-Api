@@ -15,4 +15,5 @@ export class TripEmbeddingRepository extends BaseRepository<ITripEmbedding> impl
   async deleteByScheduleId(scheduleId: string): Promise<void> {
     await this.model.deleteOne({ scheduleId: new mongoose.Types.ObjectId(scheduleId) }).exec();
   }
+
 }

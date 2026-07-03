@@ -1,10 +1,10 @@
 import { ISchedule } from "../../../types/entities/schedule.entity";
 import { PricingTierDTO } from "../../../types/dtos/vendor/response.dtos";
-import { IBasePackageEntity } from "../../../types/entities/base-package.entity";
+import { IBasePackagePopulatedByCategory } from "../../../types/entities/base-package.entity";
 
 
 //Package + Schedule data → human readable text
-export function buildCombinedText(pkg: IBasePackageEntity, schedule: ISchedule): string {
+export function buildCombinedText(pkg: IBasePackagePopulatedByCategory, schedule: ISchedule): string {
 
     const seatsAvailable = schedule.totalSeats - schedule.seatsBooked;
 
@@ -18,6 +18,7 @@ export function buildCombinedText(pkg: IBasePackageEntity, schedule: ISchedule):
     return `
     Trip Title: ${pkg.title}
     Location: ${pkg.location}, ${pkg.state}
+    Category : ${pkg?.categoryId?.name || ' '}
     Difficulty Level: ${pkg.difficultyLevel}
     Duration: ${pkg.days} days and ${pkg.nights} nights
     Description: ${pkg.description}

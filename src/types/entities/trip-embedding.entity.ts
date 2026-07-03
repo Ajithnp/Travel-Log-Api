@@ -11,12 +11,16 @@ export interface ITripEmbedding extends Document {
   location: string; // for pre-filter
   state: string;
   title: string;
+  imageKey: string | null;
   minPrice: number;
   startDate: Date;
   endDate: Date;
   seatsAvailable: number;
   difficultyLevel: string;
+  category: string;
   days: string;
   nights: string;
+  packageAverageRating: number;
+  packageTotalReviews: number;
   isActive: boolean;
 }

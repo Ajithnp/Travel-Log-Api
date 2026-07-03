@@ -6,7 +6,7 @@ import {
   GROUP_TYPE,
   PAYMENT_METHOD,
   PAYMENT_STATUS,
-} from 'shared/constants/booking';
+} from '../../shared/constants/booking';
 
 export type GroupType = (typeof GROUP_TYPE)[keyof typeof GROUP_TYPE];
 export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
@@ -71,6 +71,10 @@ export interface IBooking extends Document {
 export interface IPopulatedPackage {
   _id: mongoose.Types.ObjectId;
   title: string;
+  location?:string;
+  state?:string;
+  difficultyLevel?:string;
+
 }
 
 export interface IPopulatedSchedule {
@@ -79,6 +83,10 @@ export interface IPopulatedSchedule {
   endDate: Date;
   totalSeats: number;
   seatsBooked: number;
+}
+
+export interface RecentFiveBookingsPopulated extends Omit<IBooking, 'packageId'> {
+  packageId: IPopulatedPackage;
 }
 
 export interface IScheduleStartDatePopulated extends Omit<IBooking, 'scheduleId' | 'packageId'> {
@@ -211,3 +219,4 @@ export interface ITicketPopulatedBooking
     name: string;
   } | null;
 }
+

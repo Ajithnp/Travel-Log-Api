@@ -48,6 +48,21 @@ export interface IWishlistPackagePopulated {
   totalReviews: number;
 }
 
+export interface IWishlistPackagePreferencePopulated {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+  location: string;
+  state: string;
+  categoryId: {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+  } | null;
+  difficultyLevel: string;
+  days: string;
+  nights: string;
+  basePrice: string;
+}
+
 export interface IWishlistPopulatedDocument {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;

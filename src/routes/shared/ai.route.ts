@@ -1,19 +1,19 @@
 import { inject, injectable } from "tsyringe";
-import { IAIChatController } from "../../interfaces/controller_interfaces/IAIChatController";
+import { IAIController } from "../../interfaces/controller_interfaces/IAIController";
 import { authorize } from "../../middlewares/aurhorization.middleware";
 import { isAuthenticated } from "../../middlewares/auth.middleware";
 import { validateDTO } from "../../middlewares/validate.dto.middleware";
-import BaseRoute from "../../routes/base.route";
+import BaseRoute from "../base.route";
 import { USER_ROLES } from "../../shared/constants/roles";
 import { chatbotQueryRequestSchema } from "../../validators/chatbot-query.validation";
 
 
 
 @injectable()
-export class AIChatRoutes extends BaseRoute {
+export class AIRoutes extends BaseRoute {
   constructor(
-    @inject('IAIChatController')
-    private _aiChatController: IAIChatController,
+    @inject('IAIController')
+    private _aiController: IAIController,
   ) {
     super();
     this.initializeRoutes();
@@ -22,11 +22,18 @@ export class AIChatRoutes extends BaseRoute {
   protected initializeRoutes(): void {
     this._router.post(
       '/ask',
-    //   isAuthenticated,
-    //   authorize([USER_ROLES.USER]),
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
       validateDTO(chatbotQueryRequestSchema),
-      this._aiChatController.askChatbot.bind(this._aiChatController),
+      this._aiController.askChatbot.bind(this._aiController),
     );
 
-  }    
+    this._router.get(
+      '/packages/recommendations',
+      isAuthenticated,
+      authorize([USER_ROLES.USER]),
+      this._aiController.getRecommendedPackages.bind(this._aiController),
+    );
+
+  }
 }
