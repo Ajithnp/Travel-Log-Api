@@ -10,6 +10,7 @@ import {
   IScheduleBookingSinglePopulated,
   ITicketPopulatedBooking,
   GroupType,
+  RecentFiveBookingsPopulated,
 } from '../../types/entities/booking.entity';
 import { IBaseRepository } from './IBaseRepository';
 import mongoose, { ClientSession, Types } from 'mongoose';
@@ -126,6 +127,8 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   getRecentActivity(vendorId: string, limit?: number): Promise<RecentBookingActivityResult[]>;
 
   findUserBookingsMeta(userId: string): Promise<UserBookingsMetaResult>;
+
+  getRecentFiveBookings(userId: string): Promise<RecentFiveBookingsPopulated[]>
 }
 
 export interface SchedulePayoutTotals {

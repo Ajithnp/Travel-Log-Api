@@ -7,7 +7,7 @@ import { PaymentWebhookRoutes } from '../routes/shared/payment-webhook.route';
 import { NotificationRoutes } from '../routes/shared/notification.routes';
 import { ReviewRoutes } from '../routes/shared/review.routes';
 import { StripeRoutes } from '../routes/shared/stripe.route';
-import { AIChatRoutes } from '../routes/shared/ai-chat.route';
+import { AIRoutes } from '../routes/shared/ai.route';
 
 export class RoutesRegistry {
   static registerRoutes() {
@@ -36,8 +36,8 @@ export class RoutesRegistry {
     container.register(StripeRoutes, {
       useClass: StripeRoutes,
     });
-    container.register(AIChatRoutes, {
-      useClass: AIChatRoutes,
+    container.register(AIRoutes, {
+      useClass: AIRoutes,
     });
   }
 }

@@ -1,4 +1,8 @@
-import { IWishlistEntity, IWishlistPopulatedDocument } from 'types/entities/wishlist.entity';
+import {
+  IWishlistEntity,
+  IWishlistPopulatedDocument,
+  IWishlistPackagePreferencePopulated,
+} from '../../types/entities/wishlist.entity';
 import { IBaseRepository } from './IBaseRepository';
 
 export interface IWishlistRepository extends IBaseRepository<IWishlistEntity> {
@@ -12,4 +16,5 @@ export interface IWishlistRepository extends IBaseRepository<IWishlistEntity> {
     limit: number,
   ): Promise<IWishlistPopulatedDocument | null>;
   countPackages(userId: string): Promise<number>;
+  getWishlistPackages(userId: string): Promise<IWishlistPackagePreferencePopulated[] | null>;
 }

@@ -21,6 +21,8 @@ import { ReviewMapper } from '../shared/mappers/review.mapper';
 import { IBasePackageRepository } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { IVendorInfoRepository } from '../interfaces/repository_interfaces/IVendorInfoRepository';
 import { PaginatedData } from '../types/common/IPaginationResponse';
+import { ITripEmbeddingRepository } from '../interfaces/repository_interfaces/ITripEmbeddingRepository';
+import logger from '../config/logger';
 
 @injectable()
 export class ReviewService implements IReviewService {
@@ -33,7 +35,9 @@ export class ReviewService implements IReviewService {
     private _packageRepository: IBasePackageRepository,
     @inject('IVendorInfoRepository')
     private _vendorRepository: IVendorInfoRepository,
-  ) {}
+    @inject('ITripEmbeddingRepository')
+    private _embeddingRepository: ITripEmbeddingRepository,
+  ) { }
 
   async addReview(userId: string, reviewDto: IReviewRequestDto): Promise<void> {
     const booking = await this._bookingRepository.findOne({
@@ -91,6 +95,13 @@ export class ReviewService implements IReviewService {
         { averageRating: stats.average, totalReviews: stats.total },
       );
     }
+    this._embeddingRepository.findByIdAndUpdate(packageId, {
+
+      packageAverageRating: stats?.average,
+      packageTotalReviews: stats?.total
+    }).catch((err)=> 
+      logger.error(ERROR_MESSAGES.FAILED_TO_UPDATE_REVIEW_IN_EMBEDDING,err)
+    );
   }
 
   async deleteReview(reviewId: string, userId: string): Promise<void> {

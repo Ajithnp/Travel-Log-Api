@@ -2,6 +2,7 @@ import { FilterType, PublicPackageFilters } from 'types/db';
 import {
   DifficultyLevel,
   IBasePackageEntity,
+  IBasePackagePopulatedByCategory,
   IFile,
 } from '../../types/entities/base-package.entity';
 import { IBaseRepository } from './IBaseRepository';
@@ -32,6 +33,9 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
     page: number,
     limit: number,
   ): Promise<{ packages: RawPublicPackageDocument[]; total: number }>;
+
+  findByIdWithCategory(id: string): Promise<IBasePackagePopulatedByCategory | null>;
+
 
   softDelete(id: Types.ObjectId, vendorId: string): Promise<IBasePackageEntity | null>;
 

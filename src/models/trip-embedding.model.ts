@@ -26,6 +26,8 @@ const TripEmbeddingSchema = new Schema<ITripEmbedding>(
       required: true,
     },
 
+    imageKey: { type: String, default: null },
+
     // Filter fields
     location: { type: String },
     state: { type: String },
@@ -35,8 +37,11 @@ const TripEmbeddingSchema = new Schema<ITripEmbedding>(
     endDate: { type: Date },
     seatsAvailable: { type: Number },
     difficultyLevel: { type: String },
+    category: { type: String },
     days: { type: String },
     nights: { type: String },
+    packageAverageRating: { type: Number, default: 0 },
+    packageTotalReviews: { type: Number, default: 0 },
 
     isActive: {
       type: Boolean,

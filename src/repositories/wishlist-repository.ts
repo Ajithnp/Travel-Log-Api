@@ -2,6 +2,7 @@ import {
   IWishlistEntity,
   IWishlistPackagePopulated,
   IWishlistPopulatedDocument,
+  IWishlistPackagePreferencePopulated,
 } from '../types/entities/wishlist.entity';
 import { WishlistDocument, WishlistModel } from '../models/wishlist.model';
 import { BaseRepository } from './base.repository';
@@ -154,5 +155,21 @@ export class WishlistRepository
 
     if (!doc) return 0;
     return (doc.packages ?? []).length;
+  }
+
+  async getWishlistPackages(userId: string): Promise<IWishlistPackagePreferencePopulated[] | null> {
+    const doc = await this.model
+      .findOne({ userId: new Types.ObjectId(userId) }, { packages: 1 })
+      .populate({
+        path: 'packages',
+        select:
+          'title location state categoryId difficultyLevel days nights basePrice',
+        populate: {
+          path: 'categoryId',
+          select: 'name',
+        },
+      })
+      .lean();
+    return doc?.packages as unknown as IWishlistPackagePreferencePopulated[] | null;
   }
 }

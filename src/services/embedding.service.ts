@@ -29,7 +29,7 @@ export class EmbeddingService implements IEmbeddingService {
 
         const [schedule, pkg] = await Promise.all([
             this._scheduleRepository.findById(scheduleId),
-            this._packageRepository.findById(packageId)
+            this._packageRepository.findByIdWithCategory(packageId)
         ])
 
         if (!schedule || !pkg) {
@@ -57,7 +57,7 @@ export class EmbeddingService implements IEmbeddingService {
             { upsert: true, new: true }
         );
     };
-    // update only seats no re-embed
+    
     async updateSeatsInEmbedding(scheduleId: string, seatsBooked: number, totalSeats: number): Promise<void> {
         const seatsAvailable = totalSeats - seatsBooked;
 

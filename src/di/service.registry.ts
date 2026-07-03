@@ -80,6 +80,10 @@ import { IContactService } from '../interfaces/service_interfaces/IContactServic
 import { ContactService } from '../services/contact.service';
 import { IEmbeddingService } from '../interfaces/service_interfaces/IEmbeddingService';
 import { EmbeddingService } from '../services/embedding.service';
+import { IRecommendationService } from '../interfaces/service_interfaces/IRecommendationService';
+import { RecommendationService } from '../services/recommendation.service';
+import { IUserPreferenceService } from '../interfaces/service_interfaces/user/IPreferenceService';
+import { UserPreferenceService } from '../services/user/preference.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -153,6 +157,14 @@ export class ServiceRegistry {
 
     container.register<IEmbeddingService>('IEmbeddingService', {
       useClass: EmbeddingService,
+    });
+
+    container.register<IRecommendationService>('IRecommendationService', {
+      useClass: RecommendationService,
+    });
+
+    container.register<IUserPreferenceService>('IUserPreferenceService', {
+      useClass: UserPreferenceService,
     });
 
     //vendor-services

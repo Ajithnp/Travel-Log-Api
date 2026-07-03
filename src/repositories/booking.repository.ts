@@ -10,6 +10,7 @@ import {
   IScheduleBookingPopulated,
   IScheduleBookingSinglePopulated,
   ITicketPopulatedBooking,
+  RecentFiveBookingsPopulated,
 } from '../types/entities/booking.entity';
 import { BaseRepository } from './base.repository';
 import {
@@ -1026,6 +1027,19 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       },
     ]);
     return result;
+  }
+
+  async getRecentFiveBookings(userId: string): Promise<RecentFiveBookingsPopulated[]> {
+    return await this.model.find({
+      userId: toObjectId(userId),
+      bookingStatus: BOOKING_STATUS.CONFIRMED,
+      paymentStatus: PAYMENT_STATUS.PAID,
+    })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('packageId', 'title location state difficultyLevel')
+      .lean()
+      .exec() as unknown as RecentFiveBookingsPopulated[];
   }
 
   async getRecentActivity(

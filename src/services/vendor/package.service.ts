@@ -28,6 +28,7 @@ import { IBasePackagePopulated, IFile } from '../../types/entities/base-package.
 import { ISchedulePackageRepository } from '../../interfaces/repository_interfaces/ISchedulePackage';
 import { IReviewRepository } from '../../interfaces/repository_interfaces/IReviewRepository';
 import { IOfferRepository } from '../../interfaces/repository_interfaces/IOfferRepository';
+import { IEmbeddingService } from '../../interfaces/service_interfaces/IEmbeddingService';
 
 @injectable()
 export class PackageService implements IPackageService {
@@ -46,6 +47,8 @@ export class PackageService implements IPackageService {
     private _reviewRepository: IReviewRepository,
     @inject('IOfferRepository')
     private _offerRepository: IOfferRepository,
+    @inject('IEmbeddingService')
+    private _embeddingService: IEmbeddingService,
   ) {}
 
   private async processPackageImages(images: { key: string; status: string }[]): Promise<IFile[]> {
@@ -278,6 +281,7 @@ export class PackageService implements IPackageService {
     if (!data) {
       throw new AppError(ERROR_MESSAGES.PACKAGE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
+    await this._embeddingService.deleteEmbedding(packageId);
   }
 
   async restorePackage(packageId: string, vendorId: string): Promise<void> {
