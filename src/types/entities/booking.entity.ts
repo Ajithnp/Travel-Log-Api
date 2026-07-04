@@ -71,10 +71,9 @@ export interface IBooking extends Document {
 export interface IPopulatedPackage {
   _id: mongoose.Types.ObjectId;
   title: string;
-  location?:string;
-  state?:string;
-  difficultyLevel?:string;
-
+  location?: string;
+  state?: string;
+  difficultyLevel?: string;
 }
 
 export interface IPopulatedSchedule {
@@ -219,4 +218,3 @@ export interface ITicketPopulatedBooking
     name: string;
   } | null;
 }
-

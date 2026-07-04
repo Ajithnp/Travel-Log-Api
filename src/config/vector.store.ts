@@ -1,9 +1,8 @@
-import { config } from "./env";
+import { config } from './env';
 import { MongoClient } from 'mongodb';
 import { MongoDBAtlasVectorSearch } from '@langchain/mongodb';
 import type { Collection, Document as MongoDoc } from '@langchain/mongodb/node_modules/mongodb';
-import { Embeddings } from "@langchain/core/embeddings";
-
+import { Embeddings } from '@langchain/core/embeddings';
 
 let nativeClient: MongoClient | null = null;
 
@@ -17,7 +16,7 @@ async function getNativeClient(): Promise<MongoClient> {
 
 export async function getVectorStore(embeddings: Embeddings) {
   const client = await getNativeClient();
-  
+
   const collection: Collection<MongoDoc> = client
     .db(config.database.DB_NAME)
     .collection(config.database.VECTOR_COLLECTION_NAME) as unknown as Collection<MongoDoc>;

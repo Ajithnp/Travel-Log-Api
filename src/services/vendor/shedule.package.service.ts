@@ -136,7 +136,7 @@ export class SchedulePackageService implements ISchedulePackageService {
 
     const pricing = this.buildPricing(data.pricing);
 
-   const newSchedule = await this._schedulePackageRepository.create({
+    const newSchedule = await this._schedulePackageRepository.create({
       ...data,
       packageId: pkdId,
       vendorId: vendorObjId,
@@ -145,9 +145,9 @@ export class SchedulePackageService implements ISchedulePackageService {
       endDate,
     });
 
-    this._embeddingService.generateAndSaveEmbedding(newSchedule._id.toString(),newSchedule.packageId.toString()).catch((error) => 
-      logger.error(`embedding failed for schedule ${newSchedule._id}:`,error)
-    )
+    this._embeddingService
+      .generateAndSaveEmbedding(newSchedule._id.toString(), newSchedule.packageId.toString())
+      .catch((error) => logger.error(`embedding failed for schedule ${newSchedule._id}:`, error));
   }
 
   async fetchVendorSchedules(
@@ -263,8 +263,9 @@ export class SchedulePackageService implements ISchedulePackageService {
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
       );
     }
-    this._embeddingService.deleteEmbedding(scheduleId).catch((err)=>
-       logger.error(`embedding deletion failed for schedule ${scheduleId}:`,err));
+    this._embeddingService
+      .deleteEmbedding(scheduleId)
+      .catch((err) => logger.error(`embedding deletion failed for schedule ${scheduleId}:`, err));
     return { status: updated.status };
   }
 }

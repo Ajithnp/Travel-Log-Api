@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServiceRegistry = void 0;
 const tsyringe_1 = require("tsyringe");
 const auth_service_1 = require("../services/auth.service");
+const rag_service_1 = require("../services/rag.service");
 const jwt_service_1 = require("../services/jwt.service");
 const google_auth_service_1 = require("../services/google.auth.service");
 const otp_service_1 = require("../services/otp.service");
@@ -41,6 +42,9 @@ const stripe_service_1 = require("../services/stripe.service");
 const payout_service_1 = require("../services/payout.service");
 const admin_service_1 = require("../services/admin/admin.service");
 const contact_service_1 = require("../services/contact.service");
+const embedding_service_1 = require("../services/embedding.service");
+const recommendation_service_1 = require("../services/recommendation.service");
+const preference_service_1 = require("../services/user/preference.service");
 class ServiceRegistry {
     static registerServices() {
         tsyringe_1.container.register('IAuthService', {
@@ -93,6 +97,15 @@ class ServiceRegistry {
         });
         tsyringe_1.container.register('IContactService', {
             useClass: contact_service_1.ContactService,
+        });
+        tsyringe_1.container.register('IEmbeddingService', {
+            useClass: embedding_service_1.EmbeddingService,
+        });
+        tsyringe_1.container.register('IRecommendationService', {
+            useClass: recommendation_service_1.RecommendationService,
+        });
+        tsyringe_1.container.register('IUserPreferenceService', {
+            useClass: preference_service_1.UserPreferenceService,
         });
         //vendor-services
         tsyringe_1.container.register('IVendorService', {
@@ -159,6 +172,9 @@ class ServiceRegistry {
         });
         tsyringe_1.container.register('IRewardService', {
             useClass: user_reward_service_1.UserRewardService,
+        });
+        tsyringe_1.container.register('IRagService', {
+            useClass: rag_service_1.RagService,
         });
     } // Register other services here
 }

@@ -1,5 +1,5 @@
-import { model, Schema } from "mongoose";
-import { ITripEmbedding } from "../types/entities/trip-embedding.entity";
+import { model, Schema } from 'mongoose';
+import { ITripEmbedding } from '../types/entities/trip-embedding.entity';
 
 const TripEmbeddingSchema = new Schema<ITripEmbedding>(
   {
@@ -49,7 +49,7 @@ const TripEmbeddingSchema = new Schema<ITripEmbedding>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const TripEmbeddingModel = model<ITripEmbedding>('TripEmbedding', TripEmbeddingSchema);

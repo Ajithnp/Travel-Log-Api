@@ -5,9 +5,11 @@ import { TripEmbeddingModel } from '../models/trip-embedding.model';
 import { ITripEmbeddingRepository } from '../interfaces/repository_interfaces/ITripEmbeddingRepository';
 import mongoose from 'mongoose';
 
-
 @injectable()
-export class TripEmbeddingRepository extends BaseRepository<ITripEmbedding> implements ITripEmbeddingRepository {
+export class TripEmbeddingRepository
+  extends BaseRepository<ITripEmbedding>
+  implements ITripEmbeddingRepository
+{
   constructor() {
     super(TripEmbeddingModel);
   }
@@ -15,5 +17,4 @@ export class TripEmbeddingRepository extends BaseRepository<ITripEmbedding> impl
   async deleteByScheduleId(scheduleId: string): Promise<void> {
     await this.model.deleteOne({ scheduleId: new mongoose.Types.ObjectId(scheduleId) }).exec();
   }
-
 }

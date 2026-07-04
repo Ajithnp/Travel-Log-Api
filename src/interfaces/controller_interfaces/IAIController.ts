@@ -1,6 +1,6 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
 
 export interface IAIController {
-    askChatbot: RequestHandler
-    getRecommendedPackages: RequestHandler
+  askChatbot: RequestHandler;
+  getRecommendedPackages: RequestHandler;
 }

@@ -46,8 +46,9 @@ const payment_split_calculator_1 = require("../../shared/utils/booking/payment-s
 const validate_booking_date_1 = require("../../shared/utils/booking/validate-booking-date");
 const logger_1 = __importDefault(require("../../config/logger"));
 const retry_payment_validate_1 = require("../../shared/utils/booking/retry-payment-validate");
+const cache_1 = require("../../types/cache");
 let BookingService = class BookingService {
-    constructor(_notificationService, _schedulePackageRepo, _packageRepo, _bookingRepo, paymentGateway, _chatService, _chatRepo, _walletService, _cancellationPolicyRepo, _userRepository, _offerRepository, _vendorInfoRepository) {
+    constructor(_notificationService, _schedulePackageRepo, _packageRepo, _bookingRepo, paymentGateway, _chatService, _chatRepo, _walletService, _cancellationPolicyRepo, _userRepository, _offerRepository, _embeddingService, _cacheService) {
         this._notificationService = _notificationService;
         this._schedulePackageRepo = _schedulePackageRepo;
         this._packageRepo = _packageRepo;
@@ -59,7 +60,8 @@ let BookingService = class BookingService {
         this._cancellationPolicyRepo = _cancellationPolicyRepo;
         this._userRepository = _userRepository;
         this._offerRepository = _offerRepository;
-        this._vendorInfoRepository = _vendorInfoRepository;
+        this._embeddingService = _embeddingService;
+        this._cacheService = _cacheService;
     }
     initiateBooking(payload) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -249,6 +251,10 @@ let BookingService = class BookingService {
                 }
                 yield session.commitTransaction();
                 session.endSession();
+                this._embeddingService
+                    .updateSeatsInEmbedding(booking.scheduleId.toString(), updatedSchedule.seatsBooked, updatedSchedule.totalSeats)
+                    .catch((err) => logger_1.default.error('error updating schedule seats in embedding', err));
+                this._cacheService.del(cache_1.CACHE_KEYS.recommendedPackages(booking.userId.toString()));
                 const schedule = yield this._schedulePackageRepo.findById(booking.scheduleId.toString());
                 if (!schedule) {
                     throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.SCHEDULE_NOT_FOUND, http_status_code_1.HTTP_STATUS.NOT_FOUND);
@@ -567,6 +573,7 @@ exports.BookingService = BookingService = __decorate([
     __param(8, (0, tsyringe_1.inject)('ICancellationPolicyRepository')),
     __param(9, (0, tsyringe_1.inject)('IUserRepository')),
     __param(10, (0, tsyringe_1.inject)('IOfferRepository')),
-    __param(11, (0, tsyringe_1.inject)('IVendorInfoRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object])
+    __param(11, (0, tsyringe_1.inject)('IEmbeddingService')),
+    __param(12, (0, tsyringe_1.inject)('ICacheService')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object])
 ], BookingService);

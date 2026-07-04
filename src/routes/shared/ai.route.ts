@@ -1,13 +1,11 @@
-import { inject, injectable } from "tsyringe";
-import { IAIController } from "../../interfaces/controller_interfaces/IAIController";
-import { authorize } from "../../middlewares/aurhorization.middleware";
-import { isAuthenticated } from "../../middlewares/auth.middleware";
-import { validateDTO } from "../../middlewares/validate.dto.middleware";
-import BaseRoute from "../base.route";
-import { USER_ROLES } from "../../shared/constants/roles";
-import { chatbotQueryRequestSchema } from "../../validators/chatbot-query.validation";
-
-
+import { inject, injectable } from 'tsyringe';
+import { IAIController } from '../../interfaces/controller_interfaces/IAIController';
+import { authorize } from '../../middlewares/aurhorization.middleware';
+import { isAuthenticated } from '../../middlewares/auth.middleware';
+import { validateDTO } from '../../middlewares/validate.dto.middleware';
+import BaseRoute from '../base.route';
+import { USER_ROLES } from '../../shared/constants/roles';
+import { chatbotQueryRequestSchema } from '../../validators/chatbot-query.validation';
 
 @injectable()
 export class AIRoutes extends BaseRoute {
@@ -34,6 +32,5 @@ export class AIRoutes extends BaseRoute {
       authorize([USER_ROLES.USER]),
       this._aiController.getRecommendedPackages.bind(this._aiController),
     );
-
   }
 }

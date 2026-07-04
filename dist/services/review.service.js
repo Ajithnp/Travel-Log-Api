@@ -20,6 +20,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReviewService = void 0;
 const tsyringe_1 = require("tsyringe");
@@ -29,12 +32,14 @@ const messages_1 = require("../shared/constants/messages");
 const booking_1 = require("../shared/constants/booking");
 const objectId_helper_1 = require("../shared/utils/database/objectId.helper");
 const review_mapper_1 = require("../shared/mappers/review.mapper");
+const logger_1 = __importDefault(require("../config/logger"));
 let ReviewService = class ReviewService {
-    constructor(_reviewRepository, _bookingRepository, _packageRepository, _vendorRepository) {
+    constructor(_reviewRepository, _bookingRepository, _packageRepository, _vendorRepository, _embeddingRepository) {
         this._reviewRepository = _reviewRepository;
         this._bookingRepository = _bookingRepository;
         this._packageRepository = _packageRepository;
         this._vendorRepository = _vendorRepository;
+        this._embeddingRepository = _embeddingRepository;
     }
     addReview(userId, reviewDto) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -73,6 +78,12 @@ let ReviewService = class ReviewService {
             if (stats) {
                 yield this._packageRepository.findOneAndUpdate({ _id: (0, objectId_helper_1.toObjectId)(packageId) }, { averageRating: stats.average, totalReviews: stats.total });
             }
+            this._embeddingRepository
+                .findByIdAndUpdate(packageId, {
+                packageAverageRating: stats === null || stats === void 0 ? void 0 : stats.average,
+                packageTotalReviews: stats === null || stats === void 0 ? void 0 : stats.total,
+            })
+                .catch((err) => logger_1.default.error(messages_1.ERROR_MESSAGES.FAILED_TO_UPDATE_REVIEW_IN_EMBEDDING, err));
         });
     }
     deleteReview(reviewId, userId) {
@@ -170,5 +181,6 @@ exports.ReviewService = ReviewService = __decorate([
     __param(1, (0, tsyringe_1.inject)('IBookingRepository')),
     __param(2, (0, tsyringe_1.inject)('IBasePackageRepository')),
     __param(3, (0, tsyringe_1.inject)('IVendorInfoRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object, Object])
+    __param(4, (0, tsyringe_1.inject)('ITripEmbeddingRepository')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object])
 ], ReviewService);

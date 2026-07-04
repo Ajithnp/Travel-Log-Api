@@ -24,6 +24,7 @@ class ConnectDB {
             try {
                 yield mongoose_1.default.connect(this._dburl);
                 console.log('Database connected successfully');
+                // Native MongoDB client (for RAG )
             }
             catch (error) {
                 console.error('Database connection failed:', error);

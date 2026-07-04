@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export const chatbotQuerySchema = z.object({
-
   message: z
     .string({ required_error: 'Message is required' })
     .trim()
@@ -20,6 +19,5 @@ export const chatbotQuerySchema = z.object({
 export const chatbotQueryRequestSchema = z.object({
   body: chatbotQuerySchema,
 });
-
 
 export type ChatbotQueryRequestDTO = z.infer<typeof chatbotQueryRequestSchema>;

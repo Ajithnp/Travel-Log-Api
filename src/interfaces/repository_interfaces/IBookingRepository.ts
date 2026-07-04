@@ -128,7 +128,7 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
 
   findUserBookingsMeta(userId: string): Promise<UserBookingsMetaResult>;
 
-  getRecentFiveBookings(userId: string): Promise<RecentFiveBookingsPopulated[]>
+  getRecentFiveBookings(userId: string): Promise<RecentFiveBookingsPopulated[]>;
 }
 
 export interface SchedulePayoutTotals {

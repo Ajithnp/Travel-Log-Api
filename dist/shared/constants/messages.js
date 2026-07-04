@@ -204,6 +204,8 @@ exports.ERROR_MESSAGES = {
     PAYOUT_NOT_FOUND: 'Payout not found',
     ENQUIRY_NOT_FOUND: 'Enquiry not found',
     ENQUIRY_ALREADY_RESOLVED: 'Enquiry already resolved',
+    NO_TRIPS_FOUND: 'No matching trips found in the database.',
+    FAILED_TO_UPDATE_REVIEW_IN_EMBEDDING: 'Failed to update review in embedding',
 };
 exports.NOTIFICATION_MESSAGES = {
     CANCELLATION_REJECTED: (packageName, rejectedReason) => `Your cancellation request for "${packageName}" has been rejected. admin noted : ${rejectedReason}`,

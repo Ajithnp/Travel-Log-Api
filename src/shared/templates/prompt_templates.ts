@@ -33,16 +33,14 @@ CONTEXT (Available Trips from Database):
 {context}
 `;
 
-export const PREFERENCE_SUMMARY_SYSTEM_PROMPT =
-    `You are a travel preference analyzer. 
+export const PREFERENCE_SUMMARY_SYSTEM_PROMPT = `You are a travel preference analyzer. 
      Generate a SHORT search query (2-3 sentences max) 
      describing this user's travel preferences.
      Focus on: locations, trip types, difficulty, budget.
      Output ONLY the search query, nothing else.
     `;
 
-export const PREFERENCE_SUMMARY_PROMPT = 
-   `
+export const PREFERENCE_SUMMARY_PROMPT = `
    User travel data:
        Visited locations: {bookedLocations}
        Visited states: {bookedStates}
@@ -53,6 +51,6 @@ export const PREFERENCE_SUMMARY_PROMPT =
        Average budget: ₹{avgBudget}
        
        Generate a travel preference search query.
-   `
-export const NEW_USER_PACKAGES_RECOMMENDATION_PROMPT = 'popular weekend trips across India hill stations beaches nature adventure';
-   
+   `;
+export const NEW_USER_PACKAGES_RECOMMENDATION_PROMPT =
+  'popular weekend trips across India hill stations beaches nature adventure';

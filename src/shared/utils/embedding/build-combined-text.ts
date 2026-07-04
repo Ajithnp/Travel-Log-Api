@@ -1,21 +1,22 @@
-import { ISchedule } from "../../../types/entities/schedule.entity";
-import { PricingTierDTO } from "../../../types/dtos/vendor/response.dtos";
-import { IBasePackagePopulatedByCategory } from "../../../types/entities/base-package.entity";
-
+import { ISchedule } from '../../../types/entities/schedule.entity';
+import { PricingTierDTO } from '../../../types/dtos/vendor/response.dtos';
+import { IBasePackagePopulatedByCategory } from '../../../types/entities/base-package.entity';
 
 //Package + Schedule data → human readable text
-export function buildCombinedText(pkg: IBasePackagePopulatedByCategory, schedule: ISchedule): string {
+export function buildCombinedText(
+  pkg: IBasePackagePopulatedByCategory,
+  schedule: ISchedule,
+): string {
+  const seatsAvailable = schedule.totalSeats - schedule.seatsBooked;
 
-    const seatsAvailable = schedule.totalSeats - schedule.seatsBooked;
+  const pricingText = schedule.pricing
+    .map((p: PricingTierDTO) => `${p.type} ₹${p.price} for ${p.peopleCount} person(s)`)
+    .join(', ');
 
-    const pricingText = schedule.pricing
-        .map((p: PricingTierDTO) => `${p.type} ₹${p.price} for ${p.peopleCount} person(s)`)
-        .join(', ');
+  const startDate = new Date(schedule.startDate).toDateString();
+  const endDate = new Date(schedule.endDate).toDateString();
 
-    const startDate = new Date(schedule.startDate).toDateString();
-    const endDate = new Date(schedule.endDate).toDateString();
-
-    return `
+  return `
     Trip Title: ${pkg.title}
     Location: ${pkg.location}, ${pkg.state}
     Category : ${pkg?.categoryId?.name || ' '}
