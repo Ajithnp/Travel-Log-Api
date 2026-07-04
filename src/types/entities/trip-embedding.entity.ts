@@ -1,7 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 
 export interface ITripEmbedding extends Document {
-  _id:mongoose.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   scheduleId: mongoose.Types.ObjectId;
   packageId: mongoose.Types.ObjectId;
 

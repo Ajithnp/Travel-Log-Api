@@ -1030,16 +1030,17 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
   }
 
   async getRecentFiveBookings(userId: string): Promise<RecentFiveBookingsPopulated[]> {
-    return await this.model.find({
-      userId: toObjectId(userId),
-      bookingStatus: BOOKING_STATUS.CONFIRMED,
-      paymentStatus: PAYMENT_STATUS.PAID,
-    })
+    return (await this.model
+      .find({
+        userId: toObjectId(userId),
+        bookingStatus: BOOKING_STATUS.CONFIRMED,
+        paymentStatus: PAYMENT_STATUS.PAID,
+      })
       .sort({ createdAt: -1 })
       .limit(5)
       .populate('packageId', 'title location state difficultyLevel')
       .lean()
-      .exec() as unknown as RecentFiveBookingsPopulated[];
+      .exec()) as unknown as RecentFiveBookingsPopulated[];
   }
 
   async getRecentActivity(

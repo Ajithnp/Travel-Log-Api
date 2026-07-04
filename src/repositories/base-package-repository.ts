@@ -11,7 +11,10 @@ import {
   TopRatedPackagesResult,
 } from '../interfaces/repository_interfaces/IBasePackageRepository';
 import { BaseRepository } from './base.repository';
-import { IBasePackageEntity, IBasePackagePopulatedByCategory } from '../types/entities/base-package.entity';
+import {
+  IBasePackageEntity,
+  IBasePackagePopulatedByCategory,
+} from '../types/entities/base-package.entity';
 import { PackageModel } from '../models/package.model';
 import { FilterType, PublicPackageFilters } from '../types/db';
 import mongoose, { FilterQuery, Types } from 'mongoose';
@@ -188,11 +191,7 @@ export class BasePackageRepository
   }
 
   async findByIdWithCategory(id: string): Promise<IBasePackagePopulatedByCategory | null> {
-    const result = await this.model
-      .findById(id)
-      .populate('categoryId', 'name')
-      .lean()
-      .exec();
+    const result = await this.model.findById(id).populate('categoryId', 'name').lean().exec();
     return result as unknown as IBasePackagePopulatedByCategory | null;
   }
 

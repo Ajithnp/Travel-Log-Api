@@ -37,7 +37,7 @@ export class ReviewService implements IReviewService {
     private _vendorRepository: IVendorInfoRepository,
     @inject('ITripEmbeddingRepository')
     private _embeddingRepository: ITripEmbeddingRepository,
-  ) { }
+  ) {}
 
   async addReview(userId: string, reviewDto: IReviewRequestDto): Promise<void> {
     const booking = await this._bookingRepository.findOne({
@@ -95,13 +95,12 @@ export class ReviewService implements IReviewService {
         { averageRating: stats.average, totalReviews: stats.total },
       );
     }
-    this._embeddingRepository.findByIdAndUpdate(packageId, {
-
-      packageAverageRating: stats?.average,
-      packageTotalReviews: stats?.total
-    }).catch((err)=> 
-      logger.error(ERROR_MESSAGES.FAILED_TO_UPDATE_REVIEW_IN_EMBEDDING,err)
-    );
+    this._embeddingRepository
+      .findByIdAndUpdate(packageId, {
+        packageAverageRating: stats?.average,
+        packageTotalReviews: stats?.total,
+      })
+      .catch((err) => logger.error(ERROR_MESSAGES.FAILED_TO_UPDATE_REVIEW_IN_EMBEDDING, err));
   }
 
   async deleteReview(reviewId: string, userId: string): Promise<void> {

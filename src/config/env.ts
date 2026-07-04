@@ -18,9 +18,8 @@ export const config = {
   database: {
     DB_URL: requireEnv('DB_URL'),
     VECTOR_INDEX: requireEnv('ATLAS_VECTOR_INDEX'),
-    DB_NAME:requireEnv('DB_NAME'),
-    VECTOR_COLLECTION_NAME:requireEnv('VECTOR_COLLECTION_NAME'),
-    
+    DB_NAME: requireEnv('DB_NAME'),
+    VECTOR_COLLECTION_NAME: requireEnv('VECTOR_COLLECTION_NAME'),
   },
   cors: {
     ALLOWED_ORIGINS: requireEnv('ALLOW_ORIGIN'),
@@ -74,5 +73,5 @@ export const config = {
     GEMINI_API_KEY: requireEnv('GEMINI_API_KEY'),
     EMBEDDING_MODEL: requireEnv('GEMINI_EMBEDDING_MODEL'),
     EMBEDDING_DIMENSIONS: requireEnv('GEMINI_EMBEDDING_DIMENSIONS'),
-  }
+  },
 };

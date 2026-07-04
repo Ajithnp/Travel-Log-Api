@@ -10,6 +10,7 @@ const payment_webhook_route_1 = require("../routes/shared/payment-webhook.route"
 const notification_routes_1 = require("../routes/shared/notification.routes");
 const review_routes_1 = require("../routes/shared/review.routes");
 const stripe_route_1 = require("../routes/shared/stripe.route");
+const ai_route_1 = require("../routes/shared/ai.route");
 class RoutesRegistry {
     static registerRoutes() {
         tsyringe_1.container.register(auth_routes_1.AuthRoutes, {
@@ -35,6 +36,9 @@ class RoutesRegistry {
         });
         tsyringe_1.container.register(stripe_route_1.StripeRoutes, {
             useClass: stripe_route_1.StripeRoutes,
+        });
+        tsyringe_1.container.register(ai_route_1.AIRoutes, {
+            useClass: ai_route_1.AIRoutes,
         });
     }
 }

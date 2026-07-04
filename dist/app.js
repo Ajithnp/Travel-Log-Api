@@ -21,6 +21,7 @@ const payment_webhook_route_1 = require("./routes/shared/payment-webhook.route")
 const notification_routes_1 = require("./routes/shared/notification.routes");
 const review_routes_1 = require("./routes/shared/review.routes");
 const stripe_route_1 = require("./routes/shared/stripe.route");
+const ai_route_1 = require("./routes/shared/ai.route");
 class App {
     constructor() {
         this._app = (0, express_1.default)();
@@ -61,6 +62,7 @@ class App {
         this._app.use('/api/v1/bookings', tsyringe_1.container.resolve(booking_route_1.BookingRoutes).router);
         this._app.use('/api/v1/notifications', tsyringe_1.container.resolve(notification_routes_1.NotificationRoutes).router);
         this._app.use('/api/v1/reviews', tsyringe_1.container.resolve(review_routes_1.ReviewRoutes).router);
+        this._app.use('/api/v1/ai', tsyringe_1.container.resolve(ai_route_1.AIRoutes).router);
     }
     get expressApp() {
         return this._app;

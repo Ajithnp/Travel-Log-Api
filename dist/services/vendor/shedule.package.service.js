@@ -33,11 +33,13 @@ const http_status_code_1 = require("../../shared/constants/http_status_code");
 const constants_1 = require("../../shared/constants/constants");
 const schedule_mapper_1 = require("../../shared/mappers/schedule.mapper");
 const mongoose_1 = __importDefault(require("mongoose"));
+const logger_1 = __importDefault(require("../../config/logger"));
 let SchedulePackageService = class SchedulePackageService {
-    constructor(_schedulePackageRepository, _basePackageRepository, _bookingRepo) {
+    constructor(_schedulePackageRepository, _basePackageRepository, _bookingRepo, _embeddingService) {
         this._schedulePackageRepository = _schedulePackageRepository;
         this._basePackageRepository = _basePackageRepository;
         this._bookingRepo = _bookingRepo;
+        this._embeddingService = _embeddingService;
     }
     validateDateRange(startDate, endDate, packageDurationDays) {
         const today = new Date();
@@ -104,9 +106,12 @@ let SchedulePackageService = class SchedulePackageService {
                     `Dates cannot overlap.`, http_status_code_1.HTTP_STATUS.CONFLICT);
             }
             const pricing = this.buildPricing(data.pricing);
-            yield this._schedulePackageRepository.create(Object.assign(Object.assign({}, data), { packageId: pkdId, vendorId: vendorObjId, pricing,
+            const newSchedule = yield this._schedulePackageRepository.create(Object.assign(Object.assign({}, data), { packageId: pkdId, vendorId: vendorObjId, pricing,
                 startDate,
                 endDate }));
+            this._embeddingService
+                .generateAndSaveEmbedding(newSchedule._id.toString(), newSchedule.packageId.toString())
+                .catch((error) => logger_1.default.error(`embedding failed for schedule ${newSchedule._id}:`, error));
         });
     }
     fetchVendorSchedules(vendorId, filters) {
@@ -174,6 +179,9 @@ let SchedulePackageService = class SchedulePackageService {
             if (!updated) {
                 throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.FAILED_TO_UPDATE_SCHEDULE_STATUS, http_status_code_1.HTTP_STATUS.INTERNAL_SERVER_ERROR);
             }
+            this._embeddingService
+                .deleteEmbedding(scheduleId)
+                .catch((err) => logger_1.default.error(`embedding deletion failed for schedule ${scheduleId}:`, err));
             return { status: updated.status };
         });
     }
@@ -184,5 +192,6 @@ exports.SchedulePackageService = SchedulePackageService = __decorate([
     __param(0, (0, tsyringe_1.inject)('ISchedulePackageRepository')),
     __param(1, (0, tsyringe_1.inject)('IBasePackageRepository')),
     __param(2, (0, tsyringe_1.inject)('IBookingRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __param(3, (0, tsyringe_1.inject)('IEmbeddingService')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object])
 ], SchedulePackageService);

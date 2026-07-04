@@ -162,8 +162,7 @@ export class WishlistRepository
       .findOne({ userId: new Types.ObjectId(userId) }, { packages: 1 })
       .populate({
         path: 'packages',
-        select:
-          'title location state categoryId difficultyLevel days nights basePrice',
+        select: 'title location state categoryId difficultyLevel days nights basePrice',
         populate: {
           path: 'categoryId',
           select: 'name',

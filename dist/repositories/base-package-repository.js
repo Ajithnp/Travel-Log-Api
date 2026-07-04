@@ -173,6 +173,12 @@ let BasePackageRepository = class BasePackageRepository extends base_repository_
             };
         });
     }
+    findByIdWithCategory(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.model.findById(id).populate('categoryId', 'name').lean().exec();
+            return result;
+        });
+    }
     packageMetaDataByVendorId(vendorId) {
         return __awaiter(this, void 0, void 0, function* () {
             const packages = (yield this.model

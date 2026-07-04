@@ -31,6 +31,7 @@ const stripe_controller_1 = require("../controllers/stripe-controller");
 const payout_controller_1 = require("../controllers/payout.controller");
 const admin_controller_1 = require("../controllers/admin/admin.controller");
 const contact_controller_1 = require("../controllers/contact.controller");
+const ai_controller_1 = require("../controllers/ai.controller");
 class ControllerRegistry {
     static registerControllers() {
         tsyringe_1.container.register('IAuthController', {
@@ -56,6 +57,9 @@ class ControllerRegistry {
         });
         tsyringe_1.container.register('IContactController', {
             useClass: contact_controller_1.ContactController,
+        });
+        tsyringe_1.container.register('IAIController', {
+            useClass: ai_controller_1.AIController,
         });
         tsyringe_1.container.register('IReviewController', {
             useClass: review_controller_1.ReviewController,

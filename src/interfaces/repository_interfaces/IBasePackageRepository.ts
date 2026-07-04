@@ -36,7 +36,6 @@ export interface IBasePackageRepository extends IBaseRepository<IBasePackageEnti
 
   findByIdWithCategory(id: string): Promise<IBasePackagePopulatedByCategory | null>;
 
-
   softDelete(id: Types.ObjectId, vendorId: string): Promise<IBasePackageEntity | null>;
 
   restore(id: string, vendorId: string): Promise<IBasePackageEntity | null>;

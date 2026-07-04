@@ -947,6 +947,21 @@ class BookingRepository extends base_repository_1.BaseRepository {
             return result;
         });
     }
+    getRecentFiveBookings(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield this.model
+                .find({
+                userId: (0, objectId_helper_1.toObjectId)(userId),
+                bookingStatus: booking_1.BOOKING_STATUS.CONFIRMED,
+                paymentStatus: booking_1.PAYMENT_STATUS.PAID,
+            })
+                .sort({ createdAt: -1 })
+                .limit(5)
+                .populate('packageId', 'title location state difficultyLevel')
+                .lean()
+                .exec());
+        });
+    }
     getRecentActivity(vendorId_1) {
         return __awaiter(this, arguments, void 0, function* (vendorId, limit = 5) {
             const result = yield this.model.aggregate([

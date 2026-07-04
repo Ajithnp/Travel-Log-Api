@@ -15,14 +15,12 @@ export function formatChatHistory(history: ChatMessage[]): string {
 }
 
 export const validateChatHistory = (history: ChatMessage[]): ChatMessage[] => {
-    return history && history.length > 0 ?
-        history
+  return history && history.length > 0
+    ? history
         .filter(
           (msg: ChatMessage) =>
-            msg &&
-            typeof msg.content === 'string' &&
-            ['user', 'assistant'].includes(msg.role)
+            msg && typeof msg.content === 'string' && ['user', 'assistant'].includes(msg.role),
         )
         .slice(-10) // Last 10 messages only for managing the context window
-      : [];
-}
+    : [];
+};

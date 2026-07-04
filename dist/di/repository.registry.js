@@ -22,6 +22,7 @@ const coupon_repository_1 = require("../repositories/coupon.repository");
 const user_reward_repository_1 = require("../repositories/user-reward.repository");
 const payout_repository_1 = require("../repositories/payout.repository");
 const contact_repository_1 = require("../repositories/contact.repository");
+const trip_embedding_repository_1 = require("../repositories/trip-embedding.repository");
 class RepositoryRegistry {
     static registerRepositories() {
         //vendor-repository
@@ -83,6 +84,9 @@ class RepositoryRegistry {
         });
         tsyringe_1.container.register('IPayoutRepository', {
             useClass: payout_repository_1.PayoutRepository,
+        });
+        tsyringe_1.container.register('ITripEmbeddingRepository', {
+            useClass: trip_embedding_repository_1.TripEmbeddingRepository,
         });
         tsyringe_1.container.register('IContactRepository', {
             useClass: contact_repository_1.ContactRepository,

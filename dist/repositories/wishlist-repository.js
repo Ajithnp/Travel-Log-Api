@@ -133,5 +133,21 @@ class WishlistRepository extends base_repository_1.BaseRepository {
             return ((_a = doc.packages) !== null && _a !== void 0 ? _a : []).length;
         });
     }
+    getWishlistPackages(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const doc = yield this.model
+                .findOne({ userId: new mongoose_1.Types.ObjectId(userId) }, { packages: 1 })
+                .populate({
+                path: 'packages',
+                select: 'title location state categoryId difficultyLevel days nights basePrice',
+                populate: {
+                    path: 'categoryId',
+                    select: 'name',
+                },
+            })
+                .lean();
+            return doc === null || doc === void 0 ? void 0 : doc.packages;
+        });
+    }
 }
 exports.WishlistRepository = WishlistRepository;

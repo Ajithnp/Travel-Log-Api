@@ -42,7 +42,7 @@ const objectId_helper_1 = require("../../shared/utils/database/objectId.helper")
 const constants_1 = require("../../shared/constants/constants");
 const package_mapper_1 = require("../../shared/mappers/package.mapper");
 let PackageService = class PackageService {
-    constructor(_basePackageRepository, _vendorInfoRepository, _fileStorageHandlerService, _categoryRepository, _scheduleRepository, _reviewRepository, _offerRepository) {
+    constructor(_basePackageRepository, _vendorInfoRepository, _fileStorageHandlerService, _categoryRepository, _scheduleRepository, _reviewRepository, _offerRepository, _embeddingService) {
         this._basePackageRepository = _basePackageRepository;
         this._vendorInfoRepository = _vendorInfoRepository;
         this._fileStorageHandlerService = _fileStorageHandlerService;
@@ -50,6 +50,7 @@ let PackageService = class PackageService {
         this._scheduleRepository = _scheduleRepository;
         this._reviewRepository = _reviewRepository;
         this._offerRepository = _offerRepository;
+        this._embeddingService = _embeddingService;
     }
     processPackageImages(images) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -220,6 +221,7 @@ let PackageService = class PackageService {
             if (!data) {
                 throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.PACKAGE_NOT_FOUND, http_status_code_1.HTTP_STATUS.NOT_FOUND);
             }
+            yield this._embeddingService.deleteEmbedding(packageId);
         });
     }
     restorePackage(packageId, vendorId) {
@@ -253,5 +255,6 @@ exports.PackageService = PackageService = __decorate([
     __param(4, (0, tsyringe_1.inject)('ISchedulePackageRepository')),
     __param(5, (0, tsyringe_1.inject)('IReviewRepository')),
     __param(6, (0, tsyringe_1.inject)('IOfferRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object])
+    __param(7, (0, tsyringe_1.inject)('IEmbeddingService')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object])
 ], PackageService);

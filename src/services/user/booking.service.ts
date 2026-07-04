@@ -91,7 +91,7 @@ export class BookingService implements IBookingService {
     private _embeddingService: IEmbeddingService,
     @inject('ICacheService')
     private _cacheService: ICacheService,
-  ) { }
+  ) {}
 
   async initiateBooking(payload: InitiateBookingDTO): Promise<InitiateBookingResponseDTO> {
     let session: mongoose.ClientSession | null = null;
@@ -112,7 +112,8 @@ export class BookingService implements IBookingService {
         offer = {
           hasOffer: true,
           offerId: offerEntity!._id.toString(),
-          offerPercentage:offerEntity!.discountType === 'percentage' ? offerEntity!.discountValue : 0,
+          offerPercentage:
+            offerEntity!.discountType === 'percentage' ? offerEntity!.discountValue : 0,
         };
       }
 
@@ -363,13 +364,14 @@ export class BookingService implements IBookingService {
       await session.commitTransaction();
       session.endSession();
 
-      this._embeddingService.updateSeatsInEmbedding(
-        booking.scheduleId.toString(),
-        updatedSchedule.seatsBooked,
-        updatedSchedule.totalSeats,
-      ).catch((err) =>
-        logger.error("error updating schedule seats in embedding", err));
-      
+      this._embeddingService
+        .updateSeatsInEmbedding(
+          booking.scheduleId.toString(),
+          updatedSchedule.seatsBooked,
+          updatedSchedule.totalSeats,
+        )
+        .catch((err) => logger.error('error updating schedule seats in embedding', err));
+
       this._cacheService.del(CACHE_KEYS.recommendedPackages(booking.userId.toString()));
 
       const schedule = await this._schedulePackageRepo.findById(booking.scheduleId.toString());
