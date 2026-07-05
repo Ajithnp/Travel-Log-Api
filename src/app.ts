@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { config } from './config/env';
@@ -44,17 +44,18 @@ export default class App {
     this._app.use(express.json());
     this._app.use(cors(corsOption));
     this._app.use(cookieParser());
-    // this._app.use(
-    //   morgan('combined', {
-    //     stream: {
-    //       write: (message) => logger.http(message.trim()),
-    //     },
-    //   }),
-    // );
     this._app.use(express.urlencoded({ extended: true }));
   }
 
   private configureRoutes(): void {
+    this._app.get('/health', (req: Request, res: Response) => {
+      res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: Math.floor(process.uptime()),
+        environment: process.env.NODE_ENV || 'development',
+      });
+    });
     this._app.use('/api/v1/auth', container.resolve(AuthRoutes).router);
     this._app.use('/api/v1/vendor', container.resolve(VendorRoutes).router);
     this._app.use('/api/v1/admin', container.resolve(AdminRoutes).router);
