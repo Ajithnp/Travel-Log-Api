@@ -1,0 +1,13 @@
+node_modules/
+logs/
+.env
+data.tldr
+pendings.txt
+dist/
+.vscode
+.github
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md
