@@ -10,8 +10,9 @@ on:
       - main
     paths-ignore:
       - 'README.md'
+
 env:
-  IMAGE_NAME: ajithnp/travel-log-backend        
+  IMAGE_NAME: ajithnp/travel-log-backend
 
 jobs:
   build:
@@ -25,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'       
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
@@ -42,7 +43,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image(PR verify)
+      - name: Build Docker image (PR verify)
         if: github.event_name == 'pull_request'
         run: docker build -t ${{ env.IMAGE_NAME }}:test .
 
@@ -54,22 +55,22 @@ jobs:
             -t ${{ env.IMAGE_NAME }}:latest \
             .
           docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          docker push ${{ env.IMAGE_NAME }}:latest 
+          docker push ${{ env.IMAGE_NAME }}:latest
 
   # Deploy job
   deploy:
     name: Deploy to EC2
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    #  self-hosted runner for deployment
-    runs-on: self-hosted     
+    # Self-hosted runner for deployment
+    runs-on: self-hosted
 
     steps:
-          # Pull the latest Docker image from DockerHub
+      # Pull the latest Docker image from DockerHub
       - name: Pull Docker image
         run: docker pull ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-        # Delete the old container if it exists
+      # Delete the old container if it exists
       - name: Delete Old Container
         run: |
           if [ "$(docker ps -a -q -f name=travellog-backend-container)" ]; then
@@ -100,7 +101,7 @@ jobs:
           if [ "$response" = "200" ]; then
             echo "✅ Deployment successful!"
           else
-         echo "❌ Health check failed! Response: $response"
+            echo "❌ Health check failed! Response: $response"
             docker rm -f travellog-backend-container
             docker run -d \
               -p 3001:3001 \
@@ -109,7 +110,7 @@ jobs:
               --env-file /home/ubuntu/Travel-Log-Api/.env \
               ${{ env.IMAGE_NAME }}:latest
             exit 1
-          fi    
+          fi
 
       - name: Cleanup old images
-        run: docker image prune -f     
+        run: docker image prune -f
