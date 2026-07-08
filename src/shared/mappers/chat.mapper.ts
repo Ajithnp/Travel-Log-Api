@@ -16,8 +16,6 @@ export class ChatMapper {
     return {
       id: chat._id.toString(),
       chatName: chat.chatName,
-      scheduleId: chat.scheduleId.toString(),
-      packageId: chat.packageId.toString(),
       vendorId: chat.vendorId.toString(),
       members: chat.members.map((m) => ({
         userId: m.userId.toString(),

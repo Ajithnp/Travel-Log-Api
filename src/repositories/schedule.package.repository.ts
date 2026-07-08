@@ -112,6 +112,14 @@ export class SchedulePackageRepository
       .lean();
   }
 
+  async findScheduleIsCompleted(scheduleId: string): Promise<boolean> {
+    const schedule = await this.findOne({
+      _id: new Types.ObjectId(scheduleId),
+      $or: [{ status: SCHEDULE_STATUS.COMPLETED }, { endDate: { $lt: new Date().toISOString() } }],
+    });
+    return !!schedule;
+  }
+
   async countCompletedByVendor(vendorId: string): Promise<number> {
     return this.countDocuments({
       vendorId: toObjectId(vendorId),

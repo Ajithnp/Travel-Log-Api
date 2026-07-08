@@ -93,7 +93,6 @@ export class CouponService implements ICouponService {
   }
 
   async processLuckyDrawCoupons(userId: string): Promise<void> {
-    console.log('coupon service reached-------- heyyyy');
     const activeTemplates = await this._couponRepository.findAllActiveCoupons();
 
     if (activeTemplates.length === 0) return;

@@ -24,7 +24,6 @@ export class NotificationEmitter {
 
   send(target: EmitTarget, payload: NotificationPayload | createBroadcastNotification): void {
     if (!this.io) {
-      // Socket not yet initialized (e.g. during unit tests or early startup)
       console.warn('[NotificationEmitter] io not initialized. Skipping emit.');
       return;
     }

@@ -59,8 +59,7 @@ let OtpService = class OtpService {
             const key = `otp:${email}`;
             const hashedOtp = (0, otp_hash_helper_1.hashOtp)(otp, email);
             const storedOtp = yield this._cacheService.get(key);
-            console.log('hased otp', hashedOtp);
-            console.log('stored otp', storedOtp);
+
             if (!storedOtp) {
                 throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.OTP_EXPIRED, http_status_code_1.HTTP_STATUS.NOT_FOUND);
             }

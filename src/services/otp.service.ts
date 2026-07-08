@@ -47,8 +47,6 @@ export class OtpService implements IOtpService {
     const key = `otp:${email}`;
     const hashedOtp = hashOtp(otp, email);
     const storedOtp = await this._cacheService.get(key);
-    console.log('hased otp', hashedOtp);
-    console.log('stored otp', storedOtp);
 
     if (!storedOtp) {
       throw new AppError(ERROR_MESSAGES.OTP_EXPIRED, HTTP_STATUS.NOT_FOUND);

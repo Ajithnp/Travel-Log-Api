@@ -12,7 +12,7 @@ const dailyRotateTransport = new DailyRotateFile({
   datePattern: 'YYYY-MM-DD', // rotate daily
   zippedArchive: true, // compress old logs (.gz)
   maxSize: '20m', // max size per file before rotation
-  maxFiles: '14d', // retention period: keep 14 days
+  maxFiles: '4d', // retention period: keep 4 days
 });
 
 //  Winston logger

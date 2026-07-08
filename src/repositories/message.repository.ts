@@ -68,7 +68,7 @@ export class MessageRepository extends BaseRepository<IMessage> implements IMess
     return await this.countDocuments({
       chatId,
       senderRole,
-      createdAt: { $gt: lastReadAt },
+      createdAt: { $gte: lastReadAt },
     });
   }
 }
