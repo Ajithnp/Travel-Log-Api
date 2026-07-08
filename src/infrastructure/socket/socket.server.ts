@@ -39,6 +39,8 @@ export function initSocketServer(httpServer: HttpServer): TypedIOServer {
 
   // ── Connection handler(fires every time a new user connects)
   io.on('connection', (socket) => {
+      console.log("Connected:", socket.id);
+     console.log("Namespace:", socket.nsp.name);
     registerNotificationHandlers(
       io,
       socket as AuthenticatedSocket,
