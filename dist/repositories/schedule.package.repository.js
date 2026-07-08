@@ -130,6 +130,15 @@ let SchedulePackageRepository = class SchedulePackageRepository extends base_rep
                 .lean();
         });
     }
+    findScheduleIsCompleted(scheduleId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const schedule = yield this.findOne({
+                _id: new mongoose_1.Types.ObjectId(scheduleId),
+                $or: [{ status: constants_1.SCHEDULE_STATUS.COMPLETED }, { endDate: { $lt: new Date().toISOString() } }],
+            });
+            return !!schedule;
+        });
+    }
     countCompletedByVendor(vendorId) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.countDocuments({

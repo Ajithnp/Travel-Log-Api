@@ -20,21 +20,18 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const schedule_model_1 = __importDefault(require("../../models/schedule.model"));
 const di_1 = require("../../di");
 const constants_1 = require("../../shared/constants/constants");
+const logger_1 = __importDefault(require("config/logger"));
 di_1.DependencyInjection.registerDependencies();
 const embeddingService = tsyringe_1.container.resolve('IEmbeddingService');
 function seedEmbeddings() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log('Connecting to MongoDB...');
             yield mongoose_1.default.connect(process.env.DB_URL);
-            console.log('✅ MongoDB Connected');
             const schedules = yield schedule_model_1.default.find({
                 status: constants_1.SCHEDULE_STATUS.UPCOMING,
                 // startDate:{$gte:new Date().toISOString()}
             }).select('_id packageId');
-            console.log(`Found ${schedules.length} upcoming schedules to embed`);
             if (schedules.length === 0) {
-                console.log('⚠️ No upcoming schedules found. Add schedules first!');
                 return;
             }
             let success = 0;
@@ -43,28 +40,27 @@ function seedEmbeddings() {
                 try {
                     yield embeddingService.generateAndSaveEmbedding(schedule._id.toString(), schedule.packageId.toString());
                     success++;
-                    // 1 second delay between each embedding call
                     yield new Promise((resolve) => setTimeout(resolve, 1000));
                 }
                 catch (err) {
-                    console.error(`❌ Failed for schedule ${schedule._id}:`, err);
+                    logger_1.default.error(`Failed for schedule ${schedule._id}:`, err);
                     failed++;
                 }
             }
             // 4. Summary
-            console.log('\n─────────────────────────');
-            console.log('✅ Seeding Complete!');
-            console.log(`   Success : ${success}`);
-            console.log(`   Failed  : ${failed}`);
-            console.log(`   Total   : ${schedules.length}`);
-            console.log('─────────────────────────');
+            logger_1.default.info('\n─────────────────────────');
+            logger_1.default.info('✅ Seeding Complete!');
+            logger_1.default.info(`   Success : ${success}`);
+            logger_1.default.info(`   Failed  : ${failed}`);
+            logger_1.default.info(`   Total   : ${schedules.length}`);
+            logger_1.default.info('─────────────────────────');
         }
         catch (error) {
-            console.error('❌ Seed script error:', error);
+            logger_1.default.error('❌ Seed script error:', error);
         }
         finally {
             yield mongoose_1.default.disconnect();
-            console.log('MongoDB Disconnected');
+            logger_1.default.info('MongoDB Disconnected');
             process.exit(0);
         }
     });

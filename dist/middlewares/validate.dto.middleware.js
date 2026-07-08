@@ -21,7 +21,6 @@ const validateDTO = (schema) => (req, res, next) => {
     }
     catch (error) {
         if (error instanceof zod_1.ZodError) {
-            // console.log("ZOD ERRORS:", JSON.stringify(error.errors, null, 2));
             next(new AppError_1.AppError(error.errors[0].message, http_status_code_1.HTTP_STATUS.BAD_REQUEST));
             return;
         }

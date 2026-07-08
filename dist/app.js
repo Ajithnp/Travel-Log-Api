@@ -43,16 +43,17 @@ class App {
         this._app.use(express_1.default.json());
         this._app.use((0, cors_1.default)(cors_middleware_1.corsOption));
         this._app.use((0, cookie_parser_1.default)());
-        // this._app.use(
-        //   morgan('combined', {
-        //     stream: {
-        //       write: (message) => logger.http(message.trim()),
-        //     },
-        //   }),
-        // );
         this._app.use(express_1.default.urlencoded({ extended: true }));
     }
     configureRoutes() {
+        this._app.get('/health', (req, res) => {
+            res.status(200).json({
+                status: 'OK',
+                timestamp: new Date().toISOString(),
+                uptime: Math.floor(process.uptime()),
+                environment: process.env.NODE_ENV || 'development',
+            });
+        });
         this._app.use('/api/v1/auth', tsyringe_1.container.resolve(auth_routes_1.AuthRoutes).router);
         this._app.use('/api/v1/vendor', tsyringe_1.container.resolve(vendor_routes_1.VendorRoutes).router);
         this._app.use('/api/v1/admin', tsyringe_1.container.resolve(admin_routes_1.AdminRoutes).router);

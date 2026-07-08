@@ -62,7 +62,6 @@ let AuthController = class AuthController {
         //===============================================================================
         this.verifyEmail = (0, express_async_handler_1.default)((req, res) => __awaiter(this, void 0, void 0, function* () {
             const verificationPayload = req.body;
-            console.log('input', verificationPayload);
             const { user, accessToken, refreshToken } = yield this._authService.emailVerify(verificationPayload);
             (0, cookie_helper_1.setAuthCookies)(res, jwt_token_1.JWT_TOKEN.ACCESS_TOKEN, accessToken, jwt_token_1.JWT_TOKEN.ACCESS_TOKEN_COOKIE_EXPIRY);
             (0, cookie_helper_1.setAuthCookies)(res, jwt_token_1.JWT_TOKEN.REFRESH_TOKEN, refreshToken, jwt_token_1.JWT_TOKEN.REFRESH_TOKEN_COOKIE_EXPIRY);

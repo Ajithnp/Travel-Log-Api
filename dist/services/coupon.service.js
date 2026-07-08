@@ -94,7 +94,6 @@ let CouponService = class CouponService {
     }
     processLuckyDrawCoupons(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-
             const activeTemplates = yield this._couponRepository.findAllActiveCoupons();
             if (activeTemplates.length === 0)
                 return;

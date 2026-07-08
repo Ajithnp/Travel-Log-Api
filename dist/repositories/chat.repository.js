@@ -46,7 +46,6 @@ let ChatRepository = class ChatRepository extends base_repository_1.BaseReposito
             return yield this.create({
                 chatName: data.chatName,
                 scheduleId: data.scheduleId,
-                packageId: data.packageId,
                 vendorId: data.vendorId,
                 members: [{ userId: data.userId, joinedAt: new Date(), isActive: true }],
                 status: 'active',
