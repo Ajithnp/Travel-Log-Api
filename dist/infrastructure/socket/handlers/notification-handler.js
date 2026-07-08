@@ -58,15 +58,15 @@ function registerNotificationHandlers(io, socket, notificationRepository, userRe
             socket.emit(socket_event_1.NOTIFICATION_EVENTS.UNREAD_COUNT, { count });
         }
         catch (err) {
-            console.error(`[Socket] request_count error for ${userId}:`, err);
+            logger_1.default.error(`[Socket] request_count error for ${userId}:`, err);
         }
     }));
     // Disconnect cleanup
-    socket.on('disconnect', (reason) => {
-        console.log(`[Socket] Disconnected: userId=${userId} socketId=${socket.id} reason=${reason}`);
+    socket.on(socket_event_1.CONNECTION_EVENTS.DISCONNECT, (reason) => {
+        logger_1.default.info(`[Socket] Disconnected: userId=${userId} socketId=${socket.id} reason=${reason}`);
     });
     //. Handle unexpected errors on this socket
-    socket.on('error', (err) => {
-        console.error(`[Socket] Socket error for userId=${userId}:`, err.message);
+    socket.on(socket_event_1.CONNECTION_EVENTS.ERROR, (err) => {
+        logger_1.default.error(`[Socket] Socket error for userId=${userId}:`, err.message);
     });
 }

@@ -37,10 +37,11 @@ const objectId_helper_1 = require("../shared/utils/database/objectId.helper");
 const notification_emitter_1 = require("../infrastructure/socket/namespaces/notification-emitter");
 const constants_1 = require("../shared/constants/constants");
 let ChatService = class ChatService {
-    constructor(_chatRepo, _messageRepo, _userRepo) {
+    constructor(_chatRepo, _messageRepo, _userRepo, _scheduleRepo) {
         this._chatRepo = _chatRepo;
         this._messageRepo = _messageRepo;
         this._userRepo = _userRepo;
+        this._scheduleRepo = _scheduleRepo;
     }
     ensureRoomExists(chatName, scheduleId, packageId, vendorId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -102,7 +103,7 @@ let ChatService = class ChatService {
                 senderName,
                 content,
             });
-            yield this._userRepo.findByIdAndAddUnreadTabs(room.vendorId.toString(), constants_1.VENDOR_TABS.CHAT);
+            this._userRepo.findByIdAndAddUnreadTabs(room.vendorId.toString(), constants_1.VENDOR_TABS.CHAT);
             try {
                 notification_emitter_1.notificationEmitter.setUnreadTabs(room.vendorId.toString(), constants_1.VENDOR_TABS.CHAT);
                 chat_emitter_1.chatEmitter.sendMessageUser(chatId.toString(), room.vendorId.toString(), {
@@ -126,11 +127,13 @@ let ChatService = class ChatService {
         return __awaiter(this, void 0, void 0, function* () {
             const rooms = yield this._chatRepo.findRoomsByVendorId(vendorId, status, search);
             return Promise.all(rooms.map((room) => __awaiter(this, void 0, void 0, function* () {
+                var _a;
                 const lastMessage = yield this._messageRepo.getLastMessage(room._id.toString());
                 const lastReadAt = room.vendorLastReadAt || new Date(0);
+                const isScheduleCompleted = yield this._scheduleRepo.findScheduleIsCompleted((_a = room.scheduleId) === null || _a === void 0 ? void 0 : _a._id.toString());
                 const unreadCount = yield this._messageRepo.getMessageUnreadCount(room._id.toString(), roles_1.USER_ROLES.USER, lastReadAt);
                 const dto = chat_mapper_1.ChatMapper.toChatRoomWithPreviewDTO(room, lastMessage);
-                return Object.assign(Object.assign({}, dto), { unreadCount });
+                return Object.assign(Object.assign({}, dto), { unreadCount, isScheduleCompleted });
             })));
         });
     }
@@ -160,13 +163,18 @@ let ChatService = class ChatService {
                 throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.CHAT_ARCHIVED, http_status_code_1.HTTP_STATUS.BAD_REQUEST);
             if (!content || content.trim() === '')
                 throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.CONTENT_REQUIRED, http_status_code_1.HTTP_STATUS.BAD_REQUEST);
-            const message = yield this._messageRepo.createTextMessage({
-                chatId,
-                senderId: vendorId,
-                senderRole: roles_1.USER_ROLES.VENDOR,
-                senderName,
-                content: content.trim(),
-            });
+            const [message] = yield Promise.all([
+                this._messageRepo.createTextMessage({
+                    chatId,
+                    senderId: vendorId,
+                    senderRole: roles_1.USER_ROLES.VENDOR,
+                    senderName,
+                    content: content.trim(),
+                }),
+                this._chatRepo.findByIdAndUpdate(chatId, {
+                    vendorLastReadAt: new Date(),
+                }),
+            ]);
             try {
                 chat_emitter_1.chatEmitter.sendMessageVendor(chatId, {
                     id: message._id.toString(),
@@ -181,6 +189,7 @@ let ChatService = class ChatService {
             catch (err) {
                 logger_1.default.error('[ChatService] Socket emit failed (non-fatal):', err);
             }
+            // await this._chatRepo.findByIdAndUpdate(chatId, {lastMessage: message.content, lastMessageCreatedAt: message.createdAt, lastMessageSender: USER_ROLES.VENDOR,lastMessageSenderName: senderName})
             return chat_mapper_1.ChatMapper.toMessageDTO(message);
         });
     }
@@ -282,5 +291,6 @@ exports.ChatService = ChatService = __decorate([
     __param(0, (0, tsyringe_1.inject)('IChatRepository')),
     __param(1, (0, tsyringe_1.inject)('IMessageRepository')),
     __param(2, (0, tsyringe_1.inject)('IUserRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __param(3, (0, tsyringe_1.inject)('ISchedulePackageRepository')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object])
 ], ChatService);

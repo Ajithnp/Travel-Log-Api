@@ -72,7 +72,7 @@ let MessageRepository = class MessageRepository extends base_repository_1.BaseRe
             return yield this.countDocuments({
                 chatId,
                 senderRole,
-                createdAt: { $gt: lastReadAt },
+                createdAt: { $gte: lastReadAt },
             });
         });
     }

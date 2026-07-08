@@ -59,8 +59,8 @@ let ChatController = class ChatController {
             res.status(http_status_code_1.HTTP_STATUS.CREATED).json(successResponse);
         }));
         this.sendUserMessage = (0, express_async_handler_1.default)((req, res) => __awaiter(this, void 0, void 0, function* () {
-            const userId = new mongoose_1.Types.ObjectId(req.user.id);
-            const chatId = new mongoose_1.Types.ObjectId(req.params.chatId);
+            const userId = req.user.id;
+            const chatId = req.params.chatId;
             const { content } = req.body;
             const senderName = req.user.name;
             const message = yield this._chatService.sendUserMessage(chatId, userId, senderName, content);

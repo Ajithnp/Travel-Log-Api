@@ -47,6 +47,7 @@ const socketAuthMiddleware = (socket, next) => __awaiter(void 0, void 0, void 0,
         }
         socket.data.userId = (_d = decoded.userId) !== null && _d !== void 0 ? _d : user._id.toString();
         socket.data.role = decoded.role;
+        socket.data.userName = user.name;
         logger_1.default.info(`[Socket Auth] Authenticated: userId=${socket.data.userId} role=${socket.data.role}`);
         next(); // allow connection
     }
