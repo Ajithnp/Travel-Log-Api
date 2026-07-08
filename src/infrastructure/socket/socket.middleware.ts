@@ -53,6 +53,7 @@ export const socketAuthMiddleware = async (
 
     socket.data.userId = decoded.userId ?? user._id.toString();
     socket.data.role = decoded.role;
+    socket.data.userName = user.name;
 
     logger.info(
       `[Socket Auth] Authenticated: userId=${socket.data.userId} role=${socket.data.role}`,

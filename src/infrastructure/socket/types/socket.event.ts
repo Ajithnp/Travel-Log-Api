@@ -21,10 +21,13 @@ export const NOTIFICATION_EVENTS = {
 
 export const CHAT_EVENTS = {
   // Client → Server
-  JOIN_ROOM: 'chat:join', // user/vendor joins a chat room
-  LEAVE_ROOM: 'chat:leave', // user/vendor leaves a chat room
+  JOIN_ROOM: 'chat:join',
+  LEAVE_ROOM: 'chat:leave',
 
+  SEND_NEW_VENDOR_MESSAGE: 'chat:send_new_vendor_message',
+  SEND_NEW_USER_MESSAGE: 'chat:send_new_user_message',
   // Server → Client
-  MESSAGE_NEW: 'chat:message_new', // new message broadcast to room
-  ROOM_UPDATED: 'chat:room_updated', // pinned msg / archive update
+  MESSAGE_NEW: 'chat:message_new',
+  ROOM_UPDATED: 'chat:room_updated',
+  CHAT_ERROR: 'chat:error',
 } as const;

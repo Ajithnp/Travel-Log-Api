@@ -71,7 +71,6 @@ export class AuthController implements IAuthController {
 
   verifyEmail = asyncHandler(async (req, res) => {
     const verificationPayload = req.body;
-    console.log('input', verificationPayload);
 
     const { user, accessToken, refreshToken } =
       await this._authService.emailVerify(verificationPayload);

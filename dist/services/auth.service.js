@@ -116,7 +116,7 @@ let AuthService = class AuthService {
             if (userDoc.isEmailVerified) {
                 throw new AppError_1.AppError(messages_1.ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED, http_status_code_1.HTTP_STATUS.CONFLICT);
             }
-            console.log('service layer', payload);
+        
             yield this._otpService.verifyOtp(payload);
             const newUserDoc = yield this._userRepository.findOneAndUpdate({ email }, { isEmailVerified: true });
             if (!newUserDoc) {

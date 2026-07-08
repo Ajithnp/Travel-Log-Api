@@ -30,6 +30,8 @@ export interface ISchedulePackageRepository extends IBaseRepository<ISchedule> {
     session?: mongoose.ClientSession,
   ): Promise<ISchedule | null>;
 
+  findScheduleIsCompleted(scheduleId: string): Promise<boolean>;
+
   cancelSeats(
     scheduleId: string,
     seatsCount: number,

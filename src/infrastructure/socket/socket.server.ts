@@ -35,7 +35,6 @@ export function initSocketServer(httpServer: HttpServer): TypedIOServer {
     REPOSITORY_TOKENS.NOTIFICATION_REPOSITORY,
   );
   const userRepository = container.resolve<IUserRepository>(REPOSITORY_TOKENS.USER_REPOSITORY);
-
   const chatRepository = container.resolve<IChatRepository>(REPOSITORY_TOKENS.CHAT_REPOSITORY);
 
   // ── Connection handler(fires every time a new user connects)

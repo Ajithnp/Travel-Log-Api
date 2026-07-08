@@ -3,7 +3,7 @@ import { AuthenticatedSocket, SocketRooms, TypedIOServer } from '../types/socket
 import { INotificationRepository } from '../../../interfaces/repository_interfaces/INotificationRepository';
 import logger from '../../../config/logger';
 import { notificationEmitter } from '../namespaces/notification-emitter';
-import { NOTIFICATION_EVENTS } from '../types/socket.event';
+import { CONNECTION_EVENTS, NOTIFICATION_EVENTS } from '../types/socket.event';
 import { IUserRepository } from '../../../interfaces/repository_interfaces/IUserRepository';
 
 export function registerNotificationHandlers(
@@ -62,19 +62,19 @@ export function registerNotificationHandlers(
       });
       socket.emit(NOTIFICATION_EVENTS.UNREAD_COUNT, { count });
     } catch (err) {
-      console.error(`[Socket] request_count error for ${userId}:`, err);
+      logger.error(`[Socket] request_count error for ${userId}:`, err);
     }
   });
 
   // Disconnect cleanup
 
-  socket.on('disconnect', (reason) => {
-    console.log(`[Socket] Disconnected: userId=${userId} socketId=${socket.id} reason=${reason}`);
+  socket.on(CONNECTION_EVENTS.DISCONNECT, (reason) => {
+    logger.info(`[Socket] Disconnected: userId=${userId} socketId=${socket.id} reason=${reason}`);
   });
 
   //. Handle unexpected errors on this socket
 
-  socket.on('error', (err) => {
-    console.error(`[Socket] Socket error for userId=${userId}:`, err.message);
+  socket.on(CONNECTION_EVENTS.ERROR, (err) => {
+    logger.error(`[Socket] Socket error for userId=${userId}:`, err.message);
   });
 }

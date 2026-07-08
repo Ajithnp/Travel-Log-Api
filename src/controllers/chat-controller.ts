@@ -46,8 +46,8 @@ export class ChatController implements IChatController {
   });
 
   sendUserMessage = expressAsyncHandler(async (req, res) => {
-    const userId = new Types.ObjectId(req.user!.id);
-    const chatId = new Types.ObjectId(req.params.chatId);
+    const userId = req.user!.id;
+    const chatId = req.params.chatId;
     const { content } = req.body;
     const senderName = req.user!.name;
 

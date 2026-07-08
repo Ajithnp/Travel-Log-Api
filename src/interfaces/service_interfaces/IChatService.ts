@@ -19,10 +19,9 @@ export interface IChatService {
   ): Promise<PaginatedMessagesDTO>;
 
   sendUserMessage(
-    chatId: Types.ObjectId,
-    userId: Types.ObjectId,
+    chatId: string,
+    userId: string,
     senderName: string,
-    messageType: 'text' | 'image',
     content?: string,
   ): Promise<MessageDTO | undefined>;
 
@@ -80,8 +79,6 @@ export interface ChatMemberDTO {
 export interface ChatRoomDTO {
   id: string;
   chatName: string;
-  scheduleId: string;
-  packageId: string;
   vendorId: string;
   members: ChatMemberDTO[];
   status: RoomStatus;
@@ -104,6 +101,7 @@ export interface ChatPreviewDTO {
 export interface ChatRoomWithPreviewDTO extends ChatRoomDTO {
   lastMessage: MessageDTO | null;
   unreadCount?: number;
+  isScheduleCompleted?: boolean;
 }
 
 export interface ChatMemberDetailDTO {

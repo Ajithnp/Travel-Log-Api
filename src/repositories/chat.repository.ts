@@ -33,14 +33,12 @@ export class ChatRepository extends BaseRepository<IChat> implements IChatReposi
   async createRoom(data: {
     chatName: string;
     scheduleId: Types.ObjectId;
-    packageId: Types.ObjectId;
     vendorId: Types.ObjectId;
     userId: Types.ObjectId;
   }): Promise<IChat> {
     return await this.create({
       chatName: data.chatName,
       scheduleId: data.scheduleId,
-      packageId: data.packageId,
       vendorId: data.vendorId,
       members: [{ userId: data.userId, joinedAt: new Date(), isActive: true }],
       status: 'active',

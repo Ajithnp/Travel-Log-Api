@@ -21,6 +21,7 @@ import { toObjectId } from '../shared/utils/database/objectId.helper';
 import { notificationEmitter } from '../infrastructure/socket/namespaces/notification-emitter';
 import { VENDOR_TABS } from '../shared/constants/constants';
 import { IUserRepository } from '../interfaces/repository_interfaces/IUserRepository';
+import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
 
 @injectable()
 export class ChatService implements IChatService {
@@ -31,6 +32,8 @@ export class ChatService implements IChatService {
     private _messageRepo: IMessageRepository,
     @inject('IUserRepository')
     private _userRepo: IUserRepository,
+    @inject('ISchedulePackageRepository')
+    private _scheduleRepo: ISchedulePackageRepository,
   ) {}
 
   async ensureRoomExists(
@@ -85,8 +88,8 @@ export class ChatService implements IChatService {
   }
 
   async sendUserMessage(
-    chatId: Types.ObjectId,
-    userId: Types.ObjectId,
+    chatId: string,
+    userId: string,
     senderName: string,
     content: string,
   ): Promise<MessageDTO | undefined> {
@@ -106,7 +109,7 @@ export class ChatService implements IChatService {
       content,
     });
 
-    await this._userRepo.findByIdAndAddUnreadTabs(room.vendorId.toString(), VENDOR_TABS.CHAT);
+    this._userRepo.findByIdAndAddUnreadTabs(room.vendorId.toString(), VENDOR_TABS.CHAT);
 
     try {
       notificationEmitter.setUnreadTabs(room.vendorId.toString(), VENDOR_TABS.CHAT);
@@ -138,13 +141,19 @@ export class ChatService implements IChatService {
       rooms.map(async (room) => {
         const lastMessage = await this._messageRepo.getLastMessage(room._id.toString());
         const lastReadAt = room.vendorLastReadAt || new Date(0);
+
+        const isScheduleCompleted = await this._scheduleRepo.findScheduleIsCompleted(
+          room.scheduleId?._id.toString(),
+        );
+
         const unreadCount = await this._messageRepo.getMessageUnreadCount(
           room._id.toString(),
           USER_ROLES.USER,
           lastReadAt,
         );
+
         const dto = ChatMapper.toChatRoomWithPreviewDTO(room, lastMessage);
-        return { ...dto, unreadCount };
+        return { ...dto, unreadCount, isScheduleCompleted };
       }),
     );
   }
@@ -156,6 +165,7 @@ export class ChatService implements IChatService {
     limit: number,
   ): Promise<PaginatedMessagesDTO> {
     const room = await this._chatRepo.findRoomById(chatId);
+
     if (!room) throw new AppError(ERROR_MESSAGES.CHAT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     if (room.vendorId.toString() !== vendorId)
       throw new AppError(ERROR_MESSAGES.FORBIDDEN_ACCESS, HTTP_STATUS.FORBIDDEN);
@@ -183,13 +193,19 @@ export class ChatService implements IChatService {
 
     if (!content || content.trim() === '')
       throw new AppError(ERROR_MESSAGES.CONTENT_REQUIRED, HTTP_STATUS.BAD_REQUEST);
-    const message = await this._messageRepo.createTextMessage({
-      chatId,
-      senderId: vendorId,
-      senderRole: USER_ROLES.VENDOR,
-      senderName,
-      content: content.trim(),
-    });
+
+    const [message] = await Promise.all([
+      this._messageRepo.createTextMessage({
+        chatId,
+        senderId: vendorId,
+        senderRole: USER_ROLES.VENDOR,
+        senderName,
+        content: content.trim(),
+      }),
+      this._chatRepo.findByIdAndUpdate(chatId, {
+        vendorLastReadAt: new Date(),
+      }),
+    ]);
 
     try {
       chatEmitter.sendMessageVendor(chatId, {
@@ -204,6 +220,8 @@ export class ChatService implements IChatService {
     } catch (err) {
       logger.error('[ChatService] Socket emit failed (non-fatal):', err);
     }
+
+    // await this._chatRepo.findByIdAndUpdate(chatId, {lastMessage: message.content, lastMessageCreatedAt: message.createdAt, lastMessageSender: USER_ROLES.VENDOR,lastMessageSenderName: senderName})
     return ChatMapper.toMessageDTO(message);
   }
 
