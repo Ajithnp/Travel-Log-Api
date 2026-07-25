@@ -86,6 +86,21 @@ export class NotificationEmitter {
   isUserOnline(userId: string): Promise<boolean> {
     return this.getSocketCountForUser(userId).then((count) => count > 0);
   }
+
+  /**
+   * Returns the set of userIds whose sockets are currently joined to the
+   * given chat socket room (i.e. they are actively viewing that chat).
+   */
+  async getUserIdsInChatRoom(chatId: string): Promise<Set<string>> {
+    if (!this.io) return new Set();
+    const room = SocketRooms.forChat(chatId);
+    const sockets = await this.io.in(room).fetchSockets();
+    const ids = new Set<string>();
+    sockets.forEach((s) => {
+      if (s.data?.userId) ids.add(s.data.userId as string);
+    });
+    return ids;
+  }
 }
 
 export const notificationEmitter = NotificationEmitter.getInstance();

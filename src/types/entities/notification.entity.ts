@@ -13,6 +13,7 @@ export enum UserNotificationType {
   RefundProcessed = 'refund_processed',
   ReviewReminder = 'review_reminder',
   WishlistNewSchedule = 'wishlist_new_schedule',
+  ChatMessage = 'chat_message',
 }
 
 export enum AdminNotificationType {
@@ -38,6 +39,7 @@ export enum VendorNotificationType {
   PayoutFailed = 'payout_failed',
   TripReminder = 'trip_reminder',
   CancellationWarning = 'cancellation_warning',
+  ChatMessage = 'chat_message',
 }
 
 export type NotificationType =
@@ -60,6 +62,7 @@ export interface INotification extends Document {
   title: string;
   message: string;
   data: Record<string, unknown>;
+  redirectionId?: string;
   redirectUrl?: string | null;
   isRead: boolean;
   createdAt: Date;

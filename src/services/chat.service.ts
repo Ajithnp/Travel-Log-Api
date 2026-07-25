@@ -22,6 +22,8 @@ import { notificationEmitter } from '../infrastructure/socket/namespaces/notific
 import { VENDOR_TABS } from '../shared/constants/constants';
 import { IUserRepository } from '../interfaces/repository_interfaces/IUserRepository';
 import { ISchedulePackageRepository } from '../interfaces/repository_interfaces/ISchedulePackage';
+import { INotificationService } from '../interfaces/service_interfaces/INotificationService';
+import { UserNotificationType } from '../types/entities/notification.entity';
 
 @injectable()
 export class ChatService implements IChatService {
@@ -34,6 +36,8 @@ export class ChatService implements IChatService {
     private _userRepo: IUserRepository,
     @inject('ISchedulePackageRepository')
     private _scheduleRepo: ISchedulePackageRepository,
+    @inject('INotificationService')
+    private _notificationService: INotificationService,
   ) {}
 
   async ensureRoomExists(
@@ -185,6 +189,7 @@ export class ChatService implements IChatService {
     content: string,
   ): Promise<MessageDTO | undefined> {
     const room = await this._chatRepo.findRoomById(chatId);
+    console.log('room::', room);
     if (!room) throw new AppError(ERROR_MESSAGES.CHAT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     if (room.vendorId.toString() !== vendorId)
       throw new AppError(ERROR_MESSAGES.FORBIDDEN_ACCESS, HTTP_STATUS.FORBIDDEN);
@@ -217,6 +222,26 @@ export class ChatService implements IChatService {
         content: message.content,
         createdAt: message.createdAt,
       });
+
+      // ── Notify active members who are not currently viewing this chat room
+      const inRoom = await notificationEmitter.getUserIdsInChatRoom(chatId);
+      const activeMembers = room.members.filter((member) => member.isActive);
+
+      await Promise.all(
+        activeMembers
+          .filter((member) => !inRoom.has(member.userId.toString()))
+          .map((member) =>
+            this._notificationService.createNotification({
+              recipientId: member.userId.toString(),
+              recipientRole: USER_ROLES.USER,
+              notificationType: UserNotificationType.ChatMessage,
+              title: 'New message',
+              message: `In ${room.chatName} by ${senderName}: ${content.trim().length > 10 ? content.trim().slice(0, 10) + '…' : content.trim()}`,
+              redirectionId: chatId,
+              redirectUrl: `/user/chat`,
+            }),
+          ),
+      );
     } catch (err) {
       logger.error('[ChatService] Socket emit failed (non-fatal):', err);
     }

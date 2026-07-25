@@ -36,6 +36,7 @@ export interface CreateNotificationDTO {
   title: string;
   message: string;
   data?: Record<string, unknown>;
+  redirectionId?: string | null;
   redirectUrl?: string | null;
 }
 
@@ -62,6 +63,7 @@ export interface NotificationResponseDTO {
   title: string;
   message: string;
   data: Record<string, unknown>;
+  redirectionId: string | null;
   redirectUrl: string | null;
   isRead: boolean;
   createdAt: Date;

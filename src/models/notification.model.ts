@@ -39,6 +39,11 @@ const NotificationSchema = new Schema<INotification>(
       type: Schema.Types.Mixed,
       default: {},
     },
+    redirectionId: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     redirectUrl: {
       type: String,
       default: null,
