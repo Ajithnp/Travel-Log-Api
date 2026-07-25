@@ -392,7 +392,7 @@ export class BookingService implements IBookingService {
           title: 'Booking Confirmed',
           message: `Your booking for "${booking.packageId?.title}" has been confirmed.`,
           data: {
-            bookingUId: booking._id.toString(),
+            // bookingUId: booking._id.toString(),
             bookingId: booking.bookingCode,
             packageName: booking.packageId.title,
           },

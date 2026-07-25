@@ -12,6 +12,7 @@ export class NotificationMapper {
       title: notification.title,
       message: notification.message,
       data: notification.data,
+      redirectionId: notification.redirectionId || null,
       redirectUrl: notification.redirectUrl || null,
       isRead: notification.isRead,
       createdAt: notification.createdAt,

@@ -40,6 +40,7 @@ export class NotificationService implements INotificationService {
       title: payload.title,
       message: payload.message,
       data: payload.data,
+      redirectionId: payload.redirectionId ?? undefined,
       redirectUrl: payload.redirectUrl,
     });
 
@@ -60,6 +61,7 @@ export class NotificationService implements INotificationService {
         title: response.title,
         message: response.message,
         data: response.data,
+        redirectionId: response.redirectionId ?? null,
         redirectUrl: response.redirectUrl,
         isRead: response.isRead,
         createdAt: response.createdAt,
