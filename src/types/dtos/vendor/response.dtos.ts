@@ -1,3 +1,4 @@
+import { VendorPackageStats } from 'interfaces/repository_interfaces/IVendorInfoRepository';
 import { CategoryStatus } from '../../../shared/constants/constants';
 import { ScheduleStatus } from '../../../shared/constants/constants';
 import { TravelerDTO } from '../../../shared/mappers/booking.mapper';
@@ -7,6 +8,7 @@ export interface VendorProfileResponseDTO {
   id: string;
   userId?: string;
   profileLogo: string | null;
+  bio: string | null;
   name: string;
   email: string;
   phone: string;
@@ -15,6 +17,7 @@ export interface VendorProfileResponseDTO {
   contactPersonName: string | null;
   status: VendorStatus;
   isProfileVerified: boolean;
+  packageStats: VendorPackageStats | null;
   reasonForReject: string;
   createdAt: Date;
 }

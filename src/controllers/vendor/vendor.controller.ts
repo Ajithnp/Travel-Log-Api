@@ -35,7 +35,7 @@ export class VendorController implements IVendorController {
 
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
-  //====================================================================================
+
   updateProfileLogo = asyncHandler(async (req, res): Promise<void> => {
     const { files, vendorInfoId } = req.body;
 
@@ -47,7 +47,7 @@ export class VendorController implements IVendorController {
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
-  //=====================================================================================
+
   vendorVerificationSubmit = asyncHandler(async (req, res) => {
     const payload: VendorVerificationRequestDTO = req.body;
 
@@ -65,8 +65,6 @@ export class VendorController implements IVendorController {
     };
     res.status(HTTP_STATUS.OK).json(successResponse);
   });
-
-  //===========================================================================
 
   getRejectedVendor = asyncHandler(async (req, res) => {
     const vendorId = req.params.vendorId;

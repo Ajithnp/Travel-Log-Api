@@ -3,6 +3,7 @@ import mongoose, { FilterQuery, PipelineStage } from 'mongoose';
 import {
   IVendorInfoRepository,
   TopPerformingVendorsResult,
+  VendorPackageStats,
 } from 'interfaces/repository_interfaces/IVendorInfoRepository';
 import { BaseRepository } from './base.repository';
 import { injectable } from 'tsyringe';
@@ -362,5 +363,89 @@ export class VendorInfoRepository
     ]);
 
     return result;
+  }
+
+  async findVendorPackageStats(vendorId: string): Promise<VendorPackageStats> {
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          userId: toObjectId(vendorId),
+          isProfileVerified: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'packages',
+          let: { vendorId: '$userId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$vendorId', '$$vendorId'] },
+                status: PACKAGE_STATUS.PUBLISHED,
+                isActive: true,
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: 'activePackagesCount',
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          let: { vendorId: '$userId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$vendorId', '$$vendorId'] },
+                status: SCHEDULE_STATUS.COMPLETED,
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: 'completedSchedulesCount',
+        },
+      },
+      {
+        $lookup: {
+          from: 'schedulepackages',
+          let: { vendorId: '$userId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$vendorId', '$$vendorId'] },
+                status: SCHEDULE_STATUS.UPCOMING,
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: 'upcomingSchedulesCount',
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          activePackages: {
+            $ifNull: [{ $arrayElemAt: ['$activePackagesCount.count', 0] }, 0],
+          },
+          scheduleCompleted: {
+            $ifNull: [{ $arrayElemAt: ['$completedSchedulesCount.count', 0] }, 0],
+          },
+          upcomingSchedule: {
+            $ifNull: [{ $arrayElemAt: ['$upcomingSchedulesCount.count', 0] }, 0],
+          },
+        },
+      },
+    ];
+
+    const result = await this.model.aggregate<VendorPackageStats>(pipeline);
+
+    return (
+      result[0] || {
+        activePackages: 0,
+        scheduleCompleted: 0,
+        upcomingSchedule: 0,
+      }
+    );
   }
 }

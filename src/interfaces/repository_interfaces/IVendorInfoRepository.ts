@@ -21,6 +21,7 @@ export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
   ): Promise<IVendorInfoWithUser[]>;
 
   updateStripeAccountId(vendorId: string, accountId: string): Promise<void>;
+
   updateStripeAccountStatus(
     vendorId: string,
     onboardingComplete: boolean,
@@ -47,10 +48,18 @@ export interface IVendorInfoRepository extends IBaseRepository<IVendorInfo> {
   ): Promise<PaginatedCommissionOverviewByVendors>;
 
   findTop5Vendors(): Promise<TopPerformingVendorsResult[]>;
+
+  findVendorPackageStats(vendorId: string): Promise<VendorPackageStats>;
 }
 
 export interface TopPerformingVendorsResult {
   vendorId: string;
   vendorName: string;
   totalRevenue: number;
+}
+
+export interface VendorPackageStats {
+  activePackages: number;
+  scheduleCompleted: number;
+  upcomingSchedule: number;
 }
