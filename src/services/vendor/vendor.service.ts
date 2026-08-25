@@ -61,16 +61,20 @@ export class VendorService implements IVendorService {
         name: userDoc.name,
         email: userDoc.email,
         phone: userDoc.phone,
+        bio: vendorDoc?.businessInfo?.bio ?? null,
+        businessAddress: vendorDoc?.businessInfo?.businessAddress ?? null,
+        contactPersonName: vendorDoc?.businessInfo?.contactPersonName ?? null,
         role: userDoc.role,
         profileLogo: null,
-        businessAddress: null,
-        contactPersonName: null,
         isProfileVerified: false,
         status: vendorDoc?.status ? vendorDoc.status : VENDOR_VERIFICATION_STATUS.PENDING,
         reasonForReject: vendorDoc?.reasonForReject ? vendorDoc.reasonForReject : '',
         createdAt: userDoc.createdAt,
+        packageStats: null,
       };
     }
+
+    const packageStats = await this._vendorInfoRepository.findVendorPackageStats(userId);
 
     return {
       id: (vendorDoc._id as Types.ObjectId).toString(),
@@ -78,6 +82,7 @@ export class VendorService implements IVendorService {
       email: vendorDoc.userId.email,
       phone: vendorDoc.userId.phone,
       role: vendorDoc.userId.role,
+      bio: vendorDoc.businessInfo?.bio ?? null,
       profileLogo: vendorDoc.documents?.profileLogo?.key,
       businessAddress: vendorDoc.businessInfo?.businessAddress,
       contactPersonName: vendorDoc.businessInfo?.contactPersonName,
@@ -86,6 +91,7 @@ export class VendorService implements IVendorService {
       status: vendorDoc.status,
       reasonForReject: vendorDoc?.reasonForReject ? vendorDoc.reasonForReject : '',
       createdAt: vendorDoc?.createdAt,
+      packageStats: packageStats,
     };
   }
 
