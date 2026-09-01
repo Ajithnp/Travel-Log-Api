@@ -2,7 +2,7 @@
 
 TravelLog is a comprehensive travel management and booking platform. This repository contains the backend server, built with Node.js and TypeScript, designed to handle user authentication, vendor management, package scheduling, secure payments, and AI-powered features.
 
-🔗 **Client Repository:** [https://github.com/Ajithnp/Travel-Log-client.git](https://github.com/Ajithnp/Travel-Log-client.git)
+🔗 **Client Repository:** https://github.com/Ajithnp/Travel-Log-client.git  
 🔗 **Live Link:** [https://www.thetravellog.online/](https://www.thetravellog.online/)
 ---
 
