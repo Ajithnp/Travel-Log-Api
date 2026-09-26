@@ -22,7 +22,6 @@ import { UserService } from '../services/user/user.service';
 import { ITokenBlackListService } from '../interfaces/service_interfaces/ITokenBlacklistService';
 import { TokenBlackListService } from '../services/token.blacklist.service';
 import { IFileStorageService } from '../interfaces/service_interfaces/IStorageService';
-import { S3Service } from '../services/s3.service';
 import { IFileStorageHandlerService } from '../interfaces/service_interfaces/IFileStorageBusinessService';
 import { FileStorageHandlerService } from '../services/file.storage.handler.service';
 import { IPackageService } from '../interfaces/service_interfaces/vendor/IPackageService';
@@ -84,6 +83,7 @@ import { IRecommendationService } from '../interfaces/service_interfaces/IRecomm
 import { RecommendationService } from '../services/recommendation.service';
 import { IUserPreferenceService } from '../interfaces/service_interfaces/user/IPreferenceService';
 import { UserPreferenceService } from '../services/user/preference.service';
+import { R2Service } from '../infrastructure/file-handling/cloudflair-r2.service';
 
 export class ServiceRegistry {
   static registerServices(): void {
@@ -116,7 +116,7 @@ export class ServiceRegistry {
     });
 
     container.register<IFileStorageService>('IFileStorageService', {
-      useClass: S3Service,
+      useClass: R2Service,
     });
 
     container.register<IPaymentWebhookService>('IPaymentWebhookService', {

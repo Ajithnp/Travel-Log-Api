@@ -1,0 +1,77 @@
+import { injectable } from 'tsyringe';
+import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import r2Client from '../../config/r2.config';
+import { IGetUploadUrlPayload } from '../../types/dtos/common/request.dtos';
+import { IGetUploadUrlResponse } from '../../types/dtos/common/response.dtos';
+import { IFileStorageService } from '../../interfaces/service_interfaces/IStorageService';
+import { SignedUrlViewResponse } from '../../types/dtos/common/response.dtos';
+import { config } from '../../config/env';
+
+@injectable()
+export class R2Service implements IFileStorageService {
+  private readonly _s3Client = r2Client;
+  private readonly _bucketName = config.r2.R2_BUCKET_NAME;
+
+  async getObjectURL(key: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this._bucketName,
+      Key: key,
+    });
+    const url = await getSignedUrl(this._s3Client, command, { expiresIn: 900 });
+    return url;
+  }
+
+  async getObjectURLs(keys: string[]): Promise<SignedUrlViewResponse[]> {
+    const results = await Promise.all(
+      keys.map(async (key) => {
+        const url = await this.getObjectURL(key);
+
+        return {
+          key,
+          url,
+        };
+      }),
+    );
+
+    return results;
+  }
+
+  async generateUploadURLs(files: IGetUploadUrlPayload[]): Promise<IGetUploadUrlResponse[]> {
+    const uploadUrls = await Promise.all(
+      files.map(async (file) => {
+        const key = `uploads/${file.fieldName}/${Date.now()}-${file.fileName}`;
+
+        const command = new PutObjectCommand({
+          Bucket: this._bucketName,
+          Key: key,
+          ContentType: file.contentType,
+        });
+
+        const url = await getSignedUrl(this._s3Client, command, { expiresIn: 120 });
+
+        return { url, key, fieldName: file.fieldName, name: file.fileName };
+      }),
+    );
+    return uploadUrls;
+  }
+
+  async generateUploadURL(file: IGetUploadUrlPayload): Promise<IGetUploadUrlResponse> {
+    const [result] = await this.generateUploadURLs([file]);
+
+    return result;
+  }
+
+  async deleteFile(key: string) {
+    await this._s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: this._bucketName,
+        Key: key,
+      }),
+    );
+  }
+
+  async deleteFiles(keys: string[]) {
+    await Promise.all(keys.map((key) => this.deleteFile(key)));
+  }
+}

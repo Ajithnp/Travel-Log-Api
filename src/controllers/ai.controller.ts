@@ -34,8 +34,7 @@ export class AIController implements IAIController {
 
   getRecommendedPackages = expressAsyncHandler(
     async (req: Request, res: Response): Promise<void> => {
-      //  const userId:string = req.user?.id;
-      const userId = '693f90f3988c22ce3b927138';
+      const userId: string = req.user?.id;
 
       const data = await this._recommendationService.getRecommendedPackages(userId);
 
